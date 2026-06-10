@@ -1,0 +1,33 @@
+# LLM & agent orchestration
+langchain
+langgraph
+openai
+
+# Guardrail frameworks
+nemoguardrails
+guardrails-ai
+
+# PII detection & redaction
+presidio-analyzer
+presidio-anonymizer
+spacy
+
+# API & serving
+fastapi
+uvicorn
+
+# Dashboard
+streamlit
+
+# Data & evaluation
+pandas
+numpy
+scikit-learn
+matplotlib
+
+# Utilities
+python-dotenv
+requests
+httpx
+pyyaml
+pytest
