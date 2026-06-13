@@ -1,7 +1,7 @@
 # Literature Review: SecureAgent-SOC
 
 **Student:** Emaan Afroz Khuram
-**Updated:** _[Date]_
+**Updated:** 13/06/2026
 
 ---
 
@@ -28,6 +28,32 @@
 | 5 | NeMo Guardrails documentation and paper | NVIDIA 2023 | Primary framework to evaluate |
 
 ---
+
+## Chosen papers for literature review:
+
+1. InjecAgent
+Authors: Zhan, Liang, Ying, Kang
+Relevance: threat model for malicious log entries
+
+
+2. Survey on Hallucination in LLMs
+Authors: Huang et al.
+Relevance: output guardrail hallucination check
+
+
+3. AI-Augmented SOC Survey
+Authors: (MDPI authors)
+Relevance: background baseline agent design
+
+
+4. NeMo Guardrails
+Authors: Rebedea et al.
+Relevance: guardrail architecture & latency
+
+
+5. Presidio
+Authors: Microsoft
+Relevance: PII redaction, leakage metric
 
 ## Paper Summary Template
 
