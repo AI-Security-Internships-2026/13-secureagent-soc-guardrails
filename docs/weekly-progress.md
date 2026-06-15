@@ -18,10 +18,10 @@
 - [ ] Identified 5 related papers / tools / datasets
 
 ### Personal Introduction
-_Write 3–5 sentences about your background, skills, and what you hope to learn._
+I am a third-year Computer Science student at NUST SEECS with a strong academic and practical foundation in advanced machine learning, backend engineering, and multi-agent systems. My technical experience includes developing predictive pipelines using tree-based models, fine-tuning Vision Transformers, and engineering secure, agentic workflows inside containerized environments. Through this internship at CNIT/PNTLab Pisa, I hope to master the architecture of runtime LLM guardrail frameworks and understand how to build resilient, production-ready AI pipelines that can withstand adversarial exploitation. Ultimately, I aim to apply these secure engineering methodologies to deep-tech solutions within high-stakes, data-sensitive domains.
 
 ### Problems / Blockers
-_Describe any issues you faced._
+no blockers faced
 
 ### Next week plan
 - Read the 5 identified papers
