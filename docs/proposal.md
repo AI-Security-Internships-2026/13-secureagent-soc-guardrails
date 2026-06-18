@@ -2,8 +2,8 @@
 
 **Student:** Emaan Afroz Khuram
 **GitHub:** @emaankhuram
-**Supervisor:** _[Fill in]_
-**Start date:** _[Fill in]_
+**Supervisor:** Dr. Rana Abu Bakar
+**Start date:** 
 **Expected end date:** _[Fill in]_
 
 ---
@@ -30,7 +30,20 @@ There is no established, open-source guardrail architecture tailored to LLM-base
 Existing frameworks (NeMo Guardrails, Guardrails AI) are general-purpose and lack threat-domain
 ontologies, SOC-specific output schemas, and adversarial robustness benchmarks.
 
----
+## 2.1 Threat Model
+
+This project considers the following attack scenarios against the LLM-based SOC co-pilot:
+
+| # | Attack Type | Description | Guardrail Layer |
+|---|---|---|---|
+| T1 | Direct prompt injection | User or analyst input contains instruction-override phrases (e.g. "ignore previous instructions") that attempt to hijack agent behaviour | Input |
+| T2 | Indirect prompt injection | Adversarial instructions embedded inside ingested alert/log data that the agent processes as part of normal triage | Input |
+| T3 | PII leakage | Sensitive data present in raw alerts (names, IPs, emails, SSNs) surfaces unredacted in the generated analyst report | Output |
+| T4 | Hallucination | Agent fabricates CVE IDs, threat actor names, or severity scores not grounded in the source alert data | Output |
+
+T1 and T2 were validated experimentally in Week 2 using NeMo Guardrails 0.22.0 with Mistral 7B.
+T3 and T4 will be addressed in the output guardrail layer in subsequent weeks using Presidio and
+SelfCheckGPT-style consistency checking respectively.
 
 ## 3. Research Questions
 
@@ -38,6 +51,14 @@ ontologies, SOC-specific output schemas, and adversarial robustness benchmarks.
 2. What is the performance overhead introduced by guardrail layers in real-time alert triage?
 3. How robust are existing guardrail frameworks against adversarial prompt injection embedded in security logs?
 4. Can hallucination in threat reports be reliably detected without ground-truth labels?
+5. How does guardrail classification reliability vary between LLM-based intent matching and deterministic rule-based approaches in adversarial SOC contexts?
+
+> **Note on RQ5:** Initial experiments in Week 2 revealed that NeMo Guardrails' LLM-based
+> intent classification failed to reliably intercept injection attempts when using a 7B local
+> model (Mistral via Ollama). A deterministic Python-based input action using pattern matching
+> proved more robust for security-critical blocking. RQ5 formalises this observation into a
+> research question to be investigated systematically across multiple models and injection
+> variants in the evaluation phase.
 
 ---
 
@@ -49,9 +70,24 @@ ontologies, SOC-specific output schemas, and adversarial robustness benchmarks.
 - CVE and threat intelligence from NVD / MITRE ATT&CK
 
 ### 4.2 Approach
-1. Implement a baseline LangChain SOC co-pilot (alert intake → analysis → report).
-2. Layer guardrails: input sanitiser → agent → output validator + PII redactor.
-3. Benchmark guardrail impact on accuracy, latency, and injection resistance.
+
+1. **Baseline LangChain SOC co-pilot** — Implement an alert intake → analysis → report
+   pipeline using LangChain/LangGraph with Mistral 7B (via Ollama 0.30.8) as the local LLM
+   backend. The prototype runs fully on CPU (Intel i7-1355U, 16GB RAM) with no external API
+   dependency, ensuring no alert data leaves the local environment during development.
+
+2. **Guardrail layering** — Wrap the baseline agent with NeMo Guardrails 0.22.0:
+   - *Input layer*: deterministic Python-based action for injection pattern detection
+     (preferred over LLM intent classification based on Week 2 findings), plus a keyword
+     blocklist for known adversarial SOC log patterns.
+   - *Output layer*: Presidio-based PII redaction (names, IPs, emails, SSNs) and a
+     SelfCheckGPT-style consistency check for hallucination detection across sampled responses.
+
+3. **Benchmarking** — Evaluate guardrail impact using:
+   - Synthetic adversarial prompts modelled on CICIDS-2017 alert formats
+   - Injection resistance measured as block rate before/after guardrails
+   - Latency profiled on CPU-only hardware to establish a realistic baseline for
+     resource-constrained deployments
 
 ### 4.3 Evaluation Metrics
 - Alert classification accuracy (F1, precision, recall)
@@ -73,6 +109,7 @@ benchmark results, and a reusable guardrail template for LLM security applicatio
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| LLM API cost too high | Medium | Use Ollama with local models (LLaMA 3, Mistral) |
+| LLM API cost too high | Medium | Use Ollama with local models (Mistral 7B validated in Week 2) |
 | No public SOC alert dataset with labels | Low | Use CICIDS-2017 or generate synthetic alerts |
 | Guardrail latency too high for real-time | Medium | Profile and optimise; consider async pipeline |
+| LLM-based intent classification unreliable for small models | High | Use deterministic Python actions for security-critical rails (validated in Week 2) |

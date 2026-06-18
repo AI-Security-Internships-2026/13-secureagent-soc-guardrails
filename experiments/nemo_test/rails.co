@@ -1,0 +1,17 @@
+define user express greeting
+  "hello"
+  "hi"
+  "hey"
+
+define bot express greeting
+  "Hello! I'm the SecureAgent-SOC test assistant."
+
+define flow greeting
+  user express greeting
+  bot express greeting
+
+define flow check input safety
+  $is_injection = execute check_injection
+  if $is_injection
+    bot say "Blocked: prompt injection attempt detected."
+    stop
