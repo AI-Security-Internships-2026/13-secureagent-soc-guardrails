@@ -2,7 +2,6 @@ from nemoguardrails.actions import action
 
 @action(is_system_action=True)
 async def check_injection(context: dict) -> bool:
-    """Check if the user message contains injection patterns."""
     
     user_message = context.get("user_message", "").lower()
     

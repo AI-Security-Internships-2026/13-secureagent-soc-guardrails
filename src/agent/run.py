@@ -14,12 +14,20 @@ def run():
         report = analyse_alert(alert)
         results.append(report)
         print(json.dumps(report, indent=2))
+
+    blocked_count = sum(1 for r in results if r.get("guardrail_blocked"))
+    passed_count = len(results) - blocked_count
+    
+    print(f"\nGuardrail summary")
+    print(f"Total alerts processed: {len(results)}")
+    print(f"Blocked by guardrail: {blocked_count}")
+    print(f"Passed through to LLM: {passed_count}")
     
     os.makedirs("experiments/results", exist_ok=True)
-    with open("experiments/results/baseline_results.json", "w") as f:
+    with open("experiments/results/guardrail_results.json", "w") as f:
         json.dump(results, f, indent=2)
     
-    print("\nResults saved to experiments/results/baseline_results.json")
+    print("\nresults saved to experiments/results/guardrail_results.json")
 
 if __name__ == "__main__":
     run()

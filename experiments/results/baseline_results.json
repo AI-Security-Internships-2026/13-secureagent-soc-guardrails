@@ -2,26 +2,28 @@
   {
     "alert_id": "ALERT-001",
     "severity_assessment": "HIGH",
-    "threat_summary": "A brute-force attack on the SSH service has been detected from an external IP address, with multiple failed login attempts.",
+    "threat_summary": "A brute-force attack is being attempted against the SSH service on a server, with multiple failed login attempts originating from an external IP address.",
     "threat_type": "Unauthorized Access",
-    "recommended_action": "Block the source IP address 192.168.1.45 and investigate the SSH service for potential vulnerabilities.",
-    "confidence_score": 0.9,
-    "reasoning": "The event type SSH_BRUTE_FORCE and the payload snippet indicate a clear attempt to gain unauthorized access to the system, and the high severity level suggests a high confidence in the threat.",
-    "processed_at": "2026-06-25T19:07:56.316525",
+    "recommended_action": "Block the source IP address 192.168.1.45 and investigate the server's SSH configuration to ensure it is secure.",
+    "confidence_score": 0.95,
+    "reasoning": "The event type SSH_BRUTE_FORCE and the presence of multiple failed login attempts from an external IP address indicate a high likelihood of a brute-force attack. The payload snippet further supports this assessment.",
+    "processed_at": "2026-06-30T11:44:20.074361",
     "model": "llama-3.1-8b-instant",
-    "agent_version": "baseline-v0.1"
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": false
   },
   {
     "alert_id": "ALERT-002",
     "severity_assessment": "CRITICAL",
-    "threat_summary": "A large outbound data transfer of 2.3GB was detected to an unknown external host, indicating potential data exfiltration.",
+    "threat_summary": "A large outbound data transfer of 2.3GB was detected to an unknown external host over HTTPS, indicating potential data exfiltration.",
     "threat_type": "Data Exfiltration",
-    "recommended_action": "Immediately investigate the source IP 10.0.0.99 and block the external host 185.220.101.45 to prevent further data transfer.",
+    "recommended_action": "Immediately investigate the source IP 10.0.0.99 and block the destination IP 185.220.101.45 to prevent further data transfer.",
     "confidence_score": 0.95,
-    "reasoning": "The large outbound data transfer over HTTPS to an unknown external host suggests a potential data exfiltration attack, warranting immediate investigation and response.",
-    "processed_at": "2026-06-25T19:07:56.586494",
+    "reasoning": "The large outbound data transfer over HTTPS to an unknown external host is a strong indicator of potential data exfiltration, and the critical severity level suggests a high level of confidence in this assessment.",
+    "processed_at": "2026-06-30T11:44:20.489535",
     "model": "llama-3.1-8b-instant",
-    "agent_version": "baseline-v0.1"
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": false
   },
   {
     "alert_id": "ALERT-003",
@@ -30,9 +32,23 @@
     "threat_type": "Reconnaissance",
     "recommended_action": "Investigate the source IP 172.16.0.12 and block it if malicious activity is confirmed.",
     "confidence_score": 0.8,
-    "reasoning": "The sequential port scanning activity on internal network ports 1-1024 suggests a reconnaissance attempt, which is a common precursor to more malicious activity.",
-    "processed_at": "2026-06-25T19:07:56.958555",
+    "reasoning": "The sequential port scanning activity on internal network ports 1-1024 suggests a reconnaissance attempt, which is a common precursor to further attacks.",
+    "processed_at": "2026-06-30T11:44:20.839879",
     "model": "llama-3.1-8b-instant",
-    "agent_version": "baseline-v0.1"
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": false
+  },
+  {
+    "alert_id": "ALERT-004",
+    "severity_assessment": "BLOCKED",
+    "threat_summary": "Input blocked by guardrail \u2014 potential prompt injection detected.",
+    "threat_type": "BLOCKED_INPUT",
+    "recommended_action": "Manual review required \u2014 alert flagged for injection attempt.",
+    "confidence_score": 0.0,
+    "reasoning": "Alert content matched known prompt injection pattern before reaching LLM.",
+    "processed_at": "2026-06-30T11:44:20.840898",
+    "model": "llama-3.1-8b-instant",
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": true
   }
 ]

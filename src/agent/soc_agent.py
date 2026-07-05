@@ -1,3 +1,4 @@
+from src.guardrails.input_guardrail import check_injection
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -8,9 +9,11 @@ from src.agent.alert_schema import SecurityAlert
 
 load_dotenv()
 
+MODEL_NAME = "llama-3.1-8b-instant"
+
 llm = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
-    model="llama-3.1-8b-instant",
+    model=MODEL_NAME,
     temperature=0.1,
 )
 
@@ -46,9 +49,26 @@ Payload Snippet: {alert.payload_snippet or 'None'}
 """
 
 def analyse_alert(alert: SecurityAlert) -> dict:
+    alert_text = format_alert(alert)
+
+    if check_injection(alert_text):
+        return {
+            "alert_id": alert.alert_id,
+            "severity_assessment": "BLOCKED",
+            "threat_summary": "Input blocked by guardrail — potential prompt injection detected.",
+            "threat_type": "BLOCKED_INPUT",
+            "recommended_action": "Manual review required — alert flagged for injection attempt.",
+            "confidence_score": 0.0,
+            "reasoning": "Alert content matched known prompt injection pattern before reaching LLM.",
+            "processed_at": datetime.utcnow().isoformat(),
+            "model": MODEL_NAME,
+            "agent_version": "guardrail-v0.2",
+            "guardrail_blocked": True
+        }
+    
     messages = [
         SystemMessage(content=SYSTEM_PROMPT),
-        HumanMessage(content=f"Analyse this security alert and produce a threat report:\n{format_alert(alert)}")
+        HumanMessage(content=f"Analyse this security alert and produce a threat report:\n{alert_text}")
     ]
     
     response = llm.invoke(messages)
@@ -67,7 +87,8 @@ def analyse_alert(alert: SecurityAlert) -> dict:
         }
     
     report["processed_at"] = datetime.utcnow().isoformat()
-    report["model"] = "llama-3.1-8b-instant"
-    report["agent_version"] = "baseline-v0.1"
+    report["model"] = MODEL_NAME
+    report["agent_version"] = "guardrail-v0.2"
+    report["guardrail_blocked"] = False
     
     return report
