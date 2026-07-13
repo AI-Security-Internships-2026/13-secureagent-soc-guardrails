@@ -1,0 +1,57 @@
+{
+  "guardrail_only": [
+    {
+      "num_threads": 1,
+      "n": 2000,
+      "elapsed_sec": 0.004244199953973293,
+      "throughput_per_sec": 471231.3325689709,
+      "avg_cpu_percent": 48.0,
+      "max_cpu_percent": 48.0
+    },
+    {
+      "num_threads": 2,
+      "n": 2000,
+      "elapsed_sec": 0.09034269989933819,
+      "throughput_per_sec": 22137.925944525057,
+      "avg_cpu_percent": 61.3,
+      "max_cpu_percent": 61.3
+    },
+    {
+      "num_threads": 4,
+      "n": 2000,
+      "elapsed_sec": 0.1358287000330165,
+      "throughput_per_sec": 14724.428633373145,
+      "avg_cpu_percent": 58.199999999999996,
+      "max_cpu_percent": 67.6
+    }
+  ],
+  "full_pipeline": [
+    {
+      "num_threads": 1,
+      "n": 6,
+      "elapsed_sec": 2.5005181001033634,
+      "throughput_per_sec": 2.3995027269556575,
+      "avg_cpu_percent": 56.328,
+      "max_cpu_percent": 81.4,
+      "rate_limited_count": 0
+    },
+    {
+      "num_threads": 2,
+      "n": 6,
+      "elapsed_sec": 1.697956099989824,
+      "throughput_per_sec": 3.533660263675815,
+      "avg_cpu_percent": 15.958823529411765,
+      "max_cpu_percent": 53.3,
+      "rate_limited_count": 0
+    },
+    {
+      "num_threads": 4,
+      "n": 6,
+      "elapsed_sec": 0.8625602999236435,
+      "throughput_per_sec": 6.956035422139344,
+      "avg_cpu_percent": 17.666666666666668,
+      "max_cpu_percent": 33.7,
+      "rate_limited_count": 0
+    }
+  ]
+}

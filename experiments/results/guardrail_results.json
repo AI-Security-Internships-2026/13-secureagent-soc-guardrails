@@ -1,0 +1,54 @@
+[
+  {
+    "alert_id": "ALERT-001",
+    "severity_assessment": "HIGH",
+    "threat_summary": "A high-severity SSH brute-force attack has been detected from an external IP address, targeting the root user on the system.",
+    "threat_type": "Unauthorized Access",
+    "recommended_action": "Block the source IP address 192.168.1.45 and investigate the system for potential unauthorized access.",
+    "confidence_score": 0.9,
+    "reasoning": "The event type SSH_BRUTE_FORCE and the presence of multiple failed login attempts from an external IP address indicate a brute-force attack. The high severity of the alert and the targeting of the root user further support this assessment.",
+    "processed_at": "2026-07-03T10:22:23.919935",
+    "model": "llama-3.1-8b-instant",
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": false
+  },
+  {
+    "alert_id": "ALERT-002",
+    "severity_assessment": "CRITICAL",
+    "threat_summary": "A large outbound data transfer of 2.3GB was detected to an unknown external host over HTTPS, indicating potential data exfiltration.",
+    "threat_type": "Data Exfiltration",
+    "recommended_action": "Investigate the source IP 10.0.0.99 and identify the process responsible for the data transfer, then block the IP and terminate the process.",
+    "confidence_score": 0.95,
+    "reasoning": "The large size of the data transfer and the use of HTTPS protocol suggest a malicious activity. The unknown external host also raises suspicions.",
+    "processed_at": "2026-07-03T10:22:24.565413",
+    "model": "llama-3.1-8b-instant",
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": false
+  },
+  {
+    "alert_id": "ALERT-003",
+    "severity_assessment": "MEDIUM",
+    "threat_summary": "Sequential port scanning activity has been detected on the internal network, originating from IP address 172.16.0.12, indicating a potential reconnaissance attempt.",
+    "threat_type": "Reconnaissance",
+    "recommended_action": "Investigate the source IP address 172.16.0.12 for any malicious activity and consider blocking the IP address to prevent further scanning.",
+    "confidence_score": 0.8,
+    "reasoning": "The sequential port scanning activity is a common tactic used by attackers to identify open ports and potential vulnerabilities on a network. The fact that the scanning activity occurred within a short time frame (30 seconds) and targeted a large range of ports (1-1024) suggests a malicious intent.",
+    "processed_at": "2026-07-03T10:22:25.253124",
+    "model": "llama-3.1-8b-instant",
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": false
+  },
+  {
+    "alert_id": "ALERT-004",
+    "severity_assessment": "BLOCKED",
+    "threat_summary": "Input blocked by guardrail \u2014 potential prompt injection detected.",
+    "threat_type": "BLOCKED_INPUT",
+    "recommended_action": "Manual review required \u2014 alert flagged for injection attempt.",
+    "confidence_score": 0.0,
+    "reasoning": "Alert content matched known prompt injection pattern before reaching LLM.",
+    "processed_at": "2026-07-03T10:22:25.254122",
+    "model": "llama-3.1-8b-instant",
+    "agent_version": "guardrail-v0.2",
+    "guardrail_blocked": true
+  }
+]

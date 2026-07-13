@@ -1,0 +1,16 @@
+{
+  "guardrail_only": {
+    "mode": "guardrail_only",
+    "total_alerts": 100,
+    "elapsed_seconds": 0.0004,
+    "alerts_per_second": 285469.61,
+    "blocked_count": 0
+  },
+  "full_pipeline": {
+    "mode": "full_pipeline",
+    "total_alerts": 5,
+    "elapsed_seconds": 5.5177,
+    "alerts_per_second": 0.91,
+    "blocked_count": 0
+  }
+}

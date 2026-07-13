@@ -33,7 +33,7 @@ no blockers faced
 ## Week 2
 
 **Branch:** `emaan-week-02`
-**PR link:** _[Add after opening PR]_
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/10
 
 ### Completed this week
 - [x] Read all 5 literature review papers identified in Week 1
@@ -53,4 +53,57 @@ no blockers faced
 - Integrate the NeMo Guardrails input layer with the LangChain agent
 - Start drafting `docs/proposal.md` remaining sections
 
+## Week 3
+
+**Branch:** `emaan-week-03`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/11
+
+### Completed this week
+- [x] Built baseline SOC co-pilot agent (alert intake → LLM analysis → structured report)
+- [x] Defined SecurityAlert dataclass with typed fields in `src/agent/alert_schema.py`
+- [x] Created 3 synthetic test alerts: SSH brute force (HIGH), data exfiltration (CRITICAL), port scan (MEDIUM)
+- [x] Integrated Groq API (llama-3.1-8b-instant) as LLM backend — switched from Ollama for faster inference per supervisor recommendation
+- [x] Agent produces structured JSON reports with severity assessment, threat summary, recommended action, confidence score, and reasoning
+- [x] Results saved to `experiments/results/baseline_results.json`
+
+### Problems / Blockers
+- `llama3-8b-8192` model was decommissioned by Groq — resolved by switching to `llama-3.1-8b-instant` which is the current recommended replacement
+- Model name was hardcoded in multiple places — resolved by defining a single `MODEL_NAME` constant at the top of `soc_agent.py`
+
+### Next week plan
+- Wrap the baseline agent with the input guardrail layer
+- Create `src/guardrails/` folder with proper separation of concerns
+- Measure how many test alerts are correctly blocked/passed
+- Begin building evaluation harness with precision/recall measurement
+
+---
+
+## Week 4
+
+**Branch:** `emaan-week-04`
+**PR link:** _[Add after opening PR]_
+
+### Completed this week
+- [x] Created `src/guardrails/input_guardrail.py` with deterministic pattern-matching injection detector
+- [x] Wired input guardrail into SOC agent pipeline — guardrail runs before every LLM call
+- [x] Added ALERT-004: synthetic malicious alert with injection phrase embedded in description and payload to simulate real attacker behaviour
+- [x] All reports now include `guardrail_blocked` field for programmatic measurement
+- [x] Added guardrail summary output: total processed, blocked, passed
+- [x] Renamed output to `experiments/results/guardrail_results.json` to preserve baseline results as comparison point
+
+### Guardrail measurement results
+| Alert | Type | Decision | Correct |
+|---|---|---|---|
+| ALERT-001 | SSH brute force | Passed | ✓ |
+| ALERT-002 | Data exfiltration | Passed | ✓ |
+| ALERT-003 | Port scan | Passed | ✓ |
+| ALERT-004 | Injection attempt | Blocked | ✓ |
+
+4/4 correct — 0 false positives, 0 false negatives on synthetic test set.
+
+### Problems / Blockers
+- Guardrail logic was initially mixed into agent code, refactored into separate `src/guardrails/` folder to match architecture diagram and maintain clean separation of concerns.
+
+### Next week plan
+- scalability (prompts per second)
 
