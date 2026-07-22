@@ -1,4 +1,5 @@
 from src.guardrails.input_guardrail import check_injection
+from src.guardrails.output_guardrail import check_hallucinated_cves
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -62,8 +63,10 @@ def analyse_alert(alert: SecurityAlert) -> dict:
             "reasoning": "Alert content matched known prompt injection pattern before reaching LLM.",
             "processed_at": datetime.utcnow().isoformat(),
             "model": MODEL_NAME,
-            "agent_version": "guardrail-v0.2",
-            "guardrail_blocked": True
+            "agent_version": "guardrail-v0.3",
+            "guardrail_blocked": True,
+            "hallucinated_cves": [],
+            "output_guardrail_flagged": False
         }
     
     messages = [
@@ -88,7 +91,11 @@ def analyse_alert(alert: SecurityAlert) -> dict:
     
     report["processed_at"] = datetime.utcnow().isoformat()
     report["model"] = MODEL_NAME
-    report["agent_version"] = "guardrail-v0.2"
+    report["agent_version"] = "guardrail-v0.3"
     report["guardrail_blocked"] = False
-    
+
+    hallucinated_cves = check_hallucinated_cves(report, alert_text)
+    report["hallucinated_cves"] = hallucinated_cves
+    report["output_guardrail_flagged"] = len(hallucinated_cves) > 0
+
     return report

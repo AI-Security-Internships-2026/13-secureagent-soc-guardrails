@@ -1,4 +1,8 @@
+"""
 
+    streamlit run dashboard/app.py
+
+"""
 
 import json
 import os
@@ -13,6 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.agent.alert_schema import SecurityAlert, SAMPLE_ALERTS
 from src.agent.soc_agent import analyse_alert
+from src.data.load_cicids2017 import load_cicids2017_alerts
 
 RESULTS_DIR = "experiments/results"
 
@@ -56,22 +61,46 @@ st.title("SecureAgent-SOC")
 tab_live, tab_results = st.tabs(["Live Demo", "Results Viewer"])
 
 
-# ---------------------------------------------------------------------------
-# Live Demo
-# ---------------------------------------------------------------------------
+
 with tab_live:
     left, right = st.columns([1, 1.3], gap="large")
 
     with left:
         st.subheader("Alert input")
 
-        preset_names = ["Custom"] + [a.alert_id for a in SAMPLE_ALERTS]
-        preset = st.selectbox("Load a sample alert", preset_names)
+        source_choice = st.radio("Alert source", ["Synthetic samples", "CICIDS2017", "Custom"], horizontal=True)
 
-        if preset != "Custom":
+        sample = None
+
+        if source_choice == "Synthetic samples":
+            preset_names = [a.alert_id for a in SAMPLE_ALERTS]
+            preset = st.selectbox("Pick a sample alert", preset_names)
             sample = next(a for a in SAMPLE_ALERTS if a.alert_id == preset)
-        else:
-            sample = None
+
+        elif source_choice == "CICIDS2017":
+            csv_path = st.text_input(
+                "CICIDS2017 CSV path",
+                value="datasets/cicids2017/Tuesday-WorkingHours.pcap_ISCX.csv",
+                help="Any CICIDS2017 daily CSV. Tuesday's file has FTP/SSH brute force.",
+            )
+            n_to_load = st.slider("Rows to sample", 5, 50, 15)
+            seed = st.number_input("Shuffle seed", value=42, step=1)
+
+            if st.button("Load real alerts from CSV"):
+                try:
+                    loaded = load_cicids2017_alerts(csv_path, n=n_to_load, shuffle=True, seed=int(seed))
+                    st.session_state["cicids_loaded"] = loaded
+                except FileNotFoundError:
+                    st.error(f"File not found: {csv_path}")
+                    st.session_state["cicids_loaded"] = []
+
+            loaded = st.session_state.get("cicids_loaded", [])
+            if loaded:
+                preset_names = [f"{a.alert_id} ({a.event_type})" for a in loaded]
+                choice_idx = st.selectbox("Pick a loaded alert", range(len(loaded)), format_func=lambda i: preset_names[i])
+                sample = loaded[choice_idx]
+            else:
+                st.info("Load a CSV above to pick from real alerts.")
 
         alert_id = st.text_input("Alert ID", value=sample.alert_id if sample else "ALERT-CUSTOM")
         severity = st.selectbox(
@@ -151,9 +180,7 @@ with tab_live:
             st.info("Fill in or load an alert on the left, then click Analyze.")
 
 
-# ---------------------------------------------------------------------------
-# Results Viewer
-# ---------------------------------------------------------------------------
+
 with tab_results:
 
     def load_json(filename):

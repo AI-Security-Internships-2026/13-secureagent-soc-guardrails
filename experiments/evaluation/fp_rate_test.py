@@ -1,22 +1,4 @@
-"""
-experiments/evaluation/fp_rate_test.py
 
-Week 5 task: "run 10 clean alerts through guardrail, verify 0 wrongly blocked."
-
-Tests the guardrail in isolation (no LLM call — check_injection() is a pure
-pattern-match, so there's no reason to spend Groq API calls testing it).
-Uses real BENIGN-labeled CICIDS2017 flows rather than hand-written clean
-alerts, since real traffic descriptions are a better test of whether the
-injection pattern-matcher false-positives on legitimate network activity.
-
-Usage:
-    python -m experiments.evaluation.fp_rate_test --csv datasets/cicids2017/Monday-WorkingHours.pcap_ISCX.csv --n 10 --seed 42
-
-Note: Monday's file is benign-only traffic in CICIDS2017, so it's the
-natural source for this test. Any day-file works since skip_benign=False
-plus only_event_types={"BENIGN"} filters down to just the clean rows
-regardless of what else is in the file.
-"""
 
 import argparse
 import json

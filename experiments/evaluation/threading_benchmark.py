@@ -1,22 +1,3 @@
-"""
-experiments/evaluation/threading_benchmark.py
-
-Week 5 tasks: multi-threading benchmark (1/2/4 threads) + CPU monitoring.
-
-Tests two things separately, since they have very different bottlenecks:
-- Guardrail-only (check_injection): CPU-bound, GIL-limited, threading is not
-  expected to help much here. Included as a control/negative-result case.
-- Full pipeline (analyse_alert -> Groq API call): I/O-bound, threads release
-  the GIL while waiting on the network response, so throughput should scale
-  with thread count until Groq's rate limits or your own bandwidth caps it.
-
-Uses SAMPLE_ALERTS cycled to build a workload of the requested size, since
-the synthetic set only has 4 alerts.
-
-Usage:
-    python -m experiments.evaluation.threading_benchmark
-    python -m experiments.evaluation.threading_benchmark --guardrail-n 2000 --pipeline-n 12 --threads 1 2 4
-"""
 
 import argparse
 import itertools
