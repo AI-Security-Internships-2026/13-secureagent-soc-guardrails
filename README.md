@@ -129,6 +129,24 @@ git checkout -b emaan-week-01
 
 ---
 
+## Roadmap to September 8, 2026
+
+**Current state:** NVD-verified output guardrail merged (PR #18) — classifying CVE citations as FABRICATED/REAL_BUT_IRRELEVANT/REAL_AND_PLAUSIBLE/UNVERIFIED, plus a multiprocessing-vs-threading benchmark. Strongest guardrail stack in the cohort (NeMo Guardrails + Guardrails AI + Presidio + LangGraph). Previously only had generic undated weekly checkboxes — this replaces those with real milestones.
+
+**Novel contribution target:** the "verify against an authoritative external database" pattern used for CVEs (issue #16) generalizes — apply the same grounding technique to other citation types (CWE, MITRE ATT&CK technique IDs) rather than treating CVE-verification as a one-off feature.
+
+| Date | Milestone |
+|---|---|
+| Aug 2 | Finalize NVD-verification edge cases from PR #18 |
+| Aug 9 | Compare NeMo Guardrails vs. Guardrails AI vs. the custom NVD-grounded approach (issue #16) — latency, false-positive rate, coverage |
+| Aug 16 | Extend the grounding technique to a second citation type (CWE or MITRE ATT&CK technique IDs) |
+| Aug 23 | Full multi-source grounding benchmark |
+| Aug 30 | Write-up |
+| Sep 6 | Paper draft |
+| **Sep 8** | **Final submission** |
+
+---
+
 ## Supervisor Note
 
 Repository managed by **CNIT/PNTLab Pisa, TECIP, Scuola Superiore Sant'Anna**.
