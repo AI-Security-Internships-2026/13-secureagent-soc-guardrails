@@ -1,14 +1,19 @@
 """
 experiments/evaluation/cve_bait_test.py
 
-Runs the CVE-bait alert set through the full pipeline and reports how often
-the output guardrail flags a hallucinated CVE. None of the bait alerts
-contain a real CVE ID in their input, so any CVE-YYYY-NNNNN the model cites
-in its report is by definition hallucinated (well-known vulns like Log4Shell
-DO have real CVE numbers — CVE-2021-44228 — but the model was never given
-that number, so producing it anyway demonstrates it's pulling from training
-data/prior knowledge rather than grounding in the alert, which is exactly
-the behaviour this guardrail exists to catch).
+Runs the CVE-bait alert set through the full pipeline and reports two
+distinct rates rather than one collapsed number:
+
+  - ungrounded rate: how often the model cited ANY CVE not present in the
+    input alert (output_guardrail_flagged). This stays visible even when
+    the citation turns out to be correct — it's "did the model reach
+    beyond what it was given," not "was it wrong."
+
+  - requires-review rate: how often that ungrounded citation was actually
+    suspicious — fabricated (doesn't exist in NVD), real-but-irrelevant
+    (real CVE, wrong context), or unverified (NVD lookup failed). A
+    REAL_AND_PLAUSIBLE-only result leaves this at 0 even though the
+    ungrounded rate is nonzero — that's the intended distinction, not a bug.
 
 Usage:
     python -m experiments.evaluation.cve_bait_test
@@ -29,26 +34,32 @@ def run():
         report = analyse_alert(alert)
         results.append(report)
 
-        flagged = report.get("output_guardrail_flagged")
         cves = report.get("hallucinated_cves", [])
-        status = f"HALLUCINATED CVE(s): {cves}" if flagged else "no CVE cited / grounded"
-        print(f"  severity={report.get('severity_assessment')} | {status}")
+        if not cves:
+            print(f"  severity={report.get('severity_assessment')} | no CVE cited / grounded")
+        else:
+            tiers = [v["classification"] for v in report.get("cve_verifications", [])]
+            print(f"  severity={report.get('severity_assessment')} | "
+                  f"ungrounded CVE(s): {cves} | classification: {tiers}")
 
-    flagged_count = sum(1 for r in results if r.get("output_guardrail_flagged"))
+    ungrounded_count = sum(1 for r in results if r.get("output_guardrail_flagged"))
+    review_count = sum(1 for r in results if r.get("requires_review"))
     total = len(results)
 
     print(f"\nCVE hallucination test summary")
     print(f"Total bait alerts tested: {total}")
-    print(f"Flagged (hallucinated CVE cited): {flagged_count}")
-    print(f"Hallucination rate: {flagged_count / total:.1%}")
+    print(f"Ungrounded CVE citations (any CVE not in input): {ungrounded_count} ({ungrounded_count/total:.1%})")
+    print(f"Requires review (fabricated / wrong / unverified): {review_count} ({review_count/total:.1%})")
 
     os.makedirs("experiments/results", exist_ok=True)
     output_path = "experiments/results/cve_bait_results.json"
     with open(output_path, "w") as f:
         json.dump({
             "total_tested": total,
-            "flagged_count": flagged_count,
-            "hallucination_rate": flagged_count / total,
+            "ungrounded_count": ungrounded_count,
+            "ungrounded_rate": ungrounded_count / total,
+            "requires_review_count": review_count,
+            "requires_review_rate": review_count / total,
             "results": results,
         }, f, indent=2)
 

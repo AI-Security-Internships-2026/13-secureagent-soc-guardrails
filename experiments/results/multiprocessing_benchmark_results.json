@@ -1,0 +1,57 @@
+{
+  "guardrail_only": [
+    {
+      "num_processes": 1,
+      "n": 2000,
+      "elapsed_sec": 0.001496999990195036,
+      "throughput_per_sec": 1336005.3527718666,
+      "avg_cpu_percent": 1.3,
+      "max_cpu_percent": 1.3
+    },
+    {
+      "num_processes": 2,
+      "n": 2000,
+      "elapsed_sec": 2.4054090999998152,
+      "throughput_per_sec": 831.4593970731023,
+      "avg_cpu_percent": 24.495833333333334,
+      "max_cpu_percent": 62.5
+    },
+    {
+      "num_processes": 4,
+      "n": 2000,
+      "elapsed_sec": 3.311150399968028,
+      "throughput_per_sec": 604.0196784837414,
+      "avg_cpu_percent": 37.77272727272727,
+      "max_cpu_percent": 66.2
+    }
+  ],
+  "full_pipeline": [
+    {
+      "num_processes": 1,
+      "n": 6,
+      "elapsed_sec": 1.9202422000234947,
+      "throughput_per_sec": 3.124605843953741,
+      "avg_cpu_percent": 16.489473684210527,
+      "max_cpu_percent": 32.1,
+      "rate_limited_count": 0
+    },
+    {
+      "num_processes": 2,
+      "n": 6,
+      "elapsed_sec": 3.1392079999204725,
+      "throughput_per_sec": 1.911310113937019,
+      "avg_cpu_percent": 18.5,
+      "max_cpu_percent": 38.7,
+      "rate_limited_count": 0
+    },
+    {
+      "num_processes": 4,
+      "n": 6,
+      "elapsed_sec": 3.767730800085701,
+      "throughput_per_sec": 1.5924704599021575,
+      "avg_cpu_percent": 34.91578947368421,
+      "max_cpu_percent": 67.4,
+      "rate_limited_count": 0
+    }
+  ]
+}

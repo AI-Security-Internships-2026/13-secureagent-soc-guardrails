@@ -1,5 +1,5 @@
 from src.guardrails.input_guardrail import check_injection
-from src.guardrails.output_guardrail import check_hallucinated_cves
+from src.guardrails.output_guardrail import check_hallucinated_cves_verified
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -49,7 +49,12 @@ Port: {alert.port or 'Unknown'}
 Payload Snippet: {alert.payload_snippet or 'None'}
 """
 
-def analyse_alert(alert: SecurityAlert) -> dict:
+def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> dict:
+    """
+    verify_cves_with_nvd: set False to skip the NVD network lookup (e.g. for
+    fast local batch runs or when offline) — falls back to grounding-only
+    CVE checking with an "UNVERIFIED" classification for any ungrounded CVE.
+    """
     alert_text = format_alert(alert)
 
     if check_injection(alert_text):
@@ -63,10 +68,12 @@ def analyse_alert(alert: SecurityAlert) -> dict:
             "reasoning": "Alert content matched known prompt injection pattern before reaching LLM.",
             "processed_at": datetime.utcnow().isoformat(),
             "model": MODEL_NAME,
-            "agent_version": "guardrail-v0.3",
+            "agent_version": "guardrail-v0.4",
             "guardrail_blocked": True,
             "hallucinated_cves": [],
-            "output_guardrail_flagged": False
+            "cve_verifications": [],
+            "output_guardrail_flagged": False,
+            "requires_review": False
         }
     
     messages = [
@@ -91,11 +98,13 @@ def analyse_alert(alert: SecurityAlert) -> dict:
     
     report["processed_at"] = datetime.utcnow().isoformat()
     report["model"] = MODEL_NAME
-    report["agent_version"] = "guardrail-v0.3"
+    report["agent_version"] = "guardrail-v0.4"
     report["guardrail_blocked"] = False
 
-    hallucinated_cves = check_hallucinated_cves(report, alert_text)
-    report["hallucinated_cves"] = hallucinated_cves
-    report["output_guardrail_flagged"] = len(hallucinated_cves) > 0
+    cve_check = check_hallucinated_cves_verified(report, alert_text, verify_with_nvd=verify_cves_with_nvd)
+    report["hallucinated_cves"] = cve_check["ungrounded_cves"]
+    report["cve_verifications"] = cve_check["verifications"]
+    report["output_guardrail_flagged"] = cve_check["flagged"]
+    report["requires_review"] = cve_check["requires_review"]
 
     return report
