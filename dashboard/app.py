@@ -313,14 +313,7 @@ with tab_results:
     st.divider()
 
     st.subheader("Threading vs Multiprocessing")
-    st.caption(
-        "Multiprocessing sidesteps the GIL entirely (separate interpreters, no shared "
-        "lock) but pays for it in process-startup and inter-process data transfer cost. "
-        "For the guardrail-only workload — microsecond-scale, no I/O wait — that overhead "
-        "dominates completely. For the full pipeline, threading wins because the Groq API "
-        "client is created once and shared across threads; multiprocessing re-creates it "
-        "in every process, paying connection setup repeatedly instead of once."
-    )
+
     comparison_chart_path = os.path.join(RESULTS_DIR, "visualizations", "concurrency_comparison_charts.png")
     if os.path.exists(comparison_chart_path):
         st.image(comparison_chart_path, use_container_width=True)

@@ -31,7 +31,7 @@ def capture_environment():
         "processor": platform.processor(),
         "package_versions": {
             "llm-guard": pkg_version("llm-guard"),
-            "guardrails-ai": pkg_version("guardrails-ai"),
+            "pytector": pkg_version("pytector"),
         },
         "note": (
             "Baseline (this repo's own check_injection) has no external "

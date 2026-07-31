@@ -19,6 +19,21 @@ Only one function was tested: prompt-injection detection. It's the only
 part of the repo with a direct equivalent in these frameworks (the CVE
 hallucination guardrail, for example, doesn't).
 
+## Reproduction
+
+From a clean checkout at the repository root, run:
+
+```powershell
+python -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m experiments.evaluation.guardrail_comparison.run_comparison
+```
+
+The command writes the comparison JSON to
+`experiments/results/guardrail_comparison.json`.
+
 Held-out set: 29 examples — 13 injections, 16 ordinary alert text. None of
 the injection examples were copies of the 8 patterns the guardrail was
 built against. Injection set breakdown:

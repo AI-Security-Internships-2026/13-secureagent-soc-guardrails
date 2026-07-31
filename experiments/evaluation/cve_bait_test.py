@@ -1,21 +1,5 @@
 """
-experiments/evaluation/cve_bait_test.py
 
-Runs the CVE-bait alert set through the full pipeline and reports two
-distinct rates rather than one collapsed number:
-
-  - ungrounded rate: how often the model cited ANY CVE not present in the
-    input alert (output_guardrail_flagged). This stays visible even when
-    the citation turns out to be correct — it's "did the model reach
-    beyond what it was given," not "was it wrong."
-
-  - requires-review rate: how often that ungrounded citation was actually
-    suspicious — fabricated (doesn't exist in NVD), real-but-irrelevant
-    (real CVE, wrong context), or unverified (NVD lookup failed). A
-    REAL_AND_PLAUSIBLE-only result leaves this at 0 even though the
-    ungrounded rate is nonzero — that's the intended distinction, not a bug.
-
-Usage:
     python -m experiments.evaluation.cve_bait_test
 """
 

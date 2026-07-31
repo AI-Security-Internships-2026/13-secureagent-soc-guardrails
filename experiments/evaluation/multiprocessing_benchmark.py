@@ -1,40 +1,5 @@
 """
-experiments/evaluation/multiprocessing_benchmark.py
 
-Week 7 task: compare separate Python processes (multiprocessing) against
-the existing threading results, for both the guardrail-only (CPU-bound)
-and full-pipeline (I/O-bound) workloads.
-
-Why this matters given what threading_benchmark.py already found:
-  - Guardrail-only got SLOWER with more threads — GIL contention on a
-    microsecond-scale task dominates over any parallel benefit.
-  - Full pipeline got FASTER with more threads — the GIL releases during
-    the Groq network wait, so threads overlap I/O.
-
-Multiprocessing sidesteps the GIL entirely: each process has its own
-interpreter, its own GIL, no shared lock to contend over. Predictions to
-test against actual numbers:
-  - Guardrail-only: SHOULD benefit from true parallelism this time, since
-    there's no GIL contention across processes — but each process has much
-    heavier startup cost than a thread (new interpreter, re-importing
-    everything), so for a task this fast, startup overhead may still
-    dominate. Not assumed — measured.
-  - Full pipeline: expected to perform similarly to (not necessarily
-    better than) threading, since the bottleneck there was never CPU
-    contention — it was network wait time, which multiprocessing doesn't
-    speed up any further than threading already did.
-
-Uses the same retry-with-backoff Groq call wrapper as threading_benchmark.py
-(imported from there rather than duplicated) so rate-limit handling stays
-consistent across both benchmark scripts.
-
-IMPORTANT (Windows): multiprocessing on Windows uses the "spawn" start
-method, which re-imports this module in each child process. This is why
-all worker functions are defined at module level (picklable) and the
-whole benchmark is wrapped in `if __name__ == "__main__":` — required for
-ProcessPoolExecutor to work correctly on Windows at all.
-
-Usage:
     python -m experiments.evaluation.multiprocessing_benchmark
     python -m experiments.evaluation.multiprocessing_benchmark --guardrail-n 2000 --pipeline-n 6 --processes 1 2 4
 """
