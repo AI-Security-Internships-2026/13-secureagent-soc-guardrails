@@ -178,60 +178,84 @@ with tab_live:
                 payload_snippet=payload_snippet or None,
             )
 
-            cpu_before = psutil.cpu_percent(interval=None)
             start = time.perf_counter()
-            with st.spinner("Running guardrail and agent..."):
+            with st.spinner("Running pipeline..."):
                 report = analyse_alert(alert)
             elapsed = time.perf_counter() - start
-            cpu_after = psutil.cpu_percent(interval=None)
 
-            if report.get("guardrail_blocked"):
+            blocked = report.get("guardrail_blocked", False)
+            hallucinated_cves = report.get("hallucinated_cves", [])
+            requires_review = report.get("requires_review", False)
+
+            # ----------------------------------------------------------------
+            # STEP 1 — Input guardrail
+            # Runs before the alert ever reaches the LLM. Pattern-matches for
+            # known prompt-injection phrases. If it blocks here, steps 2 and
+            # 3 never happen — there's no LLM output to check.
+            # ----------------------------------------------------------------
+            st.markdown("**Step 1 — Input guardrail**")
+            if blocked:
                 st.markdown(
-                    '<div class="blocked-banner">Blocked by guardrail — potential prompt injection detected</div>',
+                    '<div class="blocked-banner">BLOCKED — potential prompt injection detected in the alert text. '
+                    'The alert was never sent to the LLM.</div>',
                     unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
-                    '<div class="passed-banner">Passed guardrail — analyzed by LLM</div>',
+                    '<div class="passed-banner">PASSED — no known injection pattern found. Sent to the LLM.</div>',
                     unsafe_allow_html=True,
                 )
 
-            # Output guardrail: hallucinated CVE check. Only meaningful once
-            # the alert actually reached the LLM — an input-blocked alert
-            # never produced a report, so there's nothing to check there.
-            hallucinated_cves = report.get("hallucinated_cves", [])
-            if not report.get("guardrail_blocked"):
+            if blocked:
+                st.caption("Pipeline stopped here — steps 2 and 3 don't run for a blocked alert.")
+            else:
+                st.write("")
+
+                # ------------------------------------------------------------
+                # STEP 2 — LLM report
+                # Only reached if step 1 passed.
+                # ------------------------------------------------------------
+                st.markdown("**Step 2 — LLM analysis**")
+                m1, m2, m3 = st.columns(3)
+                m1.metric("Processing time", f"{elapsed * 1000:.0f} ms")
+                m2.metric("Severity assessment", report.get("severity_assessment", "N/A"))
+                m3.metric("Confidence", f"{report.get('confidence_score', 0):.2f}")
+
+                with st.container(border=True):
+                    st.markdown(f"**Threat type:** {report.get('threat_type', 'N/A')}")
+                    st.markdown(f"**Summary:** {report.get('threat_summary', 'N/A')}")
+                    st.markdown(f"**Recommended action:** {report.get('recommended_action', 'N/A')}")
+                    st.markdown(f"**Reasoning:** {report.get('reasoning', 'N/A')}")
+
+                st.write("")
+
+                # ------------------------------------------------------------
+                # STEP 3 — Output guardrail
+                # Checks the report ABOVE for CVE numbers the LLM cited that
+                # weren't in the original alert, then verifies any it finds
+                # against the real NVD.
+                # ------------------------------------------------------------
+                st.markdown("**Step 3 — Output guardrail (CVE check)**")
                 if not hallucinated_cves:
                     st.markdown(
-                        '<div class="cve-clean-banner">Output guardrail: no ungrounded CVE citations detected</div>',
+                        '<div class="cve-clean-banner">CLEAN — no CVE numbers cited that weren\'t already in the input.</div>',
                         unsafe_allow_html=True,
                     )
-                elif report.get("requires_review"):
+                elif requires_review:
                     cve_list = ", ".join(hallucinated_cves)
                     st.markdown(
-                        f'<div class="cve-flag-banner">Requires review — {len(hallucinated_cves)} CVE(s) cited '
-                        f'that are not grounded in the input and did not verify as clearly correct: {cve_list}</div>',
+                        f'<div class="cve-flag-banner">REQUIRES REVIEW — cited {cve_list}, which was not in the '
+                        f'input, and NVD verification did not confirm it as a clear, topically-matching CVE.</div>',
                         unsafe_allow_html=True,
                     )
                 else:
                     cve_list = ", ".join(hallucinated_cves)
                     st.markdown(
-                        f'<div class="cve-clean-banner">CVE(s) cited that were not in the input ({cve_list}), '
-                        f'but NVD verification confirms they are real and topically consistent with this alert '
-                        f'— likely a correct recall, not a fabrication</div>',
+                        f'<div class="cve-clean-banner">CITED BUT VERIFIED — {cve_list} was not in the input, '
+                        f'but NVD confirms it\'s a real, topically-matching CVE — likely a correct recall, not a '
+                        f'fabrication.</div>',
                         unsafe_allow_html=True,
                     )
-
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Processing time", f"{elapsed * 1000:.0f} ms")
-            m2.metric("Severity assessment", report.get("severity_assessment", "N/A"))
-            m3.metric("Confidence", f"{report.get('confidence_score', 0):.2f}")
-
-            with st.container(border=True):
-                st.markdown(f"**Threat type:** {report.get('threat_type', 'N/A')}")
-                st.markdown(f"**Summary:** {report.get('threat_summary', 'N/A')}")
-                st.markdown(f"**Recommended action:** {report.get('recommended_action', 'N/A')}")
-                st.markdown(f"**Reasoning:** {report.get('reasoning', 'N/A')}")
 
             with st.expander("Raw report JSON"):
                 st.json(report)
@@ -313,7 +337,14 @@ with tab_results:
     st.divider()
 
     st.subheader("Threading vs Multiprocessing")
-
+    st.caption(
+        "Multiprocessing sidesteps the GIL entirely (separate interpreters, no shared "
+        "lock) but pays for it in process-startup and inter-process data transfer cost. "
+        "For the guardrail-only workload — microsecond-scale, no I/O wait — that overhead "
+        "dominates completely. For the full pipeline, threading wins because the Groq API "
+        "client is created once and shared across threads; multiprocessing re-creates it "
+        "in every process, paying connection setup repeatedly instead of once."
+    )
     comparison_chart_path = os.path.join(RESULTS_DIR, "visualizations", "concurrency_comparison_charts.png")
     if os.path.exists(comparison_chart_path):
         st.image(comparison_chart_path, use_container_width=True)
