@@ -82,45 +82,75 @@ def extract_cves(text: str) -> set:
     return {match.upper() for match in CVE_PATTERN.findall(text)}
 
 
-def _query_nvd(cve_id: str, timeout: float = 8.0) -> dict:
+def _query_nvd(cve_id: str, timeout: float = 8.0, max_retries: int = 3) -> dict:
     """
     Query the real NVD for a given CVE ID. Returns:
-        {"exists": True, "description": "..."}   if found
-        {"exists": False, "description": None}   if NVD says it doesn't exist
-        {"exists": None, "description": None, "error": "..."} on network/API failure
+        {"exists": True, "description": "..." or None, "rejected": bool}
+        {"exists": False, "description": None, "rejected": False}   if NVD says it doesn't exist
+        {"exists": None, "description": None, "error": "..."}       on network/API failure
 
-    Cached per CVE ID within the process to avoid redundant calls and to
-    stay well under NVD's public rate limit during a batch test run.
+    Retries with backoff on NVD rate limiting (HTTP 403/429). NVD's public
+    (no-API-key) limit is roughly 5 requests per rolling 30-second window —
+    a single alert citing several new CVEs can trip this even with the
+    1-second inter-call delay below, so a transient rate-limit response
+    should be retried, not treated as a permanent failure.
+
+    Cached per CVE ID within the process to avoid redundant calls.
     """
     if cve_id in _nvd_cache:
         return _nvd_cache[cve_id]
 
     url = f"{NVD_API_URL}?cveId={cve_id}"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "SecureAgent-SOC/output-guardrail"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            data = _json.loads(resp.read().decode("utf-8"))
 
-        vulnerabilities = data.get("vulnerabilities", [])
-        if not vulnerabilities:
-            result = {"exists": False, "description": None}
-        else:
-            cve_data = vulnerabilities[0].get("cve", {})
-            descriptions = cve_data.get("descriptions", [])
-            en_desc = next((d["value"] for d in descriptions if d.get("lang") == "en"), None)
-            result = {"exists": True, "description": en_desc}
+    for attempt in range(max_retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "SecureAgent-SOC/output-guardrail"})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
 
-        _nvd_cache[cve_id] = result
-        # Stay comfortably under NVD's public rate limit (~5 req/30s) if
-        # multiple ungrounded CVEs are checked in one run.
-        time.sleep(1.0)
-        return result
+            vulnerabilities = data.get("vulnerabilities", [])
+            if not vulnerabilities:
+                result = {"exists": False, "description": None, "rejected": False}
+            else:
+                cve_data = vulnerabilities[0].get("cve", {})
+                descriptions = cve_data.get("descriptions", [])
+                en_desc = next((d["value"] for d in descriptions if d.get("lang") == "en"), None)
+                # NVD marks withdrawn/invalid/duplicate CVE IDs with a
+                # vulnStatus of "Rejected" and a description that starts
+                # with "** REJECTED **" rather than removing the ID
+                # entirely. Citing one of these is a distinct, more
+                # concerning case than citing a real-but-mismatched CVE —
+                # the ID technically exists but was never a valid
+                # vulnerability record.
+                vuln_status = cve_data.get("vulnStatus", "")
+                is_rejected = (
+                    vuln_status.lower() == "rejected"
+                    or (en_desc is not None and en_desc.strip().upper().startswith("** REJECTED **"))
+                )
+                result = {"exists": True, "description": en_desc, "rejected": is_rejected}
 
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError) as e:
-        result = {"exists": None, "description": None, "error": str(e)}
-        # Don't cache failures — a transient network blip shouldn't
-        # permanently mark a CVE as unverifiable for the rest of the run.
-        return result
+            _nvd_cache[cve_id] = result
+            # Stay comfortably under NVD's public rate limit (~5 req/30s)
+            # across multiple ungrounded CVEs checked in one run.
+            time.sleep(1.0)
+            return result
+
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 429) and attempt < max_retries - 1:
+                wait = 5.0 * (2 ** attempt)
+                time.sleep(wait)
+                continue
+            result = {"exists": None, "description": None, "error": f"HTTP {e.code}: {e}"}
+            return result
+
+        except (urllib.error.URLError, TimeoutError, ValueError) as e:
+            result = {"exists": None, "description": None, "error": str(e)}
+            # Don't cache failures — a transient network blip shouldn't
+            # permanently mark a CVE as unverifiable for the rest of the run.
+            return result
+
+    # Exhausted retries on rate limiting
+    return {"exists": None, "description": None, "error": "NVD rate limit persisted after retries"}
 
 
 def _stem(word: str) -> str:
@@ -190,11 +220,24 @@ def verify_cve(cve_id: str, alert_text: str, overlap_threshold: float = 0.15) ->
     Returns a dict:
         {
             "cve_id": "CVE-2021-44228",
-            "classification": "FABRICATED" | "REAL_BUT_IRRELEVANT"
+            "classification": "FABRICATED" | "REJECTED" | "REAL_BUT_IRRELEVANT"
                              | "REAL_AND_PLAUSIBLE" | "UNVERIFIED",
             "nvd_description": "..." or None,
             "topical_overlap": 0.0-1.0 or None,
         }
+
+    Edge cases handled explicitly (not left to fall through silently):
+      - REJECTED: the CVE ID exists in NVD's records but was withdrawn,
+        never valid, or is a duplicate (NVD's own "** REJECTED **" status).
+        Citing one of these is a distinct, more concerning case than citing
+        a real-but-mismatched CVE — the ID exists but was never a genuine
+        vulnerability record, so it's closer to a fabrication than a
+        legitimate-but-wrong citation.
+      - Missing English description: some CVE records don't have an "en"
+        description. Without a description there's nothing to topically
+        compare against, so this is reported as UNVERIFIED ("couldn't
+        check") rather than silently scoring 0 overlap and landing in
+        REAL_BUT_IRRELEVANT for the wrong reason.
     """
     nvd_result = _query_nvd(cve_id)
 
@@ -210,6 +253,22 @@ def verify_cve(cve_id: str, alert_text: str, overlap_threshold: float = 0.15) ->
         return {
             "cve_id": cve_id,
             "classification": "FABRICATED",
+            "nvd_description": None,
+            "topical_overlap": None,
+        }
+
+    if nvd_result.get("rejected"):
+        return {
+            "cve_id": cve_id,
+            "classification": "REJECTED",
+            "nvd_description": nvd_result["description"],
+            "topical_overlap": None,
+        }
+
+    if not nvd_result["description"]:
+        return {
+            "cve_id": cve_id,
+            "classification": "UNVERIFIED",
             "nvd_description": None,
             "topical_overlap": None,
         }
