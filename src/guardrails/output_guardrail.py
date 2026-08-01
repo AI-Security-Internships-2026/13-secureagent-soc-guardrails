@@ -167,7 +167,7 @@ def _stem(word: str) -> str:
     suffixes = [
         "ational", "ization", "isation", "ariser", "ations", "ication",
         "ibility", "ariser",
-        "ation", "ition", "ition", "ution",
+        "ation", "ition", "ition",
         "ingly", "edly",
         "ities", "ivity",
         "ers", "ing", "ion", "ive", "ily", "ies", "ied",
@@ -175,10 +175,22 @@ def _stem(word: str) -> str:
         "es", "s",
     ]
     w = word
+    matched = False
     for suf in suffixes:
         if w.endswith(suf) and len(w) - len(suf) >= 4:
             w = w[: -len(suf)]
+            matched = True
             break
+
+    # Fallback: verbs like "execute", "isolate", "mitigate" don't end in
+    # any of the suffixes above (they end in a bare "-e"), so without this
+    # they'd never collapse with their "-ion" derived nouns
+    # ("execution"->"execut" via the "ion" rule above, but "execute" would
+    # stay "execute" unchanged — two different stems for the same concept).
+    # Only applied when nothing else matched, so it doesn't interfere with
+    # words already handled by a more specific suffix rule.
+    if not matched and w.endswith("e") and len(w) - 1 >= 4:
+        w = w[:-1]
     return w
 
 
