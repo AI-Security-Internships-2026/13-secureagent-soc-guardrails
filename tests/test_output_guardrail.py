@@ -204,7 +204,7 @@ def test_no_ungrounded_cve_means_neither_flagged_nor_requires_review():
     assert result["requires_review"] is False
 
 
-def test_real_and_plausible_citation_is_flagged_but_not_requires_review(mock_nvd):
+def test_real_and_plausible_citation_is_still_flagged_and_requires_review(mock_nvd):
     mock_nvd({
         "exists": True,
         "description": "Apache log4j2 JNDI features allow remote code execution via LDAP.",
@@ -214,11 +214,18 @@ def test_real_and_plausible_citation_is_flagged_but_not_requires_review(mock_nvd
     report = {"reasoning": "Consistent with CVE-2021-44228."}
     result = check_hallucinated_cves_verified(report, alert_text)
 
-    # This is the core behavioural fix from week 8: a correct recall is
-    # still visible (flagged=True) but is NOT treated as suspicious
-    # (requires_review=False). Collapsing these into one bool was the bug.
+    # Corrected behaviour: a topical-overlap match above threshold is a weak
+    # heuristic, not proof the cited CVE actually applies to THIS alert —
+    # and REAL_AND_PLAUSIBLE is the most convincing-looking case, so an
+    # analyst is least likely to double-check it unprompted. Every
+    # ungrounded citation requires review; the classification tier explains
+    # WHY (fabricated vs. wrong vs. plausible-but-unconfirmed vs. couldn't
+    # check), it does not decide FOR the analyst whether it's worth a look.
     assert result["flagged"] is True
-    assert result["requires_review"] is False
+    assert result["requires_review"] is True
+    # The classification itself is still the useful signal for how urgent
+    # the review is — this is not lost, just no longer auto-clears anything.
+    assert result["verifications"][0]["classification"] == "REAL_AND_PLAUSIBLE"
 
 
 def test_fabricated_citation_is_both_flagged_and_requires_review(mock_nvd):

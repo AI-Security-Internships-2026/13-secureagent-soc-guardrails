@@ -358,7 +358,18 @@ def check_hallucinated_cves_verified(report: dict, alert_text: str, verify_with_
             })
 
     flagged = len(ungrounded) > 0
-    requires_review = any(v["classification"] != "REAL_AND_PLAUSIBLE" for v in verifications)
+    # Every ungrounded citation requires review, regardless of classification
+    # tier. REAL_AND_PLAUSIBLE previously auto-cleared review on the
+    # assumption that a topical-overlap match above threshold meant "likely
+    # correct" — but that overlap score is a crude bag-of-words heuristic,
+    # not proof the cited CVE actually applies to THIS alert. Worse,
+    # REAL_AND_PLAUSIBLE is the most convincing-looking case (real CVE,
+    # on-topic), so an analyst is least likely to double-check it — exactly
+    # the wrong case to auto-clear. The classification still tells the
+    # analyst WHY it was flagged (fabricated vs. real-but-wrong vs.
+    # plausible-but-unverified-for-this-alert vs. couldn't check); it no
+    # longer decides FOR them whether it's worth a look.
+    requires_review = len(ungrounded) > 0
 
     return {
         "ungrounded_cves": ungrounded,
