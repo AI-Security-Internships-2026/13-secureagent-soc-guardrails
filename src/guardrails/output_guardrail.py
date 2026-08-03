@@ -377,3 +377,36 @@ def check_hallucinated_cves_verified(report: dict, alert_text: str, verify_with_
         "flagged": flagged,
         "requires_review": requires_review,
     }
+
+
+def annotate_ungrounded_citations(report: dict, verifications: list) -> dict:
+    """
+    Return a copy of `report` with every ungrounded CVE mention in
+    REPORT_TEXT_FIELDS tagged inline with its classification.
+
+    check_hallucinated_cves_verified() already exposes this as sibling JSON
+    fields (`hallucinated_cves`, `cve_verifications`), but an analyst reading
+    threat_summary/recommended_action/reasoning as prose has no way to tell
+    WHERE in that text the ungrounded claim is just from those sibling
+    fields — they'd have to cross-reference a CVE ID against a separate
+    list while reading. Tagging the mention in place puts the warning where
+    the analyst is actually looking.
+
+    Non-mutating: `report` itself is left untouched, a new dict is returned.
+    """
+    if not verifications:
+        return report
+
+    tags = {v["cve_id"]: v["classification"] for v in verifications}
+    annotated = dict(report)
+
+    for field in REPORT_TEXT_FIELDS:
+        text = annotated.get(field)
+        if not text:
+            continue
+        for cve_id, classification in tags.items():
+            pattern = re.compile(re.escape(cve_id), re.IGNORECASE)
+            text = pattern.sub(f"{cve_id} [⚠ ungrounded — {classification}]", text)
+        annotated[field] = text
+
+    return annotated

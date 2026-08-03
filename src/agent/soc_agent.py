@@ -1,5 +1,5 @@
 from src.guardrails.input_guardrail import check_injection
-from src.guardrails.output_guardrail import check_hallucinated_cves_verified
+from src.guardrails.output_guardrail import check_hallucinated_cves_verified, annotate_ungrounded_citations
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -102,6 +102,7 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     report["guardrail_blocked"] = False
 
     cve_check = check_hallucinated_cves_verified(report, alert_text, verify_with_nvd=verify_cves_with_nvd)
+    report = annotate_ungrounded_citations(report, cve_check["verifications"])
     report["hallucinated_cves"] = cve_check["ungrounded_cves"]
     report["cve_verifications"] = cve_check["verifications"]
     report["output_guardrail_flagged"] = cve_check["flagged"]

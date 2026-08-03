@@ -20,6 +20,7 @@ from src.guardrails.output_guardrail import (
     check_hallucinated_cves,
     check_hallucinated_cves_verified,
     verify_cve,
+    annotate_ungrounded_citations,
     _topical_overlap,
     _stem,
 )
@@ -244,3 +245,70 @@ def test_verify_with_nvd_false_skips_network_and_marks_unverified():
     assert result["ungrounded_cves"] == ["CVE-2021-44228"]
     assert result["verifications"][0]["classification"] == "UNVERIFIED"
     assert result["requires_review"] is True
+
+
+# ---------------------------------------------------------------------------
+# annotate_ungrounded_citations — inline-tags ungrounded CVE mentions
+# directly in the report's prose fields, not just the sibling
+# hallucinated_cves/cve_verifications JSON fields.
+# ---------------------------------------------------------------------------
+
+def test_annotate_tags_ungrounded_mention_in_reasoning():
+    report = {"reasoning": "Consistent with CVE-9999-99999."}
+    verifications = [{"cve_id": "CVE-9999-99999", "classification": "FABRICATED",
+                       "nvd_description": None, "topical_overlap": None}]
+
+    annotated = annotate_ungrounded_citations(report, verifications)
+
+    assert "CVE-9999-99999 [⚠ ungrounded — FABRICATED]" in annotated["reasoning"]
+
+
+def test_annotate_tags_all_report_text_fields_not_just_one():
+    report = {
+        "threat_summary": "RCE via CVE-2021-44228 suspected.",
+        "recommended_action": "Patch CVE-2021-44228 immediately.",
+        "reasoning": "No further detail.",
+    }
+    verifications = [{"cve_id": "CVE-2021-44228", "classification": "REAL_AND_PLAUSIBLE",
+                       "nvd_description": "...", "topical_overlap": 0.5}]
+
+    annotated = annotate_ungrounded_citations(report, verifications)
+
+    assert "[⚠ ungrounded — REAL_AND_PLAUSIBLE]" in annotated["threat_summary"]
+    assert "[⚠ ungrounded — REAL_AND_PLAUSIBLE]" in annotated["recommended_action"]
+
+
+def test_annotate_tags_every_occurrence_of_a_repeated_mention():
+    report = {"reasoning": "CVE-2021-44228 explains this. See also CVE-2021-44228 for detail."}
+    verifications = [{"cve_id": "CVE-2021-44228", "classification": "FABRICATED",
+                       "nvd_description": None, "topical_overlap": None}]
+
+    annotated = annotate_ungrounded_citations(report, verifications)
+
+    assert annotated["reasoning"].count("[⚠ ungrounded — FABRICATED]") == 2
+
+
+def test_annotate_leaves_grounded_report_untouched_when_no_verifications():
+    report = {"reasoning": "Nothing ungrounded here."}
+    assert annotate_ungrounded_citations(report, []) == report
+
+
+def test_annotate_does_not_mutate_the_original_report():
+    report = {"reasoning": "Consistent with CVE-9999-99999."}
+    verifications = [{"cve_id": "CVE-9999-99999", "classification": "FABRICATED",
+                       "nvd_description": None, "topical_overlap": None}]
+
+    annotate_ungrounded_citations(report, verifications)
+
+    assert report["reasoning"] == "Consistent with CVE-9999-99999."
+
+
+def test_annotate_skips_fields_that_are_missing_or_empty():
+    report = {"reasoning": None, "threat_summary": ""}
+    verifications = [{"cve_id": "CVE-9999-99999", "classification": "FABRICATED",
+                       "nvd_description": None, "topical_overlap": None}]
+
+    annotated = annotate_ungrounded_citations(report, verifications)
+
+    assert annotated["reasoning"] is None
+    assert annotated["threat_summary"] == ""
