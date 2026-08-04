@@ -1,5 +1,9 @@
 from src.guardrails.input_guardrail import check_injection
 from src.guardrails.output_guardrail import check_hallucinated_cves_verified, annotate_ungrounded_citations
+from src.guardrails.attack_grounding import (
+    check_hallucinated_attack_techniques_verified,
+    annotate_ungrounded_attack_citations,
+)
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -33,7 +37,7 @@ You must respond ONLY with a valid JSON object in exactly this format:
     "reasoning": "<brief explanation of your analysis>"
 }
 
-Do not include any text outside the JSON object. Do not hallucinate CVE numbers or threat actor names unless clearly indicated by the alert data."""
+Do not include any text outside the JSON object. Do not hallucinate CVE numbers, MITRE ATT&CK technique IDs, or threat actor names unless clearly indicated by the alert data."""
 
 def format_alert(alert: SecurityAlert) -> str:
     return f"""
@@ -72,6 +76,8 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
             "guardrail_blocked": True,
             "hallucinated_cves": [],
             "cve_verifications": [],
+            "hallucinated_attack_techniques": [],
+            "attack_technique_verifications": [],
             "output_guardrail_flagged": False,
             "requires_review": False
         }
@@ -105,7 +111,13 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     report = annotate_ungrounded_citations(report, cve_check["verifications"])
     report["hallucinated_cves"] = cve_check["ungrounded_cves"]
     report["cve_verifications"] = cve_check["verifications"]
-    report["output_guardrail_flagged"] = cve_check["flagged"]
-    report["requires_review"] = cve_check["requires_review"]
+
+    attack_check = check_hallucinated_attack_techniques_verified(report, alert_text)
+    report = annotate_ungrounded_attack_citations(report, attack_check["verifications"])
+    report["hallucinated_attack_techniques"] = attack_check["ungrounded_attack_techniques"]
+    report["attack_technique_verifications"] = attack_check["verifications"]
+
+    report["output_guardrail_flagged"] = cve_check["flagged"] or attack_check["flagged"]
+    report["requires_review"] = cve_check["requires_review"] or attack_check["requires_review"]
 
     return report

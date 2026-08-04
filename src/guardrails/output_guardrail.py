@@ -51,11 +51,14 @@ import urllib.request
 import urllib.error
 import json as _json
 
-CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
+from src.guardrails.grounding_utils import (
+    REPORT_TEXT_FIELDS,
+    _stem,
+    _topical_overlap,
+    annotate_ungrounded_mentions,
+)
 
-# Fields in the agent's report that may contain model-generated prose,
-# and therefore need scanning for hallucinated CVEs.
-REPORT_TEXT_FIELDS = ["threat_summary", "recommended_action", "reasoning"]
+CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
@@ -64,15 +67,6 @@ NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 # is ~5 requests per 30 seconds — this cache plus the sleep in
 # _query_nvd() keeps you under that during a batch test run.
 _nvd_cache = {}
-
-# Words too common to count as meaningful topical overlap (kept small and
-# security-domain-aware rather than a full stopword list).
-_STOPWORDS = {
-    "the", "a", "an", "of", "in", "on", "to", "and", "or", "is", "was",
-    "for", "with", "that", "this", "by", "as", "be", "are", "from", "at",
-    "attack", "attacker", "vulnerability", "vulnerabilities", "detected",
-    "allows", "allow", "via", "used", "known", "server", "system",
-}
 
 
 def extract_cves(text: str) -> set:
@@ -151,78 +145,6 @@ def _query_nvd(cve_id: str, timeout: float = 8.0, max_retries: int = 3) -> dict:
 
     # Exhausted retries on rate limiting
     return {"exists": None, "description": None, "error": "NVD rate limit persisted after retries"}
-
-
-def _stem(word: str) -> str:
-    """
-    Lightweight deterministic suffix-stripping stemmer — not a real
-    linguistic stemmer (no Porter/Snowball dependency added), just enough
-    to collapse common morphological variants that show up constantly in
-    security prose: "execution"/"execute", "exploitation"/"exploit",
-    "attacker"/"attack", "vulnerabilities"/"vulnerability". Order matters —
-    longer/more specific suffixes are checked first so "execution" doesn't
-    get stripped to "executio" by the "-s" rule before "-ion" gets a
-    chance.
-    """
-    suffixes = [
-        "ational", "ization", "isation", "ariser", "ations", "ication",
-        "ibility", "ariser",
-        "ation", "ition", "ition",
-        "ingly", "edly",
-        "ities", "ivity",
-        "ers", "ing", "ion", "ive", "ily", "ies", "ied",
-        "er", "ed", "ly", "al", "ic",
-        "es", "s",
-    ]
-    w = word
-    matched = False
-    for suf in suffixes:
-        if w.endswith(suf) and len(w) - len(suf) >= 4:
-            w = w[: -len(suf)]
-            matched = True
-            break
-
-    # Fallback: verbs like "execute", "isolate", "mitigate" don't end in
-    # any of the suffixes above (they end in a bare "-e"), so without this
-    # they'd never collapse with their "-ion" derived nouns
-    # ("execution"->"execut" via the "ion" rule above, but "execute" would
-    # stay "execute" unchanged — two different stems for the same concept).
-    # Only applied when nothing else matched, so it doesn't interfere with
-    # words already handled by a more specific suffix rule.
-    if not matched and w.endswith("e") and len(w) - 1 >= 4:
-        w = w[:-1]
-    return w
-
-
-def _topical_overlap(text_a: str, text_b: str) -> float:
-    """
-    Crude but deterministic topical similarity: fraction of significant
-    (stemmed) words in text_a (typically the alert description) that also
-    appear in text_b (typically the NVD CVE description). No embeddings, no
-    LLM — bag-of-words overlap with light stemming, consistent with keeping
-    this guardrail layer fully deterministic.
-
-    Stemming matters here specifically because alert prose and NVD's
-    CVSS-style description prose use different grammatical forms of the
-    same underlying concept ("exploitation" vs "exploit", "execution" vs
-    "execute") — without stemming, a genuinely correct CVE match can score
-    near-zero overlap purely on word-form mismatch, not topical mismatch.
-    """
-    def significant_stems(t):
-        # letter-led alphanumeric tokens, length >= 4 — deliberately keeps
-        # terms like "log4j", "sha256" intact. A letters-only pattern would
-        # split "log4j" into "log" (too short, discarded) and "j"
-        # (discarded) — silently losing exactly the kind of specific
-        # technical term that matters most for topical matching.
-        words = re.findall(r"[a-zA-Z][a-zA-Z0-9]{2,}", t.lower())
-        return {_stem(w) for w in words if w not in _STOPWORDS}
-
-    stems_a = significant_stems(text_a or "")
-    stems_b = significant_stems(text_b or "")
-    if not stems_a or not stems_b:
-        return 0.0
-    overlap = stems_a & stems_b
-    return len(overlap) / len(stems_a)
 
 
 def verify_cve(cve_id: str, alert_text: str, overlap_threshold: float = 0.15) -> dict:
@@ -384,29 +306,10 @@ def annotate_ungrounded_citations(report: dict, verifications: list) -> dict:
     Return a copy of `report` with every ungrounded CVE mention in
     REPORT_TEXT_FIELDS tagged inline with its classification.
 
-    check_hallucinated_cves_verified() already exposes this as sibling JSON
-    fields (`hallucinated_cves`, `cve_verifications`), but an analyst reading
-    threat_summary/recommended_action/reasoning as prose has no way to tell
-    WHERE in that text the ungrounded claim is just from those sibling
-    fields — they'd have to cross-reference a CVE ID against a separate
-    list while reading. Tagging the mention in place puts the warning where
-    the analyst is actually looking.
-
-    Non-mutating: `report` itself is left untouched, a new dict is returned.
+    Thin wrapper over the shared annotate_ungrounded_mentions()
+    (grounding_utils.py) — kept as its own name here since it's part of
+    this module's existing public surface (imported directly by
+    soc_agent.py and the test suite), even though the CVE-specific logic
+    now lives in the shared implementation.
     """
-    if not verifications:
-        return report
-
-    tags = {v["cve_id"]: v["classification"] for v in verifications}
-    annotated = dict(report)
-
-    for field in REPORT_TEXT_FIELDS:
-        text = annotated.get(field)
-        if not text:
-            continue
-        for cve_id, classification in tags.items():
-            pattern = re.compile(re.escape(cve_id), re.IGNORECASE)
-            text = pattern.sub(f"{cve_id} [⚠ ungrounded — {classification}]", text)
-        annotated[field] = text
-
-    return annotated
+    return annotate_ungrounded_mentions(report, verifications, id_key="cve_id")
