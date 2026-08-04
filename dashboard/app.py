@@ -49,7 +49,7 @@ st.markdown(
         color: #9CD6AC;
         font-weight: 600;
     }
-    .cve-flag-banner {
+    .guardrail-flag-banner {
         background-color: #3A2E1E;
         border: 1px solid #7A5F3B;
         border-radius: 10px;
@@ -58,7 +58,7 @@ st.markdown(
         font-weight: 600;
         margin-top: 10px;
     }
-    .cve-clean-banner {
+    .guardrail-clean-banner {
         background-color: #161B22;
         border: 1px solid #262C36;
         border-radius: 10px;
@@ -196,29 +196,34 @@ with tab_live:
                     unsafe_allow_html=True,
                 )
 
-            # Output guardrail: hallucinated CVE check. Only meaningful once
-            # the alert actually reached the LLM — an input-blocked alert
-            # never produced a report, so there's nothing to check there.
+            # Output guardrail: hallucinated CVE + ATT&CK technique check.
+            # Only meaningful once the alert actually reached the LLM — an
+            # input-blocked alert never produced a report, so there's
+            # nothing to check there. Both checkers set requires_review=True
+            # for every ungrounded citation regardless of classification
+            # tier (see output_guardrail.py / attack_grounding.py), so this
+            # banner reflects that directly rather than re-deriving its own
+            # notion of "clean" from the classification.
             hallucinated_cves = report.get("hallucinated_cves", [])
+            hallucinated_attack_techniques = report.get("hallucinated_attack_techniques", [])
             if not report.get("guardrail_blocked"):
-                if not hallucinated_cves:
+                if not hallucinated_cves and not hallucinated_attack_techniques:
                     st.markdown(
-                        '<div class="cve-clean-banner">Output guardrail: no ungrounded CVE citations detected</div>',
-                        unsafe_allow_html=True,
-                    )
-                elif report.get("requires_review"):
-                    cve_list = ", ".join(hallucinated_cves)
-                    st.markdown(
-                        f'<div class="cve-flag-banner">Requires review — {len(hallucinated_cves)} CVE(s) cited '
-                        f'that are not grounded in the input and did not verify as clearly correct: {cve_list}</div>',
+                        '<div class="guardrail-clean-banner">Output guardrail: no ungrounded CVE or '
+                        'ATT&CK technique citations detected</div>',
                         unsafe_allow_html=True,
                     )
                 else:
-                    cve_list = ", ".join(hallucinated_cves)
+                    citation_tags = [
+                        f"{v['cve_id']} ({v['classification']})" for v in report.get("cve_verifications", [])
+                    ] + [
+                        f"{v['technique_id']} ({v['classification']})"
+                        for v in report.get("attack_technique_verifications", [])
+                    ]
+                    total = len(hallucinated_cves) + len(hallucinated_attack_techniques)
                     st.markdown(
-                        f'<div class="cve-clean-banner">CVE(s) cited that were not in the input ({cve_list}), '
-                        f'but NVD verification confirms they are real and topically consistent with this alert '
-                        f'— likely a correct recall, not a fabrication</div>',
+                        f'<div class="guardrail-flag-banner">Requires review — {total} citation(s) not grounded '
+                        f'in the input alert: {", ".join(citation_tags)}</div>',
                         unsafe_allow_html=True,
                     )
 
