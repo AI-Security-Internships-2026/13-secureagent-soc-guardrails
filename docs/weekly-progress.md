@@ -107,3 +107,26 @@ no blockers faced
 ### Next week plan
 - scalability (prompts per second)
 
+---
+
+## Week 9
+
+**Branch:** `emaan-week-09`
+**PR link:** _[Add after opening PR]_
+
+### Completed this week
+- [x] Redid the threading vs. multiprocessing benchmark (Week 5/7) with repeated runs instead of single-shot: `threading_benchmark.py` and `multiprocessing_benchmark.py` now take a `--repeats` flag (default 3) and report mean/median/stdev/min/max per configuration via a shared `aggregate_runs()` helper, keeping every individual repeat's raw result nested under `raw_runs` for full reproducibility
+- [x] Updated `visualize_results.py` and `visualize_concurrency_comparison.py` to plot stdev as error bars on every throughput/CPU bar, so the spread is visible instead of collapsed to one point estimate
+- [x] Updated the dashboard's Results Viewer (`dashboard/app.py`) to flatten the new aggregate shape into `_mean`/`_stdev` columns for the benchmark tables, and to show stdev + repeat count on the "Best pipeline throughput" summary metric
+- [x] Re-ran both benchmarks for real (3 repeats × 1/2/4 threads/processes, guardrail-only n=2000, full pipeline n=6 live Groq calls) and committed fresh results + regenerated charts
+
+### Results
+Repeating surfaced a finding the single-shot version couldn't distinguish from noise: on the full pipeline, 4 threads is consistently ~14x slower than 1 or 2 threads (elapsed ≈9.0s vs ≈1.2–2.2s), with stdev of only 0.02–0.29s across the 3 repeats and `rate_limited_count=0` on every run — ruling out Groq rate limiting as the cause. Since the low variance shows this is reproducible rather than a fluke, it's a candidate for follow-up investigation (thread pool contention or connection-handling behavior at that concurrency level), not something to write off as a bad run.
+
+### Problems / Blockers
+- None blocking. `docs/weekly-progress.md` on this branch doesn't yet include the Week 5–8 sections merged on `emaan-week-08` — flagged here rather than silently duplicated, since resolving it belongs to whichever PR/merge reconciles the two branches, not to this week's entry.
+
+### Next week plan
+- Investigate the 4-thread full-pipeline slowdown found above
+- Extend the NVD-grounding pattern to a second citation type (CWE or MITRE ATT&CK technique IDs), per the roadmap's Aug 16 milestone
+

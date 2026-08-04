@@ -248,6 +248,29 @@ with tab_results:
         with open(path) as f:
             return json.load(f)
 
+    def flatten_benchmark_rows(rows):
+        """
+        Benchmark results are aggregates over N repeats — each numeric
+        measurement is a {"mean", "median", "stdev", "min", "max"} dict
+        rather than a single number, plus a "raw_runs" list of the
+        individual repeats. Flatten to one mean/stdev column pair per
+        measurement for display; drop raw_runs (it's in the underlying
+        JSON for reproducibility, not meant for the summary table).
+        """
+        flat_rows = []
+        for row in rows:
+            flat = {}
+            for k, v in row.items():
+                if k == "raw_runs":
+                    continue
+                if isinstance(v, dict) and "mean" in v:
+                    flat[f"{k}_mean"] = v["mean"]
+                    flat[f"{k}_stdev"] = v["stdev"]
+                else:
+                    flat[k] = v
+            flat_rows.append(flat)
+        return flat_rows
+
     guardrail_results = load_json("guardrail_results.json")
     cicids_results = load_json("cicids2017_results.json")
     fp_results = load_json("fp_rate_results.json")
@@ -278,9 +301,9 @@ with tab_results:
         c3.metric("False positive rate", "—")
 
     if threading_results is not None:
-        best = max(threading_results["full_pipeline"], key=lambda r: r["throughput_per_sec"])
-        c4.metric("Best pipeline throughput", f"{best['throughput_per_sec']:.2f} alerts/sec",
-                   f"at {best['num_threads']} threads")
+        best = max(threading_results["full_pipeline"], key=lambda r: r["throughput_per_sec"]["mean"])
+        c4.metric("Best pipeline throughput", f"{best['throughput_per_sec']['mean']:.2f} alerts/sec",
+                   f"at {best['num_threads']} threads (± {best['throughput_per_sec']['stdev']:.2f}, n={best.get('repeats', 1)})")
     else:
         c4.metric("Best pipeline throughput", "—")
 
@@ -305,10 +328,12 @@ with tab_results:
         gcol, pcol = st.columns(2)
         with gcol:
             st.markdown("**Guardrail-only**")
-            st.dataframe(pd.DataFrame(threading_results["guardrail_only"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(threading_results["guardrail_only"])),
+                         hide_index=True, use_container_width=True)
         with pcol:
             st.markdown("**Full pipeline**")
-            st.dataframe(pd.DataFrame(threading_results["full_pipeline"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(threading_results["full_pipeline"])),
+                         hide_index=True, use_container_width=True)
 
     st.divider()
 
@@ -333,10 +358,12 @@ with tab_results:
         gcol, pcol = st.columns(2)
         with gcol:
             st.markdown("**Guardrail-only (multiprocessing)**")
-            st.dataframe(pd.DataFrame(mp_results["guardrail_only"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(mp_results["guardrail_only"])),
+                         hide_index=True, use_container_width=True)
         with pcol:
             st.markdown("**Full pipeline (multiprocessing)**")
-            st.dataframe(pd.DataFrame(mp_results["full_pipeline"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(mp_results["full_pipeline"])),
+                         hide_index=True, use_container_width=True)
     else:
         st.info("No multiprocessing results found yet — run: python -m experiments.evaluation.multiprocessing_benchmark")
 
