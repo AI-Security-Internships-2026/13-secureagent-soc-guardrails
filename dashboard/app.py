@@ -153,6 +153,9 @@ with tab_live:
             "Payload snippet", value=(sample.payload_snippet or "") if sample else "",
             height=80,
         )
+        user = st.text_input("User", value=(sample.user or "") if sample else "")
+        hostname = st.text_input("Hostname", value=(sample.hostname or "") if sample else "")
+        file_hash = st.text_input("File hash", value=(sample.file_hash or "") if sample else "")
 
         analyze_clicked = st.button("Analyze alert", type="primary", use_container_width=True)
 
@@ -176,6 +179,9 @@ with tab_live:
                 protocol=protocol or None,
                 port=port,
                 payload_snippet=payload_snippet or None,
+                user=user or None,
+                hostname=hostname or None,
+                file_hash=file_hash or None,
             )
 
             cpu_before = psutil.cpu_percent(interval=None)

@@ -132,6 +132,13 @@ Manually verified the ATT&CK checker against the real snapshot: `T1055` (Process
 
 ### Next week plan
 - Investigate the 4-thread full-pipeline slowdown found above
-- Issue #23 step 4 — Evidence Pack: pull structured fields (host/user/IP/hash) already in the alert JSON into an explicit object the grounding check runs against, replacing today's raw substring match, for both the CVE and ATT&CK checkers
 - Expand the CVE-bait test set and build an equivalent ATT&CK-bait set before running the LLM-judge baseline, SelfCheckGPT comparison, and cross-claim-type adversarial re-run (issue #20/#23) — those should run once against the bigger set, not twice
+
+### Update — Evidence Pack (issue #23 step 4)
+- `SecurityAlert` (`src/agent/alert_schema.py`) gained `user`, `hostname`, `file_hash` optional fields — needed because the alert schema had no structured user/host/hash data at all before this, only IP/port. Populated realistically on all 4 sample alerts (e.g. `user="root"` on the SSH brute-force alert, a `file_hash` on the exfiltration alert).
+- Added `src/guardrails/evidence_pack.py`: `build_evidence_pack(alert)` pulls the alert's typed fields into explicit `ips`/`hosts`/`users`/`hashes`/`ports` buckets, and separates out a `text` field (description + payload_snippet only) as the surface CVE/ATT&CK identifier grounding actually runs against — instead of the full formatted alert blob used previously.
+- `soc_agent.py`'s `analyse_alert()` now builds the evidence pack once per alert and passes `evidence_pack["text"]` to both the CVE and ATT&CK grounding checks (previously passed the full `format_alert()` string). Behaviourally equivalent for CVE/ATT&CK IDs — those never appeared in the IP/timestamp/protocol fields being excluded — but the grounding surface is now explicit rather than an artefact of prompt formatting. The evidence pack itself is attached to every report as `report["evidence_pack"]` for audit visibility.
+- The structured buckets (ips/hosts/users/hashes) aren't consumed by any checker yet — CVE and ATT&CK are the only claim types in scope for issue #23. They exist now so a future IOC-grounding claim type doesn't need another schema pass.
+- Dashboard Live Demo form (`dashboard/app.py`) gained User/Hostname/File hash text inputs so manually-entered alerts populate the same fields; the existing "Raw report JSON" expander already surfaces `evidence_pack` with no further dashboard change needed.
+- 8 new tests in `tests/test_evidence_pack.py`. Full suite: 92/92 passing.
 

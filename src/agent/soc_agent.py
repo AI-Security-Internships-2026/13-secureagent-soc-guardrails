@@ -4,6 +4,7 @@ from src.guardrails.attack_grounding import (
     check_hallucinated_attack_techniques_verified,
     annotate_ungrounded_attack_citations,
 )
+from src.guardrails.evidence_pack import build_evidence_pack
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -51,6 +52,9 @@ Description: {alert.description}
 Protocol: {alert.protocol or 'Unknown'}
 Port: {alert.port or 'Unknown'}
 Payload Snippet: {alert.payload_snippet or 'None'}
+User: {alert.user or 'Unknown'}
+Hostname: {alert.hostname or 'Unknown'}
+File Hash: {alert.file_hash or 'None'}
 """
 
 def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> dict:
@@ -60,6 +64,7 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     CVE checking with an "UNVERIFIED" classification for any ungrounded CVE.
     """
     alert_text = format_alert(alert)
+    evidence_pack = build_evidence_pack(alert)
 
     if check_injection(alert_text):
         return {
@@ -79,7 +84,8 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
             "hallucinated_attack_techniques": [],
             "attack_technique_verifications": [],
             "output_guardrail_flagged": False,
-            "requires_review": False
+            "requires_review": False,
+            "evidence_pack": evidence_pack,
         }
     
     messages = [
@@ -107,17 +113,18 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     report["agent_version"] = "guardrail-v0.4"
     report["guardrail_blocked"] = False
 
-    cve_check = check_hallucinated_cves_verified(report, alert_text, verify_with_nvd=verify_cves_with_nvd)
+    cve_check = check_hallucinated_cves_verified(report, evidence_pack["text"], verify_with_nvd=verify_cves_with_nvd)
     report = annotate_ungrounded_citations(report, cve_check["verifications"])
     report["hallucinated_cves"] = cve_check["ungrounded_cves"]
     report["cve_verifications"] = cve_check["verifications"]
 
-    attack_check = check_hallucinated_attack_techniques_verified(report, alert_text)
+    attack_check = check_hallucinated_attack_techniques_verified(report, evidence_pack["text"])
     report = annotate_ungrounded_attack_citations(report, attack_check["verifications"])
     report["hallucinated_attack_techniques"] = attack_check["ungrounded_attack_techniques"]
     report["attack_technique_verifications"] = attack_check["verifications"]
 
     report["output_guardrail_flagged"] = cve_check["flagged"] or attack_check["flagged"]
     report["requires_review"] = cve_check["requires_review"] or attack_check["requires_review"]
+    report["evidence_pack"] = evidence_pack
 
     return report
