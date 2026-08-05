@@ -131,8 +131,14 @@ Manually verified the ATT&CK checker against the real snapshot: `T1055` (Process
 - MITRE ATT&CK verification runs against a periodically-refreshed local snapshot rather than a live lookup like the CVE checker's NVD calls, since ATT&CK is only published as a single ~50MB STIX bundle with no lightweight per-ID endpoint. Documented as a real, explicit tradeoff in `attack_grounding.py` rather than presented as equivalent to the NVD case — the snapshot can lag MITRE's published data between refreshes.
 
 ### Next week plan
-- Investigate the 4-thread full-pipeline slowdown found above
 - Expand the CVE-bait test set and build an equivalent ATT&CK-bait set before running the LLM-judge baseline, SelfCheckGPT comparison, and cross-claim-type adversarial re-run (issue #20/#23) — those should run once against the bigger set, not twice
+
+### Update — 4-thread full-pipeline slowdown, investigated
+Built `experiments/evaluation/diagnose_thread_slowdown.py`, which instruments each Groq call with a start/end timestamp relative to batch start instead of only measuring total wall time, to distinguish two explanations: threads queuing for a free worker slot (boring, expected) vs. individual requests stalling once already running (points at server-side throttling).
+
+Ran 3 repeats each at 2 and 4 threads (n=6, real Groq calls). Result: at 4 threads, most requests fired together at ~t=0 and completed in ~1s each, exactly as expected — but in 2 of 3 repeats, exactly one request (of the 4-6 in flight) took 5-11s instead of ~1s, while its concurrent siblings finished normally. This isn't queuing — one straggler was among the first 4 requests submitted simultaneously, not the one waiting for a worker slot to free up. Confirmed it isn't a client-side connection-pool bottleneck either: `httpx`'s default `Limits` (used under `groq`'s client) allow 100 concurrent connections / 20 keep-alive, far more than 4.
+
+Conclusion: the slowdown is a single connection occasionally stalling 5-10x longer than its concurrent peers, with no exception raised and no CPU spike — consistent with Groq queuing/throttling requests server-side under concurrent load from one API key rather than rejecting them with an explicit 429. This diagnostic run was noisier than the original benchmark (1.46s/6.05s/10.92s across repeats vs. the original's tight 8.66-9.17s band), suggesting the effect's severity tracks Groq's live server load rather than being a fixed property of "4 threads" specifically — not fully resolved, but the mechanism (server-side per-key concurrency throttling, not client scheduling or rate-limit rejection) is now evidenced rather than guessed at. Results saved to `experiments/results/thread_slowdown_diagnosis.json`.
 
 ### Update — Evidence Pack (issue #23 step 4)
 - `SecurityAlert` (`src/agent/alert_schema.py`) gained `user`, `hostname`, `file_hash` optional fields — needed because the alert schema had no structured user/host/hash data at all before this, only IP/port. Populated realistically on all 4 sample alerts (e.g. `user="root"` on the SSH brute-force alert, a `file_hash` on the exfiltration alert).
