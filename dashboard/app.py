@@ -288,10 +288,11 @@ with tab_results:
     threading_results = load_json("threading_benchmark_results.json")
     mp_results = load_json("multiprocessing_benchmark_results.json")
     cve_bait_results = load_json("cve_bait_results.json")
+    attack_bait_results = load_json("attack_bait_results.json")
 
     st.subheader("Summary")
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
 
     if guardrail_results is not None:
         blocked = sum(1 for r in guardrail_results if r.get("guardrail_blocked"))
@@ -323,6 +324,12 @@ with tab_results:
                    f"{cve_bait_results['ungrounded_count']}/{cve_bait_results['total_tested']} ungrounded citation(s)")
     else:
         c5.metric("CVE hallucination rate", "—")
+
+    if attack_bait_results is not None:
+        c6.metric("ATT&CK citations requiring review", f"{attack_bait_results['requires_review_rate']:.1%}",
+                   f"{attack_bait_results['ungrounded_count']}/{attack_bait_results['total_tested']} ungrounded citation(s)")
+    else:
+        c6.metric("ATT&CK hallucination rate", "—")
 
     st.divider()
 
@@ -394,10 +401,24 @@ with tab_results:
 
     st.divider()
 
+    st.subheader("Output guardrail — MITRE ATT&CK hallucination test")
+    if attack_bait_results is not None:
+        st.dataframe(
+            pd.DataFrame(attack_bait_results["results"])[
+                ["alert_id", "severity_assessment", "threat_type", "hallucinated_attack_techniques", "requires_review"]
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.info("No ATT&CK-bait results found yet — run: python -m experiments.evaluation.attack_bait_test")
+
+    st.divider()
+
     st.subheader("Alert results")
     view_choice = st.radio(
         "Source",
-        ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test"],
+        ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test", "ATT&CK bait test"],
         horizontal=True,
     )
 
@@ -409,5 +430,7 @@ with tab_results:
         st.dataframe(pd.DataFrame(fp_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "CVE bait test" and cve_bait_results is not None:
         st.dataframe(pd.DataFrame(cve_bait_results["results"]), hide_index=True, use_container_width=True)
+    elif view_choice == "ATT&CK bait test" and attack_bait_results is not None:
+        st.dataframe(pd.DataFrame(attack_bait_results["results"]), hide_index=True, use_container_width=True)
     else:
         st.info("No saved results found for this source yet — run the corresponding script first.")
