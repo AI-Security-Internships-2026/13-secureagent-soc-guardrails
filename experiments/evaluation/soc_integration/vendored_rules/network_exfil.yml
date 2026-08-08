@@ -1,0 +1,42 @@
+id: NET-EXFIL-001
+name: Large outbound transfer to external host
+severity: high
+mitre: [T1048]
+description: >
+  A single connection moved more than 50 MB outbound — worth a look in a small
+  environment where bulk uploads are rare.
+match:
+  all:
+    - field: category
+      equals: network
+    - field: bytes_out
+      gt: 52428800
+entity: host
+---
+id: NET-C2-PORT-001
+name: Connection to known C2-associated port
+severity: medium
+mitre: [T1571]
+description: >
+  Outbound connection to a port commonly used by off-the-shelf C2 frameworks.
+match:
+  all:
+    - field: category
+      equals: network
+    - field: dest_port
+      in: [4444, 5555, 6666, 1337, 31337]
+entity: host
+---
+id: WEB-SQLI-001
+name: SQL injection pattern in web request
+severity: high
+mitre: [T1190]
+description: >
+  Web request containing classic SQL injection markers against a public-facing app.
+match:
+  all:
+    - field: category
+      equals: web
+    - field: message
+      regex: "(?i)(union\\s+select|or\\s+1=1|'--|sleep\\(|xp_cmdshell)"
+entity: src_ip

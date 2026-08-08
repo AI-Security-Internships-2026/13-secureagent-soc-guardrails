@@ -29,3 +29,7 @@ secrets/
 *.pem
 experiments/results/*.png
 experiments/results/*.pdf
+
+# Cloned upstream repo (Wazuh Docker deployment), not vendored -- see
+# docs/ROADMAP_PLAN.md §10a
+experiments/evaluation/wazuh_integration/wazuh-docker/

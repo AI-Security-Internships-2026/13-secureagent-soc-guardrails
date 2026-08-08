@@ -1,0 +1,37 @@
+id: AUTH-BRUTE-001
+name: Brute-force logon attempts
+severity: high
+mitre: [T1110]
+description: >
+  Five or more failed logons from the same source IP within 60 seconds.
+  Typical of password guessing or credential stuffing against SSH/RDP/web logins.
+match:
+  all:
+    - field: category
+      equals: authentication
+    - field: outcome
+      equals: failure
+threshold:
+  count: 5
+  window_seconds: 60
+  group_by: [src_ip]
+entity: src_ip
+---
+id: AUTH-SPRAY-001
+name: Password spraying across accounts
+severity: high
+mitre: [T1110.003]
+description: >
+  Failed logons for 8+ events from one source within 5 minutes — sprays hit many
+  accounts with few attempts each, which per-account lockouts miss.
+match:
+  all:
+    - field: category
+      equals: authentication
+    - field: outcome
+      equals: failure
+threshold:
+  count: 8
+  window_seconds: 300
+  group_by: [src_ip]
+entity: src_ip
