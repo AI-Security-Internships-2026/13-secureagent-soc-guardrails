@@ -203,8 +203,8 @@ loudly.
   indexer directly (`GET wazuh-alerts-*/_search`, `rule.level >= 5`),
   `wazuh_alert_to_security_alert()` maps Wazuh's alert JSON onto
   `SecurityAlert` (severity bucketed from `rule.level` 0-15; MITRE IDs read
-  from `rule.mitre_techniques`, which sits flat on the rule object rather
-  than nested — confirmed against real payloads, not documentation), dedupes
+  from `rule.mitre_techniques` — later found to be only ONE of two shapes
+  Wazuh actually uses, see the bug note further down), dedupes
   on `(rule.id, full_log)` since the SCA module re-fires its entire CIS
   checklist on every scan (95 raw alerts collapsed to 3 truly unique ones —
   this is a quiet, freshly-provisioned container with only one deliberate
@@ -214,16 +214,84 @@ loudly.
   0% ungrounded ATT&CK, 0% ungrounded CVE, 0% requires-review, 0% blocked.
   Results in `experiments/results/wazuh_integration_results.json`.
 
-**Honest caveat:** n=3 is a proof-of-concept, not a dataset — the container
-is idle apart from routine compliance scans and the one FIM trigger. The
-"live tester" value (§10a's original dashboard-click idea) needs richer,
-recurring trigger activity to be worth much — e.g. a real (intentionally
-weak) sshd for genuine auth-failure alerts, or scripted process/network
-activity — which is natural follow-up, not yet started.
+**Progress (2026-08-08/09, fourth session — real attack-style trigger
+activity):** ✅ done. Installed `openssh-server` inside the agent container,
+enabled `PasswordAuthentication` (off by default — first attempt correctly
+generated zero events because the server refused the auth method before
+even checking a password), then ran repeated wrong-password logins against
+a throwaway local test account (`sshtestuser`), entirely inside the one
+container, nothing external.
+
+Two real infra bugs hit and fixed along the way:
+1. sshd's `-e` (log-to-stderr) output has no syslog-style timestamp/host
+   prefix — Wazuh's `syslog` log-format decoder needs one to route lines to
+   the sshd rules. Fixed by piping sshd's output through a small shell loop
+   that prepends `date | hostname | sshd[pid]:` before appending to
+   `/var/log/secure`.
+2. That pipe silently buffered everything until the process was killed
+   (standard C library behaviour: stdout block-buffers once it's not a
+   terminal), so nothing appeared in the log file in real time. Fixed with
+   `stdbuf -oL` to force line buffering through the pipeline.
+
+Result: Wazuh correctly fired 7× rule 5760 ("sshd: authentication failed")
+plus, notably, **1× rule 5763 ("sshd: brute force trying to get access to
+the system")** — its own correlation logic recognized the repeated-failure
+pattern as an attack, not just individual mistakes. This is genuine
+detection behavior, not a canned alert. Unique alert count (after the same
+dedup logic) went from 3 to 13. Re-ran `wazuh_integration_test.py` on all
+13 through the full guardrailed pipeline: 0% ungrounded ATT&CK/CVE, 0%
+requires-review — consistent with the earlier n=3 run, now on a real mix of
+auth-attack, file-integrity, and compliance alert types instead of just
+compliance noise. Results in `experiments/results/wazuh_integration_results.json`.
+
+**Honest caveat, updated:** n=13 is still small and was a one-time manual
+burst, not sustained/repeatable activity — good enough to prove the
+pipeline handles a real attack pattern correctly, not yet enough for a
+citable number. The SSH test setup itself (test user, host keys, password
+auth enabled) lives only in the running container's writable layer, not in
+version control or the compose file — it will NOT survive a container
+recreate (`down`/`up --force-recreate`), only a plain `restart`. If this
+needs to be reproducible later, it should be scripted properly (e.g. a
+small init script baked into a custom agent image or run via
+`docker compose up` command override) rather than redone by hand each time.
+
+**Bug found and fixed (2026-08-08/09, same session) — adapter was silently
+dropping ground-truth MITRE data for a whole rule family.** Wazuh's own
+MITRE tagging is NOT one consistent JSON shape across rule types (confirmed
+against real payloads, not documentation): SCA/compliance rules put it flat
+on `rule.mitre_techniques`, but sshd rules (5760 "authentication failed",
+5763 "brute force") nest it under `rule.mitre.id` instead.
+`wazuh_alert_to_security_alert()` only checked the flat field, so every
+SSH-related alert reached the LLM with its real technique ID (**T1110 —
+Brute Force**, plus T1110.001/T1021.004 on individual failures) silently
+stripped out. Fixed in `wazuh_integration_test.py` by checking both shapes.
+Re-ran after the fix; confirmed via the raw report JSON that the LLM's
+`reasoning` field now correctly engages with the real ID once it's actually
+present (e.g. explicitly reasoning about "T1110" for the brute-force alert).
+
+**What the unchanged 0%-ungrounded result does and doesn't mean, now that
+the fix is in:** `check_hallucinated_attack_techniques()`
+(`src/guardrails/attack_grounding.py`) only flags technique IDs the LLM
+*added* that weren't in the alert text it was given (`mentioned - grounded`,
+same convention `soc_integration_test.py` already uses — realistic alerts
+keep detector-tagged IDs visible, unlike the adversarial bait sets). Since
+T1110 was present in both the input alert and the LLM's output, it's
+correctly excluded from "ungrounded" — that's the **"stated" style** from
+the CVE-pool test (§5), not the **"bait" style**. It confirms the LLM isn't
+over-claiming beyond what it's told, but it does NOT test whether the LLM
+can spontaneously identify T1110 from the raw behavior alone without the
+label — that's the harder, more interesting test (and the CVE-pool result
+already suggests the answer would be "no, it stays silent rather than
+guessing" — 0% spontaneous correct citation, but also 0% fabrication).
+Running a withheld-label ("bait" style) version of this against real
+Wazuh alerts, instead of only the hand-authored CVE pool, is a natural
+follow-up, not yet done.
 
 Remaining/optional: wire the dashboard "click for new alert" button to this
-feed; generate more trigger variety (auth failures, network events) instead
-of relying only on FIM + SCA.
+feed; make the SSH trigger setup reproducible/scripted; consider adding a
+second trigger type (e.g. network-based) for more variety; decide on a
+target n before citing this anywhere; run a bait-style (label-withheld)
+version of the ATT&CK grounding test against real Wazuh alerts.
 
 ---
 
