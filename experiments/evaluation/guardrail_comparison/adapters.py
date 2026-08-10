@@ -102,8 +102,34 @@ def scan_pytector(text: str) -> ScanResult:
         return ScanResult(is_flagged=False, score=None, latency_ms=latency_ms, error=str(e))
 
 
+
+# ---------------------------------------------------------------------------
+# 4. Hybrid — this repo's own baseline first, Pytector fallback only when
+#    the baseline finds nothing. See src/guardrails/input_guardrail.py
+#    (check_injection_hybrid), now wired into the live pipeline in
+#    src/agent/soc_agent.py.
+# ---------------------------------------------------------------------------
+
+def scan_hybrid(text: str) -> ScanResult:
+    from src.guardrails.input_guardrail import check_injection
+
+    start = time.perf_counter()
+    try:
+        if check_injection(text):
+            latency_ms = (time.perf_counter() - start) * 1000
+            return ScanResult(is_flagged=True, score=None, latency_ms=latency_ms)
+        detector = _get_pytector_detector()
+        is_injection, probability = detector.detect_injection(text)
+        latency_ms = (time.perf_counter() - start) * 1000
+        return ScanResult(is_flagged=bool(is_injection), score=probability, latency_ms=latency_ms)
+    except Exception as e:
+        latency_ms = (time.perf_counter() - start) * 1000
+        return ScanResult(is_flagged=False, score=None, latency_ms=latency_ms, error=str(e))
+
+
 IMPLEMENTATIONS = {
     "baseline": scan_baseline,
     "llm_guard": scan_llm_guard,
     "pytector": scan_pytector,
+    "hybrid": scan_hybrid,
 }

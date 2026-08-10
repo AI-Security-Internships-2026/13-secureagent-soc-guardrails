@@ -1,4 +1,4 @@
-from src.guardrails.input_guardrail import check_injection
+from src.guardrails.input_guardrail import check_injection_hybrid
 from src.guardrails.output_guardrail import check_hallucinated_cves_verified, annotate_ungrounded_citations
 from src.guardrails.attack_grounding import (
     check_hallucinated_attack_techniques_verified,
@@ -66,7 +66,7 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     alert_text = format_alert(alert)
     evidence_pack = build_evidence_pack(alert)
 
-    if check_injection(alert_text):
+    if check_injection_hybrid(alert_text):
         return {
             "alert_id": alert.alert_id,
             "severity_assessment": "BLOCKED",
