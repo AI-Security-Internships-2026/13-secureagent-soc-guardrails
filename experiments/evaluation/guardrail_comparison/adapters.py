@@ -127,9 +127,51 @@ def scan_hybrid(text: str) -> ScanResult:
         return ScanResult(is_flagged=False, score=None, latency_ms=latency_ms, error=str(e))
 
 
+
+# ---------------------------------------------------------------------------
+# 5. Hybrid (LLM Guard fallback) — experimental variant: same deterministic
+#    first layer as scan_hybrid, but falls back to LLM Guard instead of
+#    Pytector. Tried 2026-08-11 after the significance test showed LLM
+#    Guard's recall edge over hybrid/Pytector (0.943 vs 0.736) is real, not
+#    noise -- worth checking whether the deterministic short-circuit layer
+#    can be kept while recovering that recall. NOT wired into the live
+#    pipeline (src/agent/soc_agent.py still calls the Pytector-based hybrid)
+#    -- this is a benchmark-only trial pending these results.
+# ---------------------------------------------------------------------------
+
+def scan_hybrid_llmguard(text: str) -> ScanResult:
+    from src.guardrails.input_guardrail import check_injection
+
+    start = time.perf_counter()
+    try:
+        if check_injection(text):
+            latency_ms = (time.perf_counter() - start) * 1000
+            return ScanResult(is_flagged=True, score=None, latency_ms=latency_ms)
+        scanner = _get_llm_guard_scanner()
+        sanitized_prompt, is_valid, risk_score = scanner.scan(text)
+        latency_ms = (time.perf_counter() - start) * 1000
+        return ScanResult(is_flagged=(not is_valid), score=float(risk_score), latency_ms=latency_ms)
+    except Exception as e:
+        latency_ms = (time.perf_counter() - start) * 1000
+        return ScanResult(is_flagged=False, score=None, latency_ms=latency_ms, error=str(e))
+
+
 IMPLEMENTATIONS = {
     "baseline": scan_baseline,
     "llm_guard": scan_llm_guard,
     "pytector": scan_pytector,
     "hybrid": scan_hybrid,
+    "hybrid_llmguard": scan_hybrid_llmguard,
+}
+
+# Called once per implementation, before the timed benchmark loop, so
+# one-time model-loading cost (confirmed 2026-08-11: both llm_guard's 129.5s
+# and pytector's 6.4s latency outliers were their respective first-ever
+# call) is paid upfront instead of polluting the first sample's measured
+# latency. Maps implementation name -> zero-arg callable.
+WARMUPS = {
+    "llm_guard": lambda: _get_llm_guard_scanner().scan("warmup"),
+    "pytector": lambda: _get_pytector_detector().detect_injection("warmup"),
+    "hybrid": lambda: _get_pytector_detector().detect_injection("warmup"),
+    "hybrid_llmguard": lambda: _get_llm_guard_scanner().scan("warmup"),
 }
