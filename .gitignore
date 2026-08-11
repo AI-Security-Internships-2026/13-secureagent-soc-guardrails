@@ -33,3 +33,16 @@ experiments/results/*.pdf
 # Cloned upstream repo (Wazuh Docker deployment), not vendored -- see
 # docs/ROADMAP_PLAN.md §10a
 experiments/evaluation/wazuh_integration/wazuh-docker/
+
+# LaTeX build artifacts (docs/paper/) -- .tex/.bib source stays tracked,
+# compiled output and intermediate files don't
+docs/paper/**/*.aux
+docs/paper/**/*.log
+docs/paper/**/*.out
+docs/paper/**/*.toc
+docs/paper/**/*.synctex.gz
+docs/paper/**/*.fls
+docs/paper/**/*.fdb_latexmk
+docs/paper/**/*.bbl
+docs/paper/**/*.blg
+docs/paper/**/*.pdf

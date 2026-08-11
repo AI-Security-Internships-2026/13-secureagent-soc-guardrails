@@ -1,0 +1,870 @@
+%Version 3.1 December 2024
+% See section 11 of the User Manual for version history
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                 %%
+%% Please do not use \input{...} to include other tex files.       %%
+%% Submit your LaTeX manuscript as one .tex document.              %%
+%%                                                                 %%
+%% All additional figures and files should be attached             %%
+%% separately and not embedded in the \TeX\ document itself.       %%
+%%                                                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\documentclass[referee,sn-basic]{sn-jnl}% referee option is meant for double line spacing
+
+%%=======================================================%%
+%% to print line numbers in the margin use lineno option %%
+%%=======================================================%%
+
+%%\documentclass[lineno,pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
+
+%%=========================================================================================%%
+%% the documentclass is set to pdflatex as default. You can delete it if not appropriate.  %%
+%%=========================================================================================%%
+
+%%\documentclass[sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
+
+%%Note: the following reference styles support Namedate and Numbered referencing. By default the style follows the most common style. To switch between the options you can add or remove Numbered in the optional parenthesis. 
+%%The option is available for: sn-basic.bst, sn-chicago.bst%  
+ 
+%%\documentclass[pdflatex,sn-nature]{sn-jnl}% Style for submissions to Nature Portfolio journals
+%%\documentclass[pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}% Math and Physical Sciences Numbered Reference Style
+%%\documentclass[pdflatex,sn-mathphys-ay]{sn-jnl}% Math and Physical Sciences Author Year Reference Style
+%%\documentclass[pdflatex,sn-aps]{sn-jnl}% American Physical Society (APS) Reference Style
+%%\documentclass[pdflatex,sn-vancouver-num]{sn-jnl}% Vancouver Numbered Reference Style
+%%\documentclass[pdflatex,sn-vancouver-ay]{sn-jnl}% Vancouver Author Year Reference Style
+%%\documentclass[pdflatex,sn-apa]{sn-jnl}% APA Reference Style
+%%\documentclass[pdflatex,sn-chicago]{sn-jnl}% Chicago-based Humanities Reference Style
+
+%%%% Standard Packages
+%%<additional latex packages if required can be included here>
+
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+%%%%
+
+%%%%%=============================================================================%%%%
+%%%%  Remarks: This template is provided to aid authors with the preparation
+%%%%  of original research articles intended for submission to journals published 
+%%%%  by Springer Nature. The guidance has been prepared in partnership with 
+%%%%  production teams to conform to Springer Nature technical requirements. 
+%%%%  Editorial and presentation requirements differ among journal portfolios and 
+%%%%  research disciplines. You may find sections in this template are irrelevant 
+%%%%  to your work and are empowered to omit any such section if allowed by the 
+%%%%  journal you intend to submit to. The submission guidelines and policies 
+%%%%  of the journal take precedence. A detailed User Manual is available in the 
+%%%%  template package for technical guidance.
+%%%%%=============================================================================%%%%
+
+%% as per the requirement new theorem styles can be included as shown below
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}%  meant for continuous numbers
+%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
+%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
+\newtheorem{proposition}[theorem]{Proposition}% 
+%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
+
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}%
+
+\raggedbottom
+%%\unnumbered% uncomment this for unnumbered level heads
+
+\begin{document}
+
+%\title[Article Title]{Classifying Hallucinated CVE Citations in LLM-Based SOC Agents}
+\title{LLMCite: Grounded Verification of Hallucinated CVE and ATT&CK Citations in LLM-Generated SoSC Reports}
+
+
+%%=============================================================%%
+%% GivenName	-> \fnm{Joergen W.}
+%% Particle	-> \spfx{van der} -> surname prefix
+%% FamilyName	-> \sur{Ploeg}
+%% Suffix	-> \sfx{IV}
+%% \author*[1,2]{\fnm{Joergen W.} \spfx{van der} \sur{Ploeg} 
+%%  \sfx{IV}}\email{iauthor@gmail.com}
+%%=============================================================%%
+
+\author*[1,2]{\fnm{First} \sur{Author}}\email{iauthor@gmail.com}
+
+\author[2,3]{\fnm{Second} \sur{Author}}\email{iiauthor@gmail.com}
+\equalcont{These authors contributed equally to this work.}
+
+\author[1,2]{\fnm{Third} \sur{Author}}\email{iiiauthor@gmail.com}
+\equalcont{These authors contributed equally to this work.}
+
+\affil*[1]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{100190}, \state{State}, \country{Country}}}
+
+\affil[2]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{10587}, \state{State}, \country{Country}}}
+
+\affil[3]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{610101}, \state{State}, \country{Country}}}
+
+%%==================================%%
+%% Sample for unstructured abstract %%
+%%==================================%%
+
+\abstract{Large language models are increasingly used to generate Security Operations Center (SOC) threat reports, automatically summarizing alerts and citing supporting evidence such as CVE identifiers and MITRE ATT\&CK techniques. These citations are rarely verified: models — particularly smaller, low-latency variants favored for real-time triage — can fabricate plausible-sounding identifiers, misattribute real ones to the wrong context, or recall genuinely correct citations the source alert never actually provided. A flat "flagged/not flagged" treatment of these cases obscures an important distinction: a wholly invented CVE and a real-but-unevidenced one carry different risk profiles for an analyst deciding how much to trust the report.
+
+We present LLMCite, a two-stage groundedness-verification pipeline for LLM-generated SOC reports. Stage one deterministically checks whether a cited CVE or ATT&CK identifier is supported by the source alert; stage two verifies ungrounded citations against authoritative external sources (the National Vulnerability Database and the MITRE ATT&CK STIX corpus) and classifies each into one of four categories — Fabricated, Real-but-Irrelevant, Real-and-Plausible, or Unverified — rather than a binary label. We show that Real-and-Plausible citations, despite superficially appearing legitimate, represent the case most likely to evade existing review triggers, and evaluate SecCite against an adversarial CVE/ATT&CK-citation benchmark and [N] baseline detectors, including an LLM-as-judge comparator. [Headline result once measured, e.g., "LLMCite achieves X\% precision/recall at Yms latency, outperforming..."]. We position SecCite as a domain-specialized instance of citation-grounding verification for security-critical LLM applications, distinct from prior citation-hallucination work targeting scholarly references}
+
+%%================================%%
+%% Sample for structured abstract %%
+%%================================%%
+
+% \abstract{\textbf{Purpose:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
+% 
+% \textbf{Methods:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
+% 
+% \textbf{Results:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
+% 
+% \textbf{Conclusion:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.}
+
+\keywords{keyword1, Keyword2, Keyword3, Keyword4}
+
+%%\pacs[JEL Classification]{D8, H51}
+
+%%\pacs[MSC Classification]{35A01, 65L10, 65L12, 65L20, 65L70}
+
+\maketitle
+
+\section{Introduction}\label{sec1}
+
+The Introduction section, of referenced text \cite{bib1} expands on the background of the work (some overlap with the Abstract is acceptable). The introduction should not include subheadings.
+
+Springer Nature does not impose a strict layout as standard however authors are advised to check the individual requirements for the journal they are planning to submit to as there may be journal-level preferences. When preparing your text please also be aware that some stylistic choices are not supported in full text XML (publication version), including coloured font. These will not be replicated in the typeset article if it is accepted. 
+
+\section{Literature Review}\label{sec:litreview}
+
+Eight primary research papers, benchmarks, or actively maintained open-source projects with a documented technical method form the core literature basis for this work. No survey papers are counted in this set; two survey citations are instead kept separately as background/motivational sources (Section~\ref{subsec:litreview-background}).
+
+\subsection{Chosen papers}\label{subsec:litreview-chosen}
+
+\begin{table}[h]
+\caption{Chosen papers for the literature review}\label{tab:litreview-chosen}
+\begin{tabular}{@{}p{0.3cm}p{2.3cm}p{2.6cm}p{6.3cm}@{}}
+\toprule
+\# & Title (short) & Authors & Relevance \\
+\midrule
+1 & InjecAgent & Zhan, Liang, Ying, Kang & Threat model for malicious log entries \\
+2 & SelfCheckGPT & Manakul, Liusie, Gales & Output guardrail hallucination check --- zero-resource consistency method \\
+3 & TRAM (Threat Report ATT\&CK Mapper) & MITRE Engenuity CTID & Direct prior art for ATT\&CK-technique extraction/mapping from text \\
+4 & NeMo Guardrails & Rebedea et al. & Guardrail architecture \& latency \\
+5 & Presidio & Microsoft & PII redaction, leakage metric \\
+6 & FActScore & Min et al. & Grounding methodology --- atomic fact verification against a knowledge source \\
+7 & The Instruction Hierarchy & Wallace, Xiao, Leike, Weng, Heidecke, Beutel (OpenAI) & Injection \textbf{defense}, not just attack --- provenance-aware instruction priority \\
+8 & Judging LLM-as-a-Judge (MT-Bench / Chatbot Arena) & Zheng et al. & Methodology for the planned LLM-judge baseline (Aug 23 milestone) \\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsection{Paper 1 --- InjecAgent \cite{injecagent2024}}\label{subsec:litreview-p1}
+
+\begin{description}
+\item[Full title] InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents
+\item[Authors] Zhan, Q., Liang, Z., Ying, Z., Kang, D.
+\item[Year] 2024
+\item[Venue] Findings of ACL 2024
+\item[URL/DOI] \url{https://arxiv.org/abs/2403.02691}
+\item[Method] Benchmark of 1{,}054 test cases evaluating tool-integrated LLM agents against indirect prompt injection embedded in tool outputs (e.g.\ emails, web content, logs)
+\item[Dataset] Synthetic tool-use scenarios across multiple agent tasks
+\item[Key result] Reinforcing attacker instructions with a ``hacking prompt'' nearly doubles the attack success rate against ReAct-prompted GPT-4
+\item[Limitation] Synthetic benchmark; does not cover real-world SOC log formats or domain-specific injection patterns
+\item[Relevance] Directly models the threat in this project's input guardrail layer --- malicious instructions hidden inside alert/log data that the SOC agent ingests (maps to RQ3)
+\end{description}
+
+\medskip\noindent\textit{Notes:} Most directly applicable paper for the ``Input Guardrail'' box in the architecture diagram. Useful as a template for building our own injection benchmark in \texttt{experiments/}.
+
+\subsection{Paper 2 --- SelfCheckGPT \cite{selfcheckgpt2023}}\label{subsec:litreview-p2}
+
+\begin{description}
+\item[Full title] SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models
+\item[Authors] Manakul, P., Liusie, A., Gales, M.
+\item[Year] 2023
+\item[Venue] EMNLP 2023
+\item[URL/DOI] \url{https://arxiv.org/abs/2303.08896}
+\item[Method] Samples multiple stochastic responses to the same prompt and measures consistency between them --- sentences that vary a lot across samples are flagged as likely hallucinated, with no external knowledge base required
+\item[Dataset] WikiBio-based passages generated by GPT-3, human-annotated for factuality at the sentence level
+\item[Key result] Sentence-level consistency scoring detects non-factual sentences competitively with methods that require access to the model's token-level output probabilities, despite being fully black-box
+\item[Limitation] Zero-resource means it can't confirm a claim is \textit{true} against a ground truth --- only that the model is \textit{inconsistent} about it, which is a weaker (but cheaper) signal than external verification
+\item[Relevance] Direct methodological anchor for the project's planned SelfCheckGPT comparison (Aug 23 milestone) --- contrasts with this project's own approach, which verifies against an authoritative external source (NVD/MITRE) rather than checking self-consistency alone
+\end{description}
+
+\medskip\noindent\textit{Notes:} Replaces the earlier ``Survey on Hallucination in LLMs'' citation --- that survey's own most useful content \textit{was} a description of this paper, so citing SelfCheckGPT directly is strictly better: it's the primary source, and it's the actual technique in scope for the cross-method comparison later in the project.
+
+\subsection{Paper 3 --- TRAM (Threat Report ATT\&CK Mapper) \cite{tram2023}}\label{subsec:litreview-p3}
+
+\begin{description}
+\item[Full title] Threat Report ATT\&CK Mapper (TRAM)
+\item[Authors] MITRE Engenuity Center for Threat-Informed Defense (with CrowdStrike as a contributing partner on the LLM-based version)
+\item[Year] v1: 2021; LLM-based update: 2023
+\item[Venue] Open-source project (GitHub, Center for Threat-Informed Defense)
+\item[URL/DOI] \url{https://github.com/mitre-attack/tram} ; \url{https://ctid.mitre.org/projects/threat-report-attck-mapper-tram-v1/}
+\item[Method] Trains/fine-tunes ML models (originally classical NLP, later LLM-based) to automatically identify MITRE ATT\&CK technique mentions in prose-format cyber threat intelligence reports, with a human-in-the-loop validation UI
+\item[Dataset] Corpus of analyst-annotated threat intelligence reports mapped to ATT\&CK techniques
+\item[Key result] Automates a task that is otherwise manual, slow, and inconsistent across analysts --- mapping free-text threat reports to structured ATT\&CK technique IDs
+\item[Limitation] Extracts/maps technique mentions from \textit{trusted} analyst-authored reports; does not address the adversarial case this project targets --- an LLM \textit{fabricating} a technique ID that was never actually present, or citing a real-but-irrelevant one
+\item[Relevance] Closest existing prior art to this project's MITRE ATT\&CK grounding checker (Week 9). TRAM solves ``find real technique mentions in text''; this project solves the complementary, adversarial problem --- ``verify a \textit{claimed} technique citation is real, current, and topically grounded'' --- worth stating explicitly as the point of differentiation
+\end{description}
+
+\medskip\noindent\textit{Notes:} Replaces the earlier ``AI-Augmented SOC Survey'' citation. This is a much stronger match --- it's the one existing system doing ATT\&CK-from-text extraction, which is exactly the space this project's own contribution sits in. Frame the comparison as extraction (TRAM) vs.\ adversarial verification (this project) --- that contrast is a good sentence for the paper's related-work gap statement.
+
+\subsection{Paper 4 --- NeMo Guardrails \cite{nemoguardrails2023}}\label{subsec:litreview-p4}
+
+\begin{description}
+\item[Full title] NeMo Guardrails: A Toolkit for Controllable and Safe LLM Applications with Programmable Rails
+\item[Authors] Rebedea, T., Dinu, R., et al.
+\item[Year] 2023
+\item[Venue] NVIDIA (toolkit paper)
+\item[URL/DOI] \url{https://www.semanticscholar.org/paper/NeMo-Guardrails}
+\item[Method] Introduces Colang, a domain-specific language for defining programmable guardrail policies that intercept/validate input and output across five pipeline stages
+\item[Dataset] N/A (framework)
+\item[Key result] GPU-accelerated architecture achieves sub-100ms response times; native integration with LangChain/LangGraph
+\item[Limitation] General-purpose conversational control; does not enforce provenance-aware authority ordering between system instructions and untrusted content unless explicitly configured
+\item[Relevance] Evaluated directly in Week 2 as a candidate input-guardrail framework; its LLM-based Colang intent classification proved unreliable on a local 7B model for this project's injection-detection task, motivating the switch to a deterministic Python guardrail (documented as RQ5 in the proposal)
+\end{description}
+
+\medskip\noindent\textit{Notes:} Limitation noted here matters a lot for the SOC use case --- by default it won't distinguish ``trusted system prompt'' from ``untrusted log content'' without explicit configuration. See Paper 7 (Instruction Hierarchy) for a primary paper addressing exactly this gap.
+
+\subsection{Paper 5 --- Presidio \cite{presidio2023}}\label{subsec:litreview-p5}
+
+\begin{description}
+\item[Full title] Presidio: An open-source framework for detecting, redacting, masking, and anonymizing sensitive data (PII)
+\item[Authors] Microsoft
+\item[Year] Ongoing (actively maintained)
+\item[Venue] GitHub / Microsoft open source
+\item[URL/DOI] \url{https://github.com/microsoft/presidio}
+\item[Method] Hybrid PII detection combining Named Entity Recognition (spaCy), regex pattern matching, rule-based logic, and checksum validation
+\item[Dataset] N/A (tool; ships with predefined recognizers for common entity types)
+\item[Key result] Detects entities like names, emails, phone numbers, SSNs, credit cards, and locations, with configurable anonymization operators (replace, mask, hash, redact, encrypt)
+\item[Limitation] Self-documented: automated detection provides no guarantee of catching all sensitive information; additional layered protections are recommended
+\item[Relevance] Direct implementation choice for the output guardrail's PII redaction component; its stated limitation directly informs the ``PII leakage rate'' evaluation metric
+\end{description}
+
+\medskip\noindent\textit{Notes:} The explicit ``no guarantee'' caveat from Microsoft is worth quoting in the final report when discussing residual risk after guardrails are applied.
+
+\subsection{Paper 6 --- FActScore \cite{factscore2023}}\label{subsec:litreview-p6}
+
+\begin{description}
+\item[Full title] FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation
+\item[Authors] Min, S., Krishna, K., Lyu, X., Lewis, M., Yih, W., Koh, P.W., Iyyer, M., Zettlemoyer, L., Hajishirzi, H.
+\item[Year] 2023
+\item[Venue] EMNLP 2023
+\item[URL/DOI] \url{https://arxiv.org/abs/2305.14251}
+\item[Method] Breaks a long-form generation into individual ``atomic facts,'' then checks each one against a reliable knowledge source, reporting the percentage supported
+\item[Dataset] Human-written biographies generated by InstructGPT, ChatGPT, and PerplexityAI, with human factuality annotations; also an automated estimator validated against 6{,}500 generations from 13 LMs
+\item[Key result] Even strong commercial models are far from perfectly factual (ChatGPT: 58\% atomic-fact precision on biographies); the automated FActScore estimator matches human judgment with under 2\% error
+\item[Limitation] Designed for open-domain biographical text with a broad reference corpus (Wikipedia); doesn't address a domain where the ``knowledge source'' is a structured, versioned technical database (like NVD or MITRE ATT\&CK) rather than free-text biography articles
+\item[Relevance] This project's core method --- decompose an LLM report into claims (CVE IDs, ATT\&CK technique IDs), verify each atomically against an authoritative source, classify by outcome --- is structurally the same pattern FActScore establishes, specialized to the security domain. Good citation for justifying the methodology, not just the SOC application
+\end{description}
+
+\medskip\noindent\textit{Notes:} This is the strongest ``prior art for our core method'' citation in the whole review --- worth citing prominently in the methodology section, not just related work, since the four-class taxonomy (\texttt{FABRICATED}/\texttt{REAL\_BUT\_IRRELEVANT}/\texttt{REAL\_AND\_PLAUSIBLE}/\texttt{UNVERIFIED}) is a domain-specialized descendant of this atomic-verification idea.
+
+\subsection{Paper 7 --- The Instruction Hierarchy \cite{instructionhierarchy2024}}\label{subsec:litreview-p7}
+
+\begin{description}
+\item[Full title] The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions
+\item[Authors] Wallace, E., Xiao, K., Leike, R., Weng, L., Heidecke, J., Beutel, A.
+\item[Year] 2024
+\item[Venue] arXiv (OpenAI)
+\item[URL/DOI] \url{https://arxiv.org/abs/2404.13208}
+\item[Method] Proposes an explicit instruction hierarchy (system prompt \textgreater\ trusted user input \textgreater\ untrusted third-party content) and an automated synthetic-data generation method to fine-tune models to selectively ignore lower-privileged instructions when they conflict with higher-privileged ones
+\item[Dataset] Synthetically generated conflicting-instruction examples; evaluated against held-out prompt injection and jailbreak attack types not seen during training
+\item[Key result] Substantially increases robustness against injection/jailbreak attacks, including attack types absent from training data, with minimal loss of general capability
+\item[Limitation] Requires fine-tuning access to the base model --- not applicable as a drop-in guardrail for a third-party API model (like this project's Groq-hosted Llama backend), where the defense has to live in the input/output layer instead
+\item[Relevance] Fills the gap left by the InjecAgent paper (attack-side only) --- this is a primary paper on the \textit{defense} side, and it names precisely the property NeMo Guardrails' own documentation admits it lacks by default (see Paper 4's limitation): provenance-aware authority ordering between trusted and untrusted content
+\end{description}
+
+\medskip\noindent\textit{Notes:} Good paragraph pairing: cite Paper 4's limitation, then this paper as ``here is what a principled fix to that gap looks like at the model-training level, versus this project's guardrail-layer approach at inference time.''
+
+\subsection{Paper 8 --- Judging LLM-as-a-Judge \cite{llmjudge2023}}\label{subsec:litreview-p8}
+
+\begin{description}
+\item[Full title] Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena
+\item[Authors] Zheng, L., Chiang, W., Sheng, Y., Zhuang, S., Wu, Z., Zhuang, Y., Lin, Z., Li, Z., Li, D., Xing, E.P., Zhang, H., Gonzalez, J.E., Stoica, I.
+\item[Year] 2023
+\item[Venue] NeurIPS 2023, Datasets and Benchmarks Track
+\item[URL/DOI] \url{https://arxiv.org/abs/2306.05685}
+\item[Method] Uses strong LLMs (e.g.\ GPT-4) as automated judges to score model responses to open-ended questions, then validates judge reliability against large-scale human preference data (MT-Bench, Chatbot Arena)
+\item[Dataset] MT-Bench (multi-turn question set), 3K expert votes, 30K human-preference conversations from Chatbot Arena
+\item[Key result] Strong LLM judges achieve over 80\% agreement with human preferences --- comparable to human-human agreement --- but exhibit documented biases: position bias, verbosity bias, self-enhancement bias, and limited reasoning ability on math/logic questions
+\item[Limitation] Validated on general open-ended chat quality, not on a security-specific, high-stakes factual-verification task like classifying whether a CVE/ATT\&CK citation is grounded --- the documented biases (especially self-enhancement, if the same model family judges and generates) are a real risk to control for
+\item[Relevance] Direct methodology source for the planned LLM-judge baseline (Aug 23 milestone) --- its documented bias list is exactly what to check for/report when using an LLM judge as a comparison point against this project's deterministic, database-grounded verification
+\end{description}
+
+\medskip\noindent\textit{Notes:} When implementing the LLM-judge baseline, deliberately use a different model family for the judge than for the SOC agent's own analysis, to avoid the self-enhancement bias this paper documents.
+
+\subsection{Background sources (not used as primary literature)}\label{subsec:litreview-background}
+
+These two survey papers were part of the original Week 1 chosen-papers set. Surveys are useful for motivating the background/introduction, but they aren't primary research, so they've been moved out of the main literature review (Section~\ref{subsec:litreview-chosen}, which the assignment requires to be primary sources) and kept here for background citations only.
+
+\begin{table}[h]
+\caption{Background survey sources}\label{tab:litreview-background}
+\begin{tabular}{@{}p{3.4cm}p{2.2cm}p{0.8cm}p{6.1cm}@{}}
+\toprule
+Title & Authors & Year & Use \\
+\midrule
+A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions \cite{hallucinationsurvey2024} & Huang, L. et al. & 2024 & Cite in the introduction to establish that hallucination detection is an open problem with no dominant method --- sets up the motivation before narrowing to this project's grounding-based approach. \\
+AI-Augmented SOC: A Survey of LLMs and Agents for Security Automation \cite{aisocsurvey2025} & (MDPI authors) & 2025 & Cite in the introduction for concrete baseline SOC metrics (the cited deployment's false-positive rate and MTTR improvement) to motivate \textit{why} SOC automation matters before discussing its risks. \\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsection{Reference table}\label{subsec:litreview-reftable}
+
+\begin{sidewaystable}
+\caption{Full reference table for the chosen literature}\label{tab:litreview-reftable}
+\begin{tabular*}{\textheight}{@{\extracolsep\fill}p{0.3cm}p{2cm}p{2.2cm}p{1cm}p{4.5cm}p{3cm}p{4.5cm}}
+\toprule
+\# & Title (short) & Authors & Year & Method & Dataset & Relevance \\
+\midrule
+1 & InjecAgent & Zhan, Liang, Ying, Kang & 2024 & Benchmark of indirect prompt injection against tool-using LLM agents & 1{,}054 test cases across tool-integrated agents & RQ3 --- threat model for malicious log entries \\
+2 & SelfCheckGPT & Manakul, Liusie, Gales & 2023 & Zero-resource, sampling-based consistency check for hallucination & WikiBio passages, human-annotated & RQ4 --- comparison baseline for the output guardrail's hallucination check \\
+3 & TRAM & MITRE Engenuity CTID & 2021--2023 & ML/LLM-based extraction of ATT\&CK technique mentions from CTI reports & Analyst-annotated threat reports & Direct prior art for the ATT\&CK-grounding checker (Week 9) \\
+4 & NeMo Guardrails & Rebedea et al. & 2023 & Colang-based programmable rails across 5 pipeline stages & N/A (framework) & RQ1/RQ2 --- evaluated and rejected as the input-guardrail approach \\
+5 & Presidio & Microsoft & Ongoing & Hybrid NER + regex + rule-based PII detection/anonymization & N/A (tool) & Output guardrail --- PII redaction, leakage metric \\
+6 & FActScore & Min et al. & 2023 & Atomic fact decomposition + verification against a knowledge source & Human/model-generated biographies & Core methodological pattern this project specializes to CVE/ATT\&CK grounding \\
+7 & Instruction Hierarchy & Wallace et al. (OpenAI) & 2024 & Fine-tuning models to prioritize privileged instructions & Synthetic conflicting-instruction data & Injection defense --- the gap InjecAgent's attack-only benchmark leaves open \\
+8 & LLM-as-a-Judge & Zheng et al. & 2023 & LLM-judge scoring validated against human preference data & MT-Bench, Chatbot Arena & Methodology for the planned LLM-judge baseline (Aug 23 milestone) \\
+\botrule
+\end{tabular*}
+\end{sidewaystable}
+
+\subsection{Similar projects / comparable systems}\label{subsec:litreview-comparable}
+
+Distinct from the academic literature above --- these are deployed commercial products doing LLM-assisted SOC work, cited via their own technical documentation rather than peer-reviewed papers. Comparing against them (not just against academic prior art) is what makes the ``why does this project matter'' argument concrete: none of them expose \textit{how} a citation is verified, which is precisely this project's contribution.
+
+\begin{itemize}
+\item \textbf{Microsoft Security Copilot} --- \url{https://www.microsoft.com/en-us/security/business/ai-machine-learning/microsoft-security-copilot}
+\item \textbf{Google Chronicle / Gemini for Security (SecLM)} --- \url{https://cloud.google.com/security/ai}
+\item \textbf{IBM QRadar Advisor with Watson} --- \url{https://www.ibm.com/products/qradar-siem}
+\item \textbf{Elastic AI Assistant for Security} --- \url{https://www.elastic.co/security/ai}
+\item \textbf{CrowdStrike Charlotte AI} --- \url{https://www.crowdstrike.com/platform/charlotte-ai/}
+\item \textbf{Dropzone AI, Prophet Security, Radiant Security} --- smaller, more directly comparable AI-SOC-analyst startups; cite via their technical blogs, no single canonical doc
+\end{itemize}
+
+\begin{table}[h]
+\caption{Comparison table for the related-work section}\label{tab:litreview-comparison}
+\begin{tabular}{@{}p{3.4cm}ccccc@{}}
+\toprule
+System & Open-source & Local-only option & Verifiable/grounded citations & Auditable classification taxonomy \\
+\midrule
+This project & Yes & Yes & Yes (NVD/MITRE-grounded) & Yes (4-class taxonomy) \\
+Microsoft / Google / IBM / Elastic / CrowdStrike copilots & No & No & No (black-box) & No \\
+\botrule
+\end{tabular}
+\end{table}
+
+\medskip\noindent\textit{Notes:} This table is a strong closer for the related-work section: every commercial tool listed produces a triage summary an analyst has to trust blindly, while this project's output guardrail makes every CVE/ATT\&CK citation independently checkable against its authoritative source. That's the one-sentence pitch for the paper's contribution.
+
+\subsection{Tools and frameworks}\label{subsec:litreview-tools}
+
+\begin{table}[h]
+\caption{Tools and frameworks referenced throughout this project}\label{tab:litreview-tools}
+\begin{tabular}{@{}p{2.3cm}p{1.7cm}p{4.5cm}p{4.5cm}@{}}
+\toprule
+Name & Type & URL & Notes \\
+\midrule
+NeMo Guardrails & Framework & \url{https://github.com/NVIDIA/NeMo-Guardrails} & Evaluated in Week 2, dropped in favor of a deterministic guardrail \\
+Guardrails AI & Framework & \url{https://github.com/guardrails-ai/guardrails} & Evaluated for issue \#16; its relevant hub validator requires a hosted API call, which violates the project's local-only constraint --- swapped for Pytector instead \\
+Pytector & Framework & \url{https://github.com/pytector} & Used in the issue \#16 guardrail comparison as the local-only substitute for Guardrails AI \\
+LLM Guard & Framework & \url{https://github.com/protectai/llm-guard} & Used in the issue \#16 guardrail comparison \\
+LangGraph & Orchestration & \url{https://github.com/langchain-ai/langgraph} & Agent state machine \\
+Presidio & PII detection & \url{https://github.com/microsoft/presidio} & PII redaction layer \\
+MITRE ATT\&CK & Threat intel & \url{https://attack.mitre.org} & Adversary TTP taxonomy \\
+NVD (National Vulnerability Database) & Threat intel & \url{https://nvd.nist.gov} & Live CVE verification source for the output guardrail \\
+\botrule
+\end{tabular}
+\end{table}
+
+\section{Results}\label{sec2}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+
+\section{This is an example for first level head---section head}\label{sec3}
+
+\subsection{This is an example for second level head---subsection head}\label{subsec2}
+
+\subsubsection{This is an example for third level head---subsubsection head}\label{subsubsec2}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. 
+
+\section{Equations}\label{sec4}
+
+Equations in \LaTeX\ can either be inline or on-a-line by itself (``display equations''). For
+inline equations use the \verb+$...$+ commands. E.g.: The equation
+$H\psi = E \psi$ is written via the command \verb+$H \psi = E \psi$+.
+
+For display equations (with auto generated equation numbers)
+one can use the equation or align environments:
+\begin{equation}
+\|\tilde{X}(k)\|^2 \leq\frac{\sum\limits_{i=1}^{p}\left\|\tilde{Y}_i(k)\right\|^2+\sum\limits_{j=1}^{q}\left\|\tilde{Z}_j(k)\right\|^2 }{p+q}.\label{eq1}
+\end{equation}
+where,
+\begin{align}
+D_\mu &=  \partial_\mu - ig \frac{\lambda^a}{2} A^a_\mu \nonumber \\
+F^a_{\mu\nu} &= \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g f^{abc} A^b_\mu A^a_\nu \label{eq2}
+\end{align}
+Notice the use of \verb+\nonumber+ in the align environment at the end
+of each line, except the last, so as not to produce equation numbers on
+lines where no equation numbers are required. The \verb+\label{}+ command
+should only be used at the last line of an align environment where
+\verb+\nonumber+ is not used.
+\begin{equation}
+Y_\infty = \left( \frac{m}{\textrm{GeV}} \right)^{-3}
+    \left[ 1 + \frac{3 \ln(m/\textrm{GeV})}{15}
+    + \frac{\ln(c_2/5)}{15} \right]
+\end{equation}
+The class file also supports the use of \verb+\mathbb{}+, \verb+\mathscr{}+ and
+\verb+\mathcal{}+ commands. As such \verb+\mathbb{R}+, \verb+\mathscr{R}+
+and \verb+\mathcal{R}+ produces $\mathbb{R}$, $\mathscr{R}$ and $\mathcal{R}$
+respectively (refer Subsubsection~\ref{subsubsec2}).
+
+\section{Tables}\label{sec5}
+
+Tables can be inserted via the normal table and tabular environment. To put
+footnotes inside tables you should use \verb+\footnotetext[]{...}+ tag.
+The footnote appears just below the table itself (refer Tables~\ref{tab1} and \ref{tab2}). 
+For the corresponding footnotemark use \verb+\footnotemark[...]+
+
+\begin{table}[h]
+\caption{Caption text}\label{tab1}%
+\begin{tabular}{@{}llll@{}}
+\toprule
+Column 1 & Column 2  & Column 3 & Column 4\\
+\midrule
+row 1    & data 1   & data 2  & data 3  \\
+row 2    & data 4   & data 5\footnotemark[1]  & data 6  \\
+row 3    & data 7   & data 8  & data 9\footnotemark[2]  \\
+\botrule
+\end{tabular}
+\footnotetext{Source: This is an example of table footnote. This is an example of table footnote.}
+\footnotetext[1]{Example for a first table footnote. This is an example of table footnote.}
+\footnotetext[2]{Example for a second table footnote. This is an example of table footnote.}
+\end{table}
+
+\noindent
+The input format for the above table is as follows:
+
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+\bigskip
+\begin{verbatim}
+\begin{table}[<placement-specifier>]
+\caption{<table-caption>}\label{<table-label>}%
+\begin{tabular}{@{}llll@{}}
+\toprule
+Column 1 & Column 2 & Column 3 & Column 4\\
+\midrule
+row 1 & data 1 & data 2	 & data 3 \\
+row 2 & data 4 & data 5\footnotemark[1] & data 6 \\
+row 3 & data 7 & data 8	 & data 9\footnotemark[2]\\
+\botrule
+\end{tabular}
+\footnotetext{Source: This is an example of table footnote. 
+This is an example of table footnote.}
+\footnotetext[1]{Example for a first table footnote.
+This is an example of table footnote.}
+\footnotetext[2]{Example for a second table footnote. 
+This is an example of table footnote.}
+\end{table}
+\end{verbatim}
+\bigskip
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+
+\begin{table}[h]
+\caption{Example of a lengthy table which is set to full textwidth}\label{tab2}
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}lcccccc}
+\toprule%
+& \multicolumn{3}{@{}c@{}}{Element 1\footnotemark[1]} & \multicolumn{3}{@{}c@{}}{Element 2\footnotemark[2]} \\\cmidrule{2-4}\cmidrule{5-7}%
+Project & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ \\
+\midrule
+Element 3  & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$\\
+Element 4  & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$\\
+\botrule
+\end{tabular*}
+\footnotetext{Note: This is an example of table footnote. This is an example of table footnote this is an example of table footnote this is an example of~table footnote this is an example of table footnote.}
+\footnotetext[1]{Example for a first table footnote.}
+\footnotetext[2]{Example for a second table footnote.}
+\end{table}
+
+In case of double column layout, tables which do not fit in single column width should be set to full text width. For this, you need to use \verb+\begin{table*}+ \verb+...+ \verb+\end{table*}+ instead of \verb+\begin{table}+ \verb+...+ \verb+\end{table}+ environment. Lengthy tables which do not fit in textwidth should be set as rotated table. For this, you need to use \verb+\begin{sidewaystable}+ \verb+...+ \verb+\end{sidewaystable}+ instead of \verb+\begin{table*}+ \verb+...+ \verb+\end{table*}+ environment. This environment puts tables rotated to single column width. For tables rotated to double column width, use \verb+\begin{sidewaystable*}+ \verb+...+ \verb+\end{sidewaystable*}+.
+
+\begin{sidewaystable}
+\caption{Tables which are too long to fit, should be written using the ``sidewaystable'' environment as shown here}\label{tab3}
+\begin{tabular*}{\textheight}{@{\extracolsep\fill}lcccccc}
+\toprule%
+& \multicolumn{3}{@{}c@{}}{Element 1\footnotemark[1]}& \multicolumn{3}{@{}c@{}}{Element\footnotemark[2]} \\\cmidrule{2-4}\cmidrule{5-7}%
+Projectile & Energy	& $\sigma_{calc}$ & $\sigma_{expt}$ & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ \\
+\midrule
+Element 3 & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$ \\
+Element 4 & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$ \\
+Element 5 & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$ \\
+Element 6 & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$ \\
+\botrule
+\end{tabular*}
+\footnotetext{Note: This is an example of table footnote this is an example of table footnote this is an example of table footnote this is an example of~table footnote this is an example of table footnote.}
+\footnotetext[1]{This is an example of table footnote.}
+\end{sidewaystable}
+
+\section{Figures}\label{sec6}
+
+As per the \LaTeX\ standards you need to use eps images for \LaTeX\ compilation and \verb+pdf/jpg/png+ images for \verb+PDFLaTeX+ compilation. This is one of the major difference between \LaTeX\ and \verb+PDFLaTeX+. Each image should be from a single input .eps/vector image file. Avoid using subfigures. The command for inserting images for \LaTeX\ and \verb+PDFLaTeX+ can be generalized. The package used to insert images in \verb+LaTeX/PDFLaTeX+ is the graphicx package. Figures can be inserted via the normal figure environment as shown in the below example:
+
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+\bigskip
+\begin{verbatim}
+\begin{figure}[<placement-specifier>]
+\centering
+\includegraphics{<eps-file>}
+\caption{<figure-caption>}\label{<figure-label>}
+\end{figure}
+\end{verbatim}
+\bigskip
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{fig.eps}
+\caption{This is a widefig. This is an example of long caption this is an example of long caption  this is an example of long caption this is an example of long caption}\label{fig1}
+\end{figure}
+
+In case of double column layout, the above format puts figure captions/images to single column width. To get spanned images, we need to provide \verb+\begin{figure*}+ \verb+...+ \verb+\end{figure*}+.
+
+For sample purpose, we have included the width of images in the optional argument of \verb+\includegraphics+ tag. Please ignore this. 
+
+\section{Algorithms, Program codes and Listings}\label{sec7}
+
+Packages \verb+algorithm+, \verb+algorithmicx+ and \verb+algpseudocode+ are used for setting algorithms in \LaTeX\ using the format:
+
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+\bigskip
+\begin{verbatim}
+\begin{algorithm}
+\caption{<alg-caption>}\label{<alg-label>}
+\begin{algorithmic}[1]
+. . .
+\end{algorithmic}
+\end{algorithm}
+\end{verbatim}
+\bigskip
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+
+You may refer above listed package documentations for more details before setting \verb+algorithm+ environment. For program codes, the ``verbatim'' package is required and the command to be used is \verb+\begin{verbatim}+ \verb+...+ \verb+\end{verbatim}+. 
+
+Similarly, for \verb+listings+, use the \verb+listings+ package. \verb+\begin{lstlisting}+ \verb+...+ \verb+\end{lstlisting}+ is used to set environments similar to \verb+verbatim+ environment. Refer to the \verb+lstlisting+ package documentation for more details.
+
+A fast exponentiation procedure:
+
+\lstset{texcl=true,basicstyle=\small\sf,commentstyle=\small\rm,mathescape=true,escapeinside={(*}{*)}}
+\begin{lstlisting}
+begin
+  for $i:=1$ to $10$ step $1$ do
+      expt($2,i$);  
+      newline() od                (*\textrm{Comments will be set flush to the right margin}*)
+where
+proc expt($x,n$) $\equiv$
+  $z:=1$;
+  do if $n=0$ then exit fi;
+     do if odd($n$) then exit fi;                 
+        comment: (*\textrm{This is a comment statement;}*)
+        $n:=n/2$; $x:=x*x$ od;
+     { $n>0$ };
+     $n:=n-1$; $z:=z*x$ od;
+  print($z$). 
+end
+\end{lstlisting}
+
+\begin{algorithm}
+\caption{Calculate $y = x^n$}\label{algo1}
+\begin{algorithmic}[1]
+\Require $n \geq 0 \vee x \neq 0$
+\Ensure $y = x^n$ 
+\State $y \Leftarrow 1$
+\If{$n < 0$}\label{algln2}
+        \State $X \Leftarrow 1 / x$
+        \State $N \Leftarrow -n$
+\Else
+        \State $X \Leftarrow x$
+        \State $N \Leftarrow n$
+\EndIf
+\While{$N \neq 0$}
+        \If{$N$ is even}
+            \State $X \Leftarrow X \times X$
+            \State $N \Leftarrow N / 2$
+        \Else[$N$ is odd]
+            \State $y \Leftarrow y \times X$
+            \State $N \Leftarrow N - 1$
+        \EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+\bigskip
+\begin{minipage}{\hsize}%
+\lstset{frame=single,framexleftmargin=-1pt,framexrightmargin=-17pt,framesep=12pt,linewidth=0.98\textwidth,language=pascal}% Set your language (you can change the language for each code-block optionally)
+%%% Start your code-block
+\begin{lstlisting}
+for i:=maxint to 0 do
+begin
+{ do nothing }
+end;
+Write('Case insensitive ');
+Write('Pascal keywords.');
+\end{lstlisting}
+\end{minipage}
+
+\section{Cross referencing}\label{sec8}
+
+Environments such as figure, table, equation and align can have a label
+declared via the \verb+\label{#label}+ command. For figures and table
+environments use the \verb+\label{}+ command inside or just
+below the \verb+\caption{}+ command. You can then use the
+\verb+\ref{#label}+ command to cross-reference them. As an example, consider
+the label declared for Figure~\ref{fig1} which is
+\verb+\label{fig1}+. To cross-reference it, use the command 
+\verb+Figure \ref{fig1}+, for which it comes up as
+``Figure~\ref{fig1}''. 
+
+To reference line numbers in an algorithm, consider the label declared for the line number 2 of Algorithm~\ref{algo1} is \verb+\label{algln2}+. To cross-reference it, use the command \verb+\ref{algln2}+ for which it comes up as line~\ref{algln2} of Algorithm~\ref{algo1}.
+
+\subsection{Details on reference citations}\label{subsec7}
+
+Standard \LaTeX\ permits only numerical citations. To support both numerical and author-year citations this template uses \verb+natbib+ \LaTeX\ package. For style guidance please refer to the template user manual.
+
+Here is an example for \verb+\cite{...}+: \cite{bib1}. Another example for \verb+\citep{...}+: \citep{bib2}. For author-year citation mode, \verb+\cite{...}+ prints Jones et al. (1990) and \verb+\citep{...}+ prints (Jones et al., 1990).
+
+All cited bib entries are printed at the end of this article: \cite{bib3}, \cite{bib4}, \cite{bib5}, \cite{bib6}, \cite{bib7}, \cite{bib8}, \cite{bib9}, \cite{bib10}, \cite{bib11}, \cite{bib12} and \cite{bib13}.
+
+\section{Examples for theorem like environments}\label{sec10}
+
+For theorem like environments, we require \verb+amsthm+ package. There are three types of predefined theorem styles exists---\verb+thmstyleone+, \verb+thmstyletwo+ and \verb+thmstylethree+ 
+
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+\bigskip
+\begin{tabular}{|l|p{19pc}|}
+\hline
+\verb+thmstyleone+ & Numbered, theorem head in bold font and theorem text in italic style \\\hline
+\verb+thmstyletwo+ & Numbered, theorem head in roman font and theorem text in italic style \\\hline
+\verb+thmstylethree+ & Numbered, theorem head in bold font and theorem text in roman style \\\hline
+\end{tabular}
+\bigskip
+%%=============================================%%
+%% For presentation purpose, we have included  %%
+%% \bigskip command. Please ignore this.       %%
+%%=============================================%%
+
+For mathematics journals, theorem styles can be included as shown in the following examples:
+
+\begin{theorem}[Theorem subhead]\label{thm1}
+Example theorem text. Example theorem text. Example theorem text. Example theorem text. Example theorem text. 
+Example theorem text. Example theorem text. Example theorem text. Example theorem text. Example theorem text. 
+Example theorem text. 
+\end{theorem}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+
+\begin{proposition}
+Example proposition text. Example proposition text. Example proposition text. Example proposition text. Example proposition text. 
+Example proposition text. Example proposition text. Example proposition text. Example proposition text. Example proposition text. 
+\end{proposition}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+
+\begin{example}
+Phasellus adipiscing semper elit. Proin fermentum massa
+ac quam. Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. Nam ipsum ligula, eleifend
+at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. 
+\end{example}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+
+\begin{remark}
+Phasellus adipiscing semper elit. Proin fermentum massa
+ac quam. Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. Nam ipsum ligula, eleifend
+at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. 
+\end{remark}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+
+\begin{definition}[Definition sub head]
+Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. 
+\end{definition}
+
+Additionally a predefined ``proof'' environment is available: \verb+\begin{proof}+ \verb+...+ \verb+\end{proof}+. This prints a ``Proof'' head in italic font style and the ``body text'' in roman font style with an open square at the end of each proof environment. 
+
+\begin{proof}
+Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. 
+\end{proof}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+
+\begin{proof}[Proof of Theorem~{\upshape\ref{thm1}}]
+Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. 
+\end{proof}
+
+\noindent
+For a quote environment, use \verb+\begin{quote}...\end{quote}+
+\begin{quote}
+Quoted text example. Aliquam porttitor quam a lacus. Praesent vel arcu ut tortor cursus volutpat. In vitae pede quis diam bibendum placerat. Fusce elementum
+convallis neque. Sed dolor orci, scelerisque ac, dapibus nec, ultricies ut, mi. Duis nec dui quis leo sagittis commodo.
+\end{quote}
+
+Sample body text. Sample body text. Sample body text. Sample body text. Sample body text (refer Figure~\ref{fig1}). Sample body text. Sample body text. Sample body text (refer Table~\ref{tab3}). 
+
+\section{Methods}\label{sec11}
+
+Topical subheadings are allowed. Authors must ensure that their Methods section includes adequate experimental and characterization data necessary for others in the field to reproduce their work. Authors are encouraged to include RIIDs where appropriate. 
+
+\textbf{Ethical approval declarations} (only required where applicable) Any article reporting experiment/s carried out on (i)~live vertebrate (or higher invertebrates), (ii)~humans or (iii)~human samples must include an unambiguous statement within the methods section that meets the following requirements: 
+
+\begin{enumerate}[1.]
+\item Approval: a statement which confirms that all experimental protocols were approved by a named institutional and/or licensing committee. Please identify the approving body in the methods section
+
+\item Accordance: a statement explicitly saying that the methods were carried out in accordance with the relevant guidelines and regulations
+
+\item Informed consent (for experiments involving humans or human tissue samples): include a statement confirming that informed consent was obtained from all participants and/or their legal guardian/s
+\end{enumerate}
+
+If your manuscript includes potentially identifying patient/participant information, or if it describes human transplantation research, or if it reports results of a clinical trial then  additional information will be required. Please visit (\url{https://www.nature.com/nature-research/editorial-policies}) for Nature Portfolio journals, (\url{https://www.springer.com/gp/authors-editors/journal-author/journal-author-helpdesk/publishing-ethics/14214}) for Springer Nature journals, or (\url{https://www.biomedcentral.com/getpublished/editorial-policies\#ethics+and+consent}) for BMC.
+
+\section{Discussion}\label{sec12}
+
+Discussions should be brief and focused. In some disciplines use of Discussion or `Conclusion' is interchangeable. It is not mandatory to use both. Some journals prefer a section `Results and Discussion' followed by a section `Conclusion'. Please refer to Journal-level guidance for any specific requirements. 
+
+\section{Conclusion}\label{sec13}
+
+Conclusions may be used to restate your hypothesis or research question, restate your major findings, explain the relevance and the added value of your work, highlight any limitations of your study, describe future directions for research and recommendations. 
+
+In some disciplines use of Discussion or 'Conclusion' is interchangeable. It is not mandatory to use both. Please refer to Journal-level guidance for any specific requirements. 
+
+\backmatter
+
+\bmhead{Supplementary information}
+
+If your article has accompanying supplementary file/s please state so here. 
+
+Authors reporting data from electrophoretic gels and blots should supply the full unprocessed scans for key as part of their Supplementary information. This may be requested by the editorial team/s if it is missing.
+
+Please refer to Journal-level guidance for any specific requirements.
+
+\bmhead{Acknowledgements}
+
+Acknowledgements are not compulsory. Where included they should be brief. Grant or contribution numbers may be acknowledged.
+
+Please refer to Journal-level guidance for any specific requirements.
+
+\section*{Declarations}
+
+Some journals require declarations to be submitted in a standardised format. Please check the Instructions for Authors of the journal to which you are submitting to see if you need to complete this section. If yes, your manuscript must contain the following sections under the heading `Declarations':
+
+\begin{itemize}
+\item Funding
+\item Conflict of interest/Competing interests (check journal-specific guidelines for which heading to use)
+\item Ethics approval and consent to participate
+\item Consent for publication
+\item Data availability 
+\item Materials availability
+\item Code availability 
+\item Author contribution
+\end{itemize}
+
+\noindent
+If any of the sections are not relevant to your manuscript, please include the heading and write `Not applicable' for that section. 
+
+%%===================================================%%
+%% For presentation purpose, we have included        %%
+%% \bigskip command. Please ignore this.             %%
+%%===================================================%%
+\bigskip
+\begin{flushleft}%
+Editorial Policies for:
+
+\bigskip\noindent
+Springer journals and proceedings: \url{https://www.springer.com/gp/editorial-policies}
+
+\bigskip\noindent
+Nature Portfolio journals: \url{https://www.nature.com/nature-research/editorial-policies}
+
+\bigskip\noindent
+\textit{Scientific Reports}: \url{https://www.nature.com/srep/journal-policies/editorial-policies}
+
+\bigskip\noindent
+BMC journals: \url{https://www.biomedcentral.com/getpublished/editorial-policies}
+\end{flushleft}
+
+\begin{appendices}
+
+\section{Section title of first appendix}\label{secA1}
+
+An appendix contains supplementary information that is not an essential part of the text itself but which may be helpful in providing a more comprehensive understanding of the research problem or it is information that is too cumbersome to be included in the body of the paper.
+
+%%=============================================%%
+%% For submissions to Nature Portfolio Journals %%
+%% please use the heading ``Extended Data''.   %%
+%%=============================================%%
+
+%%=============================================================%%
+%% Sample for another appendix section			       %%
+%%=============================================================%%
+
+%% \section{Example of another appendix section}\label{secA2}%
+%% Appendices may be used for helpful, supporting or essential material that would otherwise 
+%% clutter, break up or be distracting to the text. Appendices can consist of sections, figures, 
+%% tables and equations etc.
+
+\end{appendices}
+
+%%===========================================================================================%%
+%% If you are submitting to one of the Nature Portfolio journals, using the eJP submission   %%
+%% system, please include the references within the manuscript file itself. You may do this  %%
+%% by copying the reference list from your .bbl file, paste it into the main manuscript .tex %%
+%% file, and delete the associated \verb+\bibliography+ commands.                            %%
+%%===========================================================================================%%
+
+\bibliography{sn-bibliography}% common bib file
+%% if required, the content of .bbl file can be included here once bbl is generated
+%%\input sn-article.bbl
+
+\end{document}
