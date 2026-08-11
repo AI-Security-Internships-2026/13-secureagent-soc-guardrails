@@ -1,0 +1,104 @@
+{
+  "task": "McNemar significance test on paired guardrail predictions",
+  "source": "experiments/results/guardrail_comparison.json",
+  "dataset_size": 119,
+  "alpha": 0.05,
+  "comparisons": [
+    {
+      "a": "hybrid",
+      "b": "pytector",
+      "n_samples": 119,
+      "contingency": {
+        "both_correct": 102,
+        "hybrid_only_correct": 3,
+        "pytector_only_correct": 0,
+        "both_incorrect": 14
+      },
+      "discordant_pairs": 3,
+      "method": "exact_binomial",
+      "statistic": null,
+      "p_value": 0.25,
+      "significant_at_0.05": false
+    },
+    {
+      "a": "hybrid",
+      "b": "llm_guard",
+      "n_samples": 119,
+      "contingency": {
+        "both_correct": 101,
+        "hybrid_only_correct": 4,
+        "llm_guard_only_correct": 13,
+        "both_incorrect": 1
+      },
+      "discordant_pairs": 17,
+      "method": "exact_binomial",
+      "statistic": null,
+      "p_value": 0.049041748046875,
+      "significant_at_0.05": true
+    },
+    {
+      "a": "baseline",
+      "b": "hybrid",
+      "n_samples": 119,
+      "contingency": {
+        "both_correct": 80,
+        "baseline_only_correct": 0,
+        "hybrid_only_correct": 25,
+        "both_incorrect": 14
+      },
+      "discordant_pairs": 25,
+      "method": "chi_square_continuity_corrected",
+      "statistic": 23.04,
+      "p_value": 1.586656303897982e-06,
+      "significant_at_0.05": true
+    },
+    {
+      "a": "hybrid_llmguard",
+      "b": "hybrid",
+      "n_samples": 119,
+      "contingency": {
+        "both_correct": 101,
+        "hybrid_llmguard_only_correct": 13,
+        "hybrid_only_correct": 4,
+        "both_incorrect": 1
+      },
+      "discordant_pairs": 17,
+      "method": "exact_binomial",
+      "statistic": null,
+      "p_value": 0.049041748046875,
+      "significant_at_0.05": true
+    },
+    {
+      "a": "hybrid_llmguard",
+      "b": "llm_guard",
+      "n_samples": 119,
+      "contingency": {
+        "both_correct": 114,
+        "hybrid_llmguard_only_correct": 0,
+        "llm_guard_only_correct": 0,
+        "both_incorrect": 5
+      },
+      "discordant_pairs": 0,
+      "method": "degenerate",
+      "statistic": 0.0,
+      "p_value": 1.0,
+      "significant_at_0.05": false
+    },
+    {
+      "a": "hybrid_llmguard",
+      "b": "pytector",
+      "n_samples": 119,
+      "contingency": {
+        "both_correct": 98,
+        "hybrid_llmguard_only_correct": 16,
+        "pytector_only_correct": 4,
+        "both_incorrect": 1
+      },
+      "discordant_pairs": 20,
+      "method": "exact_binomial",
+      "statistic": null,
+      "p_value": 0.01181793212890625,
+      "significant_at_0.05": true
+    }
+  ]
+}
