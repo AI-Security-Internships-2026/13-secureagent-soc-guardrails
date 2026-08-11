@@ -61,9 +61,9 @@ claim in the paper, not just a nice-to-have improvement.
 | # | Item | Status | Evidence |
 |---|---|---|---|
 | 9 | Hybrid input guardrail (deterministic first, Pytector fallback) | ✅ Done, 2026-08-10 | `check_injection_hybrid()` in `input_guardrail.py` — runs the existing deterministic check first, only calls Pytector if that finds nothing. Wired into the live pipeline (`soc_agent.py` now calls the hybrid, not the deterministic-only function). Real re-run of the 29-sample set (`guardrail_comparison/run_comparison.py`, now includes a 4th `hybrid` entry): recall 0.615 (up from baseline's 0.23, matches Pytector's own recall exactly since the deterministic layer is a strict subset of what Pytector catches), precision still 1.0 (0 false positives), median latency 172.96ms (faster than Pytector alone's 182.85ms and throughput nearly doubles, 6.2/sec vs 3.32/sec, because exact-pattern matches — 3/13 injections — short-circuit before the model ever runs). Results in `experiments/results/guardrail_comparison.json`. |
-| 10 | Benchmark hybrid vs. deterministic-only on the existing 29-sample set | ❌ Blocked on #9 | Current numbers (deterministic / LLM Guard / Pytector, run separately): recall 0.23 / 1.0 / 0.62; precision 1.0 / 0.87 / 1.0; latency ~0ms / 450ms / 452ms |
-| 11 | Larger, systematic eval dataset — 20-30 real injection examples/category, more CICIDS2017 benign samples | ❌ Not done | Still 29 samples total (13 injection / 16 benign) |
-| 12 | Re-run the issue #16 guardrail comparison on the bigger dataset once #11 exists | ❌ Blocked on #11 | — |
+| 10 | Benchmark hybrid vs. deterministic-only on the existing 29-sample set | ✅ Done (superseded by #12's 119-sample re-run below) | — |
+| 11 | Larger, systematic eval dataset — 20-30 real injection examples/category, more CICIDS2017 benign samples | ✅ Done, 2026-08-11 | `eval_dataset.json` grown from 29 → 119 samples (53 injection / 66 benign). `exact_pattern` 3→12 (hand-authored, tests literal deterministic matches — deliberately not sourced externally). `paraphrase_evasion` 5→23 (18 adapted from `deepset/prompt-injections`, HF, Apache-2.0 — real attacker override phrasing, payloads rewritten to SOC context, offensive/political source content dropped). `novel_strategy` 5→18 (13 adapted from `TrustAIRLab/in-the-wild-jailbreak-prompts`, HF, MIT, Shen et al. CCS'24, + deepset — DAN/dual-persona, Developer Mode, leetspeak/spaced-letter evasion, fake delimiter, fake-turn priming). Benign: +50 **real** `BENIGN`-labeled CICIDS2017 flow rows sampled directly from `datasets/cicids2017/*.csv` (all 5 day-files) via the existing `load_cicids2017_alerts()` loader — no new loader code needed. Every adapted entry has a `provenance` field citing source/license. Full breakdown in `README_guardrail_comparison.md`. |
+| 12 | Re-run the issue #16 guardrail comparison on the bigger dataset once #11 exists | ✅ Done, 2026-08-11 | Re-ran `run_comparison.py` on the 119-sample set: baseline P=1.0/R=0.264 (was 0.23 on 29 samples — confirms the earlier number wasn't a fluke of small-n). llm_guard P=0.962/R=0.943 (2 FP). pytector P=1.0/R=0.679. **hybrid P=1.0/R=0.736** (up from 0.615 on the old set — the larger hand-authored `exact_pattern` bucket gives it more free catches before falling back to Pytector). Results in `experiments/results/guardrail_comparison.json`. §8 significance test now also done — see §8 for the McNemar results (hybrid vs. Pytector not significant, hybrid vs. LLM Guard significant, baseline vs. hybrid significant). |
 
 ---
 
@@ -97,10 +97,99 @@ claim in the paper, not just a nice-to-have improvement.
 
 ## 8. Statistical rigor requirement (attached to §3 item 7 / §4 item 12, not its own task)
 
-Once the CVE-bait test set is expanded (§3 #7) and the guardrail comparison
-is re-run on the larger dataset (§4 #12), add a significance test on the
-resulting comparison numbers before they go into the paper. This is a
-requirement attached to those two items, not a separate backlog entry.
+✅ Done, 2026-08-11 for the guardrail-comparison side. §4 #12 (guardrail
+comparison re-run) is done — see §4 for the 119-sample numbers
+(baseline/LLM Guard/Pytector/hybrid). Significance testing on those numbers
+is now built and run: `experiments/evaluation/guardrail_comparison/significance_test.py`.
+
+**Method: McNemar's test**, not a generic t-test or independent-samples
+test — all four implementations (baseline, LLM Guard, Pytector, hybrid)
+were run on the *same* 119 examples, so their predictions are paired per
+sample, not independent draws. McNemar's test is built for exactly this:
+paired binary outcomes on shared test items, using the discordant-pair
+counts (A right/B wrong vs. A wrong/B right) rather than raw accuracy.
+Implemented directly on scipy (exact binomial test when discordant pairs
+< 25, chi-square with continuity correction above that threshold — same
+25-pair cutoff `statsmodels.stats.contingency_tables.mcnemar` uses by
+default) rather than adding statsmodels as a new dependency just for this
+one test. Results in `experiments/results/guardrail_comparison_significance.json`.
+
+**Results** (paired on the same 119 samples, correctness = predicted label
+matches actual label):
+- **hybrid vs. Pytector**: 3 discordant pairs (hybrid right/Pytector wrong:
+  3, reverse: 0), exact binomial p=0.250 — **not significant**. The
+  exact-pattern short-circuit's apparent recall edge (0.736 vs. 0.679) is
+  not distinguishable from noise at this sample size — too few discordant
+  cases to draw a real conclusion, not evidence the effect is fake.
+- **hybrid vs. LLM Guard**: 17 discordant pairs (hybrid-only: 4,
+  llm_guard-only: 13), exact binomial p=0.049 — **significant** (just
+  under alpha=0.05). LLM Guard's higher recall is a real, measurable
+  advantage over hybrid on this set, not sampling noise — though still
+  worth treating cautiously given how close the p-value sits to the
+  threshold.
+- **baseline vs. hybrid**: 25 discordant pairs (all in hybrid's favor —
+  baseline-only-correct: 0), chi-square p<0.001 — **clearly significant**,
+  as expected. Confirms the test setup itself is working correctly (this
+  was included specifically as a sanity check).
+
+**What this means for the paper**: don't claim hybrid beats Pytector on
+this dataset — that comparison isn't statistically resolved yet, more
+injection samples would be needed to tell. Do claim hybrid beats the
+deterministic baseline (strongly) and that LLM Guard beats hybrid on raw
+recall (real effect, though the latency trade-off argument from the
+README still applies — LLM Guard being *more accurate* doesn't make it
+*better for this deployment*, just better on this one axis).
+
+Once the CVE-bait test set is also expanded (§3 #7), re-run the same
+`significance_test.py`-style testing on that comparison's numbers too.
+This is a requirement attached to those two items, not a separate backlog
+entry.
+
+### 8a. Trial: LLM Guard as the hybrid's fallback instead of Pytector (2026-08-11)
+
+Prompted directly by the §8 finding that LLM Guard's recall edge over
+hybrid is real — natural question: can the same deterministic-first
+architecture recover that recall by swapping which model it falls back
+to? Built `scan_hybrid_llmguard` in
+`experiments/evaluation/guardrail_comparison/adapters.py` (benchmark-only,
+**not wired into `soc_agent.py`**) and ran it through the same 119-sample
+comparison plus McNemar testing against the other four.
+
+**Finding: no benefit over LLM Guard alone.** `hybrid_llmguard` produced
+the *exact same* confusion matrix as plain LLM Guard (TP=50, FP=2, TN=64,
+FN=3) — McNemar's test against LLM Guard came back **degenerate: zero
+discordant pairs across all 119 samples**, meaning it's not "close to" LLM
+Guard, it's identical, sample for sample. The deterministic pre-filter
+only pays off when the fallback it's protecting has real blind spots
+(Pytector, recall 0.679, where the fix moved recall to 0.736 — see §8).
+LLM Guard's recall (0.943) is already high enough that the 12
+`exact_pattern` samples the fast layer would catch for free were ones LLM
+Guard already got right, so the wrapper adds a redundant fast path and
+nothing else.
+
+**Conclusion**: no reason to ship `hybrid_llmguard`. If LLM Guard's
+recall/FP/latency trade-off is ever preferred for production, switch to
+LLM Guard directly — wrapping it in the hybrid architecture buys nothing.
+
+**Side effect — a real latency methodology bug found and fixed**: while
+building this trial, checked exactly which sample caused LLM Guard's and
+Pytector's extreme latency outliers noted in §4 (LLM Guard: 129.5 seconds
+on one sample). Both landed at position 0 — the first sample each
+implementation ever processed, i.e. one-time model-loading cost, not a
+recurring stall. Fixed by adding a `WARMUPS` step to `adapters.py` /
+`run_comparison.py` that pays this cost once before the timed loop starts,
+matching how a real deployment would load the model once at startup.
+Re-running after the fix dropped median latency for LLM Guard, Pytector,
+and hybrid alike by a similar ratio (~480ms → ~180ms each) — more than
+outlier-exclusion alone explains, most likely ordinary run-to-run system
+variance rather than something caused by the fix itself. **Honest
+limitation, not yet resolved**: single-run latency benchmarks on shared,
+uncontrolled hardware aren't stable enough to cite precisely — same caveat
+already on record for the threading/multiprocessing benchmark in §5.
+Repeated trials (fresh process per implementation, mean ± spread) are
+needed before any millisecond figure from this benchmark goes in the
+paper as more than an order-of-magnitude comparison. Full writeup in
+`README_guardrail_comparison.md`.
 
 ---
 
@@ -297,15 +386,18 @@ version of the ATT&CK grounding test against real Wazuh alerts.
 
 ## 10. Suggested near-term order
 
-Given the priority flag in §2, and what's actually blocking what:
+§4 #9-#12 and §8's significance test (hybrid guardrail, larger eval
+dataset, re-run comparison, McNemar testing) are now all done as of
+2026-08-11 — see §4 and §8 for numbers. Remaining order:
 
-1. Hybrid input guardrail (§4 #9) — directly fixes the 0.23-recall weakness, unblocks #10 and #12
-2. Larger eval dataset (§4 #11) — unblocks #10, #12, and is also required for §3 #7 (CVE-bait expansion uses the same "need more real/varied samples" work)
-3. Re-run guardrail comparison + hybrid benchmark (§4 #10, #12) on the bigger dataset, with the significance test from §8
-4. Expand CVE-bait set (§3 #7), using the same larger dataset effort from #2
-5. LLM-judge baseline + SelfCheckGPT comparison (§3 #5, #8) — both required by issue #20, currently fully unbuilt
-6. Presidio PII redaction (§5) — separate track, T3 in the proposal's threat model, currently has zero coverage
-7. Everything else in §5 (nDPI, RAG/Chroma, full benchmark rigor pass) as time allows before Aug 30 write-up
+1. ~~Hybrid input guardrail (§4 #9)~~ ✅ done
+2. ~~Larger eval dataset (§4 #11)~~ ✅ done — 29 → 119 samples
+3. ~~Re-run guardrail comparison + hybrid benchmark (§4 #10, #12)~~ ✅ done — hybrid now P=1.0/R=0.736 on the bigger set.
+4. ~~Significance test on the guardrail comparison (§8)~~ ✅ done — McNemar's test via `significance_test.py`: baseline-vs-hybrid and hybrid-vs-LLM-Guard are both real, statistically significant differences; hybrid-vs-Pytector is not (too few discordant samples to tell). Full numbers in §8.
+5. Expand CVE-bait set (§3 #7), using the same larger-dataset sourcing approach just validated for #11 (real adapted examples + provenance tracking, not hand-authored alone) — then re-run significance testing on that comparison too (§8's second half)
+6. LLM-judge baseline + SelfCheckGPT comparison (§3 #5, #8) — both required by issue #20, currently fully unbuilt
+7. Presidio PII redaction (§5) — separate track, T3 in the proposal's threat model, currently has zero coverage. Confirmed still in scope (2026-08-11) — not being dropped to future-work
+8. Everything else in §5 (nDPI, RAG/Chroma, full benchmark rigor pass) as time allows before Aug 30 write-up
 
 This is a working document — update statuses here as items land rather than
 re-deriving them from scratch each time.
