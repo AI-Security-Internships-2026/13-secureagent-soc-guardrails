@@ -30,6 +30,7 @@ This is the full rundown of every experiment run on this project, in the order t
 | 18 | [Larger eval dataset + re-run](#18-larger-eval-dataset--re-run-comparison) | Aug 11 | Dataset grown 29 → 119 samples with real adapted attack data; hybrid recall confirmed at 0.736 |
 | 19 | [Significance testing (McNemar)](#19-significance-testing-mcnemar) | Aug 11 | Hybrid beats baseline (real), LLM Guard beats hybrid (real), hybrid vs. Pytector (not proven yet) |
 | 20 | [LLM-Guard-fallback trial + latency fix](#20-llm-guard-fallback-trial--latency-methodology-fix) | Aug 11 | Swapping hybrid's fallback to LLM Guard buys nothing — literally identical predictions |
+| 21 | [CVE-bait set expanded and re-run](#21-cve-bait-set-expanded-and-re-run) | Aug 12 | 6 → 25 → 100 real verified CVEs; 2/100 ungrounded (95% CI [0.6%, 7.0%]) — both on the same 2 famous CVEs, none of the 75 new ones triggered a citation |
 
 ---
 
@@ -348,13 +349,33 @@ Also built a 60-alert CVE pool (`cve_pool.py`, 15 real NVD-listed CVEs) split in
 
 ---
 
+## 21. CVE-bait set expanded and re-run
+
+**When:** Aug 12
+**What we tried:** Expanded in two passes, 6 → 25 → 100. The original CVE-bait set (#6, #7) was still just n=6, and its stored result predated two bug fixes (the stemmer fix and the `requires_review` unconditional-flag fix), so it couldn't be trusted as current even at its original size. First pass: grew it to 25 real CVEs — Struts2, Log4Shell, Heartbleed, ProxyLogon, ProxyShell, Dirty COW, EternalBlue, Shellshock, PrintNightmare, Spring4Shell, Citrix Bleed, MOVEit, BlueKeep, Zerologon, a Fortinet SSL-VPN traversal, the 2024 XZ Utils supply-chain backdoor, Follina, a Citrix ADC/Gateway traversal, CurveBall, the Office Equation Editor RCE, a Confluence OGNL injection, Oracle WebLogic RCE, a SaltStack auth bypass, VMware vCenter RCE, and a second Confluence access-control flaw — each individually verified via web search. Ran it: 2/25 ungrounded (8.0%), a 22.7-point-wide confidence interval — asked "how big is big enough," computed the actual numbers (Wilson CI at several sample sizes), and landed on n≈100 as the real target for a citable estimate.
+
+Second pass, same day: rather than hand-search 75 more CVEs one at a time, fetched CISA's official Known Exploited Vulnerabilities (KEV) catalog directly (a real, government-maintained JSON feed, 1662 entries) and built a generator that selects real CVEs from it and derives each bait alert's behavior description from that CVE's own CISA-published text — paraphrased to strip the vendor/product name and CVE framing so the alert stays purely symptom-only, not "sourced from memory" at all.
+
+**What went wrong (two real quality/bug problems, both caught and fixed before running anything against the live pipeline):**
+1. First-generation attempt: 27 of 75 entries (36%) fell back to a vague, content-free template ("...matching a documented, actively exploited weakness...") because a small hand-built CWE-to-phrase dictionary didn't cover every CWE in the data — a vague bait alert has no real symptom to test the model against, so this would have quietly degraded the test's validity even though every CVE number was still real. Fixed by deriving descriptions from each CVE's own real `shortDescription` text via a regex anchored on the word "vulnerability" (drops the vendor/product-naming preamble reliably regardless of CISA's exact phrasing), rather than a coarse lookup table.
+2. A truncated file write (mid-generation `Write` call cut off) and a payload-template string with an unescaped internal quote both caused Python syntax errors — caught immediately by trying to import the file before running anything, not discovered mid-run.
+
+**Result** (`experiments/results/cve_bait_results.json`, n=100): **2/100 alerts (2.0%) ungrounded**, both flagged for review (2.0% — exactly matches the ungrounded count, confirming the `requires_review` fix is active). 95% Wilson confidence interval: **[0.6%, 7.0%]** — down from a 22.7-point-wide band at n=25, now a genuinely citable estimate. Of the 2:
+- The Log4Shell alert correctly cited `CVE-2021-44228`, classified `REAL_AND_PLAUSIBLE` — still flagged for review despite being right, exactly per policy (correct-but-ungrounded still gets reviewed).
+- The Follina alert cited `CVE-2022-34713` instead of the correct `CVE-2022-30190`. **Not a fabrication** — verified `CVE-2022-34713` is real, it's "DogWalk," a separate Microsoft MSDT vulnerability disclosed the same year as Follina. Classified `REAL_BUT_IRRELEVANT` and flagged. A genuine, real-world instance of a model confusing two real, closely-related vulnerabilities.
+
+**The most important nuance in this result:** both ungrounded citations are the *same two* found at n=25 — **none of the 75 newly added CISA-KEV CVEs produced any citation at all.** Reported precisely rather than glossed over: spontaneous citation in this pipeline appears concentrated in a small number of extremely well-publicized vulnerabilities, not a general tendency to guess across arbitrary real CVEs. The honest claim is "rarely induces spontaneous citation, and reliably catches it correctly when it does happen on famous cases" — not "stress-tested against obscure-CVE hallucination," since the 75 new alerts gave nothing to analyze either way.
+
+**What it means:** The stale-data problem is fully resolved and the sample is now big enough for a real confidence interval, not just a bigger anecdote. The concentration finding is arguably the more interesting result of the two — it says something specific and falsifiable about *when* this failure mode occurs, not just *whether* it does.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
-- **Expand the CVE-bait test set** (currently n=6, too small for a journal-level claim) — same real-dataset-sourcing approach as #18
 - **LLM-judge baseline** — ask an LLM directly "is this citation grounded," compare against the deterministic pipeline. Not built at all yet.
 - **SelfCheckGPT comparison** — required by the paper scope, not built yet.
 - **Presidio PII redaction** — a named threat (T3) in the original proposal, currently zero coverage. Confirmed still in scope, not dropped.
-- **Significance testing on the CVE-bait comparison**, once that set is bigger — same `significance_test.py` approach as #19.
+- **Significance testing on the CVE-bait comparison** — even at n=100 (#21), only 2 ungrounded citations occurred (both on the same famous CVEs found at n=25), which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
 - Repeated-trial latency benchmarking (fresh process per implementation) to fix the instability flagged in #20.
 
 ---
