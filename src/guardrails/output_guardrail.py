@@ -7,10 +7,12 @@ CVE numbers.
 
 Why this is a real risk: your SYSTEM_PROMPT already tells the model "do not
 hallucinate CVE numbers... unless clearly indicated by the alert data" —
-but that's a soft instruction, not a guarantee. Small/fast models like
-llama-3.1-8b-instant are exactly the kind known to fabricate plausible-
-looking CVE IDs when a report "feels like" it should cite one, even when
-nothing in the input alert mentions a CVE at all.
+but that's a soft instruction, not a guarantee. Small/fast models (this
+project used llama-3.1-8b-instant until Groq decommissioned it on Aug 16
+2026; now openai/gpt-oss-20b, see docs/all_results.md #22) are exactly the
+kind known to fabricate plausible-looking CVE IDs when a report "feels
+like" it should cite one, even when nothing in the input alert mentions a
+CVE at all.
 
 Two-stage approach:
   Stage 1 (grounding check, deterministic, no network):
