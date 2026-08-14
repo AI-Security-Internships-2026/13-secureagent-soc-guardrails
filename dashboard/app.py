@@ -17,6 +17,7 @@ from src.agent.alert_schema import SecurityAlert, SAMPLE_ALERTS
 from src.agent.soc_agent import analyse_alert
 from src.data.load_cicids2017 import load_cicids2017_alerts
 from experiments.evaluation.cve_bait_alerts import CVE_BAIT_ALERTS
+from experiments.evaluation.attack_bait_alerts import ATTACK_BAIT_ALERTS
 
 RESULTS_DIR = "experiments/results"
 
@@ -74,7 +75,7 @@ st.markdown(
 st.title("SecureAgent-SOC")
 
 
-tab_live, tab_results = st.tabs(["Live Demo", "Results Viewer"])
+tab_live, tab_feed, tab_results = st.tabs(["Live Demo", "Live Feed", "Results Viewer"])
 
 
 with tab_live:
@@ -86,7 +87,8 @@ with tab_live:
         source_choice = st.radio(
             "Alert source",
             ["Synthetic samples", "CICIDS2017", "CVE-bait (output guardrail demo)",
-             "Secure_SOC_AI incidents", "Wazuh (live)", "Custom"],
+             "ATT&CK-bait (output guardrail demo)", "Secure_SOC_AI incidents",
+             "Wazuh (live)", "Custom"],
             horizontal=True,
         )
 
@@ -99,17 +101,37 @@ with tab_live:
 
         elif source_choice == "CVE-bait (output guardrail demo)":
             st.caption(
-                "Alerts worded to test the output guardrail — BAIT-006 directly "
-                "asks for a CVE citation and is the most likely to trigger a "
-                "flag. Others describe vulnerabilities by symptom only."
+                "100 alerts describing real vulnerabilities by symptom only, never by "
+                "CVE number — 97 never mention a CVE at all (0/97 ever produced an "
+                "ungrounded citation in testing); BAIT-002, 011, and 017 explicitly ask "
+                "the model to cite one it wasn't given. Defaults to BAIT-017, which "
+                "cited a real but wrong CVE (DogWalk instead of the correct Follina) — "
+                "the most illustrative flagged example."
             )
             preset_names = [f"{a.alert_id} ({a.event_type})" for a in CVE_BAIT_ALERTS]
+            default_idx = next((i for i, a in enumerate(CVE_BAIT_ALERTS) if a.alert_id == "BAIT-017"), 0)
             choice_idx = st.selectbox(
                 "Pick a bait alert", range(len(CVE_BAIT_ALERTS)),
                 format_func=lambda i: preset_names[i],
-                index=len(CVE_BAIT_ALERTS) - 1,  # defaults to BAIT-006
+                index=default_idx,
             )
             sample = CVE_BAIT_ALERTS[choice_idx]
+
+        elif source_choice == "ATT&CK-bait (output guardrail demo)":
+            st.caption(
+                "6 alerts describing MITRE ATT&CK technique behavior by symptom only. "
+                "Defaults to ATTACK-BAIT-005, which cited T1216 (System Script Proxy "
+                "Execution) for what was actually RDP lateral movement with stolen "
+                "credentials — a real technique ID, just the wrong one."
+            )
+            preset_names = [f"{a.alert_id} ({a.event_type})" for a in ATTACK_BAIT_ALERTS]
+            default_idx = next((i for i, a in enumerate(ATTACK_BAIT_ALERTS) if a.alert_id == "ATTACK-BAIT-005"), 0)
+            choice_idx = st.selectbox(
+                "Pick a bait alert", range(len(ATTACK_BAIT_ALERTS)),
+                format_func=lambda i: preset_names[i],
+                index=default_idx,
+            )
+            sample = ATTACK_BAIT_ALERTS[choice_idx]
 
         elif source_choice == "Secure_SOC_AI incidents":
             st.caption(
@@ -309,6 +331,84 @@ with tab_live:
                 st.json(report)
         else:
             st.info("Fill in or load an alert on the left, then click Analyze.")
+
+
+with tab_feed:
+    st.subheader("Live Wazuh feed")
+    st.caption(
+        "Continuously polls the local Wazuh indexer and runs every new alert through "
+        "the guardrailed pipeline automatically — no manual fetch needed. Requires the "
+        "Wazuh Docker stack to be running (see docs/ROADMAP_PLAN.md §10a)."
+    )
+
+    ctrl1, ctrl2, ctrl3 = st.columns([1, 2, 1])
+    with ctrl1:
+        live_on = st.toggle("Live feed active", value=False, key="live_feed_active")
+    with ctrl2:
+        poll_interval = st.slider("Poll interval (seconds)", 5, 60, 10, key="live_feed_interval")
+    with ctrl3:
+        if st.button("Clear feed", use_container_width=True):
+            st.session_state["live_feed_items"] = []
+            st.session_state["live_feed_seen"] = set()
+
+    st.session_state.setdefault("live_feed_items", [])
+    st.session_state.setdefault("live_feed_seen", set())
+
+    from requests.exceptions import RequestException
+    from experiments.evaluation.wazuh_integration_test import (
+        dedupe_alerts, fetch_recent_alerts, wazuh_alert_to_security_alert,
+    )
+
+    @st.fragment(run_every=f"{poll_interval}s" if live_on else None)
+    def _live_feed_poll():
+        if live_on:
+            try:
+                docs = dedupe_alerts(fetch_recent_alerts())
+                new_count = 0
+                for doc in docs:
+                    src = doc["_source"]
+                    # Same dedupe key as wazuh_integration_test.py: Wazuh's SCA
+                    # module re-runs its full checklist on every scan and reindexes
+                    # identical content under a new _id, so keying on rule.id +
+                    # full_log (not _id) is what actually stops repeated LLM calls
+                    # on the same unchanged alert across polls.
+                    key = (src.get("rule", {}).get("id"), src.get("full_log"))
+                    if key in st.session_state["live_feed_seen"]:
+                        continue
+                    st.session_state["live_feed_seen"].add(key)
+
+                    alert = wazuh_alert_to_security_alert(doc)
+                    report = analyse_alert(alert)
+                    st.session_state["live_feed_items"].insert(0, {
+                        "fetched_at": time.strftime("%H:%M:%S"),
+                        "alert_id": alert.alert_id,
+                        "rule_id": src.get("rule", {}).get("id"),
+                        "rule_level": src.get("rule", {}).get("level"),
+                        "severity_assessment": report.get("severity_assessment"),
+                        "guardrail_blocked": report.get("guardrail_blocked", False),
+                        "requires_review": report.get("requires_review", False),
+                        "hallucinated_cves": report.get("hallucinated_cves", []),
+                        "hallucinated_attack_techniques": report.get("hallucinated_attack_techniques", []),
+                        "threat_summary": report.get("threat_summary"),
+                    })
+                    new_count += 1
+                st.session_state["live_feed_items"] = st.session_state["live_feed_items"][:100]
+                st.caption(
+                    f"Live — last polled {time.strftime('%H:%M:%S')}, next in {poll_interval}s — "
+                    f"{new_count} new alert(s) this poll, {len(st.session_state['live_feed_items'])} total"
+                )
+            except RequestException as e:
+                st.error(f"Could not reach the Wazuh indexer — is the Docker stack running? ({e})")
+        else:
+            st.caption("Paused — toggle 'Live feed active' above to start polling.")
+
+        items = st.session_state["live_feed_items"]
+        if items:
+            st.dataframe(pd.DataFrame(items), hide_index=True, use_container_width=True)
+        else:
+            st.info("No alerts seen yet.")
+
+    _live_feed_poll()
 
 
 with tab_results:
