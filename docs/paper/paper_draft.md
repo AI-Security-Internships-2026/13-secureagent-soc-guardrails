@@ -15,8 +15,12 @@
 > - SelfCheckGPT comparison (§3 item 8) — not built
 > - CVE-bait test set expansion (§3 item 7) — ✅ done 2026-08-12, expanded in
 >   two passes (6 → 25 → 100 real, verified CVEs, §4.3). The old n=6 result
->   predated two bug fixes and has been fully superseded; n=100 now gives a
->   citable 95% CI of [0.6%, 7.0%] on the ungrounded rate.
+>   predated two bug fixes and has been fully superseded. The blended n=100
+>   ungrounded rate is 2.0% (95% CI [0.6%, 7.0%]), but this conflates two
+>   conditions: 0/97 alerts that never mention a CVE produced a spontaneous
+>   citation (95% CI [0.0%, 3.8%]); both flagged hits came from 3 alerts
+>   that explicitly ask for a citation, where the model was right once and
+>   wrong-but-plausible once. See §4.3 for the full breakdown.
 > - Significance testing on the CVE-bait comparison — still open; only 2
 >   ungrounded citations occurred even at n=100 (both on the same famous
 >   vulnerabilities found at n=25), which still isn't enough discordant
@@ -407,40 +411,58 @@ additionally ask the model to name a specific identifier, rather than
 staying purely symptom-only.
 
 **Result** (`experiments/results/cve_bait_results.json`, n=100): 2/100
-alerts (2.0%) produced an ungrounded CVE citation; both were flagged for
-review (2.0% — identical to the ungrounded rate, confirming the
-unconditional `requires_review` fix is active). The 95% Wilson confidence
-interval on this rate is **[0.6%, 7.0%]** — a real, citable estimate, down
-from a 22.7-point-wide interval at the original n=25.
+alerts (2.0%) produced an ungrounded CVE citation, both flagged for review
+(2.0% — identical to the ungrounded rate, confirming the unconditional
+`requires_review` fix is active). **This blended 2.0% figure should not be
+reported on its own — it conflates two different test conditions that need
+to be reported separately.** 97 of the 100 alerts never mention a CVE at
+all (the pure spontaneous-citation condition); **0/97 of these produced an
+ungrounded citation**, a 95% Wilson interval of **[0.0%, 3.8%]**. The
+remaining 3 alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the
+model to cite a CVE identifier it was not given — a deliberate second test
+condition, not the paper's main methodology — and both ungrounded hits
+come from this subset of 3 (`BAIT-011` produced no citation and was not
+flagged). So the precise claim is: **the model never spontaneously
+volunteered a CVE number across 97 symptom-only alerts; when directly
+asked to name one it wasn't given, it did so 2 of 3 times**, once
+correctly and once with a real-but-wrong neighbor (detailed below). The
+95% Wilson interval on the original blended 2/100 figure, [0.6%, 7.0%],
+remains reported below for continuity with the n=25 comparison, but the
+0/97 figure is the methodologically correct headline number for
+"spontaneous CVE hallucination rate."
 
 **The two ungrounded citations are the same two found at n=25** — no
-citation occurred on any of the 75 newly added, CISA-KEV-sourced alerts.
-This is itself a finding worth stating precisely rather than glossing
-over: spontaneous citation in this pipeline appears concentrated in a
-small number of extremely well-publicized vulnerabilities, not a general
-tendency to guess across arbitrary real CVEs. Of the 2:
+citation occurred on any of the 75 newly added, CISA-KEV-sourced alerts,
+none of which include an explicit citation request either, consistent
+with the 0/97 finding above. Of the 2:
 
-- The Log4Shell alert (with an explicit citation request) correctly
+- The Log4Shell alert (`BAIT-002`, an explicit citation request) correctly
   produced `CVE-2021-44228`, classified `REAL_AND_PLAUSIBLE` — and,
   correctly per the current taxonomy policy, still flagged for review
   despite being accurate, since the alert text itself never stated the
-  number.
-- The Follina alert (also an explicit citation request) produced
-  `CVE-2022-34713` instead of the correct `CVE-2022-30190` — classified
-  `REAL_BUT_IRRELEVANT`. This is not a fabrication: `CVE-2022-34713`
-  ("DogWalk") is a real, separate Microsoft MSDT vulnerability disclosed
-  the same year as Follina, patched around the same time. **This is a
-  concrete, real instance of exactly the risk this paper's introduction
-  describes** — a model citing a real identifier, confused with a
-  closely related one, in a way indistinguishable from a correct citation
-  without independent verification.
+  number. This flag is a policy artifact, not an error: the guardrail's
+  rule is mechanical (present in the input evidence or not), and does not
+  give credit for being independently correct.
+- The Follina alert (`BAIT-017`, also an explicit citation request)
+  produced `CVE-2022-34713` instead of the correct `CVE-2022-30190` —
+  classified `REAL_BUT_IRRELEVANT`. This is not a fabrication:
+  `CVE-2022-34713` ("DogWalk") is a real, separate Microsoft MSDT
+  vulnerability disclosed the same year as Follina, patched around the
+  same time. **This is a concrete, real instance of exactly the risk this
+  paper's introduction describes** — a model citing a real identifier,
+  confused with a closely related one, in a way indistinguishable from a
+  correct citation without independent verification. It is also the only
+  one of the 100 alerts where the model's citation was actually *wrong*,
+  rather than correct-but-mechanically-flagged.
 
 At n=100, this is now a genuinely citable estimate rather than a
 qualitative-only demonstration, though the concentration finding above
-means the honest framing is "the pipeline rarely induces spontaneous
-citation, and reliably catches it correctly when it does occur on famous
-vulnerabilities" — not "the pipeline has been stress-tested against
-obscure-vulnerability hallucination," since the 75 newly added alerts
+means the honest framing is "the pipeline never spontaneously hallucinates
+a CVE across 97 varied symptom-only alerts, and when directly pressed for
+an identifier it wasn't given, it is right more often than wrong, with its
+one error being a plausible neighbor rather than an invention" — not "the
+pipeline has been stress-tested against obscure-vulnerability
+hallucination," since the 75 newly added alerts
 produced zero citations to analyze in the first place.
 
 ### 4.4 Output guardrail: ATT&CK-bait adversarial test
