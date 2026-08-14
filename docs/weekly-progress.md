@@ -148,3 +148,29 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 - Dashboard Live Demo form (`dashboard/app.py`) gained User/Hostname/File hash text inputs so manually-entered alerts populate the same fields; the existing "Raw report JSON" expander already surfaces `evidence_pack` with no further dashboard change needed.
 - 8 new tests in `tests/test_evidence_pack.py`. Full suite: 92/92 passing.
 
+---
+
+## Week 10
+
+**Branch:** `emaan-week-10`
+**PR link:** _[Add after opening PR]_
+
+### Completed this week
+- [x] Fixed a Docker Desktop/WSL2 integration issue (stale duplicate processes) preventing the local Wazuh Docker stack from staying up reliably, and root-caused a Wazuh dashboard "login not working" report to a credential mismatch, not an infra problem — confirmed `admin`/`SecretPassword` (indexer default) directly against the indexer API.
+- [x] Added a **Live Feed** tab to the Streamlit dashboard (`dashboard/app.py`): auto-polls the Wazuh indexer on a configurable interval via `st.fragment(run_every=...)`, dedupes on `(rule.id, full_log)` (same convention as `wazuh_integration_test.py`, since Wazuh's SCA module re-fires identical alerts every scan), and runs each genuinely new alert through the full guardrailed pipeline automatically. Verified live: first poll surfaced 13 real alerts fully analysed, second poll 10s later correctly found 0 new (dedup confirmed working).
+- [x] Groq notified (email, Aug 14) that `llama-3.1-8b-instant` — this project's LLM backend since Week 3 — is being decommissioned Aug 16, 2026, giving effectively no runway. This is the second time Groq has discontinued this project's model mid-project (`llama3-8b-8192` was the first, Week 3).
+- [x] Compared Groq's suggested replacement (`openai/gpt-oss-20b`) against staying in the Llama family (`llama-3.3-70b-versatile`) on cost, speed, and migration risk; chose `gpt-oss-20b` — cheaper ($0.10/M vs. $0.59/$0.79 per M), faster (~958 tok/s vs. slower dense 70B), and Groq's actively-recommended path. Full writeup in `docs/all_results.md` #22.
+- [x] Swapped `MODEL_NAME` in `src/agent/soc_agent.py` to `openai/gpt-oss-20b`; updated now-stale model-name references in comments in `src/guardrails/output_guardrail.py` and `experiments/evaluation/threading_benchmark.py`.
+- [x] Issue #20 §3 item 5 — built the **LLM-judge baseline** (`src/guardrails/llm_judge.py`): asks the LLM directly whether a report cites an identifier the alert didn't give it, instead of the deterministic string-diff. Run against the existing CVE-bait/ATT&CK-bait results (`llm_judge_baseline_test.py`): 100% agreement with the deterministic checker, but only 4 positive cases across 106 samples — not citable on its own (`docs/all_results.md` #23).
+- [x] Made the LLM-judge result citable: built a class-balanced n=212 synthetic calibration set (`llm_judge_synthetic_test.py` — 106 real reports with citations stripped, paired with a twin injected with one real-but-foreign CVE/ATT&CK identifier). **100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+ on every metric** (`docs/all_results.md` #24).
+- [x] Issue #20 §3 item 8 — built the **SelfCheckGPT-style comparison** (`src/guardrails/selfcheckgpt.py`, `experiments/evaluation/selfcheckgpt_alerts.py`, `selfcheckgpt_test.py`): tests resampling self-consistency (does the model keep citing the same identifier at temperature=0.7 across repeats) rather than evidence-grounding, on a 60-alert stated/prompted set derived from `cve_pool.py`. Smoke-tested successfully; full run blocked (see below).
+
+### Problems / Blockers
+- All results in `docs/all_results.md` (#1–#21) were measured against `llama-3.1-8b-instant`. `gpt-oss-20b` is a different model family and larger, so prior hallucination/guardrail numbers aren't guaranteed to carry over — no re-run has happened yet, flagged as a gap rather than assumed equivalent.
+- The full SelfCheckGPT run (180 calls) hit Groq's **daily** token quota (200,000 TPD, free tier) — exhausted by the same day's LLM-judge runs, not a per-minute limit retry could fix. Failed on its first alert before writing any checkpoint data, so nothing was lost, but the run needs to resume once the daily quota resets.
+
+### Next week plan
+- Resume and complete the SelfCheckGPT run once Groq's daily quota resets; document results in `docs/all_results.md` and mark issue #20 §3 item 8 done.
+- Re-run the CVE-bait and ATT&CK-bait suites against `gpt-oss-20b` to check whether the baseline hallucination rate shifted from the numbers reported for `llama-3.1-8b-instant`.
+- Presidio PII redaction (`docs/ROADMAP_PLAN.md` §5) — still zero coverage, next major unbuilt item after the SelfCheckGPT comparison lands.
+
