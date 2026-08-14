@@ -153,7 +153,7 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 ## Week 10
 
 **Branch:** `emaan-week-10`
-**PR link:** _[Add after opening PR]_
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/25
 
 ### Completed this week
 - [x] Fixed a Docker Desktop/WSL2 integration issue (stale duplicate processes) preventing the local Wazuh Docker stack from staying up reliably, and root-caused a Wazuh dashboard "login not working" report to a credential mismatch, not an infra problem — confirmed `admin`/`SecretPassword` (indexer default) directly against the indexer API.
