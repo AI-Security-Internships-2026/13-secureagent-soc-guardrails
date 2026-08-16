@@ -49,7 +49,7 @@ st.markdown(
         color: #9CD6AC;
         font-weight: 600;
     }
-    .cve-flag-banner {
+    .guardrail-flag-banner {
         background-color: #3A2E1E;
         border: 1px solid #7A5F3B;
         border-radius: 10px;
@@ -58,7 +58,7 @@ st.markdown(
         font-weight: 600;
         margin-top: 10px;
     }
-    .cve-clean-banner {
+    .guardrail-clean-banner {
         background-color: #161B22;
         border: 1px solid #262C36;
         border-radius: 10px;
@@ -153,6 +153,9 @@ with tab_live:
             "Payload snippet", value=(sample.payload_snippet or "") if sample else "",
             height=80,
         )
+        user = st.text_input("User", value=(sample.user or "") if sample else "")
+        hostname = st.text_input("Hostname", value=(sample.hostname or "") if sample else "")
+        file_hash = st.text_input("File hash", value=(sample.file_hash or "") if sample else "")
 
         analyze_clicked = st.button("Analyze alert", type="primary", use_container_width=True)
 
@@ -176,6 +179,9 @@ with tab_live:
                 protocol=protocol or None,
                 port=port,
                 payload_snippet=payload_snippet or None,
+                user=user or None,
+                hostname=hostname or None,
+                file_hash=file_hash or None,
             )
 
             cpu_before = psutil.cpu_percent(interval=None)
@@ -196,29 +202,34 @@ with tab_live:
                     unsafe_allow_html=True,
                 )
 
-            # Output guardrail: hallucinated CVE check. Only meaningful once
-            # the alert actually reached the LLM — an input-blocked alert
-            # never produced a report, so there's nothing to check there.
+            # Output guardrail: hallucinated CVE + ATT&CK technique check.
+            # Only meaningful once the alert actually reached the LLM — an
+            # input-blocked alert never produced a report, so there's
+            # nothing to check there. Both checkers set requires_review=True
+            # for every ungrounded citation regardless of classification
+            # tier (see output_guardrail.py / attack_grounding.py), so this
+            # banner reflects that directly rather than re-deriving its own
+            # notion of "clean" from the classification.
             hallucinated_cves = report.get("hallucinated_cves", [])
+            hallucinated_attack_techniques = report.get("hallucinated_attack_techniques", [])
             if not report.get("guardrail_blocked"):
-                if not hallucinated_cves:
+                if not hallucinated_cves and not hallucinated_attack_techniques:
                     st.markdown(
-                        '<div class="cve-clean-banner">Output guardrail: no ungrounded CVE citations detected</div>',
-                        unsafe_allow_html=True,
-                    )
-                elif report.get("requires_review"):
-                    cve_list = ", ".join(hallucinated_cves)
-                    st.markdown(
-                        f'<div class="cve-flag-banner">Requires review — {len(hallucinated_cves)} CVE(s) cited '
-                        f'that are not grounded in the input and did not verify as clearly correct: {cve_list}</div>',
+                        '<div class="guardrail-clean-banner">Output guardrail: no ungrounded CVE or '
+                        'ATT&CK technique citations detected</div>',
                         unsafe_allow_html=True,
                     )
                 else:
-                    cve_list = ", ".join(hallucinated_cves)
+                    citation_tags = [
+                        f"{v['cve_id']} ({v['classification']})" for v in report.get("cve_verifications", [])
+                    ] + [
+                        f"{v['technique_id']} ({v['classification']})"
+                        for v in report.get("attack_technique_verifications", [])
+                    ]
+                    total = len(hallucinated_cves) + len(hallucinated_attack_techniques)
                     st.markdown(
-                        f'<div class="cve-clean-banner">CVE(s) cited that were not in the input ({cve_list}), '
-                        f'but NVD verification confirms they are real and topically consistent with this alert '
-                        f'— likely a correct recall, not a fabrication</div>',
+                        f'<div class="guardrail-flag-banner">Requires review — {total} citation(s) not grounded '
+                        f'in the input alert: {", ".join(citation_tags)}</div>',
                         unsafe_allow_html=True,
                     )
 
@@ -248,16 +259,40 @@ with tab_results:
         with open(path) as f:
             return json.load(f)
 
+    def flatten_benchmark_rows(rows):
+        """
+        Benchmark results are aggregates over N repeats — each numeric
+        measurement is a {"mean", "median", "stdev", "min", "max"} dict
+        rather than a single number, plus a "raw_runs" list of the
+        individual repeats. Flatten to one mean/stdev column pair per
+        measurement for display; drop raw_runs (it's in the underlying
+        JSON for reproducibility, not meant for the summary table).
+        """
+        flat_rows = []
+        for row in rows:
+            flat = {}
+            for k, v in row.items():
+                if k == "raw_runs":
+                    continue
+                if isinstance(v, dict) and "mean" in v:
+                    flat[f"{k}_mean"] = v["mean"]
+                    flat[f"{k}_stdev"] = v["stdev"]
+                else:
+                    flat[k] = v
+            flat_rows.append(flat)
+        return flat_rows
+
     guardrail_results = load_json("guardrail_results.json")
     cicids_results = load_json("cicids2017_results.json")
     fp_results = load_json("fp_rate_results.json")
     threading_results = load_json("threading_benchmark_results.json")
     mp_results = load_json("multiprocessing_benchmark_results.json")
     cve_bait_results = load_json("cve_bait_results.json")
+    attack_bait_results = load_json("attack_bait_results.json")
 
     st.subheader("Summary")
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
 
     if guardrail_results is not None:
         blocked = sum(1 for r in guardrail_results if r.get("guardrail_blocked"))
@@ -278,9 +313,9 @@ with tab_results:
         c3.metric("False positive rate", "—")
 
     if threading_results is not None:
-        best = max(threading_results["full_pipeline"], key=lambda r: r["throughput_per_sec"])
-        c4.metric("Best pipeline throughput", f"{best['throughput_per_sec']:.2f} alerts/sec",
-                   f"at {best['num_threads']} threads")
+        best = max(threading_results["full_pipeline"], key=lambda r: r["throughput_per_sec"]["mean"])
+        c4.metric("Best pipeline throughput", f"{best['throughput_per_sec']['mean']:.2f} alerts/sec",
+                   f"at {best['num_threads']} threads (± {best['throughput_per_sec']['stdev']:.2f}, n={best.get('repeats', 1)})")
     else:
         c4.metric("Best pipeline throughput", "—")
 
@@ -289,6 +324,12 @@ with tab_results:
                    f"{cve_bait_results['ungrounded_count']}/{cve_bait_results['total_tested']} ungrounded citation(s)")
     else:
         c5.metric("CVE hallucination rate", "—")
+
+    if attack_bait_results is not None:
+        c6.metric("ATT&CK citations requiring review", f"{attack_bait_results['requires_review_rate']:.1%}",
+                   f"{attack_bait_results['ungrounded_count']}/{attack_bait_results['total_tested']} ungrounded citation(s)")
+    else:
+        c6.metric("ATT&CK hallucination rate", "—")
 
     st.divider()
 
@@ -305,10 +346,12 @@ with tab_results:
         gcol, pcol = st.columns(2)
         with gcol:
             st.markdown("**Guardrail-only**")
-            st.dataframe(pd.DataFrame(threading_results["guardrail_only"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(threading_results["guardrail_only"])),
+                         hide_index=True, use_container_width=True)
         with pcol:
             st.markdown("**Full pipeline**")
-            st.dataframe(pd.DataFrame(threading_results["full_pipeline"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(threading_results["full_pipeline"])),
+                         hide_index=True, use_container_width=True)
 
     st.divider()
 
@@ -333,10 +376,12 @@ with tab_results:
         gcol, pcol = st.columns(2)
         with gcol:
             st.markdown("**Guardrail-only (multiprocessing)**")
-            st.dataframe(pd.DataFrame(mp_results["guardrail_only"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(mp_results["guardrail_only"])),
+                         hide_index=True, use_container_width=True)
         with pcol:
             st.markdown("**Full pipeline (multiprocessing)**")
-            st.dataframe(pd.DataFrame(mp_results["full_pipeline"]), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(flatten_benchmark_rows(mp_results["full_pipeline"])),
+                         hide_index=True, use_container_width=True)
     else:
         st.info("No multiprocessing results found yet — run: python -m experiments.evaluation.multiprocessing_benchmark")
 
@@ -356,10 +401,24 @@ with tab_results:
 
     st.divider()
 
+    st.subheader("Output guardrail — MITRE ATT&CK hallucination test")
+    if attack_bait_results is not None:
+        st.dataframe(
+            pd.DataFrame(attack_bait_results["results"])[
+                ["alert_id", "severity_assessment", "threat_type", "hallucinated_attack_techniques", "requires_review"]
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.info("No ATT&CK-bait results found yet — run: python -m experiments.evaluation.attack_bait_test")
+
+    st.divider()
+
     st.subheader("Alert results")
     view_choice = st.radio(
         "Source",
-        ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test"],
+        ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test", "ATT&CK bait test"],
         horizontal=True,
     )
 
@@ -371,5 +430,7 @@ with tab_results:
         st.dataframe(pd.DataFrame(fp_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "CVE bait test" and cve_bait_results is not None:
         st.dataframe(pd.DataFrame(cve_bait_results["results"]), hide_index=True, use_container_width=True)
+    elif view_choice == "ATT&CK bait test" and attack_bait_results is not None:
+        st.dataframe(pd.DataFrame(attack_bait_results["results"]), hide_index=True, use_container_width=True)
     else:
         st.info("No saved results found for this source yet — run the corresponding script first.")

@@ -1,0 +1,499 @@
+{
+  "source": "live Wazuh single-node Docker deployment (experiments/evaluation/wazuh_integration/wazuh-docker/), real agent-observed alerts, not synthetic",
+  "total_tested": 13,
+  "attack_ungrounded_count": 0,
+  "attack_ungrounded_rate": 0.0,
+  "cve_ungrounded_count": 0,
+  "cve_ungrounded_rate": 0.0,
+  "requires_review_count": 0,
+  "requires_review_rate": 0.0,
+  "injection_blocked_count": 0,
+  "results": [
+    {
+      "wazuh_alert_id": "jqfN4p8BNMtHC9CyW9bv",
+      "rule_id": "5763",
+      "rule_level": 10,
+      "report": {
+        "alert_id": "1786216533.1664118",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A brute force attack is being attempted on the system via SSH, with multiple failed authentication attempts for the user 'sshtestuser'. The attack is originating from the loopback IP address (::1), indicating a potential internal threat.",
+        "threat_type": "Brute Force Attack",
+        "recommended_action": "Investigate the source of the attack and review system logs for any potential vulnerabilities or misconfigurations. Consider implementing additional security measures to prevent future brute force attacks.",
+        "confidence_score": 0.9,
+        "reasoning": "The presence of multiple failed authentication attempts for a specific user and the use of a MITRE ATT&CK technique (T1110) tagged by the detector indicate a coordinated attack. The fact that the attack is originating from the loopback IP address suggests an internal threat, which requires immediate attention.",
+        "processed_at": "2026-08-08T20:37:47.277648",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: brute force trying to get access to the system. Authentication failed. MITRE ATT&CK techniques tagged by detector: T1110. Rule groups: syslog, sshd, authentication_failures. Aug 08 19:15:32 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 59694 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "jafN4p8BNMtHC9CyQNbG",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216527.1663627",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure was detected on the sshd service, indicating a potential brute-force attack attempt. The attack originated from the loopback IP address (::1), suggesting it may be a test or internal issue. Further investigation is required to determine the intent behind this action.",
+        "threat_type": "Brute-Force Attack",
+        "recommended_action": "Investigate the source of the authentication attempt and verify the user account 'sshtestuser'. Monitor the sshd service for further suspicious activity.",
+        "confidence_score": 0.8,
+        "reasoning": "The detection of an authentication failure on the sshd service, coupled with the presence of MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services), suggests a potential brute-force attack. However, the source IP address (::1) being the loopback address reduces the confidence in this being an external attack, but still warrants further investigation.",
+        "processed_at": "2026-08-08T20:37:47.808390",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:15:27 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 57986 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "jKfN4p8BNMtHC9CyPNbR",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216523.1663136",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure occurred on the SSH server, indicating a potential brute-force attack attempt. The attack originated from the loopback IP address (::1), which suggests it may be a test or internal activity. Further investigation is required to determine the intent behind this action.",
+        "threat_type": "Brute-Force Attack",
+        "recommended_action": "Monitor the SSH server logs for further authentication attempts and investigate the user account 'sshtestuser' for potential unauthorized access.",
+        "confidence_score": 0.8,
+        "reasoning": "The MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services) were tagged by the detector, indicating a potential brute-force attack. The authentication failure on the SSH server and the use of a test user account further support this assessment.",
+        "processed_at": "2026-08-08T20:37:48.202493",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:15:20 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 57976 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "i6fN4p8BNMtHC9CyF9as",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216517.1662645",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure occurred on the SSH server for the user 'sshtestuser' from the loopback IP address (::1), indicating a potential brute-force attack.",
+        "threat_type": "Brute-Force Attack",
+        "recommended_action": "Monitor the SSH server logs for further attempts and consider implementing rate limiting or IP blocking for the source IP address.",
+        "confidence_score": 0.8,
+        "reasoning": "The authentication failure event, combined with the presence of MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services), suggests a potential brute-force attack. The loopback IP address as the source IP further supports this assessment.",
+        "processed_at": "2026-08-08T20:37:48.527834",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:15:16 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 53808 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "iqfN4p8BNMtHC9CyC9bv",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216511.1662154",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure occurred on the SSH server for the user 'sshtestuser' from the loopback IP address '::1'. This may indicate a brute-force attack or a misconfigured SSH server.",
+        "threat_type": "Brute Force Attack",
+        "recommended_action": "Investigate the SSH server logs for further authentication failures and consider implementing rate limiting or IP blocking for the loopback IP address.",
+        "confidence_score": 0.8,
+        "reasoning": "The presence of the MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services) tagged by the detector suggests a potential brute-force attack. The authentication failure from the loopback IP address '::1' further supports this assessment.",
+        "processed_at": "2026-08-08T20:37:48.902786",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:15:11 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 53802 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "iafM4p8BNMtHC9Cy8Naj",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216507.1661663",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure was detected on the SSH service of a Wazuh agent, indicating a potential brute-force attack.",
+        "threat_type": "Brute-Force Attack",
+        "recommended_action": "Investigate the SSH service logs for further authentication attempts and consider implementing rate limiting or IP blocking for the source IP.",
+        "confidence_score": 0.8,
+        "reasoning": "The presence of MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services) suggests a targeted attack, and the repeated authentication failures indicate a potential brute-force attempt.",
+        "processed_at": "2026-08-08T20:37:49.249716",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:15:06 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 53790 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "iKfM4p8BNMtHC9Cy7Na2",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216503.1661172",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure occurred on the SSH server for the user 'sshtestuser' from the loopback IP address (::1), indicating a potential brute-force attack.",
+        "threat_type": "Brute-Force Attack",
+        "recommended_action": "Monitor the SSH server logs for further authentication failures and consider implementing rate limiting or IP blocking for the source IP address.",
+        "confidence_score": 0.8,
+        "reasoning": "The presence of MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services) suggests a targeted attack, and the authentication failure from the loopback IP address indicates a potential insider threat or a misconfigured SSH server.",
+        "processed_at": "2026-08-08T20:37:49.597004",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:15:02 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 35990 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "hKfM4p8BNMtHC9CytNYW",
+      "rule_id": "5760",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786216491.1660681",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "An authentication failure occurred on the SSH server for the user 'sshtestuser' from the loopback IP address (::1), indicating a potential brute-force attack.",
+        "threat_type": "Brute-Force Attack",
+        "recommended_action": "Monitor the SSH server logs for further attempts and consider implementing rate limiting or IP blocking for the loopback IP address.",
+        "confidence_score": 0.8,
+        "reasoning": "The authentication failure event, combined with the presence of MITRE ATT&CK techniques T1110.001 (Brute Force) and T1021.004 (Remote Services), suggests a potential brute-force attack. The loopback IP address is unusual for an external attack, but it could be a sign of an internal attacker attempting to gain unauthorized access.",
+        "processed_at": "2026-08-08T20:37:49.974333",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "::1"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [
+            "sshtestuser"
+          ],
+          "hashes": [],
+          "ports": [],
+          "text": "sshd: authentication failed. MITRE ATT&CK techniques tagged by detector: T1110.001, T1021.004. Rule groups: syslog, sshd, authentication_failed. Aug 08 19:14:47 wazuh-agent sshd[999]: Failed password for sshtestuser from ::1 port 35884 ssh2"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "gqfI4p8BNMtHC9CyZNb3",
+      "rule_id": "19004",
+      "rule_level": 7,
+      "report": {
+        "alert_id": "1786216209.1654826",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A high-severity security alert has been triggered on the 'soc-guardrails-agent-01' host due to a low CIS Benchmark score, indicating potential security vulnerabilities.",
+        "threat_type": "Compliance and Configuration Vulnerability",
+        "recommended_action": "Investigate the host 'soc-guardrails-agent-01' to identify and remediate the security vulnerabilities causing the low CIS Benchmark score.",
+        "confidence_score": 0.8,
+        "reasoning": "The alert indicates a low CIS Benchmark score, which suggests that the host may have security vulnerabilities. The unknown protocol and port further indicate that the alert is related to a configuration or compliance issue rather than a malicious activity.",
+        "processed_at": "2026-08-08T20:37:50.318644",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "172.18.0.5"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "SCA summary: CIS Benchmark for Amazon Linux 2023 Benchmark v1.0.0.: Score less than 50% (41) Rule groups: sca."
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "gKfI4p8BNMtHC9CyWtZY",
+      "rule_id": "19014",
+      "rule_level": 9,
+      "report": {
+        "alert_id": "1786216201.1642062",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential brute-force attack has been detected on the Amazon Linux system 'soc-guardrails-agent-01', with the attacker attempting to bypass password lockout mechanisms.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Investigate the source IP 172.18.0.5 and consider blocking it to prevent further attempts. Review the system's password lockout configuration to ensure it is properly set up.",
+        "confidence_score": 0.85,
+        "reasoning": "The alert indicates a change in status from 'not applicable' to 'failed' for a CIS Benchmark rule related to password lockout, suggesting an attempt to bypass this security feature. The presence of MITRE ATT&CK techniques T1110, T1110.001, and T1110.003 further supports this analysis.",
+        "processed_at": "2026-08-08T20:37:50.759892",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "172.18.0.5"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "CIS Benchmark for Amazon Linux 2023 Benchmark v1.0.0.: Ensure lockout for failed password attempts is configured.: Status changed from 'not applicable' to failed MITRE ATT&CK techniques tagged by detector: T1110, T1110.001, T1110.003. Rule groups: sca."
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "NKem4p8BNMtHC9CyINZo",
+      "rule_id": "554",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786213964.1409384",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A new file '/usr/bin/soc-guardrails-test-marker' has been added to the system on the host 'soc-guardrails-agent-01'. The file was added via a scheduled mode, indicating potential automated activity.",
+        "threat_type": "Lateral Movement/Privilege Escalation",
+        "recommended_action": "Investigate the source of the file addition and verify the legitimacy of the file. Monitor the system for any further suspicious activity.",
+        "confidence_score": 0.8,
+        "reasoning": "The addition of a new file to the system, particularly in a scheduled mode, suggests potential malicious activity. The unknown source IP and user further increase the alert's suspiciousness.",
+        "processed_at": "2026-08-08T20:37:52.186266",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "172.18.0.5"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [],
+          "hashes": [
+            "04e6af37f28d6b5e40d19614fa38ded6c55d2d3f12f004c178215e7213c17ef3"
+          ],
+          "ports": [],
+          "text": "File added to the system. Rule groups: ossec, syscheck, syscheck_entry_added, syscheck_file. File '/usr/bin/soc-guardrails-test-marker' added\nMode: scheduled\n"
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "M6el4p8BNMtHC9Cyvta6",
+      "rule_id": "19003",
+      "rule_level": 5,
+      "report": {
+        "alert_id": "1786213931.1407845",
+        "severity_assessment": "MEDIUM",
+        "threat_summary": "A security alert has been triggered on the host soc-guardrails-agent-01 due to a low CIS Benchmark score, indicating potential security vulnerabilities.",
+        "threat_type": "Configuration Vulnerability",
+        "recommended_action": "Investigate the host soc-guardrails-agent-01 and review the CIS Benchmark report to identify and remediate any security vulnerabilities.",
+        "confidence_score": 0.8,
+        "reasoning": "The alert indicates a low CIS Benchmark score, which suggests that the host may have security vulnerabilities. However, the exact nature of the vulnerabilities is not specified, so further investigation is required to determine the severity of the threat.",
+        "processed_at": "2026-08-08T20:37:56.657538",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "172.18.0.5"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "SCA summary: CIS Benchmark for Amazon Linux 2023 Benchmark v1.0.0.: Score less than 80% (52) Rule groups: sca."
+        }
+      }
+    },
+    {
+      "wazuh_alert_id": "L6el4p8BNMtHC9CyYdao",
+      "rule_id": "19007",
+      "rule_level": 7,
+      "report": {
+        "alert_id": "1786213913.1396512",
+        "severity_assessment": "HIGH",
+        "threat_summary": "A potential password cracking attempt has been detected on the Amazon Linux system 'soc-guardrails-agent-01'. The CIS Benchmark for Amazon Linux 2023 indicates that accounts in /etc/passwd should use shadowed passwords.",
+        "threat_type": "Password Cracking",
+        "recommended_action": "Investigate the system 'soc-guardrails-agent-01' for any potential password cracking attempts and ensure that accounts in /etc/passwd use shadowed passwords.",
+        "confidence_score": 0.8,
+        "reasoning": "The alert is triggered by the CIS Benchmark for Amazon Linux 2023, which indicates a potential security vulnerability. The presence of MITRE ATT&CK techniques T1003 and T1003.008 further supports the likelihood of a password cracking attempt.",
+        "processed_at": "2026-08-08T20:38:02.078236",
+        "model": "llama-3.1-8b-instant",
+        "agent_version": "guardrail-v0.4",
+        "guardrail_blocked": false,
+        "hallucinated_cves": [],
+        "cve_verifications": [],
+        "hallucinated_attack_techniques": [],
+        "attack_technique_verifications": [],
+        "output_guardrail_flagged": false,
+        "requires_review": false,
+        "evidence_pack": {
+          "ips": [
+            "172.18.0.5"
+          ],
+          "hosts": [
+            "soc-guardrails-agent-01"
+          ],
+          "users": [],
+          "hashes": [],
+          "ports": [],
+          "text": "CIS Benchmark for Amazon Linux 2023 Benchmark v1.0.0.: Ensure accounts in /etc/passwd use shadowed passwords. MITRE ATT&CK techniques tagged by detector: T1003, T1003.008. Rule groups: sca."
+        }
+      }
+    }
+  ]
+}

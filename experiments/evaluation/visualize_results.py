@@ -16,22 +16,32 @@ def make_charts(results: dict, output_path: str):
     guardrail = results["guardrail_only"]
     pipeline = results["full_pipeline"]
 
+    # Each result is now an aggregate over N repeats — {"mean", "median",
+    # "stdev", "min", "max"} per measurement — rather than a single-shot
+    # number, so stdev is plotted as an error bar instead of being discarded.
     g_threads = [r["num_threads"] for r in guardrail]
-    g_throughput = [r["throughput_per_sec"] for r in guardrail]
-    g_cpu = [r["avg_cpu_percent"] for r in guardrail]
+    g_throughput = [r["throughput_per_sec"]["mean"] for r in guardrail]
+    g_throughput_err = [r["throughput_per_sec"]["stdev"] for r in guardrail]
+    g_cpu = [r["avg_cpu_percent"]["mean"] for r in guardrail]
+    g_cpu_err = [r["avg_cpu_percent"]["stdev"] for r in guardrail]
+    g_repeats = guardrail[0].get("repeats", 1)
 
     p_threads = [r["num_threads"] for r in pipeline]
-    p_throughput = [r["throughput_per_sec"] for r in pipeline]
-    p_cpu = [r["avg_cpu_percent"] for r in pipeline]
+    p_throughput = [r["throughput_per_sec"]["mean"] for r in pipeline]
+    p_throughput_err = [r["throughput_per_sec"]["stdev"] for r in pipeline]
+    p_cpu = [r["avg_cpu_percent"]["mean"] for r in pipeline]
+    p_cpu_err = [r["avg_cpu_percent"]["stdev"] for r in pipeline]
+    p_repeats = pipeline[0].get("repeats", 1)
 
     labels = [str(t) for t in g_threads]
     colors = ["#4C72B0", "#DD8452", "#55A868"][: len(labels)]
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 9))
-    fig.suptitle("SecureAgent-SOC — Multi-Threading Benchmark", fontsize=14, fontweight="bold")
+    fig.suptitle(f"SecureAgent-SOC — Multi-Threading Benchmark (mean ± stdev, n={g_repeats} repeats)",
+                 fontsize=13, fontweight="bold")
 
     ax = axes[0][0]
-    ax.bar(labels, g_throughput, color=colors)
+    ax.bar(labels, g_throughput, yerr=g_throughput_err, capsize=4, color=colors)
     ax.set_yscale("log")
     ax.set_title("Guardrail-only throughput (CPU-bound, GIL-limited)")
     ax.set_xlabel("Threads")
@@ -40,7 +50,7 @@ def make_charts(results: dict, output_path: str):
         ax.text(i, v, f"{v:,.0f}", ha="center", va="bottom", fontsize=9)
 
     ax = axes[0][1]
-    ax.bar(labels, p_throughput, color=colors)
+    ax.bar(labels, p_throughput, yerr=p_throughput_err, capsize=4, color=colors)
     ax.set_title("Full pipeline throughput (I/O-bound: Groq API)")
     ax.set_xlabel("Threads")
     ax.set_ylabel("Alerts / sec")
@@ -48,7 +58,7 @@ def make_charts(results: dict, output_path: str):
         ax.text(i, v, f"{v:.2f}", ha="center", va="bottom", fontsize=9)
 
     ax = axes[1][0]
-    ax.bar(labels, g_cpu, color=colors)
+    ax.bar(labels, g_cpu, yerr=g_cpu_err, capsize=4, color=colors)
     ax.set_title("Guardrail-only avg CPU usage")
     ax.set_xlabel("Threads")
     ax.set_ylabel("Avg CPU %")
@@ -57,7 +67,7 @@ def make_charts(results: dict, output_path: str):
         ax.text(i, v, f"{v:.1f}%", ha="center", va="bottom", fontsize=9)
 
     ax = axes[1][1]
-    ax.bar(labels, p_cpu, color=colors)
+    ax.bar(labels, p_cpu, yerr=p_cpu_err, capsize=4, color=colors)
     ax.set_title("Full pipeline avg CPU usage")
     ax.set_xlabel("Threads")
     ax.set_ylabel("Avg CPU %")

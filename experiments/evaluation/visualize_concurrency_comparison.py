@@ -40,12 +40,18 @@ def make_comparison_chart(threading_results: dict, mp_results: dict, output_path
     thread_color = "#4C72B0"
     process_color = "#C44E52"
 
-    fig, axes = plt.subplots(2, 2, figsize=(13, 9))
-    fig.suptitle("SecureAgent-SOC — Threading vs Multiprocessing", fontsize=14, fontweight="bold")
+    repeats = threading_results["guardrail_only"][0].get("repeats", 1)
 
-    def grouped_bar(ax, thread_vals, process_vals, ylabel, title, log_scale=False, as_percent=False):
-        b1 = ax.bar(x - width / 2, thread_vals, width, label="Threading", color=thread_color)
-        b2 = ax.bar(x + width / 2, process_vals, width, label="Multiprocessing", color=process_color)
+    fig, axes = plt.subplots(2, 2, figsize=(13, 9))
+    fig.suptitle(f"SecureAgent-SOC — Threading vs Multiprocessing (mean ± stdev, n={repeats} repeats)",
+                 fontsize=13, fontweight="bold")
+
+    def grouped_bar(ax, thread_vals, process_vals, ylabel, title, thread_err=None, process_err=None,
+                     log_scale=False, as_percent=False):
+        b1 = ax.bar(x - width / 2, thread_vals, width, yerr=thread_err, capsize=3,
+                     label="Threading", color=thread_color)
+        b2 = ax.bar(x + width / 2, process_vals, width, yerr=process_err, capsize=3,
+                     label="Multiprocessing", color=process_color)
         if log_scale:
             ax.set_yscale("log")
         ax.set_title(title)
@@ -60,26 +66,42 @@ def make_comparison_chart(threading_results: dict, mp_results: dict, output_path
                 h = bar.get_height()
                 ax.text(bar.get_x() + bar.get_width() / 2, h, fmt(h), ha="center", va="bottom", fontsize=7)
 
-    g_thread_throughput = [r["throughput_per_sec"] for r in threading_results["guardrail_only"]]
-    g_process_throughput = [r["throughput_per_sec"] for r in mp_results["guardrail_only"]]
+    # Each result is now an aggregate over N repeats rather than a
+    # single-shot number — stdev is plotted as an error bar so the spread
+    # (and whether threading vs multiprocessing differ by more than noise)
+    # stays visible instead of being collapsed to one point estimate.
+    g_thread_throughput = [r["throughput_per_sec"]["mean"] for r in threading_results["guardrail_only"]]
+    g_thread_throughput_err = [r["throughput_per_sec"]["stdev"] for r in threading_results["guardrail_only"]]
+    g_process_throughput = [r["throughput_per_sec"]["mean"] for r in mp_results["guardrail_only"]]
+    g_process_throughput_err = [r["throughput_per_sec"]["stdev"] for r in mp_results["guardrail_only"]]
     grouped_bar(axes[0][0], g_thread_throughput, g_process_throughput,
-                "Alerts/sec (log scale)", "Guardrail-only throughput", log_scale=True)
+                "Alerts/sec (log scale)", "Guardrail-only throughput",
+                thread_err=g_thread_throughput_err, process_err=g_process_throughput_err, log_scale=True)
 
-    p_thread_throughput = [r["throughput_per_sec"] for r in threading_results["full_pipeline"]]
-    p_process_throughput = [r["throughput_per_sec"] for r in mp_results["full_pipeline"]]
+    p_thread_throughput = [r["throughput_per_sec"]["mean"] for r in threading_results["full_pipeline"]]
+    p_thread_throughput_err = [r["throughput_per_sec"]["stdev"] for r in threading_results["full_pipeline"]]
+    p_process_throughput = [r["throughput_per_sec"]["mean"] for r in mp_results["full_pipeline"]]
+    p_process_throughput_err = [r["throughput_per_sec"]["stdev"] for r in mp_results["full_pipeline"]]
     grouped_bar(axes[0][1], p_thread_throughput, p_process_throughput,
-                "Alerts/sec", "Full pipeline throughput")
+                "Alerts/sec", "Full pipeline throughput",
+                thread_err=p_thread_throughput_err, process_err=p_process_throughput_err)
 
-    g_thread_cpu = [r["avg_cpu_percent"] for r in threading_results["guardrail_only"]]
-    g_process_cpu = [r["avg_cpu_percent"] for r in mp_results["guardrail_only"]]
+    g_thread_cpu = [r["avg_cpu_percent"]["mean"] for r in threading_results["guardrail_only"]]
+    g_thread_cpu_err = [r["avg_cpu_percent"]["stdev"] for r in threading_results["guardrail_only"]]
+    g_process_cpu = [r["avg_cpu_percent"]["mean"] for r in mp_results["guardrail_only"]]
+    g_process_cpu_err = [r["avg_cpu_percent"]["stdev"] for r in mp_results["guardrail_only"]]
     grouped_bar(axes[1][0], g_thread_cpu, g_process_cpu,
-                "Avg CPU %", "Guardrail-only avg CPU usage", as_percent=True)
+                "Avg CPU %", "Guardrail-only avg CPU usage",
+                thread_err=g_thread_cpu_err, process_err=g_process_cpu_err, as_percent=True)
     axes[1][0].set_ylim(0, 100)
 
-    p_thread_cpu = [r["avg_cpu_percent"] for r in threading_results["full_pipeline"]]
-    p_process_cpu = [r["avg_cpu_percent"] for r in mp_results["full_pipeline"]]
+    p_thread_cpu = [r["avg_cpu_percent"]["mean"] for r in threading_results["full_pipeline"]]
+    p_thread_cpu_err = [r["avg_cpu_percent"]["stdev"] for r in threading_results["full_pipeline"]]
+    p_process_cpu = [r["avg_cpu_percent"]["mean"] for r in mp_results["full_pipeline"]]
+    p_process_cpu_err = [r["avg_cpu_percent"]["stdev"] for r in mp_results["full_pipeline"]]
     grouped_bar(axes[1][1], p_thread_cpu, p_process_cpu,
-                "Avg CPU %", "Full pipeline avg CPU usage", as_percent=True)
+                "Avg CPU %", "Full pipeline avg CPU usage",
+                thread_err=p_thread_cpu_err, process_err=p_process_cpu_err, as_percent=True)
     axes[1][1].set_ylim(0, 100)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])

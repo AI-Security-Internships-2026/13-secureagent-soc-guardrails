@@ -107,3 +107,44 @@ no blockers faced
 ### Next week plan
 - scalability (prompts per second)
 
+---
+
+## Week 9
+
+**Branch:** `emaan-week-09`
+**PR link:** _[Add after opening PR]_
+
+### Completed this week
+- [x] Redid the threading vs. multiprocessing benchmark (Week 5/7) with repeated runs instead of single-shot: `threading_benchmark.py` and `multiprocessing_benchmark.py` now take a `--repeats` flag (default 3) and report mean/median/stdev/min/max per configuration via a shared `aggregate_runs()` helper, keeping every individual repeat's raw result nested under `raw_runs` for full reproducibility
+- [x] Updated `visualize_results.py` and `visualize_concurrency_comparison.py` to plot stdev as error bars on every throughput/CPU bar, so the spread is visible instead of collapsed to one point estimate
+- [x] Updated the dashboard's Results Viewer (`dashboard/app.py`) to flatten the new aggregate shape into `_mean`/`_stdev` columns for the benchmark tables, and to show stdev + repeat count on the "Best pipeline throughput" summary metric
+- [x] Re-ran both benchmarks for real (3 repeats × 1/2/4 threads/processes, guardrail-only n=2000, full pipeline n=6 live Groq calls) and committed fresh results + regenerated charts
+- [x] Issue #23 step 3 — MITRE ATT&CK technique checker, second instance of the CVE-checker grounding+verify pattern: extracted the shared stemmer/topical-overlap/inline-annotator logic into `src/guardrails/grounding_utils.py` so both checkers use one implementation; added `src/data/fetch_mitre_attack.py` to snapshot MITRE's public Enterprise ATT&CK STIX bundle locally (no per-ID REST endpoint exists like NVD's, and the live bundle is ~50MB — too large to fetch per check) into `data/mitre_attack/enterprise_attack_techniques.json` (858 techniques, 161 revoked/deprecated); added `src/guardrails/attack_grounding.py` with the same FABRICATED/REVOKED/REAL_BUT_IRRELEVANT/REAL_AND_PLAUSIBLE/UNVERIFIED taxonomy as the CVE checker (REVOKED in place of REJECTED); wired into `soc_agent.py` alongside the CVE check (`output_guardrail_flagged`/`requires_review` now OR across both checkers); 24 new tests in `tests/test_attack_grounding.py`, all mocked against a fixture snapshot — no network/data-file dependency in the test suite
+
+### Results
+Repeating the concurrency benchmark surfaced a finding the single-shot version couldn't distinguish from noise: on the full pipeline, 4 threads is consistently ~14x slower than 1 or 2 threads (elapsed ≈9.0s vs ≈1.2–2.2s), with stdev of only 0.02–0.29s across the 3 repeats and `rate_limited_count=0` on every run — ruling out Groq rate limiting as the cause. Since the low variance shows this is reproducible rather than a fluke, it's a candidate for follow-up investigation (thread pool contention or connection-handling behavior at that concurrency level), not something to write off as a bad run.
+
+Manually verified the ATT&CK checker against the real snapshot: `T1055` (Process Injection, topically matching alert text) → `REAL_AND_PLAUSIBLE`; `T9999` (invented) → `FABRICATED`; `T1086` (old standalone PowerShell technique, since folded into `T1059.001`) → `REVOKED`.
+
+### Problems / Blockers
+- None blocking. `docs/weekly-progress.md` on this branch doesn't yet include the Week 5–8 sections merged on `emaan-week-08` — flagged here rather than silently duplicated, since resolving it belongs to whichever PR/merge reconciles the two branches, not to this week's entry.
+- MITRE ATT&CK verification runs against a periodically-refreshed local snapshot rather than a live lookup like the CVE checker's NVD calls, since ATT&CK is only published as a single ~50MB STIX bundle with no lightweight per-ID endpoint. Documented as a real, explicit tradeoff in `attack_grounding.py` rather than presented as equivalent to the NVD case — the snapshot can lag MITRE's published data between refreshes.
+
+### Next week plan
+- Expand the CVE-bait test set and build an equivalent ATT&CK-bait set before running the LLM-judge baseline, SelfCheckGPT comparison, and cross-claim-type adversarial re-run (issue #20/#23) — those should run once against the bigger set, not twice
+
+### Update — 4-thread full-pipeline slowdown, investigated
+Built `experiments/evaluation/diagnose_thread_slowdown.py`, which instruments each Groq call with a start/end timestamp relative to batch start instead of only measuring total wall time, to distinguish two explanations: threads queuing for a free worker slot (boring, expected) vs. individual requests stalling once already running (points at server-side throttling).
+
+Ran 3 repeats each at 2 and 4 threads (n=6, real Groq calls). Result: at 4 threads, most requests fired together at ~t=0 and completed in ~1s each, exactly as expected — but in 2 of 3 repeats, exactly one request (of the 4-6 in flight) took 5-11s instead of ~1s, while its concurrent siblings finished normally. This isn't queuing — one straggler was among the first 4 requests submitted simultaneously, not the one waiting for a worker slot to free up. Confirmed it isn't a client-side connection-pool bottleneck either: `httpx`'s default `Limits` (used under `groq`'s client) allow 100 concurrent connections / 20 keep-alive, far more than 4.
+
+Conclusion: the slowdown is a single connection occasionally stalling 5-10x longer than its concurrent peers, with no exception raised and no CPU spike — consistent with Groq queuing/throttling requests server-side under concurrent load from one API key rather than rejecting them with an explicit 429. This diagnostic run was noisier than the original benchmark (1.46s/6.05s/10.92s across repeats vs. the original's tight 8.66-9.17s band), suggesting the effect's severity tracks Groq's live server load rather than being a fixed property of "4 threads" specifically — not fully resolved, but the mechanism (server-side per-key concurrency throttling, not client scheduling or rate-limit rejection) is now evidenced rather than guessed at. Results saved to `experiments/results/thread_slowdown_diagnosis.json`.
+
+### Update — Evidence Pack (issue #23 step 4)
+- `SecurityAlert` (`src/agent/alert_schema.py`) gained `user`, `hostname`, `file_hash` optional fields — needed because the alert schema had no structured user/host/hash data at all before this, only IP/port. Populated realistically on all 4 sample alerts (e.g. `user="root"` on the SSH brute-force alert, a `file_hash` on the exfiltration alert).
+- Added `src/guardrails/evidence_pack.py`: `build_evidence_pack(alert)` pulls the alert's typed fields into explicit `ips`/`hosts`/`users`/`hashes`/`ports` buckets, and separates out a `text` field (description + payload_snippet only) as the surface CVE/ATT&CK identifier grounding actually runs against — instead of the full formatted alert blob used previously.
+- `soc_agent.py`'s `analyse_alert()` now builds the evidence pack once per alert and passes `evidence_pack["text"]` to both the CVE and ATT&CK grounding checks (previously passed the full `format_alert()` string). Behaviourally equivalent for CVE/ATT&CK IDs — those never appeared in the IP/timestamp/protocol fields being excluded — but the grounding surface is now explicit rather than an artefact of prompt formatting. The evidence pack itself is attached to every report as `report["evidence_pack"]` for audit visibility.
+- The structured buckets (ips/hosts/users/hashes) aren't consumed by any checker yet — CVE and ATT&CK are the only claim types in scope for issue #23. They exist now so a future IOC-grounding claim type doesn't need another schema pass.
+- Dashboard Live Demo form (`dashboard/app.py`) gained User/Hostname/File hash text inputs so manually-entered alerts populate the same fields; the existing "Raw report JSON" expander already surfaces `evidence_pack` with no further dashboard change needed.
+- 8 new tests in `tests/test_evidence_pack.py`. Full suite: 92/92 passing.
+

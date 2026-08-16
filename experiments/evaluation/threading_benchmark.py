@@ -3,6 +3,7 @@ import argparse
 import itertools
 import json
 import os
+import statistics
 import threading
 import time
 
@@ -80,6 +81,41 @@ def build_workload(n: int):
     return list(cycled)
 
 
+# Measurements that vary run-to-run and are worth summarizing across repeats.
+# num_threads/n/rate_limited_count are config/outcome fields, not per-run
+# noise, so they're kept as-is rather than averaged.
+_NUMERIC_FIELDS = ["elapsed_sec", "throughput_per_sec", "avg_cpu_percent", "max_cpu_percent"]
+
+
+def aggregate_runs(runs: list) -> dict:
+    """
+    Collapse N repeated runs of the same configuration into summary
+    statistics (mean/median/stdev/min/max) per measurement, plus the raw
+    per-run results for full reproducibility.
+
+    A single-shot benchmark run is vulnerable to one slow or fast run (OS
+    scheduling noise, a slow Groq response) skewing the whole result with no
+    way to tell signal from noise afterward. Repeating and reporting spread
+    (stdev, min/max) makes that visible instead of hidden behind one point
+    estimate.
+    """
+    agg = {k: v for k, v in runs[0].items() if k not in _NUMERIC_FIELDS and k != "rate_limited_count"}
+    agg["repeats"] = len(runs)
+    for field in _NUMERIC_FIELDS:
+        values = [r[field] for r in runs]
+        agg[field] = {
+            "mean": statistics.mean(values),
+            "median": statistics.median(values),
+            "stdev": statistics.stdev(values) if len(values) > 1 else 0.0,
+            "min": min(values),
+            "max": max(values),
+        }
+    if "rate_limited_count" in runs[0]:
+        agg["rate_limited_count"] = sum(r["rate_limited_count"] for r in runs)
+    agg["raw_runs"] = runs
+    return agg
+
+
 def run_guardrail_only(alerts, num_threads: int):
     texts = [format_alert(a) for a in alerts]
 
@@ -144,30 +180,41 @@ def main():
                          help="Seconds to wait between thread-count runs in the pipeline benchmark, to let the Groq TPM budget recover")
     parser.add_argument("--threads", type=int, nargs="+", default=[1, 2, 4],
                          help="Thread counts to test")
+    parser.add_argument("--repeats", type=int, default=3,
+                         help="How many times to repeat each thread-count configuration, "
+                              "reporting mean/stdev instead of a single-shot number")
     args = parser.parse_args()
 
     results = {"guardrail_only": [], "full_pipeline": []}
 
-    print("Guardrail-only benchmark")
+    print(f"Guardrail-only benchmark ({args.repeats} repeats per thread-count)")
     guardrail_alerts = build_workload(args.guardrail_n)
     for t in args.threads:
-        r = run_guardrail_only(guardrail_alerts, t)
+        runs = [run_guardrail_only(guardrail_alerts, t) for _ in range(args.repeats)]
+        r = aggregate_runs(runs)
         results["guardrail_only"].append(r)
-        print(f"  threads={t:>2} | {r['throughput_per_sec']:>12,.0f} alerts/sec | "
-              f"avg_cpu={r['avg_cpu_percent']:.1f}% | max_cpu={r['max_cpu_percent']:.1f}%")
+        tp, cpu = r["throughput_per_sec"], r["avg_cpu_percent"]
+        print(f"  threads={t:>2} | {tp['mean']:>12,.0f} ± {tp['stdev']:>8,.0f} alerts/sec | "
+              f"avg_cpu={cpu['mean']:.1f}%")
 
-    print("\nFull pipeline benchmark")
-    print(f"  (using n={args.pipeline_n} per thread-count — this makes real API calls, keep n modest)")
+    print(f"\nFull pipeline benchmark ({args.repeats} repeats per thread-count)")
+    print(f"  (using n={args.pipeline_n} per run — this makes real API calls, keep n modest)")
     pipeline_alerts = build_workload(args.pipeline_n)
-    for i, t in enumerate(args.threads):
-        if i > 0:
-            print(f"  [cooling down {args.cooldown:.0f}s to let Groq TPM budget recover]")
-            time.sleep(args.cooldown)
-        r = run_full_pipeline(pipeline_alerts, t)
+    first_call = True
+    for t in args.threads:
+        runs = []
+        for _ in range(args.repeats):
+            if not first_call:
+                print(f"  [cooling down {args.cooldown:.0f}s to let Groq TPM budget recover]")
+                time.sleep(args.cooldown)
+            first_call = False
+            runs.append(run_full_pipeline(pipeline_alerts, t))
+        r = aggregate_runs(runs)
         results["full_pipeline"].append(r)
-        rl_note = f" | rate_limited={r['rate_limited_count']}" if r["rate_limited_count"] else ""
-        print(f"  threads={t:>2} | {r['throughput_per_sec']:>8.2f} alerts/sec | "
-              f"avg_cpu={r['avg_cpu_percent']:.1f}% | max_cpu={r['max_cpu_percent']:.1f}%{rl_note}")
+        tp, cpu = r["throughput_per_sec"], r["avg_cpu_percent"]
+        rl_note = f" | rate_limited={r['rate_limited_count']}" if r.get("rate_limited_count") else ""
+        print(f"  threads={t:>2} | {tp['mean']:>8.2f} ± {tp['stdev']:>6.2f} alerts/sec | "
+              f"avg_cpu={cpu['mean']:.1f}%{rl_note}")
 
     os.makedirs("experiments/results", exist_ok=True)
     output_path = "experiments/results/threading_benchmark_results.json"

@@ -52,7 +52,7 @@ import psutil
 from src.agent.alert_schema import SAMPLE_ALERTS
 from src.agent.soc_agent import format_alert
 from src.guardrails.input_guardrail import check_injection
-from experiments.evaluation.threading_benchmark import analyse_alert_with_retry
+from experiments.evaluation.threading_benchmark import analyse_alert_with_retry, aggregate_runs
 
 
 class CpuMonitor:
@@ -164,30 +164,41 @@ def main():
                          help="Process counts to test")
     parser.add_argument("--cooldown", type=float, default=15.0,
                          help="Seconds between thread-count runs in the pipeline benchmark, to let Groq TPM budget recover")
+    parser.add_argument("--repeats", type=int, default=3,
+                         help="How many times to repeat each process-count configuration, "
+                              "reporting mean/stdev instead of a single-shot number")
     args = parser.parse_args()
 
     results = {"guardrail_only": [], "full_pipeline": []}
 
-    print("=== Guardrail-only benchmark: multiprocessing (CPU-bound, no GIL across processes) ===")
+    print(f"=== Guardrail-only benchmark: multiprocessing ({args.repeats} repeats per process-count) ===")
     guardrail_alerts = build_workload(args.guardrail_n)
     for p in args.processes:
-        r = run_guardrail_only(guardrail_alerts, p)
+        runs = [run_guardrail_only(guardrail_alerts, p) for _ in range(args.repeats)]
+        r = aggregate_runs(runs)
         results["guardrail_only"].append(r)
-        print(f"  processes={p:>2} | {r['throughput_per_sec']:>12,.0f} alerts/sec | "
-              f"avg_cpu={r['avg_cpu_percent']:.1f}% | max_cpu={r['max_cpu_percent']:.1f}%")
+        tp, cpu = r["throughput_per_sec"], r["avg_cpu_percent"]
+        print(f"  processes={p:>2} | {tp['mean']:>12,.0f} ± {tp['stdev']:>8,.0f} alerts/sec | "
+              f"avg_cpu={cpu['mean']:.1f}%")
 
-    print("\n=== Full pipeline benchmark: multiprocessing (I/O-bound: Groq API) ===")
-    print(f"  (using n={args.pipeline_n} per process-count — this makes real API calls, keep n modest)")
+    print(f"\n=== Full pipeline benchmark: multiprocessing ({args.repeats} repeats per process-count) ===")
+    print(f"  (using n={args.pipeline_n} per run — this makes real API calls, keep n modest)")
     pipeline_alerts = build_workload(args.pipeline_n)
-    for i, p in enumerate(args.processes):
-        if i > 0:
-            print(f"  [cooling down {args.cooldown:.0f}s to let Groq TPM budget recover]")
-            time.sleep(args.cooldown)
-        r = run_full_pipeline(pipeline_alerts, p)
+    first_call = True
+    for p in args.processes:
+        runs = []
+        for _ in range(args.repeats):
+            if not first_call:
+                print(f"  [cooling down {args.cooldown:.0f}s to let Groq TPM budget recover]")
+                time.sleep(args.cooldown)
+            first_call = False
+            runs.append(run_full_pipeline(pipeline_alerts, p))
+        r = aggregate_runs(runs)
         results["full_pipeline"].append(r)
-        rl_note = f" | rate_limited={r['rate_limited_count']}" if r["rate_limited_count"] else ""
-        print(f"  processes={p:>2} | {r['throughput_per_sec']:>8.2f} alerts/sec | "
-              f"avg_cpu={r['avg_cpu_percent']:.1f}% | max_cpu={r['max_cpu_percent']:.1f}%{rl_note}")
+        tp, cpu = r["throughput_per_sec"], r["avg_cpu_percent"]
+        rl_note = f" | rate_limited={r['rate_limited_count']}" if r.get("rate_limited_count") else ""
+        print(f"  processes={p:>2} | {tp['mean']:>8.2f} ± {tp['stdev']:>6.2f} alerts/sec | "
+              f"avg_cpu={cpu['mean']:.1f}%{rl_note}")
 
     os.makedirs("experiments/results", exist_ok=True)
     output_path = "experiments/results/multiprocessing_benchmark_results.json"

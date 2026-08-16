@@ -1,0 +1,324 @@
+{
+  "threads_2": [
+    {
+      "records": [
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-1_0",
+          "start_offset_sec": 0.001,
+          "end_offset_sec": 1.323,
+          "duration_sec": 1.322,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-1_1",
+          "start_offset_sec": 0.002,
+          "end_offset_sec": 1.318,
+          "duration_sec": 1.316,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-003",
+          "thread": "ThreadPoolExecutor-1_1",
+          "start_offset_sec": 1.318,
+          "end_offset_sec": 1.914,
+          "duration_sec": 0.596,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-004",
+          "thread": "ThreadPoolExecutor-1_0",
+          "start_offset_sec": 1.323,
+          "end_offset_sec": 1.323,
+          "duration_sec": 0.0,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-1_0",
+          "start_offset_sec": 1.323,
+          "end_offset_sec": 1.885,
+          "duration_sec": 0.562,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-1_0",
+          "start_offset_sec": 1.885,
+          "end_offset_sec": 2.625,
+          "duration_sec": 0.74,
+          "rate_limited": false
+        }
+      ],
+      "total_elapsed_sec": 2.625694399990607
+    },
+    {
+      "records": [
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-2_0",
+          "start_offset_sec": 0.001,
+          "end_offset_sec": 1.093,
+          "duration_sec": 1.092,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-2_1",
+          "start_offset_sec": 0.006,
+          "end_offset_sec": 1.089,
+          "duration_sec": 1.083,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-003",
+          "thread": "ThreadPoolExecutor-2_1",
+          "start_offset_sec": 1.089,
+          "end_offset_sec": 1.793,
+          "duration_sec": 0.704,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-004",
+          "thread": "ThreadPoolExecutor-2_0",
+          "start_offset_sec": 1.093,
+          "end_offset_sec": 1.093,
+          "duration_sec": 0.0,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-2_0",
+          "start_offset_sec": 1.093,
+          "end_offset_sec": 1.798,
+          "duration_sec": 0.705,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-2_1",
+          "start_offset_sec": 1.793,
+          "end_offset_sec": 2.719,
+          "duration_sec": 0.926,
+          "rate_limited": false
+        }
+      ],
+      "total_elapsed_sec": 2.71954970000661
+    },
+    {
+      "records": [
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-3_0",
+          "start_offset_sec": 0.001,
+          "end_offset_sec": 0.486,
+          "duration_sec": 0.485,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-3_1",
+          "start_offset_sec": 0.005,
+          "end_offset_sec": 0.958,
+          "duration_sec": 0.953,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-003",
+          "thread": "ThreadPoolExecutor-3_0",
+          "start_offset_sec": 0.486,
+          "end_offset_sec": 0.907,
+          "duration_sec": 0.421,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-004",
+          "thread": "ThreadPoolExecutor-3_0",
+          "start_offset_sec": 0.907,
+          "end_offset_sec": 0.907,
+          "duration_sec": 0.0,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-3_0",
+          "start_offset_sec": 0.907,
+          "end_offset_sec": 1.229,
+          "duration_sec": 0.321,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-3_1",
+          "start_offset_sec": 0.958,
+          "end_offset_sec": 1.648,
+          "duration_sec": 0.691,
+          "rate_limited": false
+        }
+      ],
+      "total_elapsed_sec": 1.6487720999866724
+    }
+  ],
+  "threads_4": [
+    {
+      "records": [
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-4_0",
+          "start_offset_sec": 0.001,
+          "end_offset_sec": 1.459,
+          "duration_sec": 1.458,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-4_1",
+          "start_offset_sec": 0.005,
+          "end_offset_sec": 0.6,
+          "duration_sec": 0.595,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-003",
+          "thread": "ThreadPoolExecutor-4_2",
+          "start_offset_sec": 0.009,
+          "end_offset_sec": 1.32,
+          "duration_sec": 1.311,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-004",
+          "thread": "ThreadPoolExecutor-4_3",
+          "start_offset_sec": 0.015,
+          "end_offset_sec": 0.015,
+          "duration_sec": 0.0,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-4_3",
+          "start_offset_sec": 0.016,
+          "end_offset_sec": 1.318,
+          "duration_sec": 1.302,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-4_1",
+          "start_offset_sec": 0.6,
+          "end_offset_sec": 1.317,
+          "duration_sec": 0.717,
+          "rate_limited": false
+        }
+      ],
+      "total_elapsed_sec": 1.4602986999962013
+    },
+    {
+      "records": [
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-5_0",
+          "start_offset_sec": 0.001,
+          "end_offset_sec": 1.038,
+          "duration_sec": 1.037,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-5_1",
+          "start_offset_sec": 0.008,
+          "end_offset_sec": 1.053,
+          "duration_sec": 1.046,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-003",
+          "thread": "ThreadPoolExecutor-5_2",
+          "start_offset_sec": 0.013,
+          "end_offset_sec": 1.049,
+          "duration_sec": 1.037,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-004",
+          "thread": "ThreadPoolExecutor-5_3",
+          "start_offset_sec": 0.018,
+          "end_offset_sec": 0.018,
+          "duration_sec": 0.0,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-5_3",
+          "start_offset_sec": 0.019,
+          "end_offset_sec": 1.052,
+          "duration_sec": 1.033,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-5_0",
+          "start_offset_sec": 1.038,
+          "end_offset_sec": 6.052,
+          "duration_sec": 5.014,
+          "rate_limited": false
+        }
+      ],
+      "total_elapsed_sec": 6.052691099990625
+    },
+    {
+      "records": [
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-6_0",
+          "start_offset_sec": 0.001,
+          "end_offset_sec": 0.992,
+          "duration_sec": 0.991,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-6_1",
+          "start_offset_sec": 0.005,
+          "end_offset_sec": 10.917,
+          "duration_sec": 10.912,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-003",
+          "thread": "ThreadPoolExecutor-6_2",
+          "start_offset_sec": 0.008,
+          "end_offset_sec": 1.024,
+          "duration_sec": 1.016,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-004",
+          "thread": "ThreadPoolExecutor-6_3",
+          "start_offset_sec": 0.012,
+          "end_offset_sec": 0.012,
+          "duration_sec": 0.0,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-001",
+          "thread": "ThreadPoolExecutor-6_3",
+          "start_offset_sec": 0.012,
+          "end_offset_sec": 1.046,
+          "duration_sec": 1.033,
+          "rate_limited": false
+        },
+        {
+          "alert_id": "ALERT-002",
+          "thread": "ThreadPoolExecutor-6_0",
+          "start_offset_sec": 0.992,
+          "end_offset_sec": 5.906,
+          "duration_sec": 4.913,
+          "rate_limited": false
+        }
+      ],
+      "total_elapsed_sec": 10.917431299982127
+    }
+  ]
+}
