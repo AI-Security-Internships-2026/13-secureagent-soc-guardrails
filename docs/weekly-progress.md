@@ -173,4 +173,3 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 - Resume and complete the SelfCheckGPT run once Groq's daily quota resets; document results in `docs/all_results.md` and mark issue #20 §3 item 8 done.
 - Re-run the CVE-bait and ATT&CK-bait suites against `gpt-oss-20b` to check whether the baseline hallucination rate shifted from the numbers reported for `llama-3.1-8b-instant`.
 - Presidio PII redaction (`docs/ROADMAP_PLAN.md` §5) — still zero coverage, next major unbuilt item after the SelfCheckGPT comparison lands.
-
