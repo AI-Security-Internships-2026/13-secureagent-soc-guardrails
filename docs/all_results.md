@@ -206,7 +206,7 @@ Split the result into 4 categories instead of a flat yes/no:
 | 2 | 11.74 | 3.83 | 0.54 |
 | 4 | 18.19 | 0.51 | 0.33 |
 
-**What it means:** The 4-thread slowdown from earlier wasn't a fluke — it's consistently ~14x slower than 1 or 2 threads, with *low* variance (stdev only 0.02–0.29s) across repeats. Low variance + reproducible = a real effect worth investigating, not noise to write off. That investigation is #12. Multiprocessing is confirmed worse than threading across the board here, consistent with #8.
+**What it means:** The 4-thread slowdown from earlier wasn't a fluke — it's consistently ~7.7x slower than 2 threads (8.99s vs. 1.17s) and ~4.7x slower than 1 thread (8.99s vs. 1.90s), with *low* variance (stdev only 0.05–0.29s) across repeats. Low variance + reproducible = a real effect worth investigating, not noise to write off. That investigation is #12. Multiprocessing is confirmed worse than threading across the board here, consistent with #8.
 
 ---
 
