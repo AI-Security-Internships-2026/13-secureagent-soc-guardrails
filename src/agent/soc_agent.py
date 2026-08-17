@@ -5,6 +5,7 @@ from src.guardrails.attack_grounding import (
     annotate_ungrounded_attack_citations,
 )
 from src.guardrails.evidence_pack import build_evidence_pack
+from src.guardrails.pii_guardrail import redact_report_fields
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -83,6 +84,7 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
             "cve_verifications": [],
             "hallucinated_attack_techniques": [],
             "attack_technique_verifications": [],
+            "pii_detections": [],
             "output_guardrail_flagged": False,
             "requires_review": False,
             "evidence_pack": evidence_pack,
@@ -123,8 +125,12 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     report["hallucinated_attack_techniques"] = attack_check["ungrounded_attack_techniques"]
     report["attack_technique_verifications"] = attack_check["verifications"]
 
-    report["output_guardrail_flagged"] = cve_check["flagged"] or attack_check["flagged"]
-    report["requires_review"] = cve_check["requires_review"] or attack_check["requires_review"]
+    pii_result = redact_report_fields(report)
+    report.update(pii_result["redacted_fields"])
+    report["pii_detections"] = pii_result["detections"]
+
+    report["output_guardrail_flagged"] = cve_check["flagged"] or attack_check["flagged"] or pii_result["pii_found"]
+    report["requires_review"] = cve_check["requires_review"] or attack_check["requires_review"] or pii_result["pii_found"]
     report["evidence_pack"] = evidence_pack
 
     return report

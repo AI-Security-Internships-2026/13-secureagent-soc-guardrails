@@ -463,13 +463,14 @@ with tab_results:
     mp_results = load_json("multiprocessing_benchmark_results.json")
     cve_bait_results = load_json("cve_bait_results.json")
     attack_bait_results = load_json("attack_bait_results.json")
+    pii_bait_results = load_json("pii_bait_results.json")
     soc_integration_results = load_json("soc_integration_results.json")
     soc_cve_pool_results = load_json("soc_integration_cve_pool_results.json")
     wazuh_results = load_json("wazuh_integration_results.json")
 
     st.subheader("Summary")
 
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 
     if guardrail_results is not None:
         blocked = sum(1 for r in guardrail_results if r.get("guardrail_blocked"))
@@ -507,6 +508,13 @@ with tab_results:
                    f"{attack_bait_results['ungrounded_count']}/{attack_bait_results['total_tested']} ungrounded citation(s)")
     else:
         c6.metric("ATT&CK hallucination rate", "—")
+
+    if pii_bait_results is not None:
+        c7.metric("PII redaction rate (bait alerts)",
+                   f"{pii_bait_results['pii_alerts_detection_rate']:.1%}" if pii_bait_results['pii_alerts_detection_rate'] is not None else "—",
+                   f"{pii_bait_results['clean_alerts_false_positives']} false positive(s) on clean alerts")
+    else:
+        c7.metric("PII redaction rate", "—")
 
     st.markdown("**Independent alert sources** (not hand-authored — rule-engine-generated or live-observed)")
     d1, d2, d3 = st.columns(3)
@@ -614,6 +622,29 @@ with tab_results:
 
     st.divider()
 
+    st.subheader("Output guardrail — PII redaction test")
+    st.caption(
+        "Presidio-based redaction (Threat T3, docs/proposal.md) over the generated report's "
+        "own text — different question from the CVE/ATT&CK checks above: not 'did the model "
+        "hallucinate a claim', but 'did sensitive data present in the raw alert survive "
+        "unredacted into the report'. See docs/ROADMAP_PLAN.md §5."
+    )
+    if pii_bait_results is not None:
+        st.dataframe(
+            pd.DataFrame(pii_bait_results["results"])[
+                ["alert_id", "kind", "expected_entities", "detected_entities", "pii_found", "residual_pii"]
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )
+        if pii_bait_results["residual_pii_after_redaction_count"] > 0:
+            st.warning(f"{pii_bait_results['residual_pii_after_redaction_count']} alert(s) had PII survive "
+                       f"redaction — see 'residual_pii' column.")
+    else:
+        st.info("No PII-bait results found yet — run: python -m experiments.evaluation.pii_bait_test")
+
+    st.divider()
+
     st.subheader("Secure_SOC_AI integration — rule-engine-generated incidents")
     st.caption(
         "Incidents from Secure_SOC_AI's own detection + correlation layer (76 incidents, "
@@ -682,7 +713,7 @@ with tab_results:
     view_choice = st.radio(
         "Source",
         ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test", "ATT&CK bait test",
-         "Secure_SOC_AI incidents", "CVE pool", "Wazuh (live)"],
+         "PII bait test", "Secure_SOC_AI incidents", "CVE pool", "Wazuh (live)"],
         horizontal=True,
     )
 
@@ -696,6 +727,8 @@ with tab_results:
         st.dataframe(pd.DataFrame(cve_bait_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "ATT&CK bait test" and attack_bait_results is not None:
         st.dataframe(pd.DataFrame(attack_bait_results["results"]), hide_index=True, use_container_width=True)
+    elif view_choice == "PII bait test" and pii_bait_results is not None:
+        st.dataframe(pd.DataFrame(pii_bait_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "Secure_SOC_AI incidents" and soc_integration_results is not None:
         st.dataframe(pd.DataFrame(flatten_report_rows(
             soc_integration_results["results"], ["incident_id", "entity", "rule_ids", "ground_truth_mitre"],
