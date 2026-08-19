@@ -120,6 +120,7 @@ cd 13-secureagent-soc-guardrails
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm  # required by the PII-redaction guardrail (Presidio's NER)
 python src/main.py
 
 # Create your Week 1 branch

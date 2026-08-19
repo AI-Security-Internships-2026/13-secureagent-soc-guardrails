@@ -17,6 +17,7 @@ from src.agent.alert_schema import SecurityAlert, SAMPLE_ALERTS
 from src.agent.soc_agent import analyse_alert
 from src.data.load_cicids2017 import load_cicids2017_alerts
 from experiments.evaluation.cve_bait_alerts import CVE_BAIT_ALERTS
+from experiments.evaluation.attack_bait_alerts import ATTACK_BAIT_ALERTS
 
 RESULTS_DIR = "experiments/results"
 
@@ -74,7 +75,7 @@ st.markdown(
 st.title("SecureAgent-SOC")
 
 
-tab_live, tab_results = st.tabs(["Live Demo", "Results Viewer"])
+tab_live, tab_feed, tab_results = st.tabs(["Live Demo", "Live Feed", "Results Viewer"])
 
 
 with tab_live:
@@ -85,7 +86,9 @@ with tab_live:
 
         source_choice = st.radio(
             "Alert source",
-            ["Synthetic samples", "CICIDS2017", "CVE-bait (output guardrail demo)", "Custom"],
+            ["Synthetic samples", "CICIDS2017", "CVE-bait (output guardrail demo)",
+             "ATT&CK-bait (output guardrail demo)", "Secure_SOC_AI incidents",
+             "Wazuh (live)", "Custom"],
             horizontal=True,
         )
 
@@ -98,17 +101,97 @@ with tab_live:
 
         elif source_choice == "CVE-bait (output guardrail demo)":
             st.caption(
-                "Alerts worded to test the output guardrail — BAIT-006 directly "
-                "asks for a CVE citation and is the most likely to trigger a "
-                "flag. Others describe vulnerabilities by symptom only."
+                "100 alerts describing real vulnerabilities by symptom only, never by "
+                "CVE number — 97 never mention a CVE at all (0/97 ever produced an "
+                "ungrounded citation in testing); BAIT-002, 011, and 017 explicitly ask "
+                "the model to cite one it wasn't given. Defaults to BAIT-017, which "
+                "cited a real but wrong CVE (DogWalk instead of the correct Follina) — "
+                "the most illustrative flagged example."
             )
             preset_names = [f"{a.alert_id} ({a.event_type})" for a in CVE_BAIT_ALERTS]
+            default_idx = next((i for i, a in enumerate(CVE_BAIT_ALERTS) if a.alert_id == "BAIT-017"), 0)
             choice_idx = st.selectbox(
                 "Pick a bait alert", range(len(CVE_BAIT_ALERTS)),
                 format_func=lambda i: preset_names[i],
-                index=len(CVE_BAIT_ALERTS) - 1,  # defaults to BAIT-006
+                index=default_idx,
             )
             sample = CVE_BAIT_ALERTS[choice_idx]
+
+        elif source_choice == "ATT&CK-bait (output guardrail demo)":
+            st.caption(
+                "6 alerts describing MITRE ATT&CK technique behavior by symptom only. "
+                "Defaults to ATTACK-BAIT-005, which cited T1216 (System Script Proxy "
+                "Execution) for what was actually RDP lateral movement with stolen "
+                "credentials — a real technique ID, just the wrong one."
+            )
+            preset_names = [f"{a.alert_id} ({a.event_type})" for a in ATTACK_BAIT_ALERTS]
+            default_idx = next((i for i, a in enumerate(ATTACK_BAIT_ALERTS) if a.alert_id == "ATTACK-BAIT-005"), 0)
+            choice_idx = st.selectbox(
+                "Pick a bait alert", range(len(ATTACK_BAIT_ALERTS)),
+                format_func=lambda i: preset_names[i],
+                index=default_idx,
+            )
+            sample = ATTACK_BAIT_ALERTS[choice_idx]
+
+        elif source_choice == "Secure_SOC_AI incidents":
+            st.caption(
+                "Incidents from Secure_SOC_AI's own rule engine + correlator (76 incidents "
+                "generated from synthetic_events.jsonl), not hand-authored. "
+                "See docs/INTEGRATION_PLAN.md."
+            )
+            if st.button("Load incidents"):
+                from secure_soc_ai.correlate import Correlator
+                from secure_soc_ai.detect.rule_engine import RuleEngine
+                from secure_soc_ai.ingest.jsonl_source import JsonlFileSource
+                from experiments.evaluation.soc_integration_test import (
+                    EVENTS_PATH, RULES_DIR, incident_to_security_alert,
+                )
+
+                rules = RuleEngine.from_directory(RULES_DIR)
+                correlator = Correlator()
+                incidents = {}
+                for event in JsonlFileSource(EVENTS_PATH).read():
+                    for alert in rules.evaluate(event):
+                        incident, _ = correlator.process(alert)
+                        if incident is not None:
+                            incidents[incident.id] = incident
+                for incident in correlator.flush_stale():
+                    incidents[incident.id] = incident
+                ordered = sorted(incidents.values(), key=lambda i: i.created_at)
+                st.session_state["soc_incidents_loaded"] = [incident_to_security_alert(i) for i in ordered]
+
+            loaded = st.session_state.get("soc_incidents_loaded", [])
+            if loaded:
+                preset_names = [f"{a.alert_id} ({a.event_type})" for a in loaded]
+                choice_idx = st.selectbox("Pick an incident", range(len(loaded)), format_func=lambda i: preset_names[i])
+                sample = loaded[choice_idx]
+            else:
+                st.info("Click 'Load incidents' to generate them from the rule engine.")
+
+        elif source_choice == "Wazuh (live)":
+            st.caption(
+                "Pulls real alerts from a running local Wazuh agent (Docker, local-only) — "
+                "requires the stack to be up. See docs/ROADMAP_PLAN.md §10a."
+            )
+            if st.button("Fetch new alerts from Wazuh"):
+                from requests.exceptions import RequestException
+                from experiments.evaluation.wazuh_integration_test import (
+                    dedupe_alerts, fetch_recent_alerts, wazuh_alert_to_security_alert,
+                )
+                try:
+                    docs = dedupe_alerts(fetch_recent_alerts())
+                    st.session_state["wazuh_loaded"] = [wazuh_alert_to_security_alert(d) for d in docs]
+                except RequestException as e:
+                    st.error(f"Could not reach the Wazuh indexer — is the Docker stack running? ({e})")
+                    st.session_state["wazuh_loaded"] = []
+
+            loaded = st.session_state.get("wazuh_loaded", [])
+            if loaded:
+                preset_names = [f"{a.alert_id} ({a.event_type})" for a in loaded]
+                choice_idx = st.selectbox("Pick a live alert", range(len(loaded)), format_func=lambda i: preset_names[i])
+                sample = loaded[choice_idx]
+            else:
+                st.info("Click 'Fetch new alerts from Wazuh' to pull the latest from the indexer.")
 
         elif source_choice == "CICIDS2017":
             csv_path = st.text_input(
@@ -250,6 +333,84 @@ with tab_live:
             st.info("Fill in or load an alert on the left, then click Analyze.")
 
 
+with tab_feed:
+    st.subheader("Live Wazuh feed")
+    st.caption(
+        "Continuously polls the local Wazuh indexer and runs every new alert through "
+        "the guardrailed pipeline automatically — no manual fetch needed. Requires the "
+        "Wazuh Docker stack to be running (see docs/ROADMAP_PLAN.md §10a)."
+    )
+
+    ctrl1, ctrl2, ctrl3 = st.columns([1, 2, 1])
+    with ctrl1:
+        live_on = st.toggle("Live feed active", value=False, key="live_feed_active")
+    with ctrl2:
+        poll_interval = st.slider("Poll interval (seconds)", 5, 60, 10, key="live_feed_interval")
+    with ctrl3:
+        if st.button("Clear feed", use_container_width=True):
+            st.session_state["live_feed_items"] = []
+            st.session_state["live_feed_seen"] = set()
+
+    st.session_state.setdefault("live_feed_items", [])
+    st.session_state.setdefault("live_feed_seen", set())
+
+    from requests.exceptions import RequestException
+    from experiments.evaluation.wazuh_integration_test import (
+        dedupe_alerts, fetch_recent_alerts, wazuh_alert_to_security_alert,
+    )
+
+    @st.fragment(run_every=f"{poll_interval}s" if live_on else None)
+    def _live_feed_poll():
+        if live_on:
+            try:
+                docs = dedupe_alerts(fetch_recent_alerts())
+                new_count = 0
+                for doc in docs:
+                    src = doc["_source"]
+                    # Same dedupe key as wazuh_integration_test.py: Wazuh's SCA
+                    # module re-runs its full checklist on every scan and reindexes
+                    # identical content under a new _id, so keying on rule.id +
+                    # full_log (not _id) is what actually stops repeated LLM calls
+                    # on the same unchanged alert across polls.
+                    key = (src.get("rule", {}).get("id"), src.get("full_log"))
+                    if key in st.session_state["live_feed_seen"]:
+                        continue
+                    st.session_state["live_feed_seen"].add(key)
+
+                    alert = wazuh_alert_to_security_alert(doc)
+                    report = analyse_alert(alert)
+                    st.session_state["live_feed_items"].insert(0, {
+                        "fetched_at": time.strftime("%H:%M:%S"),
+                        "alert_id": alert.alert_id,
+                        "rule_id": src.get("rule", {}).get("id"),
+                        "rule_level": src.get("rule", {}).get("level"),
+                        "severity_assessment": report.get("severity_assessment"),
+                        "guardrail_blocked": report.get("guardrail_blocked", False),
+                        "requires_review": report.get("requires_review", False),
+                        "hallucinated_cves": report.get("hallucinated_cves", []),
+                        "hallucinated_attack_techniques": report.get("hallucinated_attack_techniques", []),
+                        "threat_summary": report.get("threat_summary"),
+                    })
+                    new_count += 1
+                st.session_state["live_feed_items"] = st.session_state["live_feed_items"][:100]
+                st.caption(
+                    f"Live — last polled {time.strftime('%H:%M:%S')}, next in {poll_interval}s — "
+                    f"{new_count} new alert(s) this poll, {len(st.session_state['live_feed_items'])} total"
+                )
+            except RequestException as e:
+                st.error(f"Could not reach the Wazuh indexer — is the Docker stack running? ({e})")
+        else:
+            st.caption("Paused — toggle 'Live feed active' above to start polling.")
+
+        items = st.session_state["live_feed_items"]
+        if items:
+            st.dataframe(pd.DataFrame(items), hide_index=True, use_container_width=True)
+        else:
+            st.info("No alerts seen yet.")
+
+    _live_feed_poll()
+
+
 with tab_results:
 
     def load_json(filename):
@@ -282,6 +443,19 @@ with tab_results:
             flat_rows.append(flat)
         return flat_rows
 
+    def flatten_report_rows(rows, meta_keys):
+        """soc_integration/wazuh_integration results nest the guardrail
+        report under 'report' alongside per-row metadata (e.g. rule_id) --
+        unlike the bait tests, which store the report flat. Flatten for
+        table display.
+        """
+        flat_rows = []
+        for row in rows:
+            flat = {k: row.get(k) for k in meta_keys}
+            flat.update(row.get("report", {}))
+            flat_rows.append(flat)
+        return flat_rows
+
     guardrail_results = load_json("guardrail_results.json")
     cicids_results = load_json("cicids2017_results.json")
     fp_results = load_json("fp_rate_results.json")
@@ -289,10 +463,14 @@ with tab_results:
     mp_results = load_json("multiprocessing_benchmark_results.json")
     cve_bait_results = load_json("cve_bait_results.json")
     attack_bait_results = load_json("attack_bait_results.json")
+    pii_bait_results = load_json("pii_bait_results.json")
+    soc_integration_results = load_json("soc_integration_results.json")
+    soc_cve_pool_results = load_json("soc_integration_cve_pool_results.json")
+    wazuh_results = load_json("wazuh_integration_results.json")
 
     st.subheader("Summary")
 
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 
     if guardrail_results is not None:
         blocked = sum(1 for r in guardrail_results if r.get("guardrail_blocked"))
@@ -330,6 +508,35 @@ with tab_results:
                    f"{attack_bait_results['ungrounded_count']}/{attack_bait_results['total_tested']} ungrounded citation(s)")
     else:
         c6.metric("ATT&CK hallucination rate", "—")
+
+    if pii_bait_results is not None:
+        c7.metric("PII redaction rate (bait alerts)",
+                   f"{pii_bait_results['pii_alerts_detection_rate']:.1%}" if pii_bait_results['pii_alerts_detection_rate'] is not None else "—",
+                   f"{pii_bait_results['clean_alerts_false_positives']} false positive(s) on clean alerts")
+    else:
+        c7.metric("PII redaction rate", "—")
+
+    st.markdown("**Independent alert sources** (not hand-authored — rule-engine-generated or live-observed)")
+    d1, d2, d3 = st.columns(3)
+
+    if soc_integration_results is not None:
+        d1.metric("Secure_SOC_AI incidents tested", soc_integration_results["total_tested"],
+                   f"{soc_integration_results['requires_review_count']} requiring review")
+    else:
+        d1.metric("Secure_SOC_AI incidents tested", "—")
+
+    if soc_cve_pool_results is not None:
+        s = soc_cve_pool_results["summary"]
+        d2.metric("CVE pool: correct citation when told", f"{s['stated']['cited_ground_truth_cve_rate']:.0%}",
+                   f"vs {s['bait']['cited_ground_truth_cve_rate']:.0%} when not told")
+    else:
+        d2.metric("CVE pool: correct citation when told", "—")
+
+    if wazuh_results is not None:
+        d3.metric("Wazuh live alerts tested", wazuh_results["total_tested"],
+                   f"{wazuh_results['requires_review_count']} requiring review")
+    else:
+        d3.metric("Wazuh live alerts tested", "—")
 
     st.divider()
 
@@ -415,10 +622,98 @@ with tab_results:
 
     st.divider()
 
+    st.subheader("Output guardrail — PII redaction test")
+    st.caption(
+        "Presidio-based redaction (Threat T3, docs/proposal.md) over the generated report's "
+        "own text — different question from the CVE/ATT&CK checks above: not 'did the model "
+        "hallucinate a claim', but 'did sensitive data present in the raw alert survive "
+        "unredacted into the report'. See docs/ROADMAP_PLAN.md §5."
+    )
+    if pii_bait_results is not None:
+        st.dataframe(
+            pd.DataFrame(pii_bait_results["results"])[
+                ["alert_id", "kind", "expected_entities", "detected_entities", "pii_found", "residual_pii"]
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )
+        if pii_bait_results["residual_pii_after_redaction_count"] > 0:
+            st.warning(f"{pii_bait_results['residual_pii_after_redaction_count']} alert(s) had PII survive "
+                       f"redaction — see 'residual_pii' column.")
+    else:
+        st.info("No PII-bait results found yet — run: python -m experiments.evaluation.pii_bait_test")
+
+    st.divider()
+
+    st.subheader("Secure_SOC_AI integration — rule-engine-generated incidents")
+    st.caption(
+        "Incidents from Secure_SOC_AI's own detection + correlation layer (76 incidents, "
+        "7 rule types), not hand-authored — tests the pipeline against realistic, "
+        "non-adversarial alerts. See docs/INTEGRATION_PLAN.md."
+    )
+    if soc_integration_results is not None:
+        st.dataframe(
+            pd.DataFrame(flatten_report_rows(
+                soc_integration_results["results"],
+                ["incident_id", "entity", "rule_ids", "ground_truth_mitre"],
+            ))[["incident_id", "entity", "rule_ids", "severity_assessment",
+                "hallucinated_attack_techniques", "hallucinated_cves", "requires_review"]],
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.info("No results found yet — run: python -m experiments.evaluation.soc_integration_test")
+
+    st.divider()
+
+    st.subheader("CVE pool — 15 real CVEs, bait vs. stated citation style")
+    st.caption(
+        "Complements the CVE-bait test above at larger scale (60 alerts, 15 real NVD-listed "
+        "CVEs). 'Bait' withholds the CVE number to test spontaneous citation; 'stated' gives "
+        "it directly to test correct reflection. See docs/ROADMAP_PLAN.md §5."
+    )
+    if soc_cve_pool_results is not None:
+        st.dataframe(
+            pd.DataFrame(flatten_report_rows(
+                soc_cve_pool_results["results"],
+                ["ground_truth_cve", "cve_name", "style"],
+            ))[["ground_truth_cve", "cve_name", "style", "severity_assessment",
+                "hallucinated_cves", "requires_review"]],
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.info("No results found yet — run: python -m experiments.evaluation.soc_integration_cve_pool_test")
+
+    st.divider()
+
+    st.subheader("Wazuh integration — live agent alerts")
+    st.caption(
+        "Real alerts observed from a running Wazuh agent (Docker, local-only), not "
+        "synthetic or hand-authored — includes a real SSH brute-force attempt Wazuh's own "
+        "correlation logic flagged on its own. See docs/ROADMAP_PLAN.md §10a."
+    )
+    if wazuh_results is not None:
+        st.dataframe(
+            pd.DataFrame(flatten_report_rows(
+                wazuh_results["results"],
+                ["wazuh_alert_id", "rule_id", "rule_level"],
+            ))[["rule_id", "rule_level", "severity_assessment",
+                "hallucinated_attack_techniques", "hallucinated_cves", "requires_review"]],
+            hide_index=True,
+            use_container_width=True,
+        )
+    else:
+        st.info("No results found yet — run: python -m experiments.evaluation.wazuh_integration_test "
+                "(requires the local Wazuh Docker stack to be running)")
+
+    st.divider()
+
     st.subheader("Alert results")
     view_choice = st.radio(
         "Source",
-        ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test", "ATT&CK bait test"],
+        ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test", "ATT&CK bait test",
+         "PII bait test", "Secure_SOC_AI incidents", "CVE pool", "Wazuh (live)"],
         horizontal=True,
     )
 
@@ -432,5 +727,19 @@ with tab_results:
         st.dataframe(pd.DataFrame(cve_bait_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "ATT&CK bait test" and attack_bait_results is not None:
         st.dataframe(pd.DataFrame(attack_bait_results["results"]), hide_index=True, use_container_width=True)
+    elif view_choice == "PII bait test" and pii_bait_results is not None:
+        st.dataframe(pd.DataFrame(pii_bait_results["results"]), hide_index=True, use_container_width=True)
+    elif view_choice == "Secure_SOC_AI incidents" and soc_integration_results is not None:
+        st.dataframe(pd.DataFrame(flatten_report_rows(
+            soc_integration_results["results"], ["incident_id", "entity", "rule_ids", "ground_truth_mitre"],
+        )), hide_index=True, use_container_width=True)
+    elif view_choice == "CVE pool" and soc_cve_pool_results is not None:
+        st.dataframe(pd.DataFrame(flatten_report_rows(
+            soc_cve_pool_results["results"], ["ground_truth_cve", "cve_name", "style"],
+        )), hide_index=True, use_container_width=True)
+    elif view_choice == "Wazuh (live)" and wazuh_results is not None:
+        st.dataframe(pd.DataFrame(flatten_report_rows(
+            wazuh_results["results"], ["wazuh_alert_id", "rule_id", "rule_level"],
+        )), hide_index=True, use_container_width=True)
     else:
         st.info("No saved results found for this source yet — run the corresponding script first.")

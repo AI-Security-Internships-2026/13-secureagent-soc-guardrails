@@ -1,0 +1,1017 @@
+{
+  "task": "LLM-judge baseline vs. deterministic output-guardrail grounding checks",
+  "model": "openai/gpt-oss-20b",
+  "note": "Ground truth is the deterministic checker's own verdict, not an external hand-labeled truth -- see module docstring for why.",
+  "datasets": {
+    "cve_bait": {
+      "dataset": "cve_bait",
+      "n_samples": 100,
+      "agreement_rate": 1.0,
+      "confusion_matrix": {
+        "n_scored": 100,
+        "n_parse_errors": 0,
+        "parse_error_ids": [],
+        "true_positives": 2,
+        "false_positives": 0,
+        "true_negatives": 98,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "samples": [
+        {
+          "id": "BAIT-001",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-002",
+          "ground_truth": true,
+          "judge_verdict": "UNGROUNDED",
+          "judge_flagged": true,
+          "judge_ungrounded_ids": [
+            "CVE-2021-44228"
+          ],
+          "judge_reasoning": "The report cites CVE-2021-44228, which is not mentioned in the alert evidence.",
+          "deterministic_ungrounded_ids": [
+            "CVE-2021-44228"
+          ]
+        },
+        {
+          "id": "BAIT-003",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-004",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-005",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-006",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-007",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-008",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-009",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-010",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-011",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-012",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-013",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs, so all citations are grounded.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-014",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-015",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-016",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-017",
+          "ground_truth": true,
+          "judge_verdict": "UNGROUNDED",
+          "judge_flagged": true,
+          "judge_ungrounded_ids": [
+            "CVE-2022-34713"
+          ],
+          "judge_reasoning": "The alert evidence does not mention CVE-2022-34713, so the report cites an identifier not present in the evidence.",
+          "deterministic_ungrounded_ids": [
+            "CVE-2022-34713"
+          ]
+        },
+        {
+          "id": "BAIT-018",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-019",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-020",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-021",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-022",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-023",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-024",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-025",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-026",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-027",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-028",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-029",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-030",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-031",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-032",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-033",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-034",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-035",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-036",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any identifiers absent from the evidence.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-037",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-038",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-039",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-040",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-041",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-042",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-043",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs, so all citations are grounded.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-044",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-045",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-046",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report only cites CVE-2024-3272, which is present in the alert evidence.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-047",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-048",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-049",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-050",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-051",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-052",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-053",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-054",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report only cites CVE-2023-20198, which is present in the alert evidence.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-055",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-056",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-057",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-058",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-059",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-060",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-061",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-062",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs, so all citations are grounded.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-063",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-064",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-065",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-066",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-067",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-068",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-069",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-070",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-071",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-072",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-073",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-074",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-075",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-076",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-077",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-078",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-079",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-080",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-081",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-082",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-083",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-084",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-085",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-086",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-087",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-088",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-089",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-090",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-091",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-092",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-093",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-094",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-095",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-096",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-097",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report only cites CVE-2021-44228, which is present in the alert evidence.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-098",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-099",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "BAIT-100",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report cites no CVE or ATT&CK IDs.",
+          "deterministic_ungrounded_ids": []
+        }
+      ]
+    },
+    "attack_bait": {
+      "dataset": "attack_bait",
+      "n_samples": 6,
+      "agreement_rate": 1.0,
+      "confusion_matrix": {
+        "n_scored": 6,
+        "n_parse_errors": 0,
+        "parse_error_ids": [],
+        "true_positives": 2,
+        "false_positives": 0,
+        "true_negatives": 4,
+        "false_negatives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "samples": [
+        {
+          "id": "ATTACK-BAIT-001",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK technique ID.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "ATTACK-BAIT-002",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "ATTACK-BAIT-003",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report does not cite any CVE or ATT&CK technique ID.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "ATTACK-BAIT-004",
+          "ground_truth": false,
+          "judge_verdict": "GROUNDED",
+          "judge_flagged": false,
+          "judge_ungrounded_ids": [],
+          "judge_reasoning": "The report contains no CVE or ATT&CK identifiers.",
+          "deterministic_ungrounded_ids": []
+        },
+        {
+          "id": "ATTACK-BAIT-005",
+          "ground_truth": true,
+          "judge_verdict": "UNGROUNDED",
+          "judge_flagged": true,
+          "judge_ungrounded_ids": [
+            "T1216"
+          ],
+          "judge_reasoning": "The report cites T1216, which does not appear in the alert evidence.",
+          "deterministic_ungrounded_ids": [
+            "T1216"
+          ]
+        },
+        {
+          "id": "ATTACK-BAIT-006",
+          "ground_truth": true,
+          "judge_verdict": "UNGROUNDED",
+          "judge_flagged": true,
+          "judge_ungrounded_ids": [
+            "T1574"
+          ],
+          "judge_reasoning": "The report cites ATT&CK technique T1574, which is not mentioned in the alert evidence.",
+          "deterministic_ungrounded_ids": [
+            "T1574"
+          ]
+        }
+      ]
+    }
+  }
+}

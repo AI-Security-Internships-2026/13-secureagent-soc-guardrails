@@ -49,9 +49,9 @@ claim in the paper, not just a nice-to-have improvement.
 | 2 | Inline-annotate ungrounded citations in report text (not just sibling JSON) | ✅ Done | `annotate_ungrounded_citations()` / `annotate_ungrounded_attack_citations()` both call shared `annotate_ungrounded_mentions()` (`grounding_utils.py`), tagging every occurrence in `REPORT_TEXT_FIELDS` inline |
 | 3 | MITRE ATT&CK checker (2nd instance of CVE-checker pattern) | ✅ Done | `attack_grounding.py` — extract → grounded check → verify against local MITRE data → classify |
 | 4 | Evidence Pack (structured fields, explicit grounding surface) | ✅ Done | `evidence_pack.py`; `soc_agent.py` passes `evidence_pack["text"]` into both grounding checks instead of the raw `format_alert()` blob |
-| 5 | LLM-judge baseline added to CVE-bait benchmark | ❌ Not built | No code anywhere; only literature-review citations (FActScore, LLM-as-a-Judge) |
+| 5 | LLM-judge baseline added to CVE-bait benchmark | ✅ Done, 2026-08-14 | `src/guardrails/llm_judge.py` + `experiments/evaluation/llm_judge_baseline_test.py`, built for both CVE-bait and ATT&CK-bait together. 100% agreement with the deterministic checker on both sets, but only 4 positive cases total (2 CVE + 2 ATT&CK) — #23. Made citable via `experiments/evaluation/llm_judge_synthetic_test.py`: a class-balanced n=212 calibration set (106 grounded / 106 with a real-but-foreign identifier injected). **100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+ on every metric** — #24. |
 | 6 | Re-run CVE-bait-style adversarial test against the ATT&CK checker | ✅ Done | `attack_bait_test.py` / `attack_bait_alerts.py` — real run: 2/6 ungrounded (33%), both classified REAL_BUT_IRRELEVANT |
-| 7 | Expand the CVE-bait test set size | ❌ Not done | Still n=6 — too small to support a journal-level claim |
+| 7 | Expand the CVE-bait test set size | ✅ Done, 2026-08-12 | Expanded in two passes: `cve_bait_alerts.py` grown 6 → 25 (individually web-verified real CVEs) → **100** (75 more sourced directly from CISA's official Known Exploited Vulnerabilities catalog, behavior descriptions derived from CISA's own real per-CVE text rather than hand-recalled). Re-run at n=100 (also resolves the earlier stale-data problem — the old n=6 result predated the stemmer and `requires_review` fixes): **2/100 ungrounded (2.0%), 2/100 requires_review (2.0%, matches ungrounded exactly — fix confirmed active)**. 95% Wilson CI on the rate: **[0.6%, 7.0%]** — a real, citable estimate now (was a 22.7-point-wide band at n=25). **Important nuance, found 2026-08-12 when double-checking the two flagged cases individually:** 97 of the 100 alerts never mention a CVE at all — 0/97 of these ever produced an ungrounded citation, so the true *spontaneous* hallucination rate is 0%, not 2%. Only 3 alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the model to cite a CVE identifier it wasn't given (a deliberate second variant, not the main methodology) — and both of the 2 flagged hits come from that subset of 3, not from the 97. `BAIT-011`, the third explicitly-asked alert, produced no ungrounded citation. Of the 2 flagged: `BAIT-002` cited `CVE-2021-44228` (Log4Shell) — **factually correct**, still flagged `REAL_AND_PLAUSIBLE`/review-required purely because the guardrail's rule is mechanical (not present in the input evidence = ungrounded, regardless of real-world correctness — a deliberately conservative design, not a false claim about accuracy). `BAIT-017` cited `CVE-2022-34713` "DogWalk" instead of the correct `CVE-2022-30190` Follina — both real MSDT vulnerabilities from the same year, `REAL_BUT_IRRELEVANT` — a genuine, concrete instance of the exact misattribution risk this project's paper is about, and the only one of the 100 that's a *wrong* citation rather than a correct-but-mechanically-flagged one. Results in `experiments/results/cve_bait_results.json`. Caught and fixed two real bugs while building the generator: a truncated-mid-write file (caught before running anything, via import check) and an unescaped-quote syntax error in one payload template. |
 | 8 | SelfCheckGPT comparison, actually implemented and run | ❌ Not built | Zero code references; design-decision mentions only in `docs/proposal.md` / `docs/literature-review.md`. Required by issue #20, not optional |
 
 ---
@@ -60,10 +60,10 @@ claim in the paper, not just a nice-to-have improvement.
 
 | # | Item | Status | Evidence |
 |---|---|---|---|
-| 9 | Hybrid input guardrail (deterministic first, Pytector fallback) | ❌ Not built | `input_guardrail.py` is still pure 8-pattern keyword matching. `README_guardrail_comparison.md` explicitly notes "the guardrail running in the SOC agent pipeline itself wasn't touched — this was a side-by-side test only" |
-| 10 | Benchmark hybrid vs. deterministic-only on the existing 29-sample set | ❌ Blocked on #9 | Current numbers (deterministic / LLM Guard / Pytector, run separately): recall 0.23 / 1.0 / 0.62; precision 1.0 / 0.87 / 1.0; latency ~0ms / 450ms / 452ms |
-| 11 | Larger, systematic eval dataset — 20-30 real injection examples/category, more CICIDS2017 benign samples | ❌ Not done | Still 29 samples total (13 injection / 16 benign) |
-| 12 | Re-run the issue #16 guardrail comparison on the bigger dataset once #11 exists | ❌ Blocked on #11 | — |
+| 9 | Hybrid input guardrail (deterministic first, Pytector fallback) | ✅ Done, 2026-08-10 | `check_injection_hybrid()` in `input_guardrail.py` — runs the existing deterministic check first, only calls Pytector if that finds nothing. Wired into the live pipeline (`soc_agent.py` now calls the hybrid, not the deterministic-only function). Real re-run of the 29-sample set (`guardrail_comparison/run_comparison.py`, now includes a 4th `hybrid` entry): recall 0.615 (up from baseline's 0.23, matches Pytector's own recall exactly since the deterministic layer is a strict subset of what Pytector catches), precision still 1.0 (0 false positives), median latency 172.96ms (faster than Pytector alone's 182.85ms and throughput nearly doubles, 6.2/sec vs 3.32/sec, because exact-pattern matches — 3/13 injections — short-circuit before the model ever runs). Results in `experiments/results/guardrail_comparison.json`. |
+| 10 | Benchmark hybrid vs. deterministic-only on the existing 29-sample set | ✅ Done (superseded by #12's 119-sample re-run below) | — |
+| 11 | Larger, systematic eval dataset — 20-30 real injection examples/category, more CICIDS2017 benign samples | ✅ Done, 2026-08-11 | `eval_dataset.json` grown from 29 → 119 samples (53 injection / 66 benign). `exact_pattern` 3→12 (hand-authored, tests literal deterministic matches — deliberately not sourced externally). `paraphrase_evasion` 5→23 (18 adapted from `deepset/prompt-injections`, HF, Apache-2.0 — real attacker override phrasing, payloads rewritten to SOC context, offensive/political source content dropped). `novel_strategy` 5→18 (13 adapted from `TrustAIRLab/in-the-wild-jailbreak-prompts`, HF, MIT, Shen et al. CCS'24, + deepset — DAN/dual-persona, Developer Mode, leetspeak/spaced-letter evasion, fake delimiter, fake-turn priming). Benign: +50 **real** `BENIGN`-labeled CICIDS2017 flow rows sampled directly from `datasets/cicids2017/*.csv` (all 5 day-files) via the existing `load_cicids2017_alerts()` loader — no new loader code needed. Every adapted entry has a `provenance` field citing source/license. Full breakdown in `README_guardrail_comparison.md`. |
+| 12 | Re-run the issue #16 guardrail comparison on the bigger dataset once #11 exists | ✅ Done, 2026-08-11 | Re-ran `run_comparison.py` on the 119-sample set: baseline P=1.0/R=0.264 (was 0.23 on 29 samples — confirms the earlier number wasn't a fluke of small-n). llm_guard P=0.962/R=0.943 (2 FP). pytector P=1.0/R=0.679. **hybrid P=1.0/R=0.736** (up from 0.615 on the old set — the larger hand-authored `exact_pattern` bucket gives it more free catches before falling back to Pytector). Results in `experiments/results/guardrail_comparison.json`. §8 significance test now also done — see §8 for the McNemar results (hybrid vs. Pytector not significant, hybrid vs. LLM Guard significant, baseline vs. hybrid significant). |
 
 ---
 
@@ -73,7 +73,7 @@ claim in the paper, not just a nice-to-have improvement.
 |---|---|---|
 | nDPI substring-match comparison | ❌ Unscoped, carried since Week 5 | No references anywhere in the repo |
 | Redo threading vs. multiprocessing benchmark (repeated runs, mean ± spread, larger n) | ⚠️ Partially done | Upgraded from single-shot to n=3 repeats this week; still deferred per your own call ("polish other tasks first, then repeat on the final pipeline") — full-pipeline n is still 6, and the mocked/synthetic-latency variant to separate scheduling overhead from live Groq behavior hasn't been built |
-| Presidio-based PII redaction | ❌ Genuinely missing since Week 1 | `presidio-analyzer`/`presidio-anonymizer` are in `requirements.txt` and named in the README tech stack, but **zero references in `src/`** — never wired in. This is not just an unbuilt nice-to-have: `docs/proposal.md` names it explicitly as the planned fix for **Threat T3 (PII leakage)**, output-guardrail tier, same as hallucination (T4, which *was* built). "PII leakage rate" is also a committed success metric in the proposal with no way to currently produce it. Needs: an output-guardrail step running Presidio over the generated report, a PII-bait test set (alerts containing names/IPs/emails/SSNs), and a dashboard section, mirroring the CVE/ATT&CK grounding pattern |
+| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25) |
 | Local RAG-based CVE verification (Chroma + small CPU embedding model) | ❌ Not started | Offline alternative to live NVD calls; would also enable a "recommend similar CVE" feature. No Chroma/RAG code anywhere in the repo. **Evidence this matters, found 2026-08-08:** ran a 60-alert CVE pool (15 real NVD-listed CVEs, bait-style vs. stated-style, see `experiments/results/soc_integration_cve_pool_results.json`) — when the CVE number is withheld and only the exploit behavior is described, the LLM cites the correct ground-truth CVE **0% of the time** (never hallucinates one either — it just doesn't volunteer a number at all). When the CVE is stated directly, it's correctly reflected 100% of the time. Confirms the current pipeline only *verifies claims the LLM already makes*, it never *identifies* a CVE from behavior alone — this RAG item is the fix, not yet built, deliberately deferred behind the higher-priority hybrid-guardrail/eval-set work for Aug 23 |
 | Real test suite | ✅ Done, Week 8 | 92 passing / 1 pre-existing unrelated failure (`experiments/nemo_test/test_rails.py`, async-fixture issue) |
 
@@ -97,10 +97,99 @@ claim in the paper, not just a nice-to-have improvement.
 
 ## 8. Statistical rigor requirement (attached to §3 item 7 / §4 item 12, not its own task)
 
-Once the CVE-bait test set is expanded (§3 #7) and the guardrail comparison
-is re-run on the larger dataset (§4 #12), add a significance test on the
-resulting comparison numbers before they go into the paper. This is a
-requirement attached to those two items, not a separate backlog entry.
+✅ Done, 2026-08-11 for the guardrail-comparison side. §4 #12 (guardrail
+comparison re-run) is done — see §4 for the 119-sample numbers
+(baseline/LLM Guard/Pytector/hybrid). Significance testing on those numbers
+is now built and run: `experiments/evaluation/guardrail_comparison/significance_test.py`.
+
+**Method: McNemar's test**, not a generic t-test or independent-samples
+test — all four implementations (baseline, LLM Guard, Pytector, hybrid)
+were run on the *same* 119 examples, so their predictions are paired per
+sample, not independent draws. McNemar's test is built for exactly this:
+paired binary outcomes on shared test items, using the discordant-pair
+counts (A right/B wrong vs. A wrong/B right) rather than raw accuracy.
+Implemented directly on scipy (exact binomial test when discordant pairs
+< 25, chi-square with continuity correction above that threshold — same
+25-pair cutoff `statsmodels.stats.contingency_tables.mcnemar` uses by
+default) rather than adding statsmodels as a new dependency just for this
+one test. Results in `experiments/results/guardrail_comparison_significance.json`.
+
+**Results** (paired on the same 119 samples, correctness = predicted label
+matches actual label):
+- **hybrid vs. Pytector**: 3 discordant pairs (hybrid right/Pytector wrong:
+  3, reverse: 0), exact binomial p=0.250 — **not significant**. The
+  exact-pattern short-circuit's apparent recall edge (0.736 vs. 0.679) is
+  not distinguishable from noise at this sample size — too few discordant
+  cases to draw a real conclusion, not evidence the effect is fake.
+- **hybrid vs. LLM Guard**: 17 discordant pairs (hybrid-only: 4,
+  llm_guard-only: 13), exact binomial p=0.049 — **significant** (just
+  under alpha=0.05). LLM Guard's higher recall is a real, measurable
+  advantage over hybrid on this set, not sampling noise — though still
+  worth treating cautiously given how close the p-value sits to the
+  threshold.
+- **baseline vs. hybrid**: 25 discordant pairs (all in hybrid's favor —
+  baseline-only-correct: 0), chi-square p<0.001 — **clearly significant**,
+  as expected. Confirms the test setup itself is working correctly (this
+  was included specifically as a sanity check).
+
+**What this means for the paper**: don't claim hybrid beats Pytector on
+this dataset — that comparison isn't statistically resolved yet, more
+injection samples would be needed to tell. Do claim hybrid beats the
+deterministic baseline (strongly) and that LLM Guard beats hybrid on raw
+recall (real effect, though the latency trade-off argument from the
+README still applies — LLM Guard being *more accurate* doesn't make it
+*better for this deployment*, just better on this one axis).
+
+Once the CVE-bait test set is also expanded (§3 #7), re-run the same
+`significance_test.py`-style testing on that comparison's numbers too.
+This is a requirement attached to those two items, not a separate backlog
+entry.
+
+### 8a. Trial: LLM Guard as the hybrid's fallback instead of Pytector (2026-08-11)
+
+Prompted directly by the §8 finding that LLM Guard's recall edge over
+hybrid is real — natural question: can the same deterministic-first
+architecture recover that recall by swapping which model it falls back
+to? Built `scan_hybrid_llmguard` in
+`experiments/evaluation/guardrail_comparison/adapters.py` (benchmark-only,
+**not wired into `soc_agent.py`**) and ran it through the same 119-sample
+comparison plus McNemar testing against the other four.
+
+**Finding: no benefit over LLM Guard alone.** `hybrid_llmguard` produced
+the *exact same* confusion matrix as plain LLM Guard (TP=50, FP=2, TN=64,
+FN=3) — McNemar's test against LLM Guard came back **degenerate: zero
+discordant pairs across all 119 samples**, meaning it's not "close to" LLM
+Guard, it's identical, sample for sample. The deterministic pre-filter
+only pays off when the fallback it's protecting has real blind spots
+(Pytector, recall 0.679, where the fix moved recall to 0.736 — see §8).
+LLM Guard's recall (0.943) is already high enough that the 12
+`exact_pattern` samples the fast layer would catch for free were ones LLM
+Guard already got right, so the wrapper adds a redundant fast path and
+nothing else.
+
+**Conclusion**: no reason to ship `hybrid_llmguard`. If LLM Guard's
+recall/FP/latency trade-off is ever preferred for production, switch to
+LLM Guard directly — wrapping it in the hybrid architecture buys nothing.
+
+**Side effect — a real latency methodology bug found and fixed**: while
+building this trial, checked exactly which sample caused LLM Guard's and
+Pytector's extreme latency outliers noted in §4 (LLM Guard: 129.5 seconds
+on one sample). Both landed at position 0 — the first sample each
+implementation ever processed, i.e. one-time model-loading cost, not a
+recurring stall. Fixed by adding a `WARMUPS` step to `adapters.py` /
+`run_comparison.py` that pays this cost once before the timed loop starts,
+matching how a real deployment would load the model once at startup.
+Re-running after the fix dropped median latency for LLM Guard, Pytector,
+and hybrid alike by a similar ratio (~480ms → ~180ms each) — more than
+outlier-exclusion alone explains, most likely ordinary run-to-run system
+variance rather than something caused by the fix itself. **Honest
+limitation, not yet resolved**: single-run latency benchmarks on shared,
+uncontrolled hardware aren't stable enough to cite precisely — same caveat
+already on record for the threading/multiprocessing benchmark in §5.
+Repeated trials (fresh process per implementation, mean ± spread) are
+needed before any millisecond figure from this benchmark goes in the
+paper as more than an order-of-magnitude comparison. Full writeup in
+`README_guardrail_comparison.md`.
 
 ---
 
@@ -297,15 +386,19 @@ version of the ATT&CK grounding test against real Wazuh alerts.
 
 ## 10. Suggested near-term order
 
-Given the priority flag in §2, and what's actually blocking what:
+§4 #9-#12 and §8's significance test (hybrid guardrail, larger eval
+dataset, re-run comparison, McNemar testing) are now all done as of
+2026-08-11 — see §4 and §8 for numbers. Remaining order:
 
-1. Hybrid input guardrail (§4 #9) — directly fixes the 0.23-recall weakness, unblocks #10 and #12
-2. Larger eval dataset (§4 #11) — unblocks #10, #12, and is also required for §3 #7 (CVE-bait expansion uses the same "need more real/varied samples" work)
-3. Re-run guardrail comparison + hybrid benchmark (§4 #10, #12) on the bigger dataset, with the significance test from §8
-4. Expand CVE-bait set (§3 #7), using the same larger dataset effort from #2
-5. LLM-judge baseline + SelfCheckGPT comparison (§3 #5, #8) — both required by issue #20, currently fully unbuilt
-6. Presidio PII redaction (§5) — separate track, T3 in the proposal's threat model, currently has zero coverage
-7. Everything else in §5 (nDPI, RAG/Chroma, full benchmark rigor pass) as time allows before Aug 30 write-up
+1. ~~Hybrid input guardrail (§4 #9)~~ ✅ done
+2. ~~Larger eval dataset (§4 #11)~~ ✅ done — 29 → 119 samples
+3. ~~Re-run guardrail comparison + hybrid benchmark (§4 #10, #12)~~ ✅ done — hybrid now P=1.0/R=0.736 on the bigger set.
+4. ~~Significance test on the guardrail comparison (§8)~~ ✅ done — McNemar's test via `significance_test.py`: baseline-vs-hybrid and hybrid-vs-LLM-Guard are both real, statistically significant differences; hybrid-vs-Pytector is not (too few discordant samples to tell). Full numbers in §8.
+5. ~~Expand CVE-bait set (§3 #7)~~ ✅ done, 2026-08-12 — 6 → 25 → **100** real CVEs (75 sourced from CISA's KEV catalog); re-run resolved the stale-data problem too. Headline 2/100 ungrounded (95% CI [0.6%, 7.0%]) — but both hits come from the 3 alerts that explicitly ask for a CVE citation, not the 97 that don't; true spontaneous rate is 0/97. Of the 2: one is a factually correct citation flagged only by policy (Log4Shell), the other a real-but-wrong misattribution (Follina vs. DogWalk). Full breakdown in §3 item 7. Significance testing on this comparison still not meaningful — only 2 ungrounded cases even at n=100, not enough discordant data for McNemar against a future baseline.
+6. ~~LLM-judge baseline (§3 #5)~~ ✅ done, 2026-08-14 — built for both CVE-bait and ATT&CK-bait together (`llm_judge.py` + `llm_judge_baseline_test.py`); 100% agreement with the deterministic checker on both sets (`docs/all_results.md` #23), then made citable with a class-balanced n=212 synthetic calibration set (100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+, #24)
+7. SelfCheckGPT comparison (§3 #8) — required by issue #20, currently fully unbuilt
+8. ~~Presidio PII redaction (§5)~~ ✅ built, 2026-08-18 — see §5 for details; full-pipeline bait-test run still pending (Groq quota)
+9. Everything else in §5 (nDPI, RAG/Chroma, full benchmark rigor pass) as time allows before Aug 30 write-up
 
 This is a working document — update statuses here as items land rather than
 re-deriving them from scratch each time.

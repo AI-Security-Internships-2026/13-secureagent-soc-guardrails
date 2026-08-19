@@ -19,8 +19,11 @@ def analyse_alert_with_retry(alert, max_retries: int = 4, base_delay: float = 5.
     """
     Wraps analyse_alert with exponential backoff on Groq rate limits, so one
     429 doesn't crash the whole multi-threaded benchmark run. Free-tier Groq
-    caps llama-3.1-8b-instant at 6000 tokens/minute — concurrent threads can
-    easily burst past that even when the total workload is modest.
+    per-model token/minute caps are low enough that concurrent threads can
+    easily burst past them even when the total workload is modest (measured
+    against llama-3.1-8b-instant's 6000 tokens/minute cap; re-verify against
+    openai/gpt-oss-20b's limit, since it was not re-measured after the
+    Aug 2026 migration, see docs/all_results.md #22).
     """
     for attempt in range(max_retries):
         try:

@@ -6,7 +6,7 @@ import statistics
 import sys
 from importlib.metadata import version, PackageNotFoundError
 
-from experiments.evaluation.guardrail_comparison.adapters import IMPLEMENTATIONS
+from experiments.evaluation.guardrail_comparison.adapters import IMPLEMENTATIONS, WARMUPS
 
 DATASET_PATH = os.path.join(os.path.dirname(__file__), "eval_dataset.json")
 OUTPUT_PATH = "experiments/results/guardrail_comparison.json"
@@ -45,6 +45,17 @@ def evaluate_implementation(name: str, scan_fn, dataset: list) -> dict:
     predictions = []
     latencies = []
     execution_failures = []
+
+    warmup_ms = None
+    warmup_fn = WARMUPS.get(name)
+    if warmup_fn is not None:
+        import time
+        start = time.perf_counter()
+        try:
+            warmup_fn()
+        except Exception:
+            pass  # warmup failures don't block the real run; the real calls will surface their own errors
+        warmup_ms = (time.perf_counter() - start) * 1000
 
     for sample in dataset:
         result = scan_fn(sample["text"])
@@ -97,6 +108,7 @@ def evaluate_implementation(name: str, scan_fn, dataset: list) -> dict:
 
     return {
         "implementation": name,
+        "warmup_ms": warmup_ms,
         "confusion_matrix": {"tp": tp, "fp": fp, "tn": tn, "fn": fn},
         "precision": precision,
         "recall": recall,
@@ -162,6 +174,8 @@ def main():
         try:
             result = evaluate_implementation(name, scan_fn, dataset)
             results["implementations"][name] = result
+            if result["warmup_ms"] is not None:
+                print(f"  Warmup: {result['warmup_ms']:.1f}ms (excluded from latency stats below)")
             cm = result["confusion_matrix"]
             print(f"  TP={cm['tp']} FP={cm['fp']} TN={cm['tn']} FN={cm['fn']}")
             print(f"  Precision={result['precision']} Recall={result['recall']} F1={result['f1']}")
