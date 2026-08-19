@@ -376,11 +376,22 @@ Running a withheld-label ("bait" style) version of this against real
 Wazuh alerts, instead of only the hand-authored CVE pool, is a natural
 follow-up, not yet done.
 
-Remaining/optional: wire the dashboard "click for new alert" button to this
-feed; make the SSH trigger setup reproducible/scripted; consider adding a
-second trigger type (e.g. network-based) for more variety; decide on a
-target n before citing this anywhere; run a bait-style (label-withheld)
-version of the ATT&CK grounding test against real Wazuh alerts.
+**Progress (2026-08-14):** ✅ dashboard wiring done — `dashboard/app.py`'s
+"Live Feed" tab (added in commit `57ce2fe`) continuously polls the Wazuh
+indexer via `st.fragment(run_every=...)`, dedupes on the same
+`(rule.id, full_log)` key as `wazuh_integration_test.py`, and runs every new
+alert through `analyse_alert()` (full guardrailed pipeline) automatically —
+no manual per-alert click needed. This line in the roadmap doc was stale;
+the item was done the same week it was written, just never checked off here.
+2026-08-20: hardened so a failed LLM call (e.g. Groq daily quota exhausted)
+records that one alert as an `ERROR` row instead of crashing the whole
+polling fragment.
+
+Remaining/optional: make the SSH trigger setup reproducible/scripted;
+consider adding a second trigger type (e.g. network-based) for more
+variety; decide on a target n before citing this anywhere; run a bait-style
+(label-withheld) version of the ATT&CK grounding test against real Wazuh
+alerts.
 
 ---
 

@@ -297,13 +297,26 @@ def run():
           f"({n_ungrounded} ungrounded / {n_grounded_empty} grounded-empty / "
           f"{n_grounded_cited} grounded-cited)\n")
 
+    # Resume from a prior checkpoint if one exists -- the daily token quota
+    # on the free Groq tier is smaller than a full 318-call run needs, so
+    # this test structurally requires spanning more than one day. Skip any
+    # sample id already present in a previous (possibly incomplete) run.
     results = []
-    for i, sample in enumerate(samples):
+    if os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH) as f:
+            prior = json.load(f)
+        if "n_completed" in prior and isinstance(prior.get("results"), list):
+            results = prior["results"]
+            print(f"Resuming from checkpoint: {len(results)} samples already completed\n")
+    done_ids = {r["id"] for r in results}
+    remaining = [s for s in samples if s["id"] not in done_ids]
+
+    for sample in remaining:
         verdict = _judge_with_retry(llm, sample["alert_text"], sample["report_fields"])
         results.append({**sample, "judge_verdict": verdict["verdict"], "judge_flagged": verdict["flagged"],
                          "judge_reasoning": verdict["reasoning"]})
         agree = "agree" if sample["ground_truth"] == verdict["flagged"] else "DISAGREE"
-        print(f"[{i+1}/{len(samples)}] {sample['id']}: "
+        print(f"[{len(results)}/{len(samples)}] {sample['id']}: "
               f"truth={sample['ground_truth']} judge={verdict['verdict']} ({agree})")
 
         # Checkpoint after every sample -- a 318-call run against a

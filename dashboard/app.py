@@ -378,19 +378,39 @@ with tab_feed:
                     st.session_state["live_feed_seen"].add(key)
 
                     alert = wazuh_alert_to_security_alert(doc)
-                    report = analyse_alert(alert)
-                    st.session_state["live_feed_items"].insert(0, {
-                        "fetched_at": time.strftime("%H:%M:%S"),
-                        "alert_id": alert.alert_id,
-                        "rule_id": src.get("rule", {}).get("id"),
-                        "rule_level": src.get("rule", {}).get("level"),
-                        "severity_assessment": report.get("severity_assessment"),
-                        "guardrail_blocked": report.get("guardrail_blocked", False),
-                        "requires_review": report.get("requires_review", False),
-                        "hallucinated_cves": report.get("hallucinated_cves", []),
-                        "hallucinated_attack_techniques": report.get("hallucinated_attack_techniques", []),
-                        "threat_summary": report.get("threat_summary"),
-                    })
+                    # The LLM call (Groq) can fail independently of the Wazuh
+                    # connection -- e.g. daily token quota exhausted. That
+                    # shouldn't crash the whole live-feed fragment or stop
+                    # later alerts/polls from being tried; record it as a
+                    # failed row instead and keep going.
+                    try:
+                        report = analyse_alert(alert)
+                        row = {
+                            "fetched_at": time.strftime("%H:%M:%S"),
+                            "alert_id": alert.alert_id,
+                            "rule_id": src.get("rule", {}).get("id"),
+                            "rule_level": src.get("rule", {}).get("level"),
+                            "severity_assessment": report.get("severity_assessment"),
+                            "guardrail_blocked": report.get("guardrail_blocked", False),
+                            "requires_review": report.get("requires_review", False),
+                            "hallucinated_cves": report.get("hallucinated_cves", []),
+                            "hallucinated_attack_techniques": report.get("hallucinated_attack_techniques", []),
+                            "threat_summary": report.get("threat_summary"),
+                        }
+                    except Exception as e:
+                        row = {
+                            "fetched_at": time.strftime("%H:%M:%S"),
+                            "alert_id": alert.alert_id,
+                            "rule_id": src.get("rule", {}).get("id"),
+                            "rule_level": src.get("rule", {}).get("level"),
+                            "severity_assessment": "ERROR",
+                            "guardrail_blocked": None,
+                            "requires_review": None,
+                            "hallucinated_cves": [],
+                            "hallucinated_attack_techniques": [],
+                            "threat_summary": f"LLM call failed: {e}",
+                        }
+                    st.session_state["live_feed_items"].insert(0, row)
                     new_count += 1
                 st.session_state["live_feed_items"] = st.session_state["live_feed_items"][:100]
                 st.caption(
