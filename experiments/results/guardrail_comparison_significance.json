@@ -41,15 +41,15 @@
       "b": "hybrid",
       "n_samples": 119,
       "contingency": {
-        "both_correct": 80,
+        "both_correct": 81,
         "baseline_only_correct": 0,
-        "hybrid_only_correct": 25,
+        "hybrid_only_correct": 24,
         "both_incorrect": 14
       },
-      "discordant_pairs": 25,
-      "method": "chi_square_continuity_corrected",
-      "statistic": 23.04,
-      "p_value": 1.586656303897982e-06,
+      "discordant_pairs": 24,
+      "method": "exact_binomial",
+      "statistic": null,
+      "p_value": 1.1920928955078125e-07,
       "significant_at_0.05": true
     },
     {

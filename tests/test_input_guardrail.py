@@ -16,7 +16,7 @@ from src.guardrails.input_guardrail import check_injection, check_injection_hybr
 
 
 # ---------------------------------------------------------------------------
-# All 8 known patterns should be caught — this is the guardrail's baseline
+# All known patterns should be caught — this is the guardrail's baseline
 # contract. If any of these ever fail, the guardrail regressed.
 # ---------------------------------------------------------------------------
 
@@ -35,10 +35,11 @@ def test_exact_pattern_is_caught_uppercase(pattern):
     assert check_injection(text) is True
 
 
-def test_all_eight_patterns_are_present():
+def test_all_known_patterns_are_present():
     # Locks in the count so a future edit that accidentally drops a pattern
     # (rather than intentionally removing one) gets caught immediately.
-    assert len(INJECTION_PATTERNS) == 8
+    # 8 original + 11 added 2026-08-20 from AgentDojo/SPML (docs/all_results.md).
+    assert len(INJECTION_PATTERNS) == 19
 
 
 # ---------------------------------------------------------------------------

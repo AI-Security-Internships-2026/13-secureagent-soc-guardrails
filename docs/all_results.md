@@ -39,6 +39,8 @@ This is the full rundown of every experiment run on this project, in the order t
 | 27 | [Wazuh live-feed dashboard — end-to-end verification + crash fix](#27-wazuh-live-feed-dashboard--end-to-end-verification--crash-fix) | Aug 20 | Auto-polling live feed (built Aug 14, undocumented) confirmed working end-to-end in a real browser session against 13 real Wazuh alerts; found and fixed a bug where an LLM failure would crash the whole feed instead of flagging just that one alert |
 | 28 | [LLM-judge hard tier — completed](#28-llm-judge-hard-tier--completed) | Aug 20 (quota reset) | Resume fix from #26 finished the job on the next Groq quota window: full 318/318 run completed, **100% accuracy/precision/recall on all three tiers** (easy, hard, overall), TP=106 FP=0 TN=212 FN=0, zero parse errors |
 | 29 | [SelfCheckGPT — resume-checkpoint fix + first partial run](#29-selfcheckgpt--resume-checkpoint-fix--first-partial-run) | Aug 20 (quota reset) | Applied the same #26 resume-from-checkpoint fix to `selfcheckgpt_test.py` before its first run (it had the identical restart-from-scratch bug); first run used the rest of that same quota window after #28 and hit the wall after 16/60 alerts, checkpointed cleanly, no crash, no lost progress |
+| 30 | [LLM-judge cross-model baseline — qwen/qwen3.6-27b, partial](#30-llm-judge-cross-model-family-baseline--qwenqwen36-27b-partial-run) | Aug 20 | Groq quota confirmed per-model, not account-wide; wired a genuinely different judge model, fixed a `<think>`-block parsing bug for it. 141/318 done, 100% accuracy/precision/recall so far — matches the same-family #28 result, addressing the disclosed self-enhancement-bias gap |
+| 31 | [Input guardrail phrase list expansion (8 → 19)](#31-input-guardrail--deterministic-phrase-list-expansion-8--19-phrases) | Aug 20 | Sourced 11 new phrases from 2 disjoint 2024 academic sources (AgentDojo, SPML), all false-positive-filtered first. Baseline recall 0.264→0.283 (real but not statistically significant, McNemar p=1.0), precision held at 1.0, hybrid barely moved — real evidence for why the guardrail is hybrid, not just a bigger phrase list |
 
 ---
 
@@ -501,9 +503,42 @@ Docker Desktop wasn't running; started it, and all five Wazuh stack containers (
 
 ---
 
+## 30. LLM-judge cross-model-family baseline — qwen/qwen3.6-27b, partial run
+
+**When:** Aug 20 (later that day, once Groq's daily quota trickled back — discovered mid-session that Groq's 200k-token daily quota is tracked *per model*, not account-wide, so `qwen/qwen3.6-27b` still had untouched quota even after `openai/gpt-oss-20b` was fully exhausted by #28)
+**What we tried:** §II/§4.8 of the paper draft had disclosed a real gap — the completed #28 LLM-judge result used the *same* model for judge and report generation, not the different model family Zheng et al. [8] recommend to control for self-enhancement bias. Rather than leave that as a permanent limitation, wired `llm_judge_synthetic_test.py` to read the judge model from a new `LLM_JUDGE_MODEL` env var (defaults to the same-family behavior so #28's result and checkpoint are untouched), writing to its own results file per judge model so runs never collide. Picked `qwen/qwen3.6-27b` — a different lab/training lineage than `openai/gpt-oss-20b`, confirmed available on this Groq account.
+
+**What went wrong:** Qwen is a "thinking" model — it prepends a visible `<think>...</think>` reasoning block before its actual answer, which broke `_parse_judge_response` (it only handled a markdown-fence wrapper, not a reasoning block). Fixed in `src/guardrails/llm_judge.py` with an added regex strip, verified as a no-op for models that don't emit one (full 133-test suite still passes). Smoke-tested end to end on one real sample before committing to the full run.
+
+The run itself hit two separate stops, both handled cleanly by the existing checkpoint-resume logic: first a transient per-minute rate limit (confirmed by a quick retry a few minutes later — not the daily quota), then Qwen's own daily quota wall at 141/318 (`Used 199592/200000` — Qwen's "thinking" output burns substantially more tokens per call than gpt-oss-20b's plain-JSON answers, so it hit its daily cap at fewer than half the samples #28 got through on the other model). One sample (`cve_bait-BAIT-028-grounded-cited`) also produced an unrecoverable `PARSE_ERROR` even after the think-block fix — a real, disclosed failure mode, not silently dropped.
+
+**Result** (`experiments/results/llm_judge_synthetic_results_qwen_qwen3_6_27b.json`, 141/318 completed, `run_complete: false`): of the 140 scored samples, **100% accuracy/precision/recall** (TP=47, FP=0, TN=93, FN=0, 95% Wilson CI [92.4%, 100%]) — identical agreement with the deterministic pipeline's ground truth as the same-family #28 result, on every sample judged successfully so far.
+
+**What it means:** partial, but this is the first real evidence with a genuinely different model family, and so far it matches #28's same-family finding exactly. Not yet conclusive — 178 samples remain, split across the easy/hard tiers isn't confirmed complete yet, and the self-enhancement-bias question this was meant to address needs the full run before it can replace the disclosed limitation in the paper. Will resume on Qwen's next quota window using the same resume-from-checkpoint mechanism.
+
+---
+
+## 31. Input guardrail — deterministic phrase list expansion (8 → 19 phrases)
+
+**When:** Aug 20
+**What we tried:** The deterministic layer's exact-phrase list had only ever had 8 hand-picked phrases, all along the same "ignore/disregard/forget instructions" theme. Sourced 11 new phrases from two disjoint, real, 2024 academic sources — deliberately *not* the same datasets already used to build the 119-sample eval set (`deepset/prompt-injections`, `TrustAIRLab/in-the-wild-jailbreak-prompts`), to avoid inflating the recall number circularly:
+- **AgentDojo** (`ethz-spylab/agentdojo`, NeurIPS 2024, MIT license) — an indirect-prompt-injection-via-tool-response benchmark, the same threat model (T2) this guardrail targets. Pulled its literal attack templates directly from `src/agentdojo/attacks/baseline_attacks.py` and `important_instructions_attacks.py`: 4 new phrases, including a structural-delimiter technique (`###(system_message)`) this project's list had no coverage for at all.
+- **SPML_Chatbot_Prompt_Injection** (`reshabhs`, arXiv:2402.11755, Feb 2024, MIT license) — downloaded the full 16,012-row dataset and frequency-scanned all 12,542 flagged-injection rows for recurring override phrasing (not hand-picked from a handful of examples). Most of the dataset's actual content turned out to be full persona-hijack paragraphs (same shape problem as the datasets already excluded), but the scan surfaced 7 genuinely new, short, reusable phrases, including a new attack *category* this project hadn't covered: instruction/prompt extraction (`reveal your instructions`), not just override.
+
+Before adding anything to the real list, ran all 11 candidates against the 66 benign samples already in `eval_dataset.json` (zero-cost, no LLM calls) — all 11 came back clean, no false-positive hits.
+
+**What went wrong:** One pre-existing test, `test_all_eight_patterns_are_present` (`tests/test_input_guardrail.py`), hardcoded the count at 8 — caught immediately by the full suite, fixed to assert 19 with a comment explaining the addition (the two parametrized tests that actually exercise each pattern already iterated over `INJECTION_PATTERNS` directly, so no other test changes were needed). Nothing else broke; full suite is 133/133 passing.
+
+**Result** (`experiments/results/guardrail_comparison.json`, re-run on the same 119-sample set): baseline (deterministic-only) recall **0.264 → 0.283** (TP 14→15 out of 53 injections), precision held at a clean **1.0** (0 false positives — the pre-filter worked). A paired McNemar test between the old 8-phrase and new 19-phrase baseline on the same 119 samples found only **1 discordant pair** (`p=1.0`, not significant) — the improvement is real but too small to call statistically significant at this sample size. Hybrid (deterministic + Pytector fallback) barely moved (0.736 → 0.736): the new phrases apparently overlap heavily with what Pytector was already catching, so the net effect on the full hybrid pipeline is negligible even though the deterministic layer alone did improve.
+
+**What it means:** the ablation itself is the useful result, more than the number. It's real evidence — not just an architectural argument — for why this project's guardrail is *hybrid* rather than "grow the deterministic list": even after more than doubling the phrase list with real, curated, sourced phrases, deterministic-only recall barely moves (many real-world injection attempts are paraphrased or novel-strategy, and no fixed phrase list catches those), while precision stays perfect because the phrases were properly filtered. This strengthens rather than undermines the paper's existing §4.2 argument.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
-- **SelfCheckGPT comparison** — required by the paper scope, resume-checkpoint fix applied (#29). 16/60 alerts (48/180 Groq calls) completed and checkpointed as of Aug 20; hit the quota wall (already mostly used up by that same window's completed LLM-judge run, #28) and stopped cleanly. Will keep making real forward progress a batch at a time on quota resets, same pattern as #26/#28.
+- **SelfCheckGPT comparison** — required by the paper scope, resume-checkpoint fix applied (#29). 23/60 alerts completed and checkpointed as of Aug 20, all from the "stated" (grounded) class so far — no accuracy/precision/recall numbers are meaningful until the "prompted" (ungrounded) class is also represented.
+- **LLM-judge cross-model-family baseline (qwen/qwen3.6-27b)** — 141/318 completed and checkpointed as of Aug 20 (#30), same 100% agreement as the same-family result so far; needs to finish before it can replace the disclosed same-model-family limitation in the paper draft.
 - **Significance testing on the CVE-bait comparison** — even at n=100 (#21), only 2 ungrounded citations occurred (both on the same famous CVEs found at n=25), which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
 - Repeated-trial latency benchmarking (fresh process per implementation) to fix the instability flagged in #20.
 
