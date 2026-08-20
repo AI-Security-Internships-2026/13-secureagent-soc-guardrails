@@ -57,42 +57,42 @@
 
 ## Abstract
 
-*(target: 250 words; current draft: ~287, including a bracketed
+*(target: 250 words; current draft: ~278, including a bracketed
 placeholder note that will shrink once Sect. 4.9 lands — trim further once
-that result replaces it)*
+that result replaces it. Restructured 2026-08-20 around one central
+research question per external review feedback, rather than an itemized
+tour of every experiment.)*
 
 Large language models increasingly generate Security Operations Center
 (SOC) threat reports, citing supporting evidence such as CVE identifiers
 and MITRE ATT&CK techniques. These citations are rarely verified: models
-can fabricate plausible identifiers, misattribute real ones, or recall
-correct citations the alert never provided. A flat "flagged/not flagged"
-treatment obscures an important distinction — an invented CVE and a
-real-but-unevidenced one carry different risk profiles for an analyst
-deciding how much to trust a report.
+can fabricate identifiers, misattribute real ones, or recall citations
+the alert never provided — and a flat "flagged/not flagged" treatment
+cannot distinguish an invented CVE from a real-but-unevidenced one,
+though the two carry different risk profiles for an analyst deciding how
+much to trust a report.
 
-We present LLMCite, a two-stage groundedness-verification pipeline for
-LLM-generated SOC reports. Stage one checks whether a cited CVE or ATT&CK
-identifier is supported by the source alert; stage two verifies ungrounded
-citations against authoritative sources (the National Vulnerability
-Database, the MITRE ATT&CK STIX corpus) and classifies each as Fabricated,
-Real-but-Irrelevant, Real-and-Plausible, or Unverified, rather than a
-binary label. Real-and-Plausible citations, despite appearing legitimate,
-are the case most likely to evade a naive review trigger.
+We ask whether such reports can be automatically checked for citations
+unsupported by the evidence a model was given, and whether distinguishing
+*why* a citation is unsupported — fabricated, real but irrelevant, or
+real and plausible enough to look correct — provides assurance a binary
+flag cannot. LLMCite answers this with a two-stage pipeline: grounding
+against the source alert, then verification of ungrounded citations
+against authoritative sources (NVD, the MITRE ATT&CK STIX corpus) into a
+four-class taxonomy. The Real-and-Plausible class is the central
+finding — a real, topically appropriate citation never actually stated in
+the evidence is, by construction, the case most likely to evade naive
+human review, precisely because it looks correct.
 
-We evaluate the pipeline against adversarial CVE/ATT&CK-citation
-benchmarks, a third-party incident generator (76 incidents), a 60-alert CVE
-pool distinguishing withheld- from stated-identifier framing, live
-Wazuh SIEM alerts (13, including a genuinely detected brute-force attack),
-and a bait test of a fourth guardrail addressing PII leakage from raw
-alerts. We also benchmark the input guardrail — deterministic matching
-with an ML fallback — against two open-source alternatives on 119 samples,
-with McNemar's test establishing which differences are statistically real.
-A same-model-family LLM-judge baseline (n=318, easy and harder
-construct-validity tiers) matched the deterministic pipeline exactly —
-100% accuracy/precision/recall, 95% Wilson CI floor above 96.5%.
-**[A SelfCheckGPT comparison and the joint significance test are still
-pending — see Draft status above.]** We position LLMCite as
-a domain-specialized instance of citation-grounding verification for
+We evaluate across adversarial, third-party-generated, and live SOC data,
+and separately benchmark a statistically tested input guardrail against
+two open-source alternatives (McNemar's test, n=119). A same-model-family
+LLM-judge baseline reproduces the pipeline's binary decision on a
+controlled calibration set (n=318, 100% accuracy) — a feasibility floor,
+not a bias-controlled result, since judge and generator share a model
+family. **[SelfCheckGPT comparison and the resulting significance test
+are still pending — see Draft status above.]** LLMCite is a
+domain-specialized instance of citation-grounding verification for
 security-critical LLM applications, distinct from prior work targeting
 scholarly references.
 
@@ -656,26 +656,28 @@ TN=212, FN=0; 95% Wilson CI [98.8%, 100%] on accuracy), and identically
 and the hard pair (grounded-cited vs. ungrounded, n=212) analyzed
 separately. Zero parse errors across all 318 calls.
 
-**What this means.** On this calibration task, the LLM judge matched the
+**What this means.** On this calibration task, the LLM judge reproduced the
 deterministic pipeline's own ground-truth labels exactly, including on the
 harder tier where the distractor identifier is present in both the
-evidence and the report — the condition specifically designed to be harder
-to call than the easy tier. This is a real, if narrow, counterexample to
-the assumption in Sect. 2 that a deterministic approach is necessary for this
-task: on the specific construct this calibration set tests (does the
-report cite an identifier the alert evidence doesn't independently
-contain), asking the same model directly worked as well as string-matching.
-It does **not** show the LLM judge is a safe *replacement* for the
-deterministic pipeline in deployment — the deterministic check is
-near-zero latency with no per-call cost or rate-limit exposure, both of
-which matter for a live SOC pipeline (Sect. 4.7), and this calibration set tests
-an injected, single, isolated foreign citation against otherwise-clean text
-rather than the messier range of real model output (subtler
-misattributions, multiple citations in one report, partial matches) that
-Sects. 4.3–4.4's real-pipeline bait tests also check. The same-model-family
-caveat above means this result cannot yet rule out self-enhancement bias as
-a contributing factor — a second model family for the judge remains a
-concrete piece of follow-up work, not a completed control.
+evidence and the report. That tier's discriminating signal, though, is
+itself close to what the deterministic checker already computes — whether
+an identifier-shaped token also appears in the evidence text — so a
+capable model matching it is an expected feasibility floor, not evidence
+of deeper semantic reasoning; labels this recoverable from the sample
+construction should not be read as a strong argument against the
+deterministic pipeline being necessary. The more defensible claim: an LLM
+judge can reliably reproduce this specific binary grounding decision,
+while the deterministic pipeline retains real deployment advantages the
+judge does not share — near-zero latency, no per-call cost or rate-limit
+exposure (Sect. 4.7), and no dependence on model behavior a hosted API
+could change or throttle. This calibration set also tests an injected,
+single, isolated foreign citation against otherwise-clean text rather than
+the messier range of real model output (subtler misattributions, multiple
+citations in one report, partial matches) that Sects. 4.3–4.4's
+real-pipeline bait tests also check. The same-model-family caveat above
+means this result cannot rule out self-enhancement bias as a contributing
+factor — a second model family for the judge remains a concrete piece of
+follow-up work, not a completed control.
 
 ### 4.9 SelfCheckGPT comparison
 
@@ -779,6 +781,14 @@ than what was tested.
   (LLM-judge baseline) is now complete, but used the same model family for
   judge and generator rather than the independently-recommended different
   family (Sect. 2) — a disclosed, not a silently-assumed, limitation.
+- Sect. 4.8's 100% LLM-judge agreement should not be read as strong evidence
+  on its own: the hard tier's discriminating signal (whether an
+  identifier-shaped token also appears in the evidence) is close to what
+  the deterministic checker already computes, so the labels are largely
+  recoverable from how the calibration set was constructed rather than
+  requiring deep semantic reasoning to solve. We treat this as a
+  feasibility floor for the judge approach, not as evidence against the
+  deterministic pipeline's necessity.
 - The CVE-bait result (Sect. 4.3) is now current and at n=100 gives a
   legitimately citable 95% CI ([0.6%, 7.0%]), but both observed ungrounded
   citations occurred on the same two extremely famous vulnerabilities
