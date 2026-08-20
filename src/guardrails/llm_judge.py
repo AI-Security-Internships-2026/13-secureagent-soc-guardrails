@@ -77,9 +77,14 @@ def _parse_judge_response(content: str) -> dict:
     model wrapped its answer in one despite the system prompt saying not
     to -- seen occasionally from gpt-oss-20b while building this module,
     more often than llama-3.1-8b-instant did for the main pipeline's own
-    JSON output.
+    JSON output. Also strips a leading <think>...</think> reasoning block
+    -- seen from qwen/qwen3.6-27b when it was wired in as a second,
+    different-family judge model (docs/paper/paper_draft.md §4.8); a no-op
+    for models that don't emit one, so this doesn't change parsing for the
+    existing gpt-oss-20b judge results.
     """
     cleaned = content.strip()
+    cleaned = re.sub(r"^<think>.*?</think>\s*", "", cleaned, flags=re.IGNORECASE | re.DOTALL).strip()
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE).strip()
     return json.loads(cleaned)

@@ -64,6 +64,19 @@ project's established convention for small-ish n (see #21).
 
 Usage:
     python -m experiments.evaluation.llm_judge_synthetic_test
+
+    Judge model defaults to the same model used for report generation
+    (MODEL_NAME, src/agent/soc_agent.py) -- a disclosed limitation, see
+    docs/paper/paper_draft.md §II/§4.8. To run a genuinely different-family
+    judge instead (controls for self-enhancement bias per Zheng et al. [8]),
+    set LLM_JUDGE_MODEL to any other model this Groq account has access to
+    (e.g. "qwen/qwen3.6-27b" -- confirmed available and a different lab/
+    training lineage than openai/gpt-oss-20b as of 2026-08-20):
+
+        LLM_JUDGE_MODEL=qwen/qwen3.6-27b python -m experiments.evaluation.llm_judge_synthetic_test
+
+    Writes to its own results file (llm_judge_synthetic_results_<model>.json)
+    rather than overwriting the same-family result.
 """
 
 import json
@@ -85,7 +98,17 @@ from experiments.evaluation.cve_bait_alerts import EXPECTED_CVE
 
 load_dotenv()
 
-llm = ChatGroq(api_key=os.getenv("GROQ_API_KEY"), model=MODEL_NAME, temperature=0.1)
+# Judge model is independently selectable from the report-generation model
+# (MODEL_NAME) via LLM_JUDGE_MODEL. Defaults to MODEL_NAME so existing
+# behavior/output (the completed 318/318 same-family run, #28) is
+# untouched when the env var isn't set. Set LLM_JUDGE_MODEL to a genuinely
+# different Groq-hosted model family (e.g. "qwen/qwen3.6-27b") to run the
+# cross-model-family comparison Zheng et al. [8] recommend for controlling
+# self-enhancement bias -- disclosed as not yet done in the paper draft
+# until this is actually run (docs/paper/paper_draft.md §II/§4.8).
+JUDGE_MODEL_NAME = os.getenv("LLM_JUDGE_MODEL", MODEL_NAME)
+
+llm = ChatGroq(api_key=os.getenv("GROQ_API_KEY"), model=JUDGE_MODEL_NAME, temperature=0.1)
 
 SOURCE_DATASETS = {
     "cve_bait": {
@@ -100,7 +123,18 @@ SOURCE_DATASETS = {
     },
 }
 
-OUTPUT_PATH = "experiments/results/llm_judge_synthetic_results.json"
+def _output_path_for(judge_model: str) -> str:
+    # Same-family run (the default) keeps the original path so #28's
+    # completed 318/318 result and its checkpoint-resume history are never
+    # touched. A different judge model writes to its own file instead of
+    # overwriting or being conflated with the same-family result.
+    if judge_model == MODEL_NAME:
+        return "experiments/results/llm_judge_synthetic_results.json"
+    slug = re.sub(r"[^a-zA-Z0-9]+", "_", judge_model).strip("_").lower()
+    return f"experiments/results/llm_judge_synthetic_results_{slug}.json"
+
+
+OUTPUT_PATH = _output_path_for(JUDGE_MODEL_NAME)
 
 # Shift offsets so an alert never gets assigned its own expected/adjacent
 # identifier as a distractor -- doesn't need to be cryptographically clean,
@@ -271,7 +305,9 @@ def _write_output(n_samples: int, results: list, complete: bool) -> dict:
 
     output = {
         "task": "LLM-judge synthetic calibration -- grounded-empty / grounded-cited / ungrounded tiers",
-        "model": MODEL_NAME,
+        "judge_model": JUDGE_MODEL_NAME,
+        "generator_model": MODEL_NAME,
+        "same_model_family": JUDGE_MODEL_NAME == MODEL_NAME,
         "n_samples": n_samples,
         "n_completed": len(results),
         "run_complete": complete,
@@ -289,6 +325,10 @@ def _write_output(n_samples: int, results: list, complete: bool) -> dict:
 
 
 def run():
+    print(f"Judge model: {JUDGE_MODEL_NAME} (generator model: {MODEL_NAME}, "
+          f"same family: {JUDGE_MODEL_NAME == MODEL_NAME})")
+    print(f"Output: {OUTPUT_PATH}\n")
+
     samples = build_synthetic_samples()
     n_ungrounded = sum(s["ground_truth"] for s in samples)
     n_grounded_empty = sum(s["tier"] == "grounded_empty" for s in samples)
