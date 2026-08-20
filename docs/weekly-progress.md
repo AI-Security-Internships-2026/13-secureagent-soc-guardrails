@@ -175,3 +175,29 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 ### Next week plan
 - Resume and complete the SelfCheckGPT run and the LLM-judge hard-tier run once Groq's daily quota allows; document both in `docs/all_results.md`.
 - Re-run the CVE-bait and ATT&CK-bait suites against `gpt-oss-20b` to check whether the baseline hallucination rate shifted from the numbers reported for `llama-3.1-8b-instant`.
+
+---
+
+## Week 11
+
+**Branch:** `emaan-week-11`
+**PR link:** _[Add after opening PR]_
+
+### Completed this week
+- [x] Resolved a branch-topology issue where `emaan-week-11` had been created before Week 10's PR (#25) was merged, so it was missing that week's work entirely. Merged PR #25 into `dev` and reset `emaan-week-11` onto the updated tip; recovered a locally-committed-but-unpushed fix (the LLM-judge resume-checkpoint logic) via `git cherry-pick` rather than losing it in the reset.
+- [x] Completed the **LLM-judge hard-tier run** (issue #20 §3 item 5): the full 318-sample run (easy + hard construct-validity tiers) finished on the same day's Groq quota window that resumed it — **100% accuracy/precision/recall on every tier**, zero parse errors, closing one of the two headline evaluation gaps in the paper draft (`docs/all_results.md` #28).
+- [x] Verified and hardened the **Wazuh live-feed dashboard** tab (built the prior week): found and fixed a bug where a single LLM call failure would crash the whole live-polling fragment instead of flagging just that one alert; confirmed live in a real browser session against 13 real Wazuh alerts (`docs/all_results.md` #27).
+- [x] Wired the **LLM-judge baseline to support a genuinely different judge model** rather than only the same model used for report generation (`LLM_JUDGE_MODEL` env var, defaults to prior behavior so the completed same-family result is untouched). Fixed a real parsing bug for models that emit a visible reasoning block before their answer (`qwen/qwen3.6-27b`), verified with a full test-suite pass and a real end-to-end smoke test before committing to the full run. 153/318 completed so far, matching the same-family result on every sample judged (`docs/all_results.md` #30).
+- [x] Resumed the **SelfCheckGPT** run (checkpoint-resume logic built the prior week) across several Groq quota windows — 16 → 23 → 33 of 60 alerts completed, all safely checkpointed with no lost progress.
+- [x] **Expanded the input guardrail's deterministic phrase list from 8 to 19 phrases**, sourced from two 2024 academic datasets (AgentDojo — NeurIPS 2024, MIT license; SPML_Chatbot_Prompt_Injection — arXiv 2402.11755, MIT license), both disjoint from the datasets already used in the 119-sample eval set. Every candidate phrase was checked against all 66 benign eval samples for false positives before being added — all 11 came back clean. Re-ran the guardrail comparison: baseline recall 0.264 → 0.283 (real but not statistically significant at this sample size, paired McNemar p=1.0), precision unchanged at 1.0, hybrid essentially unchanged (`docs/all_results.md` #31).
+- [x] **Expanded the ATT&CK-bait adversarial test set from 6 to 50 alerts**, individually sourced from the project's own local MITRE ATT&CK Enterprise STIX snapshot (858 real techniques with official descriptions), spanning all major ATT&CK tactics rather than clustering. Verified none of the 50 alerts leak the underlying technique ID or name into their text. Upgraded `attack_bait_test.py` to match `cve_bait_test.py`'s rigor: Wilson confidence intervals, ground-truth correct-citation tracking, and a symptom-only vs. explicit-citation-request breakdown built in from the start (rather than discovered after the fact, as happened with the CVE-bait set at n=100). Also added checkpoint-resume logic to the test script after an initial run without it would have lost all progress on a mid-run quota failure — caught and fixed before that happened for real.
+- [x] Paper draft: wrote up the LLM-judge and PII-redaction sections that were previously placeholder-only; reformatted the whole document to the target venue's (Springer Nature) section-numbering and in-text-reference conventions (Arabic numerals on main headings, "Sect."/"Sects." instead of the § symbol throughout); rewrote the abstract to lead with one central research question instead of itemizing every experiment; revised how strongly the LLM-judge's 100% result is framed, since the specific construct it's tested on is closer to what the deterministic checker already computes than a deep semantic result would be.
+
+### Problems / Blockers
+- Groq's free-tier daily token quota (200,000 tokens per model) is shared across every experiment using the same model, so the LLM-judge (same-family), SelfCheckGPT, and ATT&CK-bait expansion runs all compete for the same limited daily budget on `openai/gpt-oss-20b` — only the LLM-judge run finished this week, the other two are checkpointed mid-run and resuming across quota windows.
+- Discovered mid-week that Groq's daily quota is tracked per model rather than account-wide — `qwen/qwen3.6-27b` had its own separate, untouched budget even while `gpt-oss-20b` was fully exhausted, which is what made the cross-model judge run possible without waiting for a full reset.
+- `attack_bait_test.py`'s first version (before this week's rewrite) didn't checkpoint incrementally, only writing results after all 50 alerts finished — caught this before the real run went far enough for it to matter, and fixed it with the same resume-from-checkpoint pattern already used elsewhere in the project.
+
+### Next week plan
+- Resume and complete SelfCheckGPT, the ATT&CK-bait run, and the cross-model LLM-judge run as Groq quota allows; document final numbers in `docs/all_results.md`.
+- Continue paper draft revisions.
