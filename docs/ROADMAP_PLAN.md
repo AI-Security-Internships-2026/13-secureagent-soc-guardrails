@@ -414,3 +414,114 @@ dataset, re-run comparison, McNemar testing) are now all done as of
 
 This is a working document — update statuses here as items land rather than
 re-deriving them from scratch each time.
+
+---
+
+## 11. External manuscript review (2026-08-20) — priority additions
+
+A detailed external review of `docs/paper/paper_draft.md` (as it stood
+2026-08-20, before this section was added) gave per-venue acceptance
+estimates (~45-60% at IJIS, ~60-75% at SN Computer Science if the draft
+is tightened) and a specific, evidence-engaged critique — not generic
+feedback; it correctly quoted exact sentences and caught a real
+construction issue. Assessed against the actual codebase/results and
+largely agreed with; see conversation log for the full point-by-point.
+New/changed items below, prioritized by the Aug 30 deadline and this
+project's actual bottlenecks (Groq daily quota; manual labeling time).
+
+**Tier 1 — do before submission, ranked by cost:**
+
+1. **Finish SelfCheckGPT (§3 #8)** — already in progress (23/60 as of
+   2026-08-20, #29/#30 in all_results.md). Non-negotiable per the review:
+   can't keep it in the abstract half-finished. Don't force a "LLMCite
+   wins" framing if the data shows complementary failure-mode detection
+   instead — that would be a stronger, more interesting result than
+   simple superiority.
+2. **Soften the LLM-judge framing (§4.8, abstract, §II)** — the review's
+   sharpest point: the hard tier's grounded-cited-vs-ungrounded split is
+   essentially "does this ID also appear in the evidence," mechanically
+   close to what the deterministic checker already does. 100%
+   accuracy there isn't a deep semantic result, it's an expected floor.
+   Reframe from "counterexample to determinism-is-necessary" to
+   "demonstrates the LLM can reproduce the binary decision on a
+   controlled set; the deterministic implementation keeps the
+   latency/cost/determinism advantages." Writing-only, no new data
+   needed — do this early, it's nearly free.
+3. **Rewrite the abstract around one central question** — current draft
+   (~287 words) itemizes ~12 different components instead of leading
+   with the actual research question. Proposed central framing (from the
+   review, endorsed): *can LLM-generated SOC reports be checked for
+   citations ungrounded in their evidence, and does distinguishing
+   real-but-irrelevant/real-and-plausible from fabricated add useful
+   assurance over a binary flag.* Everything else becomes supporting
+   evidence, not co-equal headline material. Writing-only.
+4. **Center the REAL_AND_PLAUSIBLE taxonomy class as the paper's main
+   novelty angle** (Intro contributions, §3.5, discussion) — agreed as
+   the strongest available novelty argument, since the LLM-judge result
+   (item 2 above) no longer carries that weight on its own. **Important
+   correction while doing this: the review's own two favorite examples
+   are in different classes.** Log4Shell (`BAIT-002`, §4.3) is the real
+   REAL_AND_PLAUSIBLE case (correct CVE, still flagged — the actual
+   "looks right, still not verifiably grounded" story). Follina
+   (`BAIT-017`) is `REAL_BUT_IRRELEVANT` (wrong-but-plausible-neighbor
+   CVE) — a different, also-good story, but not this one. Lead with
+   Log4Shell for this class, keep Follina as the separate
+   REAL_BUT_IRRELEVANT illustration. **Honesty caveat to keep in the
+   text:** REAL_AND_PLAUSIBLE has been spontaneously observed exactly
+   **once** across the entire evaluation (n=100 CVE-bait + n=6
+   ATT&CK-bait combined) — frame as "rare but the highest-consequence
+   failure mode, hardest for manual review to catch," not as a common
+   occurrence. This makes item 5 below load-bearing, not optional.
+5. **Expand ATT&CK-bait set beyond n=6 (§3 #6)** — the review's most
+   concrete, lowest-risk-to-implement Tier-1 item: this project already
+   has the exact recipe (CVE-bait went 6→25→100, §3 #7, individually
+   verified + CISA KEV-sourced). Target 30-50 real ATT&CK techniques
+   the same way. Also directly strengthens item 4: more trials = more
+   chances to observe additional REAL_AND_PLAUSIBLE cases instead of
+   resting the paper's central claim on n=1. **Cost: real Groq calls,
+   competing with #29/#30's queued quota** — needs explicit scheduling
+   against SelfCheckGPT/cross-model-judge, not free.
+6. **Validate the relevance classifier itself (§3.4 Stage 2)** — the
+   deterministic, stemmed bag-of-words topical-overlap score is what
+   actually produces the REAL_AND_PLAUSIBLE / REAL_BUT_IRRELEVANT split.
+   If item 4 makes that split the paper's centerpiece, an unvalidated
+   heuristic behind it is a much bigger liability than before. Build a
+   manually-labeled CVE-alert relevance benchmark (~50-100 pairs),
+   report precision/recall/F1, optionally compare against a semantic
+   embedding baseline. **Cost: this needs a human (you) to actually
+   label the ground-truth relevance pairs — not something that can be
+   automated or run against Groq quota.** The single most
+   labor-intensive Tier-1 item.
+
+**Tier 2 — cheap, mechanical, do alongside the above:**
+
+7. **Reproducibility metadata** — explicit MITRE ATT&CK STIX snapshot
+   version/date/hash, NVD retrieval-date note, confirm all package
+   versions are captured (`4.1` already lists most of this; snapshot
+   versioning is the actual gap).
+8. **"Real-world validation" → "live integration demonstration"**
+   (§4.6 Wazuh) — the current phrase claims more statistical weight than
+   n=13 from one manual session supports. Matches this project's own
+   honesty norm everywhere else; just needs the two occurrences reworded.
+9. **McNemar multiple-comparisons correction (§4.2, §8)** — 6 pairwise
+   comparisons now run (`significance_test.py`'s `COMPARISON_PAIRS`), no
+   Holm-Bonferroni or similar correction applied across the family yet.
+   Report both raw and corrected p-values; the `hybrid vs llm_guard`
+   p=0.049 result is the one closest to the line and most likely to draw
+   scrutiny.
+10. **Reference #10 citation spot-check** — already tracked in §9, still
+    open, needs doing before submission regardless of everything above.
+
+**Tier 3 — optional, only if time remains after Tier 1-2:**
+
+11. **Expand PII bait set (§5, §4.11)** — review's own framing agreed
+    with what's already written (§4.11 already hedges n=6 as "a first
+    real signal, not a citable rate"). Lower priority than Tier 1 items —
+    T3 is not the thesis; only expand if Tier 1-2 finish early.
+12. **Second LLM-judge model family** — qwen/qwen3.6-27b run already in
+    progress (#30, 141/318 as of 2026-08-20) independent of this review;
+    continue opportunistically on quota resets, not a new ask.
+
+This section supersedes/extends §10's ordering above where they
+overlap — treat §11 as the current priority list, §10 as the historical
+record of what was already true before this review.
