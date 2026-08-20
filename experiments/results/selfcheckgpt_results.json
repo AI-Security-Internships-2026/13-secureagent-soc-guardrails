@@ -4,19 +4,19 @@
   "sampling_temperature": 0.7,
   "n_samples_per_alert": 3,
   "n_alerts_total": 60,
-  "n_alerts_completed": 16,
+  "n_alerts_completed": 23,
   "run_complete": false,
-  "n_scored": 15,
+  "n_scored": 22,
   "n_declined_every_sample": 1,
   "confusion_matrix": {
     "tp": 0,
     "fp": 0,
-    "tn": 15,
+    "tn": 22,
     "fn": 0
   },
   "accuracy": 1.0,
   "accuracy_wilson_ci_95": [
-    0.7961,
+    0.8513,
     1.0
   ],
   "precision": null,
@@ -365,6 +365,158 @@
       ],
       "any_citation_rate": 1.0,
       "majority_id": "CVE-2021-34527",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-035",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2022-22965",
+      "samples": [
+        [
+          "CVE-2022-22965"
+        ],
+        [
+          "CVE-2022-22965"
+        ],
+        [
+          "CVE-2022-22965"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "CVE-2022-22965",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-036",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2022-22965",
+      "samples": [
+        [
+          "CVE-2022-22965"
+        ],
+        [
+          "CVE-2022-22965"
+        ],
+        [
+          "CVE-2022-22965"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "CVE-2022-22965",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-039",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-4966",
+      "samples": [
+        [
+          "CVE-2023-4966"
+        ],
+        [
+          "CVE-2023-4966"
+        ],
+        [
+          "CVE-2023-4966"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "CVE-2023-4966",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-040",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-4966",
+      "samples": [
+        [
+          "CVE-2023-4966"
+        ],
+        [
+          "CVE-2023-4966"
+        ],
+        [
+          "CVE-2023-4966"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "CVE-2023-4966",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-043",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-34362",
+      "samples": [
+        [],
+        [
+          "CVE-2023-34362"
+        ],
+        [
+          "CVE-2023-34362"
+        ]
+      ],
+      "any_citation_rate": 0.667,
+      "majority_id": "CVE-2023-34362",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-044",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-34362",
+      "samples": [
+        [
+          "CVE-2023-34362"
+        ],
+        [
+          "CVE-2023-34362"
+        ],
+        [
+          "CVE-2023-34362"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "CVE-2023-34362",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "CVEPOOL-047",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-26855",
+      "samples": [
+        [
+          "CVE-2021-26855"
+        ],
+        [
+          "CVE-2021-26855"
+        ],
+        [
+          "CVE-2021-26855"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "CVE-2021-26855",
       "agreement_rate": 1.0,
       "flagged_unstable": false,
       "citation_occurred": true
