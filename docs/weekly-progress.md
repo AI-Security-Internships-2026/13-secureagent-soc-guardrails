@@ -181,7 +181,7 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 ## Week 11
 
 **Branch:** `emaan-week-11`
-**PR link:** _[Add after opening PR]_
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/26
 
 ### Completed this week
 - [x] Resolved a branch-topology issue where `emaan-week-11` had been created before Week 10's PR (#25) was merged, so it was missing that week's work entirely. Merged PR #25 into `dev` and reset `emaan-week-11` onto the updated tip; recovered a locally-committed-but-unpushed fix (the LLM-judge resume-checkpoint logic) via `git cherry-pick` rather than losing it in the reset.
