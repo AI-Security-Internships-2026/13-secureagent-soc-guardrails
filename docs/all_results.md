@@ -37,6 +37,8 @@ This is the full rundown of every experiment run on this project, in the order t
 | 25 | [Presidio PII redaction — bait test](#25-presidio-pii-redaction--bait-test-issue-20-5-threat-t3) | Aug 18 | 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction — model mostly summarizes PII abstractly rather than quoting it verbatim; the one time it did quote a real name, the guardrail caught and redacted it correctly |
 | 26 | [LLM-judge hard tier — resume-from-checkpoint fix](#26-llm-judge-hard-tier--resume-from-checkpoint-fix) | Aug 20 | Groq's daily quota (200k tokens) is smaller than the full 318-call run needs, so it can never finish in one day; script previously restarted from sample 1 every time, wasting quota re-doing finished work — fixed to resume from the last checkpoint instead, now at 201/318 |
 | 27 | [Wazuh live-feed dashboard — end-to-end verification + crash fix](#27-wazuh-live-feed-dashboard--end-to-end-verification--crash-fix) | Aug 20 | Auto-polling live feed (built Aug 14, undocumented) confirmed working end-to-end in a real browser session against 13 real Wazuh alerts; found and fixed a bug where an LLM failure would crash the whole feed instead of flagging just that one alert |
+| 28 | [LLM-judge hard tier — completed](#28-llm-judge-hard-tier--completed) | Aug 20 (quota reset) | Resume fix from #26 finished the job on the next Groq quota window: full 318/318 run completed, **100% accuracy/precision/recall on all three tiers** (easy, hard, overall), TP=106 FP=0 TN=212 FN=0, zero parse errors |
+| 29 | [SelfCheckGPT — resume-checkpoint fix + first partial run](#29-selfcheckgpt--resume-checkpoint-fix--first-partial-run) | Aug 20 (quota reset) | Applied the same #26 resume-from-checkpoint fix to `selfcheckgpt_test.py` before its first run (it had the identical restart-from-scratch bug); first run used the rest of that same quota window after #28 and hit the wall after 16/60 alerts, checkpointed cleanly, no crash, no lost progress |
 
 ---
 
@@ -473,10 +475,35 @@ Docker Desktop wasn't running; started it, and all five Wazuh stack containers (
 
 ---
 
+## 28. LLM-judge hard tier — completed
+
+**When:** Aug 20 (quota reset window after #26/#27)
+**What we tried:** Resumed the #26 run using the resume-from-checkpoint fix, starting from the 201/318 samples already saved. Also double-checked the process-management mistakes from #26 wouldn't repeat: confirmed no stray Python processes were running before starting (`tasklist`), and after starting confirmed the two `python.exe` entries that appeared were a normal venv-launcher/worker parent-child pair (`wmic process where "ProcessId=X" get ParentProcessId`) rather than a duplicate run, before trusting the run to continue unattended.
+
+**What went wrong:** Nothing. The run completed the remaining 117 samples and finished on its own — 318/318, `run_complete: true` — faster and more smoothly than expected, with quota to spare afterward.
+
+**Result** (`experiments/results/llm_judge_synthetic_results.json`, n=318): **100% accuracy, 100% precision, 100% recall** on all three reported slices — the full set (n=318, TP=106 FP=0 TN=212 FN=0), the easy pair (n=212), and the hard "construct-validity" pair (n=212, grounded-cited vs. ungrounded, the harder class added per PR #25 review feedback). Zero parse errors across all 318 calls. 95% Wilson CI floor stayed at or above 96.5% on every metric in every slice.
+
+**What it means:** the hard-tier construct-validity extension — where the distractor identifier is injected into *both* the evidence and the report, making the two classes genuinely harder to tell apart than #24's original easy pair — didn't move the needle at all: the judge still separated grounded-cited from ungrounded perfectly. Combined with #24, this is now full-coverage, statistically citable evidence for the LLM-judge baseline (issue #20 §3 item 5) across every difficulty tier this project built for it, not just the original easy case.
+
+---
+
+## 29. SelfCheckGPT — resume-checkpoint fix + first partial run
+
+**When:** Aug 20 (same quota window as #28, immediately after)
+**What we tried:** Before running `selfcheckgpt_test.py` for the first time, reviewed it and found the exact same bug #26 had already fixed once in `llm_judge_synthetic_test.py`: `run()` always rebuilt `results = []` from scratch and reprocessed every alert from index 0, with no resume logic, despite already checkpointing to disk after every alert. Applied the identical fix pattern — read any existing checkpoint, skip alert ids already present, continue from there — before ever starting the run, rather than discovering the same problem the hard way a second time.
+
+**What went wrong:** The run itself hit Groq's daily token quota wall after 16/60 alerts (48/180 total Groq calls, at 3 samples/alert) — expected, since the same quota window had just been mostly used up finishing #28's 117 remaining samples immediately before this. Confirmed via the traceback: `groq.RateLimitError: ... Used 199499, Requested 988`. This is normal quota exhaustion, not a bug — the checkpoint fix meant it stopped cleanly with 16 alerts saved (`n_alerts_completed: 16`, `run_complete: false`) instead of crashing mid-write or losing anything.
+
+**Result:** 16/60 alerts scored so far — 15 stable (agreement 67-100%), 1 declined-every-sample. All 16 so far are from the "stated" (grounded) class, since `all_alerts` orders stated before prompted; the "prompted" (ungrounded) class hasn't been reached yet, so no accuracy/precision/recall numbers are meaningful until the run has both classes represented.
+
+**What it means:** same lesson as #26, now applied proactively instead of reactively — this run will also finish reliably a batch at a time across however many quota windows it takes, with no risk of restarting from zero. Worth noting for planning: running #28 and #29 back-to-back in the same window meant #29 only got the leftover quota rather than a full window of its own, so future sessions should expect roughly one paper-relevant baseline's worth of progress per quota window when multiple Groq-dependent scripts are queued up together, not both finishing the same day.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
-- **LLM-judge hard tier (construct-validity)** — #24's calibration set extended with a harder "grounded-cited" class (same distractor identifier injected into both evidence and report, not just the report), per PR #25 review feedback. 201/318 samples completed and checkpointed as of Aug 20 (hit Groq's daily quota wall twice in one day — see #27 note below); the script now resumes from its own checkpoint instead of restarting from sample 1, so it just needs a few more days of quota to finish, nothing is at risk of being lost.
-- **SelfCheckGPT comparison** — required by the paper scope, code built and smoke-tested; full 180-call run pending Groq daily quota.
+- **SelfCheckGPT comparison** — required by the paper scope, resume-checkpoint fix applied (#29). 16/60 alerts (48/180 Groq calls) completed and checkpointed as of Aug 20; hit the quota wall (already mostly used up by that same window's completed LLM-judge run, #28) and stopped cleanly. Will keep making real forward progress a batch at a time on quota resets, same pattern as #26/#28.
 - **Significance testing on the CVE-bait comparison** — even at n=100 (#21), only 2 ungrounded citations occurred (both on the same famous CVEs found at n=25), which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
 - Repeated-trial latency benchmarking (fresh process per implementation) to fix the instability flagged in #20.
 
