@@ -484,13 +484,14 @@ with tab_results:
     cve_bait_results = load_json("cve_bait_results.json")
     attack_bait_results = load_json("attack_bait_results.json")
     pii_bait_results = load_json("pii_bait_results.json")
+    selfcheckgpt_results = load_json("selfcheckgpt_results.json")
     soc_integration_results = load_json("soc_integration_results.json")
     soc_cve_pool_results = load_json("soc_integration_cve_pool_results.json")
     wazuh_results = load_json("wazuh_integration_results.json")
 
     st.subheader("Summary")
 
-    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
+    c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(8)
 
     if guardrail_results is not None:
         blocked = sum(1 for r in guardrail_results if r.get("guardrail_blocked"))
@@ -524,8 +525,9 @@ with tab_results:
         c5.metric("CVE hallucination rate", "—")
 
     if attack_bait_results is not None:
-        c6.metric("ATT&CK citations requiring review", f"{attack_bait_results['requires_review_rate']:.1%}",
-                   f"{attack_bait_results['ungrounded_count']}/{attack_bait_results['total_tested']} ungrounded citation(s)")
+        _attack_overall = attack_bait_results["overall"]
+        c6.metric("ATT&CK citations requiring review", f"{_attack_overall['requires_review_rate']:.1%}",
+                   f"{_attack_overall['ungrounded_count']}/{_attack_overall['n']} ungrounded citation(s)")
     else:
         c6.metric("ATT&CK hallucination rate", "—")
 
@@ -535,6 +537,14 @@ with tab_results:
                    f"{pii_bait_results['clean_alerts_false_positives']} false positive(s) on clean alerts")
     else:
         c7.metric("PII redaction rate", "—")
+
+    if selfcheckgpt_results is not None and selfcheckgpt_results.get("run_complete"):
+        cm = selfcheckgpt_results["confusion_matrix"]
+        c8.metric("SelfCheckGPT recall", f"{selfcheckgpt_results['recall']:.1%}",
+                   f"precision {selfcheckgpt_results['precision']:.1%} — "
+                   f"{len(selfcheckgpt_results.get('stable_but_wrong_alert_ids', []))} stable-but-ungrounded")
+    else:
+        c8.metric("SelfCheckGPT recall", "—")
 
     st.markdown("**Independent alert sources** (not hand-authored — rule-engine-generated or live-observed)")
     d1, d2, d3 = st.columns(3)
@@ -663,6 +673,65 @@ with tab_results:
     else:
         st.info("No PII-bait results found yet — run: python -m experiments.evaluation.pii_bait_test")
 
+    st.markdown("**Same guardrail, on real Wazuh alert text**")
+    st.caption(
+        "The bait test above uses hand-authored alerts built specifically to test PII "
+        "detection. This is the same guardrail's output on real Wazuh live-agent alert "
+        "text instead — surfaces false positives the narrow bait test never contained "
+        "(e.g. URL paths or command strings misread as a person's name)."
+    )
+    if wazuh_results is not None:
+        wazuh_pii_df = pd.DataFrame(flatten_report_rows(
+            wazuh_results["results"], ["wazuh_alert_id", "rule_id"],
+        ))
+        wazuh_pii_df["pii_found"] = wazuh_pii_df["pii_detections"].apply(lambda d: len(d) > 0)
+        wazuh_pii_df["pii_detections_summary"] = wazuh_pii_df["pii_detections"].apply(
+            lambda d: "; ".join(f"{e['entity_type']}: \"{e['text']}\" ({e['score']})" for e in d)
+        )
+        st.dataframe(
+            wazuh_pii_df[["wazuh_alert_id", "rule_id", "severity_assessment",
+                          "pii_found", "pii_detections_summary", "requires_review"]].rename(
+                columns={"pii_detections_summary": "pii_detections"}
+            ),
+            hide_index=True,
+            use_container_width=True,
+        )
+        n_pii_flagged = int(wazuh_pii_df["pii_found"].sum())
+        if n_pii_flagged > 0:
+            st.warning(f"{n_pii_flagged} live Wazuh alert(s) had a PII detection — see 'pii_detections' "
+                       f"column to check whether each is a real leak or a false positive.")
+    else:
+        st.info("No Wazuh results found yet — run: python -m experiments.evaluation.wazuh_integration_test "
+                "(requires the local Wazuh Docker stack to be running)")
+
+    st.divider()
+
+    st.subheader("SelfCheckGPT baseline — self-consistency vs. external grounding")
+    st.caption(
+        "A different question again: not 'is this citation grounded in the evidence', but "
+        "'does the model keep making the same claim when resampled'. `expected_ungrounded` is "
+        "the alert's true construction (CVE withheld = should be flagged); `flagged_unstable` is "
+        "what SelfCheckGPT actually predicted. Watch for rows where `expected_ungrounded` is True, "
+        "`flagged_unstable` is False, and `majority_id` equals `ground_truth_cve` — SelfCheckGPT's "
+        "blind spot: the model consistently recalled the *correct* withheld CVE from training "
+        "knowledge, so nothing looked unstable, even though the checker still (correctly) flags it "
+        "as ungrounded. See docs/paper/paper_draft.md Sect. 4.9."
+    )
+    if selfcheckgpt_results is not None:
+        st.dataframe(
+            pd.DataFrame(selfcheckgpt_results["results"])[
+                ["alert_id", "class", "expected_ungrounded", "flagged_unstable",
+                 "majority_id", "ground_truth_cve", "agreement_rate"]
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )
+        if not selfcheckgpt_results.get("run_complete"):
+            st.info(f"Run in progress: {selfcheckgpt_results.get('n_alerts_completed', 0)}/"
+                    f"{selfcheckgpt_results.get('n_alerts_total', '?')} alerts completed so far.")
+    else:
+        st.info("No SelfCheckGPT results found yet — run: python -m experiments.evaluation.selfcheckgpt_test")
+
     st.divider()
 
     st.subheader("Secure_SOC_AI integration — rule-engine-generated incidents")
@@ -733,7 +802,7 @@ with tab_results:
     view_choice = st.radio(
         "Source",
         ["Synthetic (week 4)", "CICIDS2017 (real)", "False positive test", "CVE bait test", "ATT&CK bait test",
-         "PII bait test", "Secure_SOC_AI incidents", "CVE pool", "Wazuh (live)"],
+         "PII bait test", "SelfCheckGPT comparison", "Secure_SOC_AI incidents", "CVE pool", "Wazuh (live)"],
         horizontal=True,
     )
 
@@ -749,6 +818,8 @@ with tab_results:
         st.dataframe(pd.DataFrame(attack_bait_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "PII bait test" and pii_bait_results is not None:
         st.dataframe(pd.DataFrame(pii_bait_results["results"]), hide_index=True, use_container_width=True)
+    elif view_choice == "SelfCheckGPT comparison" and selfcheckgpt_results is not None:
+        st.dataframe(pd.DataFrame(selfcheckgpt_results["results"]), hide_index=True, use_container_width=True)
     elif view_choice == "Secure_SOC_AI incidents" and soc_integration_results is not None:
         st.dataframe(pd.DataFrame(flatten_report_rows(
             soc_integration_results["results"], ["incident_id", "entity", "rule_ids", "ground_truth_mitre"],

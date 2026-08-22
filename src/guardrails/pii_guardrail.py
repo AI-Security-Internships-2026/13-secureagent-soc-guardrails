@@ -41,6 +41,8 @@ without conflating "this alert legitimately reports an IP" with "this
 report leaked someone's SSN."
 """
 
+import re
+
 from presidio_analyzer import AnalyzerEngine, RecognizerResult
 from presidio_analyzer.nlp_engine import NlpEngineProvider
 from presidio_anonymizer import AnonymizerEngine
@@ -77,6 +79,37 @@ def _get_anonymizer() -> AnonymizerEngine:
     return _anonymizer
 
 
+# Characters that never appear in a real human name, but do appear in the
+# technical text (URL paths, function calls, acronyms, version/year
+# numbers) spaCy's small NER model sometimes mistakes for a PERSON.
+# Deliberately does NOT include apostrophes or hyphens -- real names like
+# "O'Brien" or "Jean-Pierre" use those, so filtering on them would trade a
+# false positive for a false negative rather than actually fixing anything.
+# Found via 5 real false positives on live Wazuh alert text
+# (docs/all_results.md #33): "/profile.php", "xp_cmdshell('whoami",
+# "ATT&CK" (x2), "2023 Benchmark" -- every one contains at least one of
+# these characters.
+_IMPLAUSIBLE_PERSON_PATTERN = re.compile(r"[/()&]|\d")
+
+
+def _is_plausible_person(text: str) -> bool:
+    return not _IMPLAUSIBLE_PERSON_PATTERN.search(text)
+
+
+def _analyze(text: str, entities: list) -> list:
+    """
+    Run Presidio's analyzer, then drop PERSON matches that fail the
+    plausibility check above. Shared by detect_pii() and redact_text() so
+    the filter can't drift out of sync between the two call sites -- both
+    used to call the analyzer directly and independently.
+    """
+    results = _get_analyzer().analyze(text=text, language="en", entities=entities)
+    return [
+        r for r in results
+        if r.entity_type != "PERSON" or _is_plausible_person(text[r.start:r.end])
+    ]
+
+
 def detect_pii(text: str, entities: list = None) -> list:
     """
     Run Presidio's analyzer over `text`. Returns a list of dicts:
@@ -90,7 +123,7 @@ def detect_pii(text: str, entities: list = None) -> list:
     if not text:
         return []
     entities = entities if entities is not None else DEFAULT_ENTITIES
-    results = _get_analyzer().analyze(text=text, language="en", entities=entities)
+    results = _analyze(text, entities)
     return [
         {
             "entity_type": r.entity_type,
@@ -115,7 +148,7 @@ def redact_text(text: str, entities: list = None) -> tuple:
         return text, []
 
     entities = entities if entities is not None else DEFAULT_ENTITIES
-    analyzer_results = _get_analyzer().analyze(text=text, language="en", entities=entities)
+    analyzer_results = _analyze(text, entities)
     if not analyzer_results:
         return text, []
 

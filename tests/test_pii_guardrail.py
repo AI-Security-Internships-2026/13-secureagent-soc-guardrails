@@ -29,6 +29,43 @@ def test_detects_person_name():
     assert any(d["entity_type"] == "PERSON" for d in detections)
 
 
+# Regression tests for the PERSON plausibility filter (docs/all_results.md
+# #33, #35) -- spaCy's small NER model mistook technical text for a name on
+# real live Wazuh alerts. Each string below is a real false positive
+# observed in production, not a hypothetical one.
+def test_url_path_not_flagged_as_person():
+    detections = detect_pii("Request to /profile.php returned 200.", entities=["PERSON"])
+    assert detections == []
+
+
+def test_sql_command_fragment_not_flagged_as_person():
+    detections = detect_pii("Payload used xp_cmdshell('whoami') to enumerate the host.", entities=["PERSON"])
+    assert detections == []
+
+
+def test_ampersand_acronym_not_flagged_as_person():
+    detections = detect_pii("Matches MITRE ATT&CK technique T1190.", entities=["PERSON"])
+    assert detections == []
+
+
+def test_year_plus_word_not_flagged_as_person():
+    detections = detect_pii("Fails the CIS 2023 Benchmark check.", entities=["PERSON"])
+    assert detections == []
+
+
+def test_apostrophe_name_still_detected():
+    # The plausibility filter deliberately does NOT reject apostrophes --
+    # rejecting them would fix these false positives by breaking real
+    # names like this one instead.
+    detections = detect_pii("Escalated to Sean O'Brien for review.")
+    assert any(d["entity_type"] == "PERSON" for d in detections)
+
+
+def test_hyphenated_name_still_detected():
+    detections = detect_pii("Reported by Jean-Pierre Dubois.")
+    assert any(d["entity_type"] == "PERSON" for d in detections)
+
+
 def test_detects_real_ssn():
     detections = detect_pii("SSN on file: 219-09-9999.")
     assert any(d["entity_type"] == "US_SSN" and d["text"] == "219-09-9999" for d in detections)

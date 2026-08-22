@@ -52,7 +52,7 @@ claim in the paper, not just a nice-to-have improvement.
 | 5 | LLM-judge baseline added to CVE-bait benchmark | ✅ Done, full coverage 2026-08-20 | `src/guardrails/llm_judge.py` + `experiments/evaluation/llm_judge_baseline_test.py`, built for both CVE-bait and ATT&CK-bait together. 100% agreement with the deterministic checker on both sets, but only 4 positive cases total (2 CVE + 2 ATT&CK) — #23. Made citable via `experiments/evaluation/llm_judge_synthetic_test.py`: a class-balanced n=212 calibration set (106 grounded / 106 with a real-but-foreign identifier injected). **100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+ on every metric** — #24. Extended to a harder construct-validity tier (distractor injected into evidence *and* report, not just report) per PR #25 review feedback — full 318-sample run completed 2026-08-20 after a resume-from-checkpoint fix (Groq's daily quota is smaller than one full run needs — #26). **Still 100% accuracy/precision/recall on every tier (easy, hard, overall)** — #28. |
 | 6 | Re-run CVE-bait-style adversarial test against the ATT&CK checker | ✅ Done | `attack_bait_test.py` / `attack_bait_alerts.py` — real run: 2/6 ungrounded (33%), both classified REAL_BUT_IRRELEVANT |
 | 7 | Expand the CVE-bait test set size | ✅ Done, 2026-08-12 | Expanded in two passes: `cve_bait_alerts.py` grown 6 → 25 (individually web-verified real CVEs) → **100** (75 more sourced directly from CISA's official Known Exploited Vulnerabilities catalog, behavior descriptions derived from CISA's own real per-CVE text rather than hand-recalled). Re-run at n=100 (also resolves the earlier stale-data problem — the old n=6 result predated the stemmer and `requires_review` fixes): **2/100 ungrounded (2.0%), 2/100 requires_review (2.0%, matches ungrounded exactly — fix confirmed active)**. 95% Wilson CI on the rate: **[0.6%, 7.0%]** — a real, citable estimate now (was a 22.7-point-wide band at n=25). **Important nuance, found 2026-08-12 when double-checking the two flagged cases individually:** 97 of the 100 alerts never mention a CVE at all — 0/97 of these ever produced an ungrounded citation, so the true *spontaneous* hallucination rate is 0%, not 2%. Only 3 alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the model to cite a CVE identifier it wasn't given (a deliberate second variant, not the main methodology) — and both of the 2 flagged hits come from that subset of 3, not from the 97. `BAIT-011`, the third explicitly-asked alert, produced no ungrounded citation. Of the 2 flagged: `BAIT-002` cited `CVE-2021-44228` (Log4Shell) — **factually correct**, still flagged `REAL_AND_PLAUSIBLE`/review-required purely because the guardrail's rule is mechanical (not present in the input evidence = ungrounded, regardless of real-world correctness — a deliberately conservative design, not a false claim about accuracy). `BAIT-017` cited `CVE-2022-34713` "DogWalk" instead of the correct `CVE-2022-30190` Follina — both real MSDT vulnerabilities from the same year, `REAL_BUT_IRRELEVANT` — a genuine, concrete instance of the exact misattribution risk this project's paper is about, and the only one of the 100 that's a *wrong* citation rather than a correct-but-mechanically-flagged one. Results in `experiments/results/cve_bait_results.json`. Caught and fixed two real bugs while building the generator: a truncated-mid-write file (caught before running anything, via import check) and an unescaped-quote syntax error in one payload template. |
-| 8 | SelfCheckGPT comparison, actually implemented and run | 🟡 Built, partially run | `experiments/evaluation/selfcheckgpt_test.py` + `selfcheckgpt_alerts.py` (60 stated/prompted alerts, 3 resamples each = 180 Groq calls) and `src/guardrails/selfcheckgpt.py`. Resume-from-checkpoint fix applied 2026-08-20 (same fix pattern as #26). First run: 16/60 alerts completed and checkpointed before hitting the day's Groq quota wall — #29. Not yet enough data (stated-class only so far) for accuracy/precision/recall. |
+| 8 | SelfCheckGPT comparison, actually implemented and run | ✅ Done, 2026-08-21 | `experiments/evaluation/selfcheckgpt_test.py` + `selfcheckgpt_alerts.py` (60 stated/prompted alerts, 3 resamples each) and `src/guardrails/selfcheckgpt.py`. Full 60/60 run complete (#34 in all_results.md): recall 0.31, precision 1.0 — but 18 of the 20 "misses" are the model correctly recalling a withheld CVE from training knowledge, not a fabrication, which directly contradicts item 15/§4.5's "never volunteers when withheld" finding at this run's higher sampling temperature (0.7 vs. 0.1). Written into `docs/paper/paper_draft.md` §4.9, plus the abstract, §2, §4.5, §4.10, §5, §6. |
 
 ---
 
@@ -74,7 +74,7 @@ claim in the paper, not just a nice-to-have improvement.
 |---|---|---|
 | nDPI substring-match comparison | ⛔ Descoped, 2026-08-20 | nDPI is a network-packet deep-packet-inspection library for classifying raw traffic by protocol signature — a different problem from this guardrail's actual job (matching English override phrases in alert/log text before it reaches the LLM). Never had any references in the repo; dropped rather than force-fit. The relevant underlying idea (fast matching against a larger pattern set) is instead covered by item 13 above — a real, sourced phrase-list expansion — with a proper multi-pattern string algorithm (Aho-Corasick) as the natural next step if list size ever grows enough to need one. |
 | Redo threading vs. multiprocessing benchmark (repeated runs, mean ± spread, larger n) | ⚠️ Partially done | Upgraded from single-shot to n=3 repeats this week; still deferred per your own call ("polish other tasks first, then repeat on the final pipeline") — full-pipeline n is still 6, and the mocked/synthetic-latency variant to separate scheduling overhead from live Groq behavior hasn't been built |
-| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25) |
+| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25). **2026-08-21:** the Wazuh alert-type expansion (`docs/all_results.md` #33) surfaced 5 real PERSON false positives on live data (`/profile.php`, `xp_cmdshell('whoami`, `ATT&CK` x2, `2023 Benchmark`) — fixed with a plausibility filter rejecting PERSON matches containing `/()&` or digits (`docs/all_results.md` #35); 0/26 false positives now, no regression on real names or the original bait-test numbers. |
 | Local RAG-based CVE verification (Chroma + small CPU embedding model) | ❌ Not started | Offline alternative to live NVD calls; would also enable a "recommend similar CVE" feature. No Chroma/RAG code anywhere in the repo. **Evidence this matters, found 2026-08-08:** ran a 60-alert CVE pool (15 real NVD-listed CVEs, bait-style vs. stated-style, see `experiments/results/soc_integration_cve_pool_results.json`) — when the CVE number is withheld and only the exploit behavior is described, the LLM cites the correct ground-truth CVE **0% of the time** (never hallucinates one either — it just doesn't volunteer a number at all). When the CVE is stated directly, it's correctly reflected 100% of the time. Confirms the current pipeline only *verifies claims the LLM already makes*, it never *identifies* a CVE from behavior alone — this RAG item is the fix, not yet built, deliberately deferred behind the higher-priority hybrid-guardrail/eval-set work for Aug 23 |
 | Real test suite | ✅ Done, Week 8 | 92 passing / 1 pre-existing unrelated failure (`experiments/nemo_test/test_rails.py`, async-fixture issue) |
 
@@ -146,6 +146,25 @@ Once the CVE-bait test set is also expanded (§3 #7), re-run the same
 This is a requirement attached to those two items, not a separate backlog
 entry.
 
+**Update, 2026-08-22 — Holm-Bonferroni multiple-comparisons correction
+added.** All 6 comparisons `significance_test.py` runs (the 3 above plus
+the 3 involving the LLM-Guard-fallback trial, §8a below) share overlapping
+implementations, so testing each at raw α=0.05 independently inflates the
+real false-positive rate across the family. Added `holm_bonferroni()` to
+`significance_test.py`, applied across all 6 p-values at once. **Result:
+only "baseline vs. hybrid" survives correction (p<0.001, unchanged).** The
+other three that were raw-significant — "hybrid vs. LLM Guard" (p=0.049 →
+corrected 0.196), and both LLM-Guard-fallback comparisons against hybrid
+(0.049 → 0.196) and Pytector (0.012 → 0.059) — do **not** survive. This
+directly walks back the "LLM Guard's higher recall is a real, measurable
+advantage" claim two paragraphs up: that claim predates the correction and
+is no longer supported at the corrected level. Only the pipeline's actual
+core safety claim (hybrid beats the naive deterministic-only baseline)
+remains statistically proven once the multiple-comparisons problem is
+accounted for — written into the paper draft's §4.2 accordingly (both raw
+and corrected p-values reported side by side, not just the corrected
+numbers substituted in silently).
+
 ### 8a. Trial: LLM Guard as the hybrid's fallback instead of Pytector (2026-08-11)
 
 Prompted directly by the §8 finding that LLM Guard's recall edge over
@@ -197,7 +216,7 @@ paper as more than an order-of-magnitude comparison. Full writeup in
 ## 9. Extra tasks mentioned but not on any official list
 
 - **Secure_SOC_AI integration** — ✅ built and run per `docs/INTEGRATION_PLAN.md`: 76 rule-engine-derived incidents (scaled up from an initial 9 via `generate_events.py`) plus a new 60-alert CVE pool (`cve_pool.py`, 15 real CVEs) both ran through the full guardrailed pipeline; results in `experiments/results/soc_integration_results.json` and `soc_integration_cve_pool_results.json`. Not yet committed to git. Supports §3's "full multi-source grounding benchmark" by supplying realistic (non-hand-crafted) incidents instead of relying only on the small bait sets, and the CVE pool run is what surfaced the RAG-matching finding in §5.
-- **Overleaf porting + citation spot-check** — your own follow-up task: verify the new literature review citations (SelfCheckGPT, FActScore, TRAM, Instruction Hierarchy, LLM-as-a-Judge) against Google Scholar/dblp before finalizing, then port `docs/literature-review.md` into the actual Overleaf project.
+- **Overleaf porting + citation spot-check** — your own follow-up task: verify the new literature review citations (SelfCheckGPT, FActScore, TRAM, Instruction Hierarchy, LLM-as-a-Judge) against Google Scholar/dblp before finalizing, then port `docs/literature-review.md` into the actual Overleaf project. The AI-Augmented SOC survey (reference #10)'s placeholder author field is done — verified 2026-08-22 against Crossref's DOI record (`docs/all_results.md`); the rest of this list is still open.
 
 ---
 
@@ -405,10 +424,10 @@ dataset, re-run comparison, McNemar testing) are now all done as of
 1. ~~Hybrid input guardrail (§4 #9)~~ ✅ done
 2. ~~Larger eval dataset (§4 #11)~~ ✅ done — 29 → 119 samples
 3. ~~Re-run guardrail comparison + hybrid benchmark (§4 #10, #12)~~ ✅ done — hybrid now P=1.0/R=0.736 on the bigger set.
-4. ~~Significance test on the guardrail comparison (§8)~~ ✅ done — McNemar's test via `significance_test.py`: baseline-vs-hybrid and hybrid-vs-LLM-Guard are both real, statistically significant differences; hybrid-vs-Pytector is not (too few discordant samples to tell). Full numbers in §8.
+4. ~~Significance test on the guardrail comparison (§8)~~ ✅ done — McNemar's test via `significance_test.py` across all 6 comparisons, Holm-Bonferroni corrected 2026-08-22: only baseline-vs-hybrid survives correction (p<0.001); hybrid-vs-LLM-Guard and the two LLM-Guard-fallback comparisons were raw-significant but do not survive being tested as a family. Full numbers in §8.
 5. ~~Expand CVE-bait set (§3 #7)~~ ✅ done, 2026-08-12 — 6 → 25 → **100** real CVEs (75 sourced from CISA's KEV catalog); re-run resolved the stale-data problem too. Headline 2/100 ungrounded (95% CI [0.6%, 7.0%]) — but both hits come from the 3 alerts that explicitly ask for a CVE citation, not the 97 that don't; true spontaneous rate is 0/97. Of the 2: one is a factually correct citation flagged only by policy (Log4Shell), the other a real-but-wrong misattribution (Follina vs. DogWalk). Full breakdown in §3 item 7. Significance testing on this comparison still not meaningful — only 2 ungrounded cases even at n=100, not enough discordant data for McNemar against a future baseline.
 6. ~~LLM-judge baseline (§3 #5)~~ ✅ done, full coverage 2026-08-20 — built for both CVE-bait and ATT&CK-bait together (`llm_judge.py` + `llm_judge_baseline_test.py`); 100% agreement with the deterministic checker on both sets (`docs/all_results.md` #23), then made citable with a class-balanced n=212 synthetic calibration set (100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+, #24), then extended to a 318-sample hard/construct-validity tier — still 100% across every tier (#26, #28)
-7. SelfCheckGPT comparison (§3 #8) — required by issue #20; built and resume-checkpoint-fixed 2026-08-20, first run got 16/60 alerts done before the day's Groq quota wall (#29); needs a few more quota windows to finish
+7. ~~SelfCheckGPT comparison (§3 #8)~~ ✅ done, 2026-08-21 — full 60/60 run (#34 in all_results.md), written into the paper draft. Real finding: 18 of 20 "missed" hallucinations are actually the model correctly recalling a withheld CVE from training knowledge, not a fabrication — a temperature-dependent contradiction of item 5's/§4.5's own finding, now stated as such in both sections.
 8. ~~Presidio PII redaction (§5)~~ ✅ built, 2026-08-18 — see §5 for details; full-pipeline bait-test run still pending (Groq quota)
 9. Everything else in §5 (nDPI descoped, RAG/Chroma, full benchmark rigor pass) as time allows before Aug 30 write-up
 
@@ -431,12 +450,14 @@ project's actual bottlenecks (Groq daily quota; manual labeling time).
 
 **Tier 1 — do before submission, ranked by cost:**
 
-1. **Finish SelfCheckGPT (§3 #8)** — already in progress (23/60 as of
-   2026-08-20, #29/#30 in all_results.md). Non-negotiable per the review:
-   can't keep it in the abstract half-finished. Don't force a "LLMCite
-   wins" framing if the data shows complementary failure-mode detection
-   instead — that would be a stronger, more interesting result than
-   simple superiority.
+1. **Finish SelfCheckGPT (§3 #8)** — ✅ done, 2026-08-21 (#34 in
+   all_results.md). Turned out to be the complementary-failure-mode
+   result, not a superiority result: SelfCheckGPT never false-flags the
+   grounded class, but 18 of its 20 misses on the ungrounded class are the
+   model *correctly* recalling a withheld CVE from training knowledge,
+   which a consistency-only signal cannot distinguish from genuine
+   grounding. Written into §4.9, plus the abstract, §2, §4.5, §4.10, §5,
+   §6.
 2. **Soften the LLM-judge framing (§4.8, abstract, §II)** — the review's
    sharpest point: the hard tier's grounded-cited-vs-ungrounded split is
    essentially "does this ID also appear in the evidence," mechanically
@@ -468,49 +489,68 @@ project's actual bottlenecks (Groq daily quota; manual labeling time).
    Log4Shell for this class, keep Follina as the separate
    REAL_BUT_IRRELEVANT illustration. **Honesty caveat to keep in the
    text:** REAL_AND_PLAUSIBLE has been spontaneously observed exactly
-   **once** across the entire evaluation (n=100 CVE-bait + n=6
-   ATT&CK-bait combined) — frame as "rare but the highest-consequence
-   failure mode, hardest for manual review to catch," not as a common
-   occurrence. This makes item 5 below load-bearing, not optional.
-5. **Expand ATT&CK-bait set beyond n=6 (§3 #6)** — the review's most
-   concrete, lowest-risk-to-implement Tier-1 item: this project already
-   has the exact recipe (CVE-bait went 6→25→100, §3 #7, individually
-   verified + CISA KEV-sourced). Target 30-50 real ATT&CK techniques
-   the same way. Also directly strengthens item 4: more trials = more
-   chances to observe additional REAL_AND_PLAUSIBLE cases instead of
-   resting the paper's central claim on n=1. **Cost: real Groq calls,
-   competing with #29/#30's queued quota** — needs explicit scheduling
-   against SelfCheckGPT/cross-model-judge, not free.
-6. **Validate the relevance classifier itself (§3.4 Stage 2)** — the
-   deterministic, stemmed bag-of-words topical-overlap score is what
-   actually produces the REAL_AND_PLAUSIBLE / REAL_BUT_IRRELEVANT split.
-   If item 4 makes that split the paper's centerpiece, an unvalidated
-   heuristic behind it is a much bigger liability than before. Build a
-   manually-labeled CVE-alert relevance benchmark (~50-100 pairs),
-   report precision/recall/F1, optionally compare against a semantic
-   embedding baseline. **Cost: this needs a human (you) to actually
-   label the ground-truth relevance pairs — not something that can be
-   automated or run against Groq quota.** The single most
-   labor-intensive Tier-1 item.
+   **once** through the actual deterministic pipeline/taxonomy classifier
+   (n=100 CVE-bait + n=50 ATT&CK-bait combined, after item 5 below) —
+   frame as "rare but the highest-consequence failure mode, hardest for
+   manual review to catch," not as a common occurrence. Note: item 1's
+   SelfCheckGPT run separately produced 18 citations that are
+   *functionally* the same pattern (real, correct, ungrounded), but those
+   went through citation-extraction only, not the full grounding/taxonomy
+   pipeline (§4.9's method deliberately bypasses it) — worth citing as
+   supporting evidence in §4.9/§5, not folded into this n=1 count, since
+   it's a different measurement.
+5. **Expand ATT&CK-bait set beyond n=6 (§3 #6)** — ✅ done, 2026-08-21,
+   6 → 50 (all_results.md #32). Symptom-only ungrounded rate 1/48 (2.1%,
+   95% CI [0.4%, 10.9%]) — same shape as CVE-bait's n=100 result. No
+   additional REAL_AND_PLAUSIBLE case surfaced at this n (still n=1
+   through the real pipeline, see item 4's note above), so the n=1
+   framing stands as written, now on a larger denominator.
+6. **Validate the relevance classifier itself (§3.4 Stage 2)** — ✅ done,
+   2026-08-22 (`docs/all_results.md` #36). 80 (alert, real CVE) pairs
+   built from the CVE-bait alerts with real NVD descriptions fetched
+   live; labeled AI-suggested-then-human-confirmed (0/80 overrides on
+   first pass, then the 3 genuinely ambiguous pairs specifically
+   re-checked blind with zero visibility into the suggestions, and all 3
+   held). **Result: accuracy 92.5% (95% CI [84.6%, 96.5%]), precision
+   90.5%, recall 95.0%, F1 92.7%** (TP=38, FP=4, TN=36, FN=2,
+   `experiments/evaluation/relevance_classifier_validation/relevance_classifier_validation_results.json`).
+   All 6 disagreements cluster right at the 0.15 overlap threshold
+   (0.100-0.191) — a boundary-case failure mode, not general
+   unreliability. One concrete, citable limitation found: a genuinely
+   correct CVE (`BAIT-053`, Windows Print Spooler) scored only 0.100 and
+   was misclassified, because its real NVD description is just the bare
+   title with almost no text to match against — short/generic
+   authoritative descriptions starve the word-overlap approach
+   regardless of correctness. ✅ Written into the paper draft, 2026-08-22
+   — new §4.12, plus forward-pointers in §3.4, a new §5 limitations
+   bullet, the draft-status callout, and the appendix mapping table.
 
 **Tier 2 — cheap, mechanical, do alongside the above:**
 
-7. **Reproducibility metadata** — explicit MITRE ATT&CK STIX snapshot
-   version/date/hash, NVD retrieval-date note, confirm all package
-   versions are captured (`4.1` already lists most of this; snapshot
-   versioning is the actual gap).
+7. **Reproducibility metadata** — ✅ done, 2026-08-22. §4.1 now states the
+   MITRE ATT&CK STIX snapshot's fetch date (2026-08-04), technique count
+   (858), and SHA-256 hash, plus an explicit note on the CVE path's live
+   (not snapshot) NVD lookups and why that asymmetry is disclosed rather
+   than treated as equivalent. Test count corrected 95→139 passing (stale
+   since this session's additions).
 8. **"Real-world validation" → "live integration demonstration"**
-   (§4.6 Wazuh) — the current phrase claims more statistical weight than
-   n=13 from one manual session supports. Matches this project's own
-   honesty norm everywhere else; just needs the two occurrences reworded.
-9. **McNemar multiple-comparisons correction (§4.2, §8)** — 6 pairwise
-   comparisons now run (`significance_test.py`'s `COMPARISON_PAIRS`), no
-   Holm-Bonferroni or similar correction applied across the family yet.
-   Report both raw and corrected p-values; the `hybrid vs llm_guard`
-   p=0.049 result is the one closest to the line and most likely to draw
-   scrutiny.
-10. **Reference #10 citation spot-check** — already tracked in §9, still
-    open, needs doing before submission regardless of everything above.
+   (§4.6 Wazuh) — ✅ done, 2026-08-22. Reworded, and §4.6 itself brought up
+   to date at the same time (was still describing the original n=13 data,
+   missing this session's alert-type expansion to n=26 and the PII
+   false-positive finding/fix — a bigger staleness gap than just wording).
+9. **McNemar multiple-comparisons correction (§4.2, §8)** — ✅ done,
+   2026-08-22 (see §8's update note above). `holm_bonferroni()` added to
+   `significance_test.py`; only baseline-vs-hybrid survives correction.
+   Both raw and corrected p-values reported in the paper, not just the
+   corrected numbers substituted in silently.
+10. **Reference #10 citation spot-check** — ✅ done, 2026-08-22. Looked up
+    via Crossref's DOI registration record (the publisher's own MDPI/DOAJ/
+    ResearchGate pages all block automated fetches, so used the
+    authoritative DOI registry instead): real author list (8 authors,
+    Srinivas et al.), actual journal (Journal of Cybersecurity and
+    Privacy, not "MDPI" — MDPI is the publisher, not the journal name),
+    volume 5, issue 4, article 95, DOI 10.3390/jcp5040095. Updated in the
+    paper draft's reference list and `sn-bibliography.bib`.
 
 **Tier 3 — optional, only if time remains after Tier 1-2:**
 
@@ -525,3 +565,62 @@ project's actual bottlenecks (Groq daily quota; manual labeling time).
 This section supersedes/extends §10's ordering above where they
 overlap — treat §11 as the current priority list, §10 as the historical
 record of what was already true before this review.
+
+---
+
+## 12. Component ablation study — deferred until everything else is done
+
+Not a Tier 1-3 item, not required for submission — explicitly parked
+until §11's list above (and the Aug 30 write-up) is finished. Recorded
+now so it isn't lost, not because it's urgent.
+
+**What:** systematically toggle each pipeline component on/off (and in
+useful combinations) — input guardrail, CVE grounding checker, ATT&CK
+grounding checker, PII redaction guardrail — and measure the difference,
+instead of only ever arguing for each one's value in isolation (CVE-bait
+tests the CVE checker alone, PII-bait tests PII alone, etc.).
+
+**Why:** answers two questions nothing currently answers directly: (1)
+how much does each component actually cost in latency, and (2) how many
+alerts would have slipped through *silently* if one specific component
+were disabled — i.e., does turning off PII redaction ever cause an alert
+that CVE/ATT&CK grounding also would have caught anyway (redundant
+coverage), or is each component catching a genuinely disjoint set of
+problems (no overlap at all)? Useful both as a real ablation section for
+the paper and as practical deployment guidance ("here's what you lose if
+you disable X for latency reasons").
+
+**One thing already known from reading `soc_agent.py`'s actual pipeline
+order, worth stating upfront so the eventual write-up doesn't have to
+rediscover it:** PII redaction runs *last*, after both grounding checks
+have already scanned the report text — so today's three components don't
+interfere with each other's detection logic, they only OR together onto
+the same `requires_review`/`output_guardrail_flagged` fields. That means
+the main open empirical questions are the *latency* tradeoff curve and
+confirming there's no hidden redundancy between components, not "does
+disabling one component change another's accuracy" — reordering the
+pipeline is a separate, not-yet-scoped question if it ever comes up.
+
+**Rough method (refine when actually building this):**
+1. Add toggle parameters to `analyse_alert()` — same precedent as the
+   existing `verify_cves_with_nvd: bool = True` — e.g.
+   `enable_input_guardrail`, `enable_cve_check`, `enable_attack_check`,
+   `enable_pii_redaction`, all defaulting to `True` (today's behavior
+   unchanged).
+2. Re-run the existing test sets (CVE-bait n=100, ATT&CK-bait n=50,
+   PII-bait n=14, input-guardrail eval n=119) under each
+   single-component-disabled configuration, plus a handful of meaningful
+   combinations (all-on baseline, all-off floor, each pair).
+3. Measure per configuration: latency (mean/median per alert), the
+   `requires_review`/`guardrail_blocked` rate, and — the actual
+   headline number — how many alerts were caught *only* because of one
+   specific component (would have gone through unflagged if that one
+   component were off). That's the real "how much does each guardrail
+   matter" answer, not raw detection rate measured in isolation.
+
+**Cost:** cheap in engineering effort (mostly boolean flags on an
+already-built pipeline), moderate in Groq-quota cost — each configuration
+re-runs the same alert sets through fresh LLM calls, so N configurations
+× the combined size of all four datasets in API calls. Needs explicit
+quota scheduling like everything else quota-gated in this project, not a
+free add-on.

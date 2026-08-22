@@ -31,20 +31,9 @@
         "EMAIL_ADDRESS",
         "PERSON"
       ],
-      "detected_entities": [
-        "PERSON"
-      ],
-      "pii_detections": [
-        {
-          "field": "threat_summary",
-          "entity_type": "PERSON",
-          "text": "Daniel Ortiz",
-          "score": 0.85,
-          "start": 116,
-          "end": 128
-        }
-      ],
-      "pii_found": true,
+      "detected_entities": [],
+      "pii_detections": [],
+      "pii_found": false,
       "residual_pii": []
     },
     {
@@ -65,9 +54,20 @@
         "PERSON",
         "PHONE_NUMBER"
       ],
-      "detected_entities": [],
-      "pii_detections": [],
-      "pii_found": false,
+      "detected_entities": [
+        "PHONE_NUMBER"
+      ],
+      "pii_detections": [
+        {
+          "field": "recommended_action",
+          "entity_type": "PHONE_NUMBER",
+          "text": "555-284-9013",
+          "score": 0.75,
+          "start": 78,
+          "end": 90
+        }
+      ],
+      "pii_found": true,
       "residual_pii": []
     },
     {
