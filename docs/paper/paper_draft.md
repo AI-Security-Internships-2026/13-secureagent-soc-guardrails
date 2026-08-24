@@ -32,19 +32,31 @@
 >   p=0.0118, n=56) — the one comparison in this paper where a performance
 >   gap is both large and statistically confirmed, not just architecturally
 >   argued.
-> - CVE-bait test set expansion (Sect. 3 item 7) — ✅ done 2026-08-12, expanded in
->   two passes (6 → 25 → 100 real, verified CVEs, Sect. 4.3). The old n=6 result
->   predated two bug fixes and has been fully superseded. The blended n=100
->   ungrounded rate is 2.0% (95% CI [0.6%, 7.0%]), but this conflates two
->   conditions: 0/97 alerts that never mention a CVE produced a spontaneous
->   citation (95% CI [0.0%, 3.8%]); both flagged hits came from 3 alerts
->   that explicitly ask for a citation, where the model was right once and
->   wrong-but-plausible once. See Sect. 4.3 for the full breakdown.
-> - Significance testing on the CVE-bait comparison — still open; only 2
->   ungrounded citations occurred even at n=100 (both on the same famous
->   vulnerabilities found at n=25), which still isn't enough discordant
->   data for McNemar-style testing against a future baseline to be
->   meaningful (Sect. 8)
+> - CVE-bait and ATT&CK-bait test set expansion (Sect. 3 items 6-7) — ✅ done,
+>   expanded in three and two passes respectively, most recently
+>   **2026-08-25 to n=150 each** (Sects. 4.3-4.4). CVE-bait: blended n=150
+>   ungrounded rate 1.3% (95% CI [0.4%, 4.7%]); 0/147 symptom-only alerts
+>   ever produced a spontaneous citation (95% CI [0.0%, 2.6%]), both hits
+>   came from the 3 alerts that explicitly ask for a citation, where the
+>   model was right once and wrong-but-plausible once. ATT&CK-bait: blended
+>   n=150 rate 4.0% (95% CI [1.8%, 8.5%]); 4/148 symptom-only (2.7%), 2/2
+>   explicit-ask; includes one new finding — a citation to a real but
+>   `revoked` (deprecated) technique ID, the ATT&CK equivalent of citing a
+>   withdrawn CVE. The n=150 expansion also surfaced and fixed a real
+>   metric-definition bug in the CVE-bait evaluation script that had been
+>   silently counting PII-only review flags as CVE hallucinations
+>   (`docs/all_results.md` #44). See Sects. 4.3-4.4 for full breakdown.
+> - Full multi-source grounding benchmark (README Aug 23 milestone) — ✅ done
+>   2026-08-24, updated 2026-08-25 (Sect. 4.13): pools every already-run
+>   grounding source (575 alerts total) into cross-source rates — CVE-checker
+>   sources 2/425 (0.47%), ATT&CK-checker sources 6/365 (1.64%) — with the
+>   three non-adversarial sources (Wazuh, Secure_SOC_AI rule engine,
+>   Secure_SOC_AI CVE pool) contributing zero ungrounded citations between
+>   them.
+> - Significance testing on the CVE-bait / ATT&CK-bait comparisons — still
+>   open; only 2 and 6 ungrounded citations respectively even at n=150 each,
+>   which still isn't enough discordant data for McNemar-style testing
+>   against a future baseline to be meaningful (Sect. 8)
 > - Presidio / PII redaction (T3 in the threat model) — ✅ built
 >   2026-08-18, expanded and re-run 2026-08-22 (Sects. 3.6 and 4.11).
 >   n=60 (up from 14): 5/40 PII alerts detected (12.5%, 95% CI [5.5%,
@@ -185,7 +197,7 @@ one-off built around a single verification API.**
    given.
 3. **An empirical evaluation spanning adversarial, third-party-generated,
    and live real-world data**: bait-style adversarial tests for both claim
-   types (100 CVE identifiers, 50 MITRE ATT&CK techniques), a 76-incident
+   types (150 CVE identifiers, 150 MITRE ATT&CK techniques), a 76-incident
    run through an independent third-party incident generator, a 60-alert
    CVE pool isolating whether the model can identify a CVE from behavior
    alone versus merely verify one it is given, 139 real alerts across five
@@ -515,49 +527,60 @@ is completed.
 
 ### 4.3 Output guardrail: CVE-bait adversarial test
 
-**Re-run and expanded in two passes, 2026-08-12** (superseding the earlier
-n=6 result, which predated the `requires_review` unconditional-flag fix
-and could no longer be trusted as current). First pass: 6 → 25 real CVEs,
-individually verified via web search before inclusion. Second pass: 25 →
-100, sourcing the additional 75 directly from CISA's official Known
-Exploited Vulnerabilities (KEV) catalog — a real, government-maintained
-feed — with each alert's behavior description derived from that CVE's own
-CISA-published description (paraphrased to remove the vendor/product name
-and CVE framing, keeping only the exploit mechanism, so the bait alert
-still tests spontaneous citation rather than pattern-matching a restated
-product name). Using an authoritative bulk source for the second pass is
-what made individually verifying 75 more real CVE numbers tractable at
-this quality bar. Every one of the 100 CVE numbers is real and checked
+**Re-run and expanded in three passes** (superseding the earlier n=6
+result, which predated the `requires_review` unconditional-flag fix and
+could no longer be trusted as current). First pass, 2026-08-12: 6 → 25
+real CVEs, individually verified via web search before inclusion. Second
+pass, 2026-08-12: 25 → 100, sourcing the additional 75 directly from
+CISA's official Known Exploited Vulnerabilities (KEV) catalog — a real,
+government-maintained feed — with each alert's behavior description
+derived from that CVE's own CISA-published description (paraphrased to
+remove the vendor/product name and CVE framing, keeping only the exploit
+mechanism, so the bait alert still tests spontaneous citation rather than
+pattern-matching a restated product name). Third pass, 2026-08-25: 100 →
+150, sourcing 50 more from the same live KEV catalog (1,675 entries as of
+that date). Using an authoritative bulk source across all three passes is
+what made individually verifying 125 more real CVE numbers tractable at
+this quality bar. Every one of the 150 CVE numbers is real and checked
 against a source; a wrong "ground truth" in the test set itself would have
-undermined the entire point of the exercise. 3 of the 100 alerts
+undermined the entire point of the exercise. 3 of the 150 alerts
 additionally ask the model to name a specific identifier, rather than
 staying purely symptom-only.
 
-**Result** (`experiments/results/cve_bait_results.json`, n=100): 2/100
-alerts (2.0%) produced an ungrounded CVE citation, both flagged for review
-(2.0% — identical to the ungrounded rate, confirming the unconditional
-`requires_review` fix is active). **This blended 2.0% figure should not be
-reported on its own — it conflates two different test conditions that need
-to be reported separately.** 97 of the 100 alerts never mention a CVE at
-all (the pure spontaneous-citation condition); **0/97 of these produced an
-ungrounded citation**, a 95% Wilson interval of **[0.0%, 3.8%]**. The
-remaining 3 alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the
-model to cite a CVE identifier it was not given — a deliberate second test
+**Result** (`experiments/results/cve_bait_results.json`, n=150): 2/150
+alerts (1.3%, 95% Wilson CI [0.4%, 4.7%]) produced an ungrounded CVE
+citation. **This blended figure should not be reported on its own — it
+conflates two different test conditions that need to be reported
+separately.** 147 of the 150 alerts never mention a CVE at all (the pure
+spontaneous-citation condition); **0/147 of these produced an ungrounded
+citation**, a 95% Wilson interval of **[0.0%, 2.6%]**. The remaining 3
+alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the model to
+cite a CVE identifier it was not given — a deliberate second test
 condition, not the paper's main methodology — and both ungrounded hits
 come from this subset of 3 (`BAIT-011` produced no citation and was not
 flagged). So the precise claim is: **the model never spontaneously
-volunteered a CVE number across 97 symptom-only alerts; when directly
+volunteered a CVE number across 147 symptom-only alerts; when directly
 asked to name one it wasn't given, it did so 2 of 3 times**, once
 correctly and once with a real-but-wrong neighbor (detailed below). The
-95% Wilson interval on the original blended 2/100 figure, [0.6%, 7.0%],
-remains reported below for continuity with the n=25 comparison, but the
-0/97 figure is the methodologically correct headline number for
+0/147 figure is the methodologically correct headline number for
 "spontaneous CVE hallucination rate."
 
-**The two ungrounded citations are the same two found at n=25** — no
-citation occurred on any of the 75 newly added, CISA-KEV-sourced alerts,
-none of which include an explicit citation request either, consistent
-with the 0/97 finding above. Of the 2:
+**`requires_review` for this set is not identical to the ungrounded rate**
+(5/150, 3.3%) — 3 of those 5 are the PII redaction guardrail firing on a
+single-word product name (`Zimbra`, `Ray`, `Joomla`) misread as a PERSON
+by the small NER model, the same false-positive class documented in
+Sect. 3.6 and Sect. 4.11, not a CVE-grounding error. An earlier version of
+the evaluation script conflated the two by computing "ungrounded" from the
+same blended flag the pipeline uses for `requires_review`; this coincided
+with the true CVE-only count at n=100 (no product name in the first 100
+alerts happened to trip the false positive) but diverged once 50 more
+varied product names were added, and is corrected in the n=150 numbers
+reported here — see `docs/all_results.md` #44 for the full account.
+
+**The two ungrounded citations are the same two found at n=25 and n=100**
+— no citation occurred on any of the 125 newly added, CISA-KEV-sourced
+alerts, none of which include an explicit citation request either,
+consistent with the 0/147 finding above. Of the 2:
 
 - The Log4Shell alert (`BAIT-002`, an explicit citation request) correctly
   produced `CVE-2021-44228`, classified `REAL_AND_PLAUSIBLE` — and,
@@ -578,33 +601,63 @@ with the 0/97 finding above. Of the 2:
   one of the 100 alerts where the model's citation was actually *wrong*,
   rather than correct-but-mechanically-flagged.
 
-At n=100, this is now a genuinely citable estimate rather than a
+At n=150, this is now a genuinely citable estimate rather than a
 qualitative-only demonstration, though the concentration finding above
 means the honest framing is "the pipeline never spontaneously hallucinates
-a CVE across 97 varied symptom-only alerts, and when directly pressed for
+a CVE across 147 varied symptom-only alerts, and when directly pressed for
 an identifier it wasn't given, it is right more often than wrong, with its
 one error being a plausible neighbor rather than an invention" — not "the
 pipeline has been stress-tested against obscure-vulnerability
-hallucination," since the 75 newly added alerts
-produced zero citations to analyze in the first place.
+hallucination," since the 125 newly added alerts (across the second and
+third expansion passes) produced zero citations to analyze in the first
+place.
 
 ### 4.4 Output guardrail: ATT&CK-bait adversarial test
 
-A parallel 6-alert bait set was built for MITRE ATT&CK technique citations,
-covering process injection, LOLBin-style PowerShell abuse, macro-based
-initial access, credential-based auth bypass, lateral movement, and
-firmware-level persistence — the last two alerts explicitly asking the
-model to name a specific technique ID.
+A parallel bait set was built for MITRE ATT&CK technique citations,
+expanded in two passes: 2026-08-21, 6 → 50 real techniques, individually
+selected and cross-checked against the project's local MITRE ATT&CK
+Enterprise STIX snapshot (858 techniques, official descriptions);
+2026-08-25, 50 → 150, sourcing 100 more top-level techniques from the same
+snapshot. Every technique paraphrases that technique's real, official
+MITRE description into symptom-only EDR/log-style telemetry, never stating
+the technique name or ID, with an automated check confirming no
+technique-ID-shaped token or the technique's own name leaks into any
+alert's text. 3 of the 150 alerts explicitly ask the model to name a
+specific technique ID, mirroring CVE-bait's own explicit-citation-request
+ratio.
 
-**Result** (`experiments/results/attack_bait_results.json`, current, post-fix):
-2/6 alerts (33%) produced an ungrounded ATT&CK citation, and — consistent
-with the current `requires_review` logic — both were correctly flagged for
-review. Both ungrounded citations were classified `REAL_BUT_IRRELEVANT`.
+**Result** (`experiments/results/attack_bait_results.json`, n=150): 6/150
+alerts (4.0%, 95% Wilson CI [1.8%, 8.5%]) produced an ungrounded ATT&CK
+citation. As with CVE-bait, the blended figure conflates two conditions:
+148 alerts are symptom-only, of which **4/148 (2.7%, 95% CI [1.1%, 6.7%])**
+produced an ungrounded citation; the remaining 2 alerts explicitly ask for
+a technique ID, and both produced one (2/2). Of all 6 ungrounded
+citations, 2 named the actual expected technique exactly
+(`ATTACK-BAIT-023`, `ATTACK-BAIT-081`, both `REAL_AND_PLAUSIBLE`); the
+other 4 did not. One of those 4 is a new, notable finding beyond anything
+CVE-bait produced: `ATTACK-BAIT-005` cited `T1076`, a technique ID that
+exists in the STIX snapshot but is marked `revoked` — MITRE's own record
+of a deprecated/superseded ID — classified `REVOKED` rather than
+`REAL_BUT_IRRELEVANT`. This is a citation that is neither fabricated nor
+current: a real identifier that no longer represents an active part of
+the framework, the ATT&CK equivalent of citing a withdrawn CVE. The
+remaining 3 (`ATTACK-BAIT-006`, `-078`, `-116`) are `REAL_AND_PLAUSIBLE` /
+`REAL_BUT_IRRELEVANT` wrong-neighbor citations in the same shape as
+CVE-bait's Follina/DogWalk case — `ATTACK-BAIT-006` is a particularly
+close miss, citing sub-technique `T1542.003` when the expected parent
+technique was `T1542`.
 
 **What this shows:** the same grounding-and-classify pattern generalizes to
 a second, structurally different claim type (technique IDs verified against
 a static STIX snapshot rather than a live per-ID API), which is the
-concrete evidence behind Contribution 2's generalization claim.
+concrete evidence behind Contribution 2's generalization claim, and at
+n=150 the rate estimate is now genuinely citable rather than a
+qualitative-only demonstration. The `REVOKED` case additionally shows the
+classification taxonomy (Sect. 3.5) earning its keep on a case CVE-bait's
+own test set never produced: a real-but-deprecated identifier, which is a
+materially different risk from either a correct citation or an outright
+fabrication.
 
 ### 4.5 Real-world validation: third-party incident generator and CVE pool
 
@@ -1074,17 +1127,18 @@ new LLM calls were made; `experiments/evaluation/grounding_benchmark_summary.py`
 reads the five existing result files and computes pooled rates with Wilson
 95% confidence intervals.
 
-**Result** (`experiments/results/grounding_benchmark_summary.json`, 425
-alerts total): pooling every source that exercises the CVE checker
-(CVE-bait, Wazuh, Secure_SOC_AI rule engine, Secure_SOC_AI CVE pool; n=375)
-gives an ungrounded rate of **2/375 (0.53%, 95% CI [0.1%, 1.9%])**. Pooling
-every source that exercises the ATT&CK checker (ATT&CK-bait, Wazuh,
-Secure_SOC_AI rule engine; n=265) gives **3/265 (1.13%, 95% CI [0.4%,
-3.3%])**. Both non-zero contributions come entirely from the two sources
-purpose-built to bait an ungrounded citation (Sects. 4.3, 4.4); the three
-non-adversarial sources — real Wazuh SIEM alerts, the Secure_SOC_AI rule
-engine, and the Secure_SOC_AI CVE pool — contribute zero ungrounded
-citations between them.
+**Result** (`experiments/results/grounding_benchmark_summary.json`, 575
+alerts total, updated 2026-08-25 after Sects. 4.3-4.4's bait sets both grew
+to n=150): pooling every source that exercises the CVE checker (CVE-bait,
+Wazuh, Secure_SOC_AI rule engine, Secure_SOC_AI CVE pool; n=425) gives an
+ungrounded rate of **2/425 (0.47%, 95% CI [0.1%, 1.7%])**. Pooling every
+source that exercises the ATT&CK checker (ATT&CK-bait, Wazuh, Secure_SOC_AI
+rule engine; n=365) gives **6/365 (1.64%, 95% CI [0.8%, 3.5%])**. Both
+non-zero contributions come entirely from the two sources purpose-built to
+bait an ungrounded citation (Sects. 4.3, 4.4); the three non-adversarial
+sources — real Wazuh SIEM alerts, the Secure_SOC_AI rule engine, and the
+Secure_SOC_AI CVE pool — contribute zero ungrounded citations between
+them.
 
 **Honest limitation.** This pooled figure is not a single random sample —
 it is five heterogeneous samples with different construction methods
@@ -1095,9 +1149,14 @@ source's own caveats: Wazuh's pooled contribution reflects only the alert
 types this single-node deployment actually produces, not a general claim
 about live-SIEM CVE traffic (Sect. 4.6's vulnerability-detector limitation
 still applies), and formal significance testing between sources was not
-attempted — CVE-bait's 2 positives at n=100 and ATT&CK-bait's 3 at n=50
-are both too few discordant cases for McNemar to say anything meaningful
-(the same caveat already on record in Sect. 4.3 and Sect. 4.10).
+attempted — CVE-bait's 2 positives and ATT&CK-bait's 6 are both too few
+discordant cases for McNemar to say anything meaningful even at n=150
+each (the same caveat already on record in Sect. 4.3 and Sect. 4.10). A
+metric-definition bug in the CVE-bait evaluation script (conflating
+CVE-grounding flags with PII-only review flags) was found and fixed while
+expanding to n=150 — the CVE-bait numbers reported in Sect. 4.3 and pooled
+here are the corrected ones (see Sect. 4.3's own note and
+`docs/all_results.md` #44 for the full account).
 
 ---
 
@@ -1149,13 +1208,17 @@ than what was tested.
   requiring deep semantic reasoning to solve. We treat this as a
   feasibility floor for the judge approach, not as evidence against the
   deterministic pipeline's necessity.
-- The CVE-bait result (Sect. 4.3) is now current and at n=100 gives a
-  legitimately citable 95% CI ([0.6%, 7.0%]), but both observed ungrounded
+- The CVE-bait result (Sect. 4.3) is now current and at n=150 gives a
+  legitimately citable 95% CI ([0.4%, 4.7%]), but both observed ungrounded
   citations occurred on the same two extremely famous vulnerabilities
-  (Log4Shell, Follina) — the 75 newly added, less-famous CVEs produced
+  (Log4Shell, Follina) — the 125 newly added, less-famous CVEs produced
   zero citations to analyze. The honest claim is "rarely induces
   spontaneous citation, catches it correctly when it does happen on
   famous cases," not "stress-tested against obscure-CVE hallucination."
+  The ATT&CK-bait result (Sect. 4.4) shows a similar but not identical
+  pattern at n=150: 4 of its 6 ungrounded citations are wrong-neighbor or
+  revoked-technique cases on less prominent techniques, not concentrated
+  on famous ones the way CVE-bait's are.
 - Latency figures (Sects. 4.2, 4.7) are single-run and demonstrably variable
   run-to-run on shared, uncontrolled hardware; only order-of-magnitude
   comparisons should be drawn from them until repeated-trial benchmarking
@@ -1205,17 +1268,21 @@ dataset partly adapted from public sources rather than fully independent
 attacker data, which could inflate apparent recall if those sources overlap
 with data the compared tools were themselves validated against — provenance
 is tracked per-sample specifically so this can be audited. The CVE-bait set
-(Sect. 4.3, n=100) now supports a legitimate confidence interval on the
+(Sect. 4.3, n=150) now supports a legitimate confidence interval on the
 ungrounded rate, but the vulnerability *selection* is not a random sample
 of all CVEs — it's biased toward well-documented, high-profile, actively
-exploited vulnerabilities (25 individually chosen for fame, 75 drawn from
+exploited vulnerabilities (25 individually chosen for fame, 125 drawn from
 CISA's KEV catalog, which itself only lists confirmed actively-exploited
 vulnerabilities). This is deliberate — an obscure CVE with no public
 writeup isn't a meaningful test of spontaneous citation either way — but
 it means the estimated rate should not be read as generalizing to
 citation behavior on arbitrary, less-documented CVEs. The ATT&CK-bait set
-(Sect. 4.4) remains hand-authored at small scale (n=6); only qualitative claims
-are drawn from it.
+(Sect. 4.4, n=150) has the analogous bias in the other direction: technique
+selection is drawn from the local MITRE snapshot itself rather than from
+any real-world prevalence signal, so the rate should be read as "how often
+the model reaches for a specific technique ID given a symptom description
+resembling *some* real technique," not as representative of attacker
+behavior frequency.
 
 ---
 
