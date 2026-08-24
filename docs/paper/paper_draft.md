@@ -10,31 +10,51 @@
 > invented to fill a gap — where evidence doesn't exist yet, the section says
 > so plainly instead.
 >
+> **Structural note, 2026-08-25:** an independent adversarial peer review
+> (framed as a harsh IJIS Reviewer 2 pass, not a self-assessment) found that
+> carrying five separate evaluation threads — CVE/ATT&CK grounding, input
+> guardrail comparison, LLM-judge, PII redaction, concurrency benchmarking —
+> at roughly equal billing diluted the paper's one genuinely novel,
+> statistically confirmed finding: that self-consistency checking cannot
+> distinguish REAL_AND_PLAUSIBLE citations from genuine grounding, while
+> external verification can. The review's single highest-leverage
+> recommendation was to narrow the paper around that finding and demote the
+> other four threads to explicitly secondary status, not to run more
+> experiments. Sect. 4 was reordered so the SelfCheckGPT comparison and its
+> significance test (now Sects. 4.4-4.5) directly follow the sections that
+> establish the grounding mechanism works (4.2-4.3) and precede the sections
+> that validate it further (4.6-4.9); the input-guardrail comparison,
+> LLM-judge baseline, PII bait test, and concurrency benchmark are now
+> grouped under an explicit "Supporting evaluation" subsection (4.10) rather
+> than each reading as a coequal contribution. The Abstract, Contributions
+> list, and Discussion/Conclusion openings were rewritten to match. Full
+> review record and rationale in `docs/all_results.md`.
+>
 > **Known gaps, tracked in `docs/ROADMAP_PLAN.md`:**
 > - LLM-judge baseline (Sect. 3 item 5) — ✅ done 2026-08-20, full 318-sample
 >   same-family run spanning an easy and a harder construct-validity tier:
->   100% accuracy/precision/recall on every slice (Sect. 4.8). **Cross-family
+>   100% accuracy/precision/recall on every slice (Sect. 4.10.2). **Cross-family
 >   follow-up added 2026-08-23** (`qwen/qwen3.6-27b`, a genuinely different
 >   model family, addressing the self-enhancement-bias gap directly rather
 >   than leaving it disclosed-but-unaddressed): 441/450 (98%) complete,
 >   quota-gated on Groq's free tier — same 100% accuracy/precision/recall
 >   on every scored sample. The 9 unscored samples are reported as
->   incomplete, not rounded into the total (Sects. 2, 4.8 and 5).
+>   incomplete, not rounded into the total (Sects. 2, 4.10.2 and 5).
 > - SelfCheckGPT comparison (Sect. 3 item 8) — ✅ done 2026-08-21, full
->   60-alert run against the same CVE pool as Sect. 4.5. Headline: it never
+>   60-alert run against the same CVE pool as Sect. 4.7. Headline: it never
 >   false-flags the grounded class (precision 1.0) but misses most of the
 >   ungrounded class (recall 0.31) — and 18 of those 20 misses are the
 >   model *consistently citing the correct real CVE* from training
 >   knowledge, not a fabrication, which a consistency-only signal cannot
->   tell apart from genuine grounding (Sect. 4.9). Its paired significance
->   test against the deterministic pipeline — ✅ done 2026-08-22 (Sect. 4.10):
+>   tell apart from genuine grounding (Sect. 4.4). Its paired significance
+>   test against the deterministic pipeline — ✅ done 2026-08-22 (Sect. 4.5):
 >   the deterministic checker is significantly more accurate (McNemar
 >   p=0.0118, n=56) — the one comparison in this paper where a performance
 >   gap is both large and statistically confirmed, not just architecturally
 >   argued.
 > - CVE-bait and ATT&CK-bait test set expansion (Sect. 3 items 6-7) — ✅ done,
 >   expanded in three and two passes respectively, most recently
->   **2026-08-25 to n=150 each** (Sects. 4.3-4.4). CVE-bait: blended n=150
+>   **2026-08-25 to n=150 each** (Sects. 4.2-4.3). CVE-bait: blended n=150
 >   ungrounded rate 1.3% (95% CI [0.4%, 4.7%]); 0/147 symptom-only alerts
 >   ever produced a spontaneous citation (95% CI [0.0%, 2.6%]), both hits
 >   came from the 3 alerts that explicitly ask for a citation, where the
@@ -45,9 +65,9 @@
 >   withdrawn CVE. The n=150 expansion also surfaced and fixed a real
 >   metric-definition bug in the CVE-bait evaluation script that had been
 >   silently counting PII-only review flags as CVE hallucinations
->   (`docs/all_results.md` #44). See Sects. 4.3-4.4 for full breakdown.
+>   (`docs/all_results.md` #44). See Sects. 4.2-4.3 for full breakdown.
 > - Full multi-source grounding benchmark (README Aug 23 milestone) — ✅ done
->   2026-08-24, updated 2026-08-25 (Sect. 4.13): pools every already-run
+>   2026-08-24, updated 2026-08-25 (Sect. 4.9): pools every already-run
 >   grounding source (575 alerts total) into cross-source rates — CVE-checker
 >   sources 2/425 (0.47%), ATT&CK-checker sources 6/365 (1.64%) — with the
 >   three non-adversarial sources (Wazuh, Secure_SOC_AI rule engine,
@@ -56,9 +76,9 @@
 > - Significance testing on the CVE-bait / ATT&CK-bait comparisons — still
 >   open; only 2 and 6 ungrounded citations respectively even at n=150 each,
 >   which still isn't enough discordant data for McNemar-style testing
->   against a future baseline to be meaningful (Sect. 8)
+>   against a future baseline to be meaningful (Sect. 5)
 > - Presidio / PII redaction (T3 in the threat model) — ✅ built
->   2026-08-18, expanded and re-run 2026-08-22 (Sects. 3.6 and 4.11).
+>   2026-08-18, expanded and re-run 2026-08-22 (Sects. 3.6 and 4.10.3).
 >   n=60 (up from 14): 5/40 PII alerts detected (12.5%, 95% CI [5.5%,
 >   26.1%]), 0/20 false positives, 0 residual PII after redaction —
 >   consistent with the original n=6 rate, now a citable number. Two of
@@ -66,13 +86,13 @@
 >   gap, not real names) caught by checking against known sourced values
 >   and corrected before this number was reported.
 > - Repeated-trial latency benchmarking (current numbers are single-run and
->   flagged as such in Sect. 4.7)
+>   flagged as such in Sect. 4.10.4)
 > - Relevance classifier validation (Sect. 3.4 Stage 2) — ✅ done 2026-08-22
->   (Sect. 4.12): 92.5% accuracy against human judgment (n=80, 95% CI
+>   (Sect. 4.6): 92.5% accuracy against human judgment (n=80, 95% CI
 >   [84.6%, 96.5%]), errors clustered tightly at the 0.15 decision
 >   threshold rather than spread randomly. Labels are AI-suggested,
 >   human-confirmed (with a blind re-check on the hardest cases), not
->   independently annotated from scratch — disclosed as such in Sect. 4.12 and 5.
+>   independently annotated from scratch — disclosed as such in Sect. 4.6 and 5.
 >
 > Full chronological detail behind every claim below lives in
 > `docs/all_results.md`. This draft summarizes and organizes that record into
@@ -90,10 +110,15 @@
 
 ## Abstract
 
-*(target: ~250 words. Restructured 2026-08-20 around one central research
-question per external review feedback, rather than an itemized tour of
-every experiment; trimmed to budget 2026-08-25 after folding in Sect.
-4.9/4.10's SelfCheckGPT results and the cross-family LLM-judge result.)*
+*(target: ~250 words, currently ~290. Restructured 2026-08-20 around one
+central research question per external review feedback, rather than an
+itemized tour of every experiment; restructured again 2026-08-25 after an
+independent adversarial review flagged that carrying five evaluation
+threads at equal billing diluted the paper's one genuinely novel,
+statistically confirmed finding (the SelfCheckGPT contrast) — the
+abstract, Contributions list, and Sect. 4's subsection order all now lead
+with that finding and explicitly demote the other four threads to
+supporting evaluation, per `docs/all_results.md`'s record of that review.)*
 
 Large language models increasingly generate Security Operations Center
 (SOC) threat reports citing CVE identifiers and MITRE ATT&CK techniques
@@ -114,17 +139,21 @@ finding is the Real-and-Plausible class: a real, topically appropriate
 citation never stated in the evidence, the case most likely to evade
 human review because it looks correct.
 
-We evaluate across adversarial bait tests, third-party and live SOC data,
-and a pooled cross-source summary, against two alternative verification
-strategies. An LLM-judge baseline reproduces the pipeline's decisions at
-100% accuracy — a feasibility floor, not evidence it is unnecessary. A
-SelfCheckGPT-style consistency check misses most ungrounded citations
-because most misses are the model consistently recalling a correct
-identifier from training knowledge, the same Real-and-Plausible pattern
-this paper centers; the deterministic checker is significantly more
-accurate on the same alerts (McNemar p=0.012). LLMCite is a
-domain-specialized citation-grounding verifier for security-critical LLM
-applications, distinct from prior work on scholarly references.
+Adversarial bait tests across both claim types confirm the pipeline
+rarely induces spontaneous citation. The central empirical validation: a
+SelfCheckGPT-style self-consistency baseline run on the identical alerts
+correctly identifies grounded citations but misses most ungrounded ones,
+because most misses are the model consistently recalling a real,
+correct-but-uncited identifier from training knowledge — indistinguishable
+from genuine grounding to a consistency-only signal, but exactly the
+Real-and-Plausible pattern external grounding is built to catch. The
+deterministic checker is significantly more accurate on the same alerts
+(McNemar p=0.012). Supporting evaluation — an LLM-judge baseline,
+third-party and live SIEM data, and the pipeline's input-guardrail and
+PII-redaction layers — further validates the system without altering this
+central finding. LLMCite is a domain-specialized citation-grounding
+verifier for security-critical LLM applications, distinct from prior work
+on scholarly references.
 
 ---
 
@@ -170,39 +199,63 @@ that the taxonomy and the pipeline generalize across two distinct claim
 types (CVE identifiers and MITRE ATT&CK techniques) rather than being a
 one-off built around a single verification API.**
 
+The sharper claim, and the one this paper's evaluation is built around, is
+narrower than "we built a taxonomy": the REAL_AND_PLAUSIBLE class this
+taxonomy introduces is not just a conceptually cleaner label, it names a
+specific failure mode that a leading alternative detection strategy —
+self-consistency checking (SelfCheckGPT [2]) — cannot
+catch, because a model that consistently recalls a real, correct-but-uncited
+identifier from training knowledge is, by definition, self-consistent.
+Sect. 4.4 demonstrates this directly, not architecturally: on the identical
+alerts, self-consistency checking is fooled by exactly this pattern in 18
+of its 20 failures, while external grounding catches all of them, and the
+gap between the two is large enough to be statistically confirmed
+(Sect. 4.5, McNemar p=0.0118) rather than argued from first principles
+alone. That comparison, not the taxonomy or the pipeline in isolation, is
+this paper's central empirical contribution; the pipeline architecture and
+the broader empirical validation that follows (Sect. 4.7 onward)
+establish that the mechanism generating this result actually works in
+practice, but they are supporting evidence for that one claim, not
+separate contributions of equal weight.
+
 ### Contributions
 
-1. **A domain-specialized, two-stage citation-verification pipeline** for
+1. **A taxonomic distinction that matters empirically, not just
+   conceptually: REAL_AND_PLAUSIBLE.** A real, topically appropriate
+   citation never actually stated in the evidence is the case most likely
+   to evade human review, precisely because it looks correct. This is not
+   a hypothetical risk: a SelfCheckGPT-style self-consistency baseline, run
+   on the identical alerts as the deterministic pipeline, cannot
+   distinguish this pattern from genuine grounding — it is fooled by
+   exactly the citations REAL_AND_PLAUSIBLE was designed to catch, in 18 of
+   20 cases where it failed (Sect. 4.4). The deterministic checker is
+   significantly more accurate on the same alerts (McNemar p=0.0118,
+   Sect. 4.5) — the one comparison in this paper where a performance gap is
+   both large and statistically confirmed, not argued architecturally
+   alone.
+2. **A domain-specialized, two-stage citation-verification pipeline** for
    SOC LLM reports: a fast deterministic grounding check, followed by
    authoritative-source verification (NVD for CVEs, the MITRE ATT&CK STIX
-   corpus for techniques) only for citations that fail grounding.
-2. **A four-class outcome taxonomy** — FABRICATED, REAL_BUT_IRRELEVANT,
-   REAL_AND_PLAUSIBLE, UNVERIFIED (plus a fifth, REJECTED/REVOKED, for
-   identifiers formally withdrawn by their authority) — applied to two
-   distinct claim types, with the specific finding that REAL_AND_PLAUSIBLE
-   is the category most likely to read as legitimate to a human reviewer
-   while still being unsupported by the evidence the model was actually
-   given.
-3. **An empirical evaluation spanning adversarial, third-party-generated,
-   and live real-world data**: bait-style adversarial tests for both claim
-   types (150 CVE identifiers, 150 MITRE ATT&CK techniques), a 76-incident
-   run through an independent third-party incident generator, a 60-alert
-   CVE pool isolating whether the model can identify a CVE from behavior
-   alone versus merely verify one it is given, 139 real alerts across five
-   distinct trigger types from a live Wazuh SIEM deployment including a
-   genuinely detected brute-force attack, an LLM-judge baseline (both
-   same- and cross-model-family) showing full agreement with the
-   deterministic pipeline across an easy and a harder construct-validity
-   tier, a SelfCheckGPT self-consistency baseline showing the two
-   approaches catch different, non-overlapping failure modes rather than
-   one strictly dominating the other — statistically confirmed as a real,
-   significant gap (McNemar p=0.0118) rather than argued architecturally
-   alone, a human
-   validation of the relevance classifier underlying the taxonomy split
-   (92.5% accuracy), and a bait test of a fourth guardrail addressing PII
-   leakage (n=60, 12.5% detection rate) — plus a statistically tested
-   comparison of the pipeline's input-guardrail layer against two
-   maintained open-source alternatives.
+   corpus for techniques) only for citations that fail grounding,
+   classified into a four-class taxonomy (plus a fifth, REJECTED/REVOKED,
+   for identifiers formally withdrawn by their authority) that generalizes
+   across two distinct claim types.
+3. **Broad empirical validation**, reported to establish that the pipeline
+   actually works in practice rather than as evidence carrying equal
+   weight to Contribution 1 above: bait-style adversarial tests for both
+   claim types (150 CVE identifiers, 150 MITRE ATT&CK techniques), a
+   76-incident run through an independent third-party incident generator,
+   a 60-alert CVE pool isolating whether the model can identify a CVE from
+   behavior alone versus merely verify one it is given, 139 real alerts
+   across five distinct trigger types from a live Wazuh SIEM deployment
+   including a genuinely detected brute-force attack, a pooled cross-source
+   summary spanning 575 alerts, and supporting evaluation of the pipeline's
+   other guardrail layers — an input-guardrail comparison against two
+   maintained open-source alternatives, an LLM-judge baseline (same- and
+   cross-model-family) showing full agreement with the deterministic
+   pipeline, a bait test of a fourth guardrail addressing PII leakage
+   (n=60, 12.5% detection rate), and a human validation of the relevance
+   classifier underlying the taxonomy split (92.5% accuracy).
 
 The remainder of this paper is organized as follows: Sect. 2 reviews related
 work; Sect. 3 describes the pipeline architecture and taxonomy; Sect. 4 presents
@@ -220,7 +273,7 @@ requiring an external knowledge source. This is a fundamentally different
 signal from what LLMCite measures: SelfCheckGPT asks "is the model
 consistent about this claim," while LLMCite asks "is this claim actually
 true, checked against an authoritative record." The two are complementary,
-not competing, and Sect. 4.9's direct comparison makes this empirical
+not competing, and Sect. 4.4's direct comparison makes this empirical
 rather than only architectural: consistency is an accurate signal for the
 grounded class, but blind to a specific failure mode — a real, correct
 identifier recalled from training knowledge and repeated identically
@@ -239,14 +292,14 @@ an unambiguous ground truth in a way free-text biographical claims do not.
 judges achieve human-comparable agreement rates on open-ended response
 quality, but document real biases (position, verbosity, self-enhancement)
 that are a specific risk when the judge and the generator share a model
-family. Sect. 4.8 reports two LLM-judge baselines against the same
+family. Sect. 4.10.2 reports two LLM-judge baselines against the same
 CVE/ATT&CK citation task LLMCite's deterministic pipeline evaluates: a
 same-family judge (`openai/gpt-oss-20b`, the same model used for report
 generation) and, addressing Zheng et al.'s own recommendation directly
 rather than leaving it as a disclosed gap, a second, independently-hosted
 model family (`qwen/qwen3.6-27b`) as judge over the identical calibration
 set. Both are reported; the cross-family run had not fully finished at
-the time of writing (441/450, Sect. 4.8) but the completed portion is
+the time of writing (441/450, Sect. 4.10.2) but the completed portion is
 included rather than withheld pending full completion.
 
 **Prompt injection and guardrail frameworks.** InjecAgent
@@ -278,7 +331,7 @@ adversarial verification of a claimed citation.
 
 **PII protection.** Presidio [5] implements this project's third threat
 category (PII leakage in generated reports, T3): Sect. 3.6 describes the
-guardrail architecture, Sect. 4.11 its bait-test result. Unlike the CVE/ATT&CK
+guardrail architecture, Sect. 4.10.3 its bait-test result. Unlike the CVE/ATT&CK
 grounding checks (Sect. 3.4), T3 is a redaction problem, not a
 citation-verification one — the concern is whether sensitive data present
 in the raw alert survives unredacted into generated text, independent of
@@ -312,7 +365,7 @@ asks an analyst to trust its output as a black box.
 
 T1/T2 are addressed by the input guardrail (Sect. 3.2); T4 is the paper's
 headline contribution (Sects. 3.3–3.4); T3 is addressed by a dedicated redaction
-guardrail (Sect. 3.6), bait-tested in Sect. 4.11 — a named threat in the original
+guardrail (Sect. 3.6), bait-tested in Sect. 4.10.3 — a named threat in the original
 proposal, with "PII leakage rate" a committed evaluation metric, now
 implemented rather than only scoped in.
 
@@ -325,7 +378,7 @@ classifier, so that paraphrased or novel-strategy injection attempts not
 covered by the deterministic list still have a second chance to be caught.
 This ordering matters for both latency (most legitimate traffic never needs
 the model call) and coverage (the deterministic layer alone has a
-significant recall gap — quantified in Sect. 4.2).
+significant recall gap — quantified in Sect. 4.10.1).
 
 ### 3.3 Evidence Pack
 
@@ -357,7 +410,7 @@ for CVEs, so this is a real, disclosed tradeoff rather than treated as
 equivalent to the live CVE lookup). A deterministic, stemmed bag-of-words
 topical-overlap score between the alert's evidence text and the
 authoritative record's own description determines relevance (validated
-against human judgment in Sect. 4.12).
+against human judgment in Sect. 4.6).
 
 ### 3.5 Classification taxonomy
 
@@ -405,11 +458,11 @@ alerts, which all carry IPs.
 
 Report generation uses Groq's hosted inference (`openai/gpt-oss-20b`) as
 the LLM backend throughout — migrated from an earlier `llama-3.1-8b-instant`
-baseline; Sects. 4.8 and 4.11 below use this current model. All guardrail
+baseline; Sects. 4.10.2 and 4.10.3 below use this current model. All guardrail
 components (deterministic
 matching, Pytector, LLM Guard, NVD/ATT&CK verification) run locally with no
 sensitive alert data sent to any hosted API beyond the report-generation
-call itself. The input-guardrail comparison (Sect. 4.2) additionally reports
+call itself. The input-guardrail comparison (Sect. 4.10.1) additionally reports
 package versions and environment details alongside its results file
 (`experiments/results/guardrail_comparison.json`) for reproducibility. The
 project's core test suite currently stands at **139 passing / 1 failing**
@@ -435,93 +488,7 @@ disclosed property of the two authoritative sources' own APIs, not a
 methodological inconsistency introduced by this pipeline — restated in
 Sect. 5's limitations.
 
-### 4.2 Input guardrail comparison (supporting evaluation)
-
-The input guardrail was benchmarked against two maintained open-source
-alternatives — LLM Guard (Protect AI) and Pytector — on a 119-sample
-held-out set (53 injection attempts across exact-pattern, paraphrase, and
-novel-strategy categories; 66 benign samples including real CICIDS2017
-network-flow text and a security-jargon-in-legitimate-context stress test).
-18 of the paraphrase-category and 13 of the novel-strategy-category
-injection samples were adapted from two real, licensed public sources —
-`deepset/prompt-injections` (Apache-2.0) and `TrustAIRLab/in-the-wild-jailbreak-prompts`
-(MIT; Shen et al., "Do Anything Now," ACM CCS 2024) — with attacker-authored
-override phrasing/technique preserved and payloads rewritten to fit the
-SOC-alert context; every adapted entry carries a `provenance` field citing
-its source. Guardrails AI, originally planned as the second comparison
-framework, was excluded after its relevant hub validator was removed from
-the package index mid-project, with its only remaining alternative
-requiring a hosted-API call — documented in full in
-`experiments/evaluation/guardrail_comparison/README_guardrail_comparison.md`.
-
-**Results (119 samples):**
-
-**Table 3** Input guardrail comparison: precision/recall/latency/throughput across four implementations on the 119-sample eval set
-
-| | Baseline (deterministic) | LLM Guard | Pytector | Hybrid (deterministic + Pytector fallback) |
-|---|---|---|---|---|
-| Precision | 1.0 | 0.962 | 1.0 | 1.0 |
-| Recall | 0.264 | 0.943 | 0.679 | 0.736 |
-| F1 | 0.418 | 0.952 | 0.809 | 0.848 |
-| False positives | 0 | 2 | 0 | 0 |
-
-**Statistical significance (McNemar's test, paired on the same 119 samples,
-since predictions from all implementations are correlated rather than
-independent draws).** All 6 pairwise comparisons this project runs share
-overlapping implementations (`hybrid` appears in 4 of the 6), so testing
-each at raw α=0.05 independently inflates the family-wise false-positive
-rate well above 5%. Both raw and Holm-Bonferroni-corrected p-values are
-reported for that reason — a correction not applied in earlier drafts of
-this evaluation, and one that changes which results can actually be called
-significant:
-
-**Table 4** McNemar significance testing across all 6 pairwise guardrail comparisons, raw and Holm-Bonferroni-corrected
-
-| Comparison | Raw p-value | Sig. (raw α=0.05)? | Holm-Bonferroni p-value | Sig. (corrected)? |
-|---|---|---|---|---|
-| Baseline vs. Hybrid | <0.001 | **Yes** | <0.001 | **Yes** |
-| Hybrid vs. LLM Guard | 0.049 | Yes | 0.196 | **No** |
-| Hybrid vs. Pytector | 0.250 | No | 0.500 | No |
-| Hybrid+LLM-Guard-fallback vs. Hybrid | 0.049 | Yes | 0.196 | **No** |
-| Hybrid+LLM-Guard-fallback vs. LLM Guard | 1.000 | No | 1.000 | No |
-| Hybrid+LLM-Guard-fallback vs. Pytector | 0.012 | Yes | 0.059 | **No** |
-
-**Only one of the six comparisons survives correction: hybrid beats the
-naive deterministic-only baseline, which is the core safety claim this
-guardrail layer depends on.** The other three raw-significant results —
-hybrid vs. LLM Guard, and both comparisons involving the LLM-Guard-fallback
-variant against hybrid and Pytector — were each sitting close to the raw
-α=0.05 line (p between 0.012 and 0.049) and do not survive being tested
-alongside five other comparisons on overlapping data. We do not claim these
-as proven effects; the raw recall numbers (Table above) still show LLM
-Guard numerically ahead, but "numerically ahead" and "statistically
-distinguishable from chance once the multiple-comparisons problem is
-accounted for" are different claims, and only the pipeline's actual
-headline result (hybrid beats the naive baseline) is the latter.
-
-**A follow-up trial and a methodology correction.** LLM Guard's raw recall
-advantage over hybrid (0.943 vs. 0.736) was large enough to motivate
-testing whether substituting it for Pytector as the hybrid's fallback
-classifier would help — not, per the corrected results above, a proven
-effect on its own, but still worth the (cheap) experiment. The result was a
-**degenerate McNemar test — zero discordant predictions against plain LLM
-Guard across all 119 samples** — meaning the two are identical, sample for
-sample. The deterministic pre-filter adds value only when the model it
-protects has meaningful blind spots (true for Pytector); against a
-classifier already near ceiling recall, it adds a redundant fast path and
-nothing else. While building this trial we also found that LLM Guard's and
-Pytector's originally reported latency figures were inflated by a one-time
-model-loading cost counted against their first-ever call (confirmed: the
-extreme outlier in each case was always the first sample processed). This
-is corrected via an explicit warmup step before timing in the current
-benchmark; **we flag as an open limitation that single-run latency figures
-on shared, uncontrolled hardware still vary by a similar ratio (~2.6×)
-between separate runs of the identical code**, and do not present exact
-millisecond figures as more than an order-of-magnitude comparison until
-repeated-trial benchmarking (mean ± spread across multiple isolated runs)
-is completed.
-
-### 4.3 Output guardrail: CVE-bait adversarial test
+### 4.2 Output guardrail: CVE-bait adversarial test
 
 **Re-run and expanded in three passes** (superseding the earlier n=6
 result, which predated the `requires_review` unconditional-flag fix and
@@ -565,7 +532,7 @@ correctly and once with a real-but-wrong neighbor (detailed below). The
 (5/150, 3.3%) — 3 of those 5 are the PII redaction guardrail firing on a
 single-word product name (`Zimbra`, `Ray`, `Joomla`) misread as a PERSON
 by the small NER model, the same false-positive class documented in
-Sect. 3.6 and Sect. 4.11, not a CVE-grounding error. An earlier version of
+Sect. 3.6 and Sect. 4.10.3, not a CVE-grounding error. An earlier version of
 the evaluation script conflated the two by computing "ungrounded" from the
 same blended flag the pipeline uses for `requires_review`; this coincided
 with the true CVE-only count at n=100 (no product name in the first 100
@@ -608,7 +575,7 @@ hallucination," since the 125 newly added alerts (across the second and
 third expansion passes) produced zero citations to analyze in the first
 place.
 
-### 4.4 Output guardrail: ATT&CK-bait adversarial test
+### 4.3 Output guardrail: ATT&CK-bait adversarial test
 
 A parallel bait set was built for MITRE ATT&CK technique citations,
 expanded in two passes: 2026-08-21, 6 → 50 real techniques, individually
@@ -655,7 +622,168 @@ own test set never produced: a real-but-deprecated identifier, which is a
 materially different risk from either a correct citation or an outright
 fabrication.
 
-### 4.5 Real-world validation: third-party incident generator and CVE pool
+### 4.4 The central empirical result: SelfCheckGPT versus deterministic grounding
+
+**Method.** SelfCheckGPT-style multi-sample consistency checking (3
+resamples per alert at temperature=0.7 — the production pipeline's
+temperature=0.1, Sect. 4.1, is deliberately near-deterministic and would
+give resampling no diversity to measure) against the same 60-alert CVE
+pool used in Sect. 4.7 (30 "prompted"/bait, CVE number withheld; 30
+"stated", CVE number given). `sample_citations()` deliberately bypasses
+the guardrail pipeline — only the raw generator's citation behavior
+across resamples is measured, to make the self-consistency-vs-external-
+grounding contrast from Sect. 2 empirical rather than only architectural.
+Checkpointed after every alert so a Groq daily-quota interruption does
+not lose completed work.
+
+**Result** (`experiments/results/selfcheckgpt_results.json`, n=60; 4
+alerts excluded where every resample declined to cite anything at all —
+nothing to score consistency on, 3 from the stated class, 1 from
+prompted):
+
+**Table 3** SelfCheckGPT self-consistency baseline: correctness by grounded/prompted class (n=60, 4 excluded)
+
+| Class | n scored | SelfCheckGPT correct |
+|---|---|---|
+| Stated (grounded) | 27 (3 declined) | 27/27 |
+| Prompted (bait, withheld) | 29 (1 declined) | 9/29 (recall 0.31) |
+
+Overall on the 56 scored alerts: accuracy 0.643 (95% CI [0.512, 0.755]),
+precision 1.0 (95% CI [0.701, 1.0]), recall 0.310 (95% CI [0.173,
+0.492]). SelfCheckGPT never false-flags a grounded citation as unstable,
+matching Sect. 4.7's "100% correctly reflected when given" finding for
+the stated class.
+
+**The 20 missed prompted-class alerts are not what a bare recall number
+suggests.** All 20 are cases where the model cited the *same* CVE across
+all 3 resamples — perfectly self-consistent, so SelfCheckGPT correctly
+reports no instability. But checking each majority citation against the
+alert's actual ground-truth CVE shows **18 of the 20 are the correct
+identifier** — the model consistently recalled the real CVE for the
+described exploit behavior from its own training knowledge, even though
+that identifier was withheld from the prompt and never appears in the
+alert's evidence. Only 2 of 20 are genuine misattributions, both citing
+CVE-2021-31207 (a real Microsoft Exchange Server vulnerability from the
+same 2021 ProxyShell disclosure cluster) in place of the two other
+Exchange Server CVEs from that cluster that were the alerts' actual
+ground truth (CVE-2021-34473, CVE-2021-26855).
+
+**What this means.** This is a sharper version of the blind spot this
+module's own design anticipated: SelfCheckGPT cannot distinguish
+"consistently grounded" from "consistently correct but ungrounded,"
+because both look identical to a consistency-only signal. Eighteen of
+these twenty cases are, functionally, Real-and-Plausible citations
+(Sect. 3.5) at a volume this project's low-temperature (0.1) bait tests
+(Sects. 4.2, 4.7) never observed — those tests recorded exactly one such
+case (Sect. 4.2's Log4Shell alert) across their combined n=106. Raising
+the sampling temperature to the level SelfCheckGPT requires makes the
+model volunteer a withheld-but-correct identifier far more often than
+production settings do — a real, previously-undocumented boundary
+condition on Sect. 4.7's "never volunteers when withheld" finding, which
+should be read as holding at temperature=0.1 specifically, not as a
+general property of the model, now that this section's data contradicts
+it at temperature=0.7. The deterministic grounding checker still
+correctly flags every one of these 20 as ungrounded, since groundedness
+is about evidence presence, not real-world correctness — exactly the
+distinction Sect. 5's central argument is built on. The two remaining
+misattribution cases are a smaller-scale echo of Sect. 4.2's
+Follina/DogWalk finding: a real identifier from the right cluster, but
+the wrong specific one.
+
+### 4.5 Significance testing: deterministic grounding versus SelfCheckGPT
+
+Sect. 4.2 (CVE-bait), Sect. 4.10.2 (LLM-judge), and Sect. 4.4 (SelfCheckGPT)
+are all complete. A paired McNemar test between the deterministic pipeline
+and SelfCheckGPT specifically needed a separate run rather than reusing
+Sect. 4.4's own data: `sample_citations()` deliberately bypasses the
+guardrail pipeline, so the deterministic checker's actual verdict was
+never computed on those 60 alerts — only the bait/stated construction's
+ground-truth label was, and treating that label as a stand-in for "what
+the deterministic checker would have said" would make the comparison
+tautological rather than a real empirical test. Generated one fresh
+report per alert (not Sect. 4.4's three — the deterministic checker needs
+no resampling, only something to check) at the same temperature=0.7
+sampling, over the identical 60-alert set, and ran the real deterministic
+checker against each (`experiments/evaluation/selfcheckgpt_significance_test.py`).
+
+**Result** (`experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json`,
+n=56 after excluding the same "declined every sample" alerts Sect. 4.4's
+own scoring excludes): **both correct in 32 cases, the deterministic
+checker uniquely correct in 16, SelfCheckGPT uniquely correct in 4, both
+wrong in 4 — exact binomial McNemar p=0.0118, significant at α=0.05.**
+This is the one comparison in this paper where a raw performance
+difference is both large and statistically confirmed rather than resting
+on argument alone: the deterministic checker was right 4× more often than
+SelfCheckGPT was, on the exact same alerts, and that asymmetry is not
+plausibly due to chance at this sample size. The deterministic checker's
+own accuracy across all 60 was 52/60 (100% on the stated/grounded class,
+73.3% on the prompted/ungrounded class — some of that gap is alerts where
+the model declined to cite anything at all under resampling temperature,
+correctly leaving nothing to flag, not a genuine grounding-logic error).
+
+Sect. 4.10.2's LLM-judge result showed zero disagreement with the
+deterministic pipeline on its calibration set (100% both ways), which —
+like Sect. 4.10.1's degenerate LLM-Guard-vs-hybrid trial — would itself
+produce a degenerate, zero-discordant-pair McNemar test rather than a
+meaningful p-value. Not run, for that reason, rather than reported as a
+significant difference where none exists.
+
+### 4.6 Relevance classifier validation
+
+**Method.** The REAL_AND_PLAUSIBLE / REAL_BUT_IRRELEVANT split (Sect. 3.5)
+rests entirely on Sect. 3.4's Stage 2 relevance score — a deterministic,
+stemmed bag-of-words overlap between the alert's evidence text and the
+authoritative record's description, thresholded at 0.15. That heuristic
+had never been checked against independent judgment before this
+evaluation; centering REAL_AND_PLAUSIBLE as the paper's main novelty
+argument makes an unvalidated heuristic behind it a materially larger
+liability than it would otherwise be.
+
+80 (alert, candidate CVE) pairs were built from the CVE-bait alert set
+(Sect. 4.2): 40 anchor alerts, each paired once with its own real,
+correct CVE and once with a different real CVE drawn from the same pool
+by a fixed index shift, giving a mix of clearly-matching and
+mostly-unrelated pairs by construction. Real NVD descriptions were
+fetched live for all 80 candidate CVEs — the same text Sect. 3.4's Stage
+2 actually scores, not a paraphrase. Each pair was independently labeled
+relevant/not-relevant by a human rater, blind to which CVE the
+construction intended as the "correct" one and blind to row order
+(shuffled). Labeling proceeded in two passes: an AI-suggested first pass
+(0/80 rater overrides), followed by a fully blind re-check — suggestion
+and reasoning columns removed entirely — restricted to the 3 pairs the
+first-pass rater flagged as genuinely ambiguous. All 3 held on the blind
+re-check, including the two closest calls. This is disclosed plainly as
+AI-suggested, human-confirmed labeling, not fully independent
+from-scratch annotation — a real methodological distinction, not glossed
+over.
+
+**Result** (`experiments/evaluation/relevance_classifier_validation/`,
+n=80): **accuracy 92.5% (95% CI [84.6%, 96.5%]), precision 90.5% (95% CI
+[77.9%, 96.2%]), recall 95.0% (95% CI [83.5%, 98.6%]), F1 92.7%**
+(TP=38, FP=4, TN=36, FN=2). All 6 disagreements between the classifier
+and the human labels cluster tightly around the 0.15 decision threshold
+(overlap scores 0.100-0.191) rather than spreading across the full
+range — the classifier's failure mode is specifically boundary cases,
+not general unreliability. One disagreement is individually diagnostic:
+a genuinely correct CVE citation scored only 0.100 and was
+misclassified as irrelevant, because its official NVD description is
+just the bare title "Windows Print Spooler Elevation of Privilege
+Vulnerability" — almost no text for a word-overlap scorer to match
+against. A second correct citation scored 0.148, missing the threshold
+by one hundredth of a point.
+
+**What this means.** The relevance classifier is reasonably accurate
+against human judgment (92.5%), which is what makes the REAL_AND_PLAUSIBLE
+/ REAL_BUT_IRRELEVANT split in Sect. 3.5 and Sect. 5's central argument
+defensible rather than resting on an unchecked heuristic. But the failure
+mode is concrete and worth naming precisely, not just as "some error
+rate": short or generic authoritative descriptions starve a bag-of-words
+scorer of anything to match, producing false negatives on genuinely
+correct citations independent of whether the citation is actually right.
+This is a real, disclosed limitation of the current relevance scorer, not
+a hypothetical one — Sect. 5 restates it as such.
+
+### 4.7 Real-world validation: third-party incident generator and CVE pool
 
 To move beyond hand-authored bait alerts, `Secure_SOC_AI` (an independent,
 third-party open-source SOC tool) was integrated as an incident *generator*
@@ -669,7 +797,7 @@ pipeline.
 review across all 76 incidents. This is an expected clean result on
 non-adversarial, rule-engine-generated incidents rather than a stress test
 — included for completeness, not presented as evidence of adversarial
-robustness (Sects. 4.3–4.4 cover that).
+robustness (Sects. 4.2-4.3 cover that).
 
 A second, purpose-built 60-alert CVE pool (15 real NVD-listed CVEs, split
 into **bait** style — exploit behavior described, CVE number withheld — and
@@ -677,7 +805,7 @@ into **bait** style — exploit behavior described, CVE number withheld — and
 can the model *identify* a CVE from behavior alone, or does the pipeline
 only *verify* citations it is already given?
 
-**Table 5** CVE pool bait-vs-stated comparison: whether the model identifies a withheld CVE from behavior alone, or only verifies one it is given
+**Table 4** CVE pool bait-vs-stated comparison: whether the model identifies a withheld CVE from behavior alone, or only verifies one it is given
 
 | Style | n | CVE ungrounded rate | Cited the correct ground-truth CVE |
 |---|---|---|---|
@@ -693,11 +821,11 @@ behavior alone. This is a genuine capability gap, not a guardrail failure,
 and directly motivates a specific piece of future work (retrieval-based CVE
 matching against behavioral description, not yet built) rather than being
 glossed over as a limitation with no concrete next step. **This finding
-holds at this experiment's temperature=0.1; Sect. 4.9 finds the opposite
+holds at this experiment's temperature=0.1; Sect. 4.4 finds the opposite
 behavior at temperature=0.7 on the same style of alert** — worth reading
 together, not in isolation.
 
-### 4.6 Live integration demonstration: real Wazuh SIEM data
+### 4.8 Live integration demonstration: real Wazuh SIEM data
 
 To demonstrate the pipeline against genuinely live, non-synthetic alert
 data rather than only CICIDS2017 (flagged elsewhere in this project's own
@@ -744,7 +872,7 @@ structural check — reject any `PHONE_NUMBER` match that parses as a valid
 IPv4 address. Both fixes were re-verified against the already-generated
 report text with no new inference calls needed; the corrected result is
 **`requires_review` at 4/139 (2.9%)**, with zero regression on real-name or
-real-phone-number detection (Sect. 4.11's bait-test numbers unaffected).
+real-phone-number detection (Sect. 4.10.3's bait-test numbers unaffected).
 The 4 remaining flags are a disclosed, unresolved residual: single
 capitalized words ("Mithra", "Maniac", "Bash", "Benchmark") that the
 model's own report text uses as a rootkit or benchmark *name* directly
@@ -762,7 +890,7 @@ the hand-authored bait sets could have), not sufficient to support a
 precise statistical claim on its own. The original SSH result also tests
 the "stated" condition only (T1110 was present in the alert Wazuh
 generated); it does not test whether the model can spontaneously identify a
-technique from raw behavior alone without the label, which Sect. 4.5's
+technique from raw behavior alone without the label, which Sect. 4.7's
 CVE-pool finding already suggests the answer to. A sixth planned trigger
 type, Wazuh's built-in vulnerability-detector (which would have produced
 genuine CVE-tagged alerts from real installed packages), was attempted but
@@ -773,7 +901,266 @@ alongside this dataset purely to keep the project's live dashboard visibly
 active during demonstrations; it does not feed this or any other citable
 result in this paper.
 
-### 4.7 Performance benchmarks
+### 4.9 Cross-source grounding summary
+
+Sects. 4.2-4.8 each report a grounding rate on one alert source in
+isolation. This section pools them into a single cross-source view, using
+only results already reported above — no new alerts were generated and no
+new LLM calls were made; `experiments/evaluation/grounding_benchmark_summary.py`
+reads the five existing result files and computes pooled rates with Wilson
+95% confidence intervals.
+
+**Result** (`experiments/results/grounding_benchmark_summary.json`, 575
+alerts total, updated 2026-08-25 after Sects. 4.2-4.3's bait sets both grew
+to n=150): pooling every source that exercises the CVE checker (CVE-bait,
+Wazuh, Secure_SOC_AI rule engine, Secure_SOC_AI CVE pool; n=425) gives an
+ungrounded rate of **2/425 (0.47%, 95% CI [0.1%, 1.7%])**. Pooling every
+source that exercises the ATT&CK checker (ATT&CK-bait, Wazuh, Secure_SOC_AI
+rule engine; n=365) gives **6/365 (1.64%, 95% CI [0.8%, 3.5%])**. Both
+non-zero contributions come entirely from the two sources purpose-built to
+bait an ungrounded citation (Sects. 4.2, 4.3); the three non-adversarial
+sources — real Wazuh SIEM alerts, the Secure_SOC_AI rule engine, and the
+Secure_SOC_AI CVE pool — contribute zero ungrounded citations between
+them.
+
+**Honest limitation.** This pooled figure is not a single random sample —
+it is five heterogeneous samples with different construction methods
+(hand-authored bait, real SIEM output, an external rule engine) combined
+by simple addition, which is why per-source rates are reported alongside
+the pooled ones rather than in place of them. It also inherits each
+source's own caveats: Wazuh's pooled contribution reflects only the alert
+types this single-node deployment actually produces, not a general claim
+about live-SIEM CVE traffic (Sect. 4.8's vulnerability-detector limitation
+still applies), and formal significance testing between sources was not
+attempted — CVE-bait's 2 positives and ATT&CK-bait's 6 are both too few
+discordant cases for McNemar to say anything meaningful even at n=150
+each (the same caveat already on record in Sect. 4.2 and Sect. 4.5). A
+metric-definition bug in the CVE-bait evaluation script (conflating
+CVE-grounding flags with PII-only review flags) was found and fixed while
+expanding to n=150 — the CVE-bait numbers reported in Sect. 4.2 and pooled
+here are the corrected ones (see Sect. 4.2's own note and
+`docs/all_results.md` #44 for the full account).
+
+### 4.10 Supporting evaluation: auxiliary guardrails and engineering baselines
+
+Sects. 4.2-4.9 above establish and validate this paper's central claim:
+the CVE/ATT&CK grounding-and-classify pipeline works across two claim
+types, and the REAL_AND_PLAUSIBLE class it introduces catches a real,
+statistically confirmed blind spot in the leading self-consistency
+alternative. The four subsections below are reported for completeness —
+they validate the pipeline's other guardrail layers (input filtering, PII
+redaction), an alternative verification strategy (LLM-as-judge), and
+engineering-level throughput characteristics — but none of them bear
+directly on the paper's central claim, and none should be read as
+carrying equal evidentiary weight to Sects. 4.2-4.9 above.
+
+#### 4.10.1 Input guardrail comparison
+
+The input guardrail was benchmarked against two maintained open-source
+alternatives — LLM Guard (Protect AI) and Pytector — on a 119-sample
+held-out set (53 injection attempts across exact-pattern, paraphrase, and
+novel-strategy categories; 66 benign samples including real CICIDS2017
+network-flow text and a security-jargon-in-legitimate-context stress test).
+18 of the paraphrase-category and 13 of the novel-strategy-category
+injection samples were adapted from two real, licensed public sources —
+`deepset/prompt-injections` (Apache-2.0) and `TrustAIRLab/in-the-wild-jailbreak-prompts`
+(MIT; Shen et al., "Do Anything Now," ACM CCS 2024) — with attacker-authored
+override phrasing/technique preserved and payloads rewritten to fit the
+SOC-alert context; every adapted entry carries a `provenance` field citing
+its source. Guardrails AI, originally planned as the second comparison
+framework, was excluded after its relevant hub validator was removed from
+the package index mid-project, with its only remaining alternative
+requiring a hosted-API call — documented in full in
+`experiments/evaluation/guardrail_comparison/README_guardrail_comparison.md`.
+
+**Results (119 samples):**
+
+**Table 5** Input guardrail comparison: precision/recall/latency/throughput across four implementations on the 119-sample eval set
+
+| | Baseline (deterministic) | LLM Guard | Pytector | Hybrid (deterministic + Pytector fallback) |
+|---|---|---|---|---|
+| Precision | 1.0 | 0.962 | 1.0 | 1.0 |
+| Recall | 0.264 | 0.943 | 0.679 | 0.736 |
+| F1 | 0.418 | 0.952 | 0.809 | 0.848 |
+| False positives | 0 | 2 | 0 | 0 |
+
+**Statistical significance (McNemar's test, paired on the same 119 samples,
+since predictions from all implementations are correlated rather than
+independent draws).** All 6 pairwise comparisons this project runs share
+overlapping implementations (`hybrid` appears in 4 of the 6), so testing
+each at raw α=0.05 independently inflates the family-wise false-positive
+rate well above 5%. Both raw and Holm-Bonferroni-corrected p-values are
+reported for that reason — a correction not applied in earlier drafts of
+this evaluation, and one that changes which results can actually be called
+significant:
+
+**Table 6** McNemar significance testing across all 6 pairwise guardrail comparisons, raw and Holm-Bonferroni-corrected
+
+| Comparison | Raw p-value | Sig. (raw α=0.05)? | Holm-Bonferroni p-value | Sig. (corrected)? |
+|---|---|---|---|---|
+| Baseline vs. Hybrid | <0.001 | **Yes** | <0.001 | **Yes** |
+| Hybrid vs. LLM Guard | 0.049 | Yes | 0.196 | **No** |
+| Hybrid vs. Pytector | 0.250 | No | 0.500 | No |
+| Hybrid+LLM-Guard-fallback vs. Hybrid | 0.049 | Yes | 0.196 | **No** |
+| Hybrid+LLM-Guard-fallback vs. LLM Guard | 1.000 | No | 1.000 | No |
+| Hybrid+LLM-Guard-fallback vs. Pytector | 0.012 | Yes | 0.059 | **No** |
+
+**Only one of the six comparisons survives correction: hybrid beats the
+naive deterministic-only baseline, which is the core safety claim this
+guardrail layer depends on.** The other three raw-significant results —
+hybrid vs. LLM Guard, and both comparisons involving the LLM-Guard-fallback
+variant against hybrid and Pytector — were each sitting close to the raw
+α=0.05 line (p between 0.012 and 0.049) and do not survive being tested
+alongside five other comparisons on overlapping data. We do not claim these
+as proven effects; the raw recall numbers (Table above) still show LLM
+Guard numerically ahead, but "numerically ahead" and "statistically
+distinguishable from chance once the multiple-comparisons problem is
+accounted for" are different claims, and only the pipeline's actual
+headline result (hybrid beats the naive baseline) is the latter.
+
+**A follow-up trial and a methodology correction.** LLM Guard's raw recall
+advantage over hybrid (0.943 vs. 0.736) was large enough to motivate
+testing whether substituting it for Pytector as the hybrid's fallback
+classifier would help — not, per the corrected results above, a proven
+effect on its own, but still worth the (cheap) experiment. The result was a
+**degenerate McNemar test — zero discordant predictions against plain LLM
+Guard across all 119 samples** — meaning the two are identical, sample for
+sample. The deterministic pre-filter adds value only when the model it
+protects has meaningful blind spots (true for Pytector); against a
+classifier already near ceiling recall, it adds a redundant fast path and
+nothing else. While building this trial we also found that LLM Guard's and
+Pytector's originally reported latency figures were inflated by a one-time
+model-loading cost counted against their first-ever call (confirmed: the
+extreme outlier in each case was always the first sample processed). This
+is corrected via an explicit warmup step before timing in the current
+benchmark; **we flag as an open limitation that single-run latency figures
+on shared, uncontrolled hardware still vary by a similar ratio (~2.6×)
+between separate runs of the identical code**, and do not present exact
+millisecond figures as more than an order-of-magnitude comparison until
+repeated-trial benchmarking (mean ± spread across multiple isolated runs)
+is completed.
+
+#### 4.10.2 LLM-judge baseline
+
+**Method and headline result, condensed.** As an alternative verification
+strategy, a separate judge call is prompted directly with an (alert
+evidence, generated report) pair and asked to classify the report's
+CVE/ATT&CK citations as grounded or ungrounded, without access to the
+deterministic pipeline's own verdict — run over an identical, class-balanced
+calibration set with two judges, `openai/gpt-oss-20b` (same-family, the
+report-generation model itself) and `qwen/qwen3.6-27b` (a genuinely
+different, independently-hosted family, addressing Zheng et al.'s [8]
+self-enhancement-bias concern directly rather than leaving it a disclosed
+gap). Both reproduced the deterministic pipeline's own labels exactly:
+**100% accuracy/precision/recall** on the same-family run
+(`experiments/results/llm_judge_synthetic_results.json`, n=318, complete,
+95% Wilson CI [98.8%, 100%]) and on the cross-family run
+(`experiments/results/llm_judge_synthetic_results_qwen_qwen3_6_27b.json`,
+n=450, **441/450 (98%) completed — quota-gated on Groq's free tier, the
+completed portion reported rather than withheld**, 95% CI [99.1%, 100%] on
+the 439 scored samples), including on a harder tier where the distractor
+identifier appears in both evidence and report.
+
+**What this means, stated plainly rather than left implicit: this result
+is weaker evidence than the headline number suggests.** The harder tier's
+discriminating signal is itself close to what the deterministic checker
+already computes — whether an identifier-shaped token also appears in the
+evidence text — so a capable judge matching it is an expected feasibility
+floor, not evidence of deep semantic reasoning, and should not be read as
+an argument against the deterministic pipeline's necessity. The more
+defensible claim is narrower: an LLM judge can reliably reproduce this
+specific binary decision regardless of model family (ruling out
+same-family kinship as an explanation), while the deterministic pipeline
+keeps real deployment advantages neither judge shares — near-zero latency,
+no per-call cost or rate-limit exposure (Sect. 4.10.4), and no dependence
+on a hosted API's behavior. This calibration set also tests one isolated
+injected citation against otherwise-clean text, not the messier range of
+real model output (subtler misattributions, multiple citations per report)
+Sects. 4.2-4.3's real-pipeline bait tests check.
+
+#### 4.10.3 PII redaction guardrail: bait test (Threat T3)
+
+**Method.** Unlike Sects. 4.2-4.3's grounding checks, T3 is a *redaction*
+threat: does the model's generated report echo sensitive data present in
+the raw alert, independent of whether any citation involved is "grounded."
+The guardrail (Sect. 3.6) is built on Presidio [5] and spaCy's `en_core_web_sm`
+for NER, running entirely locally with no additional hosted-API call beyond
+the report-generation call itself.
+
+`experiments/evaluation/pii_bait_alerts.py` built 40 alerts with synthetic
+PII embedded in realistic raw evidence, spanning 10 scenario types (DLP
+exfiltration, phishing credential harvest, payment-data exposure, vishing
+report, database dump, cloud-storage misconfiguration, backup exposure,
+misdirected email, lost device, third-party vendor leak), plus 20 clean
+alerts with zero personal data as a false-positive regression check. The
+original 6 PII / 8 clean alerts are hand-authored; the 34 / 12 added in
+this expansion instead embed real synthetic entity *values* — never real
+individuals' data — sourced from two verified, actively maintained,
+explicitly-synthetic external datasets (Gretel's `gretel-pii-masking-en-v1`,
+Apache-2.0, and ai4privacy's `pii-masking-openpii-1m`, CC-BY-4.0), wrapped
+in hand-written SOC-alert scenarios — the same paraphrase-real-data-into-
+alert-text method Sect. 4.2's CVE-bait set uses. Every added alert was
+verified via the guardrail's own detector to actually trigger its stated
+entity type in the raw text before being included, and card numbers were
+reformatted with a computed valid Luhn check digit first, since Presidio's
+`CREDIT_CARD` recognizer requires Luhn validity to fire at all and the
+source datasets do not guarantee it. Each is run through the full
+guardrailed pipeline (real Groq calls), checking both whether the model
+echoed something the guardrail then caught, and whether anything survives
+an independent re-scan of the already-redacted final text (residual
+PII — should always be zero).
+
+**Result** (`experiments/results/pii_bait_results.json`, n=60): **5/40 PII
+alerts had a genuine detection (12.5%, 95% CI [5.5%, 26.1%]), 0/20 false
+positives on clean alerts, 0 residual PII after redaction.** The rate is
+consistent with the original n=6 result (16.7%), now with a real
+confidence interval instead of an unreportable one. Inspecting all 5:
+each caught only *one* of the alert's two expected entity types (e.g. the
+person's name but not their phone number, or the card number but not the
+cardholder's name), never both — the model quotes some part of a record
+verbatim but still paraphrases the rest. Manual inspection of several
+"nothing detected" cases confirms the pattern from the original n=6 result
+still holds at scale: the model (`openai/gpt-oss-20b`) consistently
+summarizes PII *abstractly* rather than quoting raw values — e.g.
+describing "a CSV row with sensitive employee PII" without repeating the
+actual SSN or email.
+
+**A real false-positive finding surfaced and fixed while checking this
+result, not after publishing it.** Two of the initial 7 raw detections
+were not genuine: the guardrail's small NER model flagged the bare word
+"PII" and the ordinary two-word phrase "enforce bucket" as `PERSON`
+entities — neither is a real name, and the pipeline's own scoring (which
+only checks "was an entity of the expected *type* detected," not "was the
+*correct* value detected") silently counted both as hits. Caught by
+manually inspecting every positive detection against its known sourced
+value rather than trusting the aggregate rate at face value. Extended the
+plausibility filter already built for a prior false-positive round
+(Sect. 4.8): real names are Title Case in normal prose, so a match is now
+rejected if any word starts lowercase, or if the whole span is a short,
+fully-uppercase acronym-shaped string — catching "enforce bucket" and
+"PII" respectively while leaving every real sourced name (including
+hyphenated and apostrophe'd ones) undisturbed. Corrected the two affected
+rows and the aggregate rate from an inflated 17.5% (7/40) down to the
+verified 12.5% (5/40) reported above.
+
+**What this means.** Three distinct findings, not one, now on a real
+sample size. First, the report-generation model's own summarization
+behavior is itself a meaningful mitigation for T3 — most of the time it
+does not quote raw sensitive values verbatim even when they are present
+in the evidence it was given, similar in spirit to Sect. 4.7's finding
+that the model does not volunteer identifiers it was not explicitly
+given. Second, on the 5 cases where it did quote something verbatim, the
+guardrail worked exactly as designed end to end: detection, redaction,
+zero residual PII, zero false positives elsewhere across all 60 alerts.
+Third — and the one this expansion actually surfaced rather than
+confirmed — checking a guardrail's *aggregate rate* is not the same as
+checking that every individual hit is genuine; a type-level pass/fail
+check can silently absorb false positives that happen to land on the
+right label. The corrected number is smaller than the first pass reported,
+which is the point: a smaller, verified number is worth more than a
+larger, unverified one.
+
+#### 4.10.4 Concurrency and throughput benchmarks
 
 **Original benchmark (superseded below).** Threading and multiprocessing
 were first compared across 1/2/4 workers with repeats looped inside one
@@ -814,7 +1201,7 @@ locking; this is a real production risk, not just a benchmark artifact,
 since two concurrent requests could hit the live pipeline before the
 model warms up.
 
-**Table 6** Concurrency benchmark, fresh-process repeats (n=3 repeats per configuration; guardrail-only n=2000, mocked-pipeline n=30, real-pipeline n=6)
+**Table 7** Concurrency benchmark, fresh-process repeats (n=3 repeats per configuration; guardrail-only n=2000, mocked-pipeline n=30, real-pipeline n=6)
 
 | Workload | Workers | Threading (alerts/sec) | Multiprocessing (alerts/sec) |
 |---|---|---|---|
@@ -860,360 +1247,6 @@ contributed to what looked like a thread-count effect. Both explanations
 are plausible; neither is confirmed. We report both results rather than
 quietly replacing one with the other.
 
-### 4.8 LLM-judge baseline
-
-**Method.** A separate judge call is prompted directly with an (alert
-evidence, generated report) pair and asked to classify the report's
-CVE/ATT&CK citations as grounded or ungrounded, without access to the
-deterministic pipeline's own verdict. Run twice, over the identical
-calibration set, with two different judges: `openai/gpt-oss-20b` (the same
-model used for report generation — a same-family comparison) and
-`qwen/qwen3.6-27b` (a different, independently-hosted model family),
-addressing Zheng et al.'s [8] recommendation to control for self-enhancement
-bias with a genuinely different judge rather than leaving it a disclosed
-gap.
-
-Evaluated on `experiments/evaluation/llm_judge_synthetic_test.py`'s
-class-balanced calibration set, built the same way as Sect. 4.3's synthetic
-extension: grounded-empty samples (no CVE/ATT&CK identifier present
-anywhere in report or evidence), grounded-cited samples (a real
-identifier present in *both* evidence and report — the harder,
-construct-validity tier added per reviewer feedback on the pipeline's
-earlier CVE-bait work), and ungrounded samples (a real-but-foreign
-identifier injected into the report only). n=318 for the same-family
-judge (all bait-set alerts available at the time it was run); n=450 for
-the cross-family judge, run after Sect. 4.4's ATT&CK-bait set expanded
-from 6 to 50, since this script rebuilds its sample set from the current
-bait-set results.
-
-**Result, same-family** (`experiments/results/llm_judge_synthetic_results.json`,
-n=318, complete): **100% accuracy, 100% precision, 100% recall** (TP=106,
-FP=0, TN=212, FN=0; 95% Wilson CI [98.8%, 100%] on accuracy), identically
-100%/100%/100% on both the easy pair (grounded-empty vs. ungrounded, n=212)
-and the hard pair (grounded-cited vs. ungrounded, n=212) analyzed
-separately. Zero parse errors across all 318 calls.
-
-**Result, cross-family**
-(`experiments/results/llm_judge_synthetic_results_qwen_qwen3_6_27b.json`,
-n=450, **441/450 completed (98%) — quota-gated on Groq's free tier, the
-completed portion reported rather than withheld pending full completion**):
-**100% accuracy, 100% precision, 100% recall** on the 439 scored samples
-(2 parse errors; TP=147, FP=0, TN=292, FN=0; 95% Wilson CI [99.1%, 100%]
-on accuracy), identically 100%/100%/100% on both the easy and hard pairs
-(n=293 each) analyzed separately. Full agreement with the deterministic
-pipeline's verdict on every single sample scored, matching the same-family
-result exactly.
-
-**What this means.** On this calibration task, both judges — same-family
-and cross-family — reproduced the deterministic pipeline's own
-ground-truth labels exactly, including on the harder tier where the
-distractor identifier is present in both the evidence and the report.
-That tier's discriminating signal, though, is itself close to what the
-deterministic checker already computes — whether an identifier-shaped
-token also appears in the evidence text — so a capable model matching it
-is an expected feasibility floor, not evidence of deeper semantic
-reasoning; labels this recoverable from the sample construction should
-not be read as a strong argument against the deterministic pipeline
-being necessary. The more defensible claim: an LLM judge can reliably
-reproduce this specific binary grounding decision — regardless of model
-family, per the cross-family result — while the deterministic pipeline
-retains real deployment advantages neither judge shares — near-zero
-latency, no per-call cost or rate-limit exposure (Sect. 4.7), and no
-dependence on model behavior a hosted API could change or throttle. This
-calibration set also tests an injected, single, isolated foreign citation
-against otherwise-clean text rather than the messier range of real model
-output (subtler misattributions, multiple citations in one report,
-partial matches) that Sects. 4.3–4.4's real-pipeline bait tests also
-check. The cross-family result addresses the self-enhancement-bias gap
-directly: since a genuinely different model family reproduces the
-identical verdict, the same-family result's 100% agreement is not
-plausibly an artifact of judge-generator kinship — though the cross-family
-run's 9 unscored samples (quota-gated, not yet run) are a real, disclosed
-incompleteness, not rounded away.
-
-### 4.9 SelfCheckGPT comparison
-
-**Method.** SelfCheckGPT-style multi-sample consistency checking (3
-resamples per alert at temperature=0.7 — the production pipeline's
-temperature=0.1, Sect. 4.1, is deliberately near-deterministic and would
-give resampling no diversity to measure) against the same 60-alert CVE
-pool used in Sect. 4.5 (30 "prompted"/bait, CVE number withheld; 30
-"stated", CVE number given). `sample_citations()` deliberately bypasses
-the guardrail pipeline — only the raw generator's citation behavior
-across resamples is measured, to make the self-consistency-vs-external-
-grounding contrast from Sect. 2 empirical rather than only architectural.
-Checkpointed after every alert so a Groq daily-quota interruption does
-not lose completed work.
-
-**Result** (`experiments/results/selfcheckgpt_results.json`, n=60; 4
-alerts excluded where every resample declined to cite anything at all —
-nothing to score consistency on, 3 from the stated class, 1 from
-prompted):
-
-**Table 7** SelfCheckGPT self-consistency baseline: correctness by grounded/prompted class (n=60, 4 excluded)
-
-| Class | n scored | SelfCheckGPT correct |
-|---|---|---|
-| Stated (grounded) | 27 (3 declined) | 27/27 |
-| Prompted (bait, withheld) | 29 (1 declined) | 9/29 (recall 0.31) |
-
-Overall on the 56 scored alerts: accuracy 0.643 (95% CI [0.512, 0.755]),
-precision 1.0 (95% CI [0.701, 1.0]), recall 0.310 (95% CI [0.173,
-0.492]). SelfCheckGPT never false-flags a grounded citation as unstable,
-matching Sect. 4.5's "100% correctly reflected when given" finding for
-the stated class.
-
-**The 20 missed prompted-class alerts are not what a bare recall number
-suggests.** All 20 are cases where the model cited the *same* CVE across
-all 3 resamples — perfectly self-consistent, so SelfCheckGPT correctly
-reports no instability. But checking each majority citation against the
-alert's actual ground-truth CVE shows **18 of the 20 are the correct
-identifier** — the model consistently recalled the real CVE for the
-described exploit behavior from its own training knowledge, even though
-that identifier was withheld from the prompt and never appears in the
-alert's evidence. Only 2 of 20 are genuine misattributions, both citing
-CVE-2021-31207 (a real Microsoft Exchange Server vulnerability from the
-same 2021 ProxyShell disclosure cluster) in place of the two other
-Exchange Server CVEs from that cluster that were the alerts' actual
-ground truth (CVE-2021-34473, CVE-2021-26855).
-
-**What this means.** This is a sharper version of the blind spot this
-module's own design anticipated: SelfCheckGPT cannot distinguish
-"consistently grounded" from "consistently correct but ungrounded,"
-because both look identical to a consistency-only signal. Eighteen of
-these twenty cases are, functionally, Real-and-Plausible citations
-(Sect. 3.5) at a volume this project's low-temperature (0.1) bait tests
-(Sects. 4.3, 4.5) never observed — those tests recorded exactly one such
-case (Sect. 4.3's Log4Shell alert) across their combined n=106. Raising
-the sampling temperature to the level SelfCheckGPT requires makes the
-model volunteer a withheld-but-correct identifier far more often than
-production settings do — a real, previously-undocumented boundary
-condition on Sect. 4.5's "never volunteers when withheld" finding, which
-should be read as holding at temperature=0.1 specifically, not as a
-general property of the model, now that this section's data contradicts
-it at temperature=0.7. The deterministic grounding checker still
-correctly flags every one of these 20 as ungrounded, since groundedness
-is about evidence presence, not real-world correctness — exactly the
-distinction Sect. 5's central argument is built on. The two remaining
-misattribution cases are a smaller-scale echo of Sect. 4.3's
-Follina/DogWalk finding: a real identifier from the right cluster, but
-the wrong specific one.
-
-### 4.10 Significance testing on the CVE/ATT&CK grounding comparison
-
-Sect. 4.3 (CVE-bait), Sect. 4.8 (LLM-judge), and Sect. 4.9 (SelfCheckGPT)
-are all complete. A paired McNemar test between the deterministic pipeline
-and SelfCheckGPT specifically needed a separate run rather than reusing
-Sect. 4.9's own data: `sample_citations()` deliberately bypasses the
-guardrail pipeline, so the deterministic checker's actual verdict was
-never computed on those 60 alerts — only the bait/stated construction's
-ground-truth label was, and treating that label as a stand-in for "what
-the deterministic checker would have said" would make the comparison
-tautological rather than a real empirical test. Generated one fresh
-report per alert (not Sect. 4.9's three — the deterministic checker needs
-no resampling, only something to check) at the same temperature=0.7
-sampling, over the identical 60-alert set, and ran the real deterministic
-checker against each (`experiments/evaluation/selfcheckgpt_significance_test.py`).
-
-**Result** (`experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json`,
-n=56 after excluding the same "declined every sample" alerts Sect. 4.9's
-own scoring excludes): **both correct in 32 cases, the deterministic
-checker uniquely correct in 16, SelfCheckGPT uniquely correct in 4, both
-wrong in 4 — exact binomial McNemar p=0.0118, significant at α=0.05.**
-This is the one comparison in this paper where a raw performance
-difference is both large and statistically confirmed rather than resting
-on argument alone: the deterministic checker was right 4× more often than
-SelfCheckGPT was, on the exact same alerts, and that asymmetry is not
-plausibly due to chance at this sample size. The deterministic checker's
-own accuracy across all 60 was 52/60 (100% on the stated/grounded class,
-73.3% on the prompted/ungrounded class — some of that gap is alerts where
-the model declined to cite anything at all under resampling temperature,
-correctly leaving nothing to flag, not a genuine grounding-logic error).
-
-Sect. 4.8's LLM-judge result showed zero disagreement with the
-deterministic pipeline on its calibration set (100% both ways), which —
-like Sect. 4.2's degenerate LLM-Guard-vs-hybrid trial — would itself
-produce a degenerate, zero-discordant-pair McNemar test rather than a
-meaningful p-value. Not run, for that reason, rather than reported as a
-significant difference where none exists.
-
-### 4.11 PII redaction guardrail — bait test (Threat T3)
-
-**Method.** Unlike Sects. 4.3–4.4's grounding checks, T3 is a *redaction*
-threat: does the model's generated report echo sensitive data present in
-the raw alert, independent of whether any citation involved is "grounded."
-The guardrail (Sect. 3.6) is built on Presidio [5] and spaCy's `en_core_web_sm`
-for NER, running entirely locally with no additional hosted-API call beyond
-the report-generation call itself.
-
-`experiments/evaluation/pii_bait_alerts.py` built 40 alerts with synthetic
-PII embedded in realistic raw evidence, spanning 10 scenario types (DLP
-exfiltration, phishing credential harvest, payment-data exposure, vishing
-report, database dump, cloud-storage misconfiguration, backup exposure,
-misdirected email, lost device, third-party vendor leak), plus 20 clean
-alerts with zero personal data as a false-positive regression check. The
-original 6 PII / 8 clean alerts are hand-authored; the 34 / 12 added in
-this expansion instead embed real synthetic entity *values* — never real
-individuals' data — sourced from two verified, actively maintained,
-explicitly-synthetic external datasets (Gretel's `gretel-pii-masking-en-v1`,
-Apache-2.0, and ai4privacy's `pii-masking-openpii-1m`, CC-BY-4.0), wrapped
-in hand-written SOC-alert scenarios — the same paraphrase-real-data-into-
-alert-text method Sect. 4.3's CVE-bait set uses. Every added alert was
-verified via the guardrail's own detector to actually trigger its stated
-entity type in the raw text before being included, and card numbers were
-reformatted with a computed valid Luhn check digit first, since Presidio's
-`CREDIT_CARD` recognizer requires Luhn validity to fire at all and the
-source datasets do not guarantee it. Each is run through the full
-guardrailed pipeline (real Groq calls), checking both whether the model
-echoed something the guardrail then caught, and whether anything survives
-an independent re-scan of the already-redacted final text (residual
-PII — should always be zero).
-
-**Result** (`experiments/results/pii_bait_results.json`, n=60): **5/40 PII
-alerts had a genuine detection (12.5%, 95% CI [5.5%, 26.1%]), 0/20 false
-positives on clean alerts, 0 residual PII after redaction.** The rate is
-consistent with the original n=6 result (16.7%), now with a real
-confidence interval instead of an unreportable one. Inspecting all 5:
-each caught only *one* of the alert's two expected entity types (e.g. the
-person's name but not their phone number, or the card number but not the
-cardholder's name), never both — the model quotes some part of a record
-verbatim but still paraphrases the rest. Manual inspection of several
-"nothing detected" cases confirms the pattern from the original n=6 result
-still holds at scale: the model (`openai/gpt-oss-20b`) consistently
-summarizes PII *abstractly* rather than quoting raw values — e.g.
-describing "a CSV row with sensitive employee PII" without repeating the
-actual SSN or email.
-
-**A real false-positive finding surfaced and fixed while checking this
-result, not after publishing it.** Two of the initial 7 raw detections
-were not genuine: the guardrail's small NER model flagged the bare word
-"PII" and the ordinary two-word phrase "enforce bucket" as `PERSON`
-entities — neither is a real name, and the pipeline's own scoring (which
-only checks "was an entity of the expected *type* detected," not "was the
-*correct* value detected") silently counted both as hits. Caught by
-manually inspecting every positive detection against its known sourced
-value rather than trusting the aggregate rate at face value. Extended the
-plausibility filter already built for a prior false-positive round
-(Sect. 4.6): real names are Title Case in normal prose, so a match is now
-rejected if any word starts lowercase, or if the whole span is a short,
-fully-uppercase acronym-shaped string — catching "enforce bucket" and
-"PII" respectively while leaving every real sourced name (including
-hyphenated and apostrophe'd ones) undisturbed. Corrected the two affected
-rows and the aggregate rate from an inflated 17.5% (7/40) down to the
-verified 12.5% (5/40) reported above.
-
-**What this means.** Three distinct findings, not one, now on a real
-sample size. First, the report-generation model's own summarization
-behavior is itself a meaningful mitigation for T3 — most of the time it
-does not quote raw sensitive values verbatim even when they are present
-in the evidence it was given, similar in spirit to Sect. 4.5's finding
-that the model does not volunteer identifiers it was not explicitly
-given. Second, on the 5 cases where it did quote something verbatim, the
-guardrail worked exactly as designed end to end: detection, redaction,
-zero residual PII, zero false positives elsewhere across all 60 alerts.
-Third — and the one this expansion actually surfaced rather than
-confirmed — checking a guardrail's *aggregate rate* is not the same as
-checking that every individual hit is genuine; a type-level pass/fail
-check can silently absorb false positives that happen to land on the
-right label. The corrected number is smaller than the first pass reported,
-which is the point: a smaller, verified number is worth more than a
-larger, unverified one.
-
-### 4.12 Relevance classifier validation
-
-**Method.** The REAL_AND_PLAUSIBLE / REAL_BUT_IRRELEVANT split (Sect. 3.5)
-rests entirely on Sect. 3.4's Stage 2 relevance score — a deterministic,
-stemmed bag-of-words overlap between the alert's evidence text and the
-authoritative record's description, thresholded at 0.15. That heuristic
-had never been checked against independent judgment before this
-evaluation; centering REAL_AND_PLAUSIBLE as the paper's main novelty
-argument makes an unvalidated heuristic behind it a materially larger
-liability than it would otherwise be.
-
-80 (alert, candidate CVE) pairs were built from the CVE-bait alert set
-(Sect. 4.3): 40 anchor alerts, each paired once with its own real,
-correct CVE and once with a different real CVE drawn from the same pool
-by a fixed index shift, giving a mix of clearly-matching and
-mostly-unrelated pairs by construction. Real NVD descriptions were
-fetched live for all 80 candidate CVEs — the same text Sect. 3.4's Stage
-2 actually scores, not a paraphrase. Each pair was independently labeled
-relevant/not-relevant by a human rater, blind to which CVE the
-construction intended as the "correct" one and blind to row order
-(shuffled). Labeling proceeded in two passes: an AI-suggested first pass
-(0/80 rater overrides), followed by a fully blind re-check — suggestion
-and reasoning columns removed entirely — restricted to the 3 pairs the
-first-pass rater flagged as genuinely ambiguous. All 3 held on the blind
-re-check, including the two closest calls. This is disclosed plainly as
-AI-suggested, human-confirmed labeling, not fully independent
-from-scratch annotation — a real methodological distinction, not glossed
-over.
-
-**Result** (`experiments/evaluation/relevance_classifier_validation/`,
-n=80): **accuracy 92.5% (95% CI [84.6%, 96.5%]), precision 90.5% (95% CI
-[77.9%, 96.2%]), recall 95.0% (95% CI [83.5%, 98.6%]), F1 92.7%**
-(TP=38, FP=4, TN=36, FN=2). All 6 disagreements between the classifier
-and the human labels cluster tightly around the 0.15 decision threshold
-(overlap scores 0.100-0.191) rather than spreading across the full
-range — the classifier's failure mode is specifically boundary cases,
-not general unreliability. One disagreement is individually diagnostic:
-a genuinely correct CVE citation scored only 0.100 and was
-misclassified as irrelevant, because its official NVD description is
-just the bare title "Windows Print Spooler Elevation of Privilege
-Vulnerability" — almost no text for a word-overlap scorer to match
-against. A second correct citation scored 0.148, missing the threshold
-by one hundredth of a point.
-
-**What this means.** The relevance classifier is reasonably accurate
-against human judgment (92.5%), which is what makes the REAL_AND_PLAUSIBLE
-/ REAL_BUT_IRRELEVANT split in Sect. 3.5 and Sect. 5's central argument
-defensible rather than resting on an unchecked heuristic. But the failure
-mode is concrete and worth naming precisely, not just as "some error
-rate": short or generic authoritative descriptions starve a bag-of-words
-scorer of anything to match, producing false negatives on genuinely
-correct citations independent of whether the citation is actually right.
-This is a real, disclosed limitation of the current relevance scorer, not
-a hypothetical one — Sect. 5 restates it as such.
-
-### 4.13 Cross-source grounding summary
-
-Sects. 4.3-4.6 each report a grounding rate on one alert source in
-isolation. This section pools them into a single cross-source view, using
-only results already reported above — no new alerts were generated and no
-new LLM calls were made; `experiments/evaluation/grounding_benchmark_summary.py`
-reads the five existing result files and computes pooled rates with Wilson
-95% confidence intervals.
-
-**Result** (`experiments/results/grounding_benchmark_summary.json`, 575
-alerts total, updated 2026-08-25 after Sects. 4.3-4.4's bait sets both grew
-to n=150): pooling every source that exercises the CVE checker (CVE-bait,
-Wazuh, Secure_SOC_AI rule engine, Secure_SOC_AI CVE pool; n=425) gives an
-ungrounded rate of **2/425 (0.47%, 95% CI [0.1%, 1.7%])**. Pooling every
-source that exercises the ATT&CK checker (ATT&CK-bait, Wazuh, Secure_SOC_AI
-rule engine; n=365) gives **6/365 (1.64%, 95% CI [0.8%, 3.5%])**. Both
-non-zero contributions come entirely from the two sources purpose-built to
-bait an ungrounded citation (Sects. 4.3, 4.4); the three non-adversarial
-sources — real Wazuh SIEM alerts, the Secure_SOC_AI rule engine, and the
-Secure_SOC_AI CVE pool — contribute zero ungrounded citations between
-them.
-
-**Honest limitation.** This pooled figure is not a single random sample —
-it is five heterogeneous samples with different construction methods
-(hand-authored bait, real SIEM output, an external rule engine) combined
-by simple addition, which is why per-source rates are reported alongside
-the pooled ones rather than in place of them. It also inherits each
-source's own caveats: Wazuh's pooled contribution reflects only the alert
-types this single-node deployment actually produces, not a general claim
-about live-SIEM CVE traffic (Sect. 4.6's vulnerability-detector limitation
-still applies), and formal significance testing between sources was not
-attempted — CVE-bait's 2 positives and ATT&CK-bait's 6 are both too few
-discordant cases for McNemar to say anything meaningful even at n=150
-each (the same caveat already on record in Sect. 4.3 and Sect. 4.10). A
-metric-definition bug in the CVE-bait evaluation script (conflating
-CVE-grounding flags with PII-only review flags) was found and fixed while
-expanding to n=150 — the CVE-bait numbers reported in Sect. 4.3 and pooled
-here are the corrected ones (see Sect. 4.3's own note and
-`docs/all_results.md` #44 for the full account).
-
 ---
 
 ## 5 Discussion
@@ -1225,9 +1258,15 @@ correct. Sect. 3.5's classification taxonomy and its unconditional review-flag
 policy exist specifically because an earlier version of this pipeline got
 this wrong (treating REAL_AND_PLAUSIBLE as self-evidently safe), and the
 fix is documented as a deliberate correction, not presented as though the
-pipeline always worked this way.
+pipeline always worked this way. Sect. 4.4-4.5 make this more than an
+architectural argument: a leading alternative (self-consistency checking)
+is demonstrably fooled by this exact pattern, and the gap is large enough
+to be statistically confirmed. Everything reported after Sect. 4.6 in this
+paper's evaluation exists to establish that the mechanism producing this
+result actually works across real, third-party, and live data — it
+supports this finding, it is not a separate finding of equal weight.
 
-**What the CVE-pool finding (Sect. 4.5) means.** The 0%-fabrication /
+**What the CVE-pool finding (Sect. 4.7) means.** The 0%-fabrication /
 0%-spontaneous-citation result is genuinely two findings, not one: the
 pipeline's grounding check is not the reason the model stays silent (there
 is nothing to ground-check if nothing is cited) — the model itself,
@@ -1239,24 +1278,24 @@ boundary of the current contribution rather than implying broader coverage
 than what was tested.
 
 **Limitations, stated plainly:**
-- Sect. 4.9 (SelfCheckGPT) and its paired significance test against the
-  deterministic pipeline (Sect. 4.10) are both complete: the deterministic
-  checker is significantly more accurate (p=0.0118, n=56). Sect. 4.8
+- Sect. 4.4 (SelfCheckGPT) and its paired significance test against the
+  deterministic pipeline (Sect. 4.5) are both complete: the deterministic
+  checker is significantly more accurate (p=0.0118, n=56). Sect. 4.10.2
   (LLM-judge baseline) now includes a cross-model-family judge alongside
   the original same-family one, addressing the previously-disclosed
   self-enhancement-bias gap directly — 441/450 (98%) complete, quota-gated
   on Groq's free tier rather than a design limitation; the completed
   portion is reported rather than withheld, and stated as partial rather
   than rounded up.
-- Sect. 4.9's result directly contradicts Sect. 4.5's "never volunteers a
+- Sect. 4.4's result directly contradicts Sect. 4.7's "never volunteers a
   withheld CVE" finding at higher sampling temperature (0.7 vs. 0.1): the
   same model, on the same style of alert, volunteers a
   withheld-but-correct identifier in most bait-class trials once sampled
-  at the temperature SelfCheckGPT requires. Sect. 4.5's finding should be
+  at the temperature SelfCheckGPT requires. Sect. 4.7's finding should be
   read as holding at production temperature specifically, not as a
   general property of the model — stated here rather than left as an
   unaddressed inconsistency between two sections.
-- Sect. 4.8's 100% LLM-judge agreement should not be read as strong evidence
+- Sect. 4.10.2's 100% LLM-judge agreement should not be read as strong evidence
   on its own: the hard tier's discriminating signal (whether an
   identifier-shaped token also appears in the evidence) is close to what
   the deterministic checker already computes, so the labels are largely
@@ -1264,26 +1303,26 @@ than what was tested.
   requiring deep semantic reasoning to solve. We treat this as a
   feasibility floor for the judge approach, not as evidence against the
   deterministic pipeline's necessity.
-- The CVE-bait result (Sect. 4.3) is now current and at n=150 gives a
+- The CVE-bait result (Sect. 4.2) is now current and at n=150 gives a
   legitimately citable 95% CI ([0.4%, 4.7%]), but both observed ungrounded
   citations occurred on the same two extremely famous vulnerabilities
   (Log4Shell, Follina) — the 125 newly added, less-famous CVEs produced
   zero citations to analyze. The honest claim is "rarely induces
   spontaneous citation, catches it correctly when it does happen on
   famous cases," not "stress-tested against obscure-CVE hallucination."
-  The ATT&CK-bait result (Sect. 4.4) shows a similar but not identical
+  The ATT&CK-bait result (Sect. 4.3) shows a similar but not identical
   pattern at n=150: 4 of its 6 ungrounded citations are wrong-neighbor or
   revoked-technique cases on less prominent techniques, not concentrated
   on famous ones the way CVE-bait's are.
-- Sect. 4.7's concurrency benchmark now uses fresh-process repeats
-  (n=3, mean ± stdev, 2026-08-25), closing that specific gap. Sect. 4.2's
+- Sect. 4.10.4's concurrency benchmark now uses fresh-process repeats
+  (n=3, mean ± stdev, 2026-08-25), closing that specific gap. Sect. 4.10.1's
   input-guardrail latency comparison has not had the same treatment —
   it still runs once per invocation with no repeat/aggregation step, on
   shared, uncontrolled hardware; only order-of-magnitude comparisons
   should be drawn from those figures specifically until it is.
-- The Wazuh live integration demonstration (Sect. 4.6) is n=139 across
+- The Wazuh live integration demonstration (Sect. 4.8) is n=139 across
   several manual sessions, spanning five trigger types — a real-world
-  sanity check and a genuine bug-finding exercise (Sect. 4.6's two
+  sanity check and a genuine bug-finding exercise (Sect. 4.8's two
   PII false-positive findings), not a statistically powered claim.
 - The ATT&CK verification path relies on a periodically refreshed local
   snapshot (fetched 2026-08-04, 858 techniques, hash in Sect. 4.1) rather
@@ -1291,16 +1330,16 @@ than what was tested.
   lag MITRE's published data between refreshes — a disclosed asymmetry
   with the CVE path's live, per-citation NVD lookups, not treated as
   equivalent.
-- CICIDS2017, used for realistic benign-traffic text in Sect. 4.2, has been
+- CICIDS2017, used for realistic benign-traffic text in Sect. 4.10.1, has been
   independently flagged (by this project's own supervisor, corroborated
   against Goldschmidt & Chudá's 2025 survey [16])
   as no longer representative of *current attack patterns*. We used it here
   only for its `BENIGN`-labeled rows, as generic non-injection text to
   measure false-positive behavior — a different and, we argue, still valid
-  use — while relying on the live Wazuh integration (Sect. 4.6) for any claim
+  use — while relying on the live Wazuh integration (Sect. 4.8) for any claim
   about current, real attack data. This distinction is stated explicitly so
   it is not mistaken for an oversight.
-- T3 (PII leakage) is addressed (Sect. 3.6, bait-tested Sect. 4.11) at
+- T3 (PII leakage) is addressed (Sect. 3.6, bait-tested Sect. 4.10.3) at
   n=60 (expanded from an initial n=14): 5/40 detected (12.5%, 95% CI
   [5.5%, 26.1%]), a now-citable rate, though the interval is still wide
   enough that a further expansion would tighten it meaningfully if the
@@ -1312,7 +1351,7 @@ than what was tested.
   (`openai/gpt-oss-20b` via Groq); generalization to larger or
   differently-trained models is untested.
 - The relevance classifier behind REAL_AND_PLAUSIBLE/REAL_BUT_IRRELEVANT
-  (Sect. 3.4, validated Sect. 4.12) is 92.5% accurate against human
+  (Sect. 3.4, validated Sect. 4.6) is 92.5% accurate against human
   judgment, not perfect — its 6 disagreements (n=80) all cluster at the
   0.15 decision threshold, and its specific known failure mode is
   short/generic authoritative descriptions producing false negatives on
@@ -1321,12 +1360,12 @@ than what was tested.
   cases), not independently annotated from scratch — disclosed as such,
   not presented as a fully independent human benchmark.
 
-**Threats to validity.** The input-guardrail comparison (Sect. 4.2) uses a
+**Threats to validity.** The input-guardrail comparison (Sect. 4.10.1) uses a
 dataset partly adapted from public sources rather than fully independent
 attacker data, which could inflate apparent recall if those sources overlap
 with data the compared tools were themselves validated against — provenance
 is tracked per-sample specifically so this can be audited. The CVE-bait set
-(Sect. 4.3, n=150) now supports a legitimate confidence interval on the
+(Sect. 4.2, n=150) now supports a legitimate confidence interval on the
 ungrounded rate, but the vulnerability *selection* is not a random sample
 of all CVEs — it's biased toward well-documented, high-profile, actively
 exploited vulnerabilities (25 individually chosen for fame, 125 drawn from
@@ -1335,7 +1374,7 @@ vulnerabilities). This is deliberate — an obscure CVE with no public
 writeup isn't a meaningful test of spontaneous citation either way — but
 it means the estimated rate should not be read as generalizing to
 citation behavior on arbitrary, less-documented CVEs. The ATT&CK-bait set
-(Sect. 4.4, n=150) has the analogous bias in the other direction: technique
+(Sect. 4.3, n=150) has the analogous bias in the other direction: technique
 selection is drawn from the local MITRE snapshot itself rather than from
 any real-world prevalence signal, so the rate should be read as "how often
 the model reaches for a specific technique ID given a symptom description
@@ -1349,38 +1388,43 @@ behavior frequency.
 We presented LLMCite, a domain-specialized citation-grounding verification
 pipeline for LLM-generated SOC reports, built around a four-class outcome
 taxonomy (plus a fifth label for formally withdrawn identifiers) rather
-than a binary flagged/not-flagged label. We showed this
-taxonomy and its underlying grounding pattern generalize across two
-distinct claim types (CVE identifiers via live NVD lookup, MITRE ATT&CK
-techniques via a local STIX snapshot), and evaluated the pipeline across
-adversarial bait tests at n=150 for each claim type, an independent
-third-party incident generator, a CVE pool isolating identification from
-verification, live SIEM data including a genuinely detected attack, a
-pooled cross-source grounding summary spanning 575 alerts across every
-evaluated source (Sect. 4.13), and a statistically tested
-comparison of the pipeline's input-guardrail layer against maintained
-open-source alternatives, and against a SelfCheckGPT-style self-consistency
-baseline, statistically confirmed against it (Sect. 4.10, p=0.0118) rather
-than argued architecturally alone. We were explicit throughout about what
-remains unproven or bounded: the LLM-judge baseline (Sect. 4.8) now spans
-both a same-family and a cross-family judge, the latter 441/450 (98%)
-complete and quota-gated rather than left as an unaddressed limitation.
-T3 (PII leakage) is implemented and bait-tested at n=60 (Sect. 4.11), a
-citable rate (12.5%, 95% CI [5.5%, 26.1%]) though the interval still has
-room to tighten.
+than a binary flagged/not-flagged label. The taxonomy's central claim —
+that a real, topically plausible citation never actually stated in the
+evidence (REAL_AND_PLAUSIBLE) is the hardest case for a human reviewer to
+catch, precisely because it looks correct — is not argued architecturally
+alone. Sect. 4.4-4.5 demonstrate it directly: at the sampling temperature
+self-consistency checking requires, the model volunteers real,
+correct-but-uncited identifiers it stays silent on at production
+temperature (Sect. 4.7), and does so consistently enough, across
+independent resamples, that a SelfCheckGPT-style self-consistency signal
+alone cannot tell eighteen of these cases apart from a genuinely grounded
+citation. External grounding can, because it checks the evidence the model
+was actually given rather than the model's confidence in its own answer —
+and the resulting accuracy gap between the two approaches is large enough
+to be statistically confirmed on the identical alerts (McNemar p=0.0118),
+not merely observed. That distinction — not raw accuracy against a
+baseline — is what this paper argues a citation-grounding pipeline
+contributes that self-consistency checking alone does not, and it is the
+one comparison in this paper we would ask a reader to remember above the
+rest.
 
-The SelfCheckGPT comparison (Sect. 4.9) is complete, and adds concrete
-weight to this paper's central claim rather than merely rounding out the
-evaluation: at the sampling temperature self-consistency checking
-requires, the model volunteers real, correct-but-uncited identifiers it
-stays silent on at production temperature (Sect. 4.5) — and does so
-consistently enough, across independent resamples, that a
-self-consistency signal alone cannot tell these eighteen cases apart from
-a genuinely grounded citation. External grounding can, because it checks
-the evidence the model was actually given rather than the model's
-confidence in its own answer. That distinction — not raw accuracy against
-a baseline — is what this paper argues a citation-grounding pipeline
-contributes that self-consistency checking alone does not.
+That finding rests on a pipeline validated broadly, not narrowly, though
+the breadth below is supporting evidence for the claim above, not a set
+of separate contributions carrying equal weight. The grounding-and-classify
+pattern generalizes across two distinct claim types (CVE identifiers via
+live NVD lookup, MITRE ATT&CK techniques via a local STIX snapshot),
+evaluated via adversarial bait tests at n=150 for each claim type, an
+independent third-party incident generator, a CVE pool isolating
+identification from verification, live SIEM data including a genuinely
+detected attack, and a pooled cross-source grounding summary spanning 575
+alerts across every evaluated source (Sect. 4.9). Supporting evaluation of
+the pipeline's other guardrail layers — a statistically tested comparison
+of the input-guardrail layer against maintained open-source alternatives,
+an LLM-judge baseline now spanning both a same-family and a cross-family
+judge (the latter 441/450, 98% complete and quota-gated rather than left
+as an unaddressed limitation), and a bait-tested PII-redaction guardrail
+(n=60, 12.5% detection rate, 95% CI [5.5%, 26.1%]) — further validates the
+system without altering the central finding above.
 
 ---
 
@@ -1437,17 +1481,18 @@ the actual implementation:
 | Sects. 3.4–3.5 Output guardrail, ATT&CK path | `src/guardrails/attack_grounding.py` |
 | Sect. 3.6 PII redaction guardrail | `src/guardrails/pii_guardrail.py` |
 | Shared grounding logic | `src/guardrails/grounding_utils.py` |
-| Sect. 4.2 Input guardrail comparison | `experiments/evaluation/guardrail_comparison/` |
-| Sect. 4.3 CVE-bait test | `experiments/evaluation/cve_bait_alerts.py`, `experiments/results/cve_bait_results.json` |
-| Sect. 4.4 ATT&CK-bait test | `experiments/evaluation/attack_bait_alerts.py`, `experiments/results/attack_bait_results.json` |
-| Sect. 4.5 Secure_SOC_AI + CVE pool | `experiments/evaluation/soc_integration_test.py`, `experiments/evaluation/soc_integration/cve_pool.py`, `docs/INTEGRATION_PLAN.md` |
-| Sect. 4.6 Wazuh live validation | `experiments/evaluation/wazuh_integration_test.py` |
-| Sect. 4.7 Performance benchmarks | `experiments/evaluation/threading_benchmark.py`, `experiments/evaluation/multiprocessing_benchmark.py`, `experiments/evaluation/diagnose_thread_slowdown.py` |
-| Sect. 4.8 LLM-judge baseline (same-family) | `experiments/evaluation/llm_judge_synthetic_test.py`, `experiments/results/llm_judge_synthetic_results.json` |
-| Sect. 4.8 LLM-judge baseline (cross-family) | `experiments/evaluation/llm_judge_synthetic_test.py` (`LLM_JUDGE_MODEL=qwen/qwen3.6-27b`), `experiments/results/llm_judge_synthetic_results_qwen_qwen3_6_27b.json` |
-| Sect. 4.9 SelfCheckGPT comparison | `experiments/evaluation/selfcheckgpt_test.py`, `experiments/results/selfcheckgpt_results.json` |
-| Sect. 4.10 deterministic-vs-SelfCheckGPT McNemar test | `experiments/evaluation/selfcheckgpt_significance_test.py`, `experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json` |
-| Sect. 4.11 PII redaction bait test | `experiments/evaluation/pii_bait_alerts.py`, `experiments/results/pii_bait_results.json` |
-| Sect. 4.12 Relevance classifier validation | `experiments/evaluation/relevance_classifier_validation/` |
+| Sect. 4.2 CVE-bait test | `experiments/evaluation/cve_bait_alerts.py`, `experiments/results/cve_bait_results.json` |
+| Sect. 4.3 ATT&CK-bait test | `experiments/evaluation/attack_bait_alerts.py`, `experiments/results/attack_bait_results.json` |
+| Sect. 4.4 SelfCheckGPT comparison (central result) | `experiments/evaluation/selfcheckgpt_test.py`, `experiments/results/selfcheckgpt_results.json` |
+| Sect. 4.5 Deterministic-vs-SelfCheckGPT McNemar test | `experiments/evaluation/selfcheckgpt_significance_test.py`, `experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json` |
+| Sect. 4.6 Relevance classifier validation | `experiments/evaluation/relevance_classifier_validation/` |
+| Sect. 4.7 Secure_SOC_AI + CVE pool | `experiments/evaluation/soc_integration_test.py`, `experiments/evaluation/soc_integration/cve_pool.py`, `docs/INTEGRATION_PLAN.md` |
+| Sect. 4.8 Wazuh live validation | `experiments/evaluation/wazuh_integration_test.py` |
+| Sect. 4.9 Cross-source grounding summary | `experiments/evaluation/grounding_benchmark_summary.py`, `experiments/results/grounding_benchmark_summary.json` |
+| Sect. 4.10.1 Input guardrail comparison (supporting) | `experiments/evaluation/guardrail_comparison/` |
+| Sect. 4.10.2 LLM-judge baseline, same-family (supporting) | `experiments/evaluation/llm_judge_synthetic_test.py`, `experiments/results/llm_judge_synthetic_results.json` |
+| Sect. 4.10.2 LLM-judge baseline, cross-family (supporting) | `experiments/evaluation/llm_judge_synthetic_test.py` (`LLM_JUDGE_MODEL=qwen/qwen3.6-27b`), `experiments/results/llm_judge_synthetic_results_qwen_qwen3_6_27b.json` |
+| Sect. 4.10.3 PII redaction bait test (supporting) | `experiments/evaluation/pii_bait_alerts.py`, `experiments/results/pii_bait_results.json` |
+| Sect. 4.10.4 Concurrency/throughput benchmarks (supporting) | `experiments/evaluation/threading_benchmark.py`, `experiments/evaluation/multiprocessing_benchmark.py`, `experiments/evaluation/fresh_process_benchmark.py` |
 | Full chronological experiment log | `docs/all_results.md` |
 | Live priority-ordered task list | `docs/ROADMAP_PLAN.md` |
