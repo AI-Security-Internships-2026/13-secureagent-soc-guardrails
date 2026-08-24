@@ -66,6 +66,53 @@ def test_hyphenated_name_still_detected():
     assert any(d["entity_type"] == "PERSON" for d in detections)
 
 
+# Second round of plausibility-filter regressions (docs/all_results.md
+# #38) -- the punctuation/digit filter above didn't catch these because
+# neither contains any of the filtered characters.
+def test_lowercase_phrase_not_flagged_as_person():
+    # Real false positive: spaCy misread this ordinary two-word phrase
+    # (from generated report prose about a cloud storage bucket policy)
+    # as a PERSON entity.
+    detections = detect_pii("Recommend action: enforce bucket policy immediately.", entities=["PERSON"])
+    assert detections == []
+
+
+def test_short_acronym_not_flagged_as_person():
+    from src.guardrails.pii_guardrail import _is_plausible_person
+    for acronym in ["PII", "SOC", "CVE", "DLP"]:
+        assert _is_plausible_person(acronym) is False
+
+
+def test_titlecase_name_still_plausible():
+    from src.guardrails.pii_guardrail import _is_plausible_person
+    assert _is_plausible_person("Michelle Hayes-Taylor") is True
+    assert _is_plausible_person("Emily Davis-Hernandez") is True
+
+
+# Third false-positive round (docs/all_results.md, live-data bulk expansion
+# to n~150): a bare IP address gets the identical 0.4 confidence score
+# Presidio gives a real phone number, so score alone can't tell them apart --
+# only IPv4 structure can.
+def test_ip_address_not_flagged_as_phone_number():
+    detections = detect_pii("Traffic observed from 203.0.113.138 to internal host.", entities=["PHONE_NUMBER"])
+    assert detections == []
+    detections = detect_pii("Beaconing to 198.51.100.45 detected.", entities=["PHONE_NUMBER"])
+    assert detections == []
+
+
+def test_real_phone_number_still_detected_alongside_ip_fix():
+    detections = detect_pii("Caller left callback number 555-284-9013, asked for employee John Smith.",
+                              entities=["PHONE_NUMBER"])
+    assert any(d["entity_type"] == "PHONE_NUMBER" and d["text"] == "555-284-9013" for d in detections)
+
+
+def test_dotted_phone_number_not_mistaken_for_ip():
+    from src.guardrails.pii_guardrail import _is_plausible_phone
+    # 555.284.9013 -- first octet 555 is out of IPv4 range, so this must
+    # NOT be rejected even though it's dot-separated like an IP.
+    assert _is_plausible_phone("555.284.9013") is True
+
+
 def test_detects_real_ssn():
     detections = detect_pii("SSN on file: 219-09-9999.")
     assert any(d["entity_type"] == "US_SSN" and d["text"] == "219-09-9999" for d in detections)

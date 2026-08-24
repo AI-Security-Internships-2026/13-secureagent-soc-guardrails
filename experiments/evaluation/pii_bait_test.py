@@ -82,13 +82,28 @@ def _write_output(n_total: int, results: list, complete: bool) -> dict:
 
 def run():
     all_items = [("pii", item) for item in PII_ALERTS] + [("clean", item) for item in CLEAN_ALERTS]
-    print(f"Running {len(all_items)} alerts ({len(PII_ALERTS)} PII / {len(CLEAN_ALERTS)} clean) "
-          f"through the full guardrailed pipeline\n")
+    n_total = len(all_items)
 
+    # Resume from a prior checkpoint if one exists -- same pattern as
+    # cve_bait_test.py/attack_bait_test.py/selfcheckgpt_test.py, added once
+    # this set grew from 14 to 60 alerts (60 real Groq calls is real quota
+    # exposure, not free to just redo from scratch after a crash or a
+    # daily-quota wall mid-run).
     results = []
-    for i, (kind, item) in enumerate(all_items):
+    if os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH) as f:
+            prior = json.load(f)
+        if isinstance(prior.get("results"), list):
+            results = prior["results"]
+            print(f"Resuming from checkpoint: {len(results)} alerts already completed\n")
+    done_ids = {r["alert_id"] for r in results}
+    remaining = [(kind, item) for kind, item in all_items if item["alert"].alert_id not in done_ids]
+
+    print(f"Running {len(remaining)}/{n_total} remaining alerts through the full guardrailed pipeline\n")
+
+    for i, (kind, item) in enumerate(remaining):
         alert = item["alert"]
-        print(f"[{i+1}/{len(all_items)}] {alert.alert_id} ({kind})...")
+        print(f"[{len(results)+1}/{n_total}] {alert.alert_id} ({kind})...")
         report = analyse_alert(alert)
 
         detections = report.get("pii_detections", [])
@@ -107,9 +122,9 @@ def run():
         residual_flag = " [RESIDUAL PII AFTER REDACTION]" if residual else ""
         print(f"    {status}{residual_flag}")
 
-        _write_output(len(all_items), results, complete=False)
+        _write_output(n_total, results, complete=False)
 
-    output = _write_output(len(all_items), results, complete=True)
+    output = _write_output(n_total, results, complete=(len(results) == n_total))
 
     print(f"\n=== PII bait test summary ===")
     print(f"PII alerts with a detection: {output['pii_alerts_with_detection']}/{output['n_pii_alerts']} "

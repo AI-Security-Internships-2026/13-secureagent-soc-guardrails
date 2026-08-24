@@ -1,0 +1,16 @@
+{
+  "task": "McNemar's test: deterministic checker vs. SelfCheckGPT, paired on the same alerts",
+  "n_samples": 56,
+  "n_excluded_declined_every_sample": 4,
+  "contingency": {
+    "both_correct": 32,
+    "deterministic_only_correct": 16,
+    "selfcheckgpt_only_correct": 4,
+    "both_incorrect": 4
+  },
+  "discordant_pairs": 20,
+  "method": "exact_binomial",
+  "statistic": null,
+  "p_value": 0.01181793212890625,
+  "significant_at_0.05": true
+}

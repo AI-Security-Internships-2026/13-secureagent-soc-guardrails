@@ -93,20 +93,75 @@ _IMPLAUSIBLE_PERSON_PATTERN = re.compile(r"[/()&]|\d")
 
 
 def _is_plausible_person(text: str) -> bool:
-    return not _IMPLAUSIBLE_PERSON_PATTERN.search(text)
+    if _IMPLAUSIBLE_PERSON_PATTERN.search(text):
+        return False
+
+    # Real names are Title Case in normal English prose -- every
+    # space/hyphen-separated word starts with an uppercase letter
+    # ("Michelle Hayes-Taylor", "Sean O'Brien", "Jean-Pierre Dubois").
+    # Found via 2 more real false positives (docs/all_results.md #38,
+    # the PII bait-set expansion): "enforce bucket" (ordinary lowercase
+    # words spaCy misread as a name) and "PII" (a short all-caps acronym,
+    # flagged only in specific sentence context -- this filter doesn't
+    # need to reproduce that context, it just needs to correctly reject
+    # whatever span ends up matched). Ignores words that don't start with
+    # a letter at all (dates, numbers already caught above).
+    words = [w for w in re.split(r"[\s\-]+", text.strip()) if w]
+    if not words:
+        return False
+    if any(w[0].islower() for w in words if w[0].isalpha()):
+        return False
+
+    # A short span that's entirely uppercase letters reads as an acronym
+    # (PII, SOC, CVE, ATT&CK once the & above is stripped) -- a real name
+    # isn't written ALL CAPS in normal report prose.
+    letters_only = re.sub(r"[^A-Za-z]", "", text)
+    if letters_only and letters_only.isupper() and len(letters_only) <= 6:
+        return False
+
+    return True
+
+
+def _is_plausible_phone(text: str) -> bool:
+    """
+    Reject a PHONE_NUMBER match that's actually a valid IPv4 address.
+    Found via a real false positive expanding the live Wazuh alert set
+    (docs/all_results.md #33-adjacent, live-data bulk expansion): Presidio's
+    phone recognizer gives a bare dotted-number sequence like "203.0.113.138"
+    the exact same 0.4 confidence score it gives a real phone number
+    ("555-284-9013" also scores 0.4) -- score alone can't discriminate them.
+    IPv4 structure can: a real phone number is never four dot-separated
+    groups each in 0-255 (e.g. "555.284.9013" fails on "555" > 255). This
+    project's own policy already treats IP addresses as core operational
+    telemetry, not personal data (module docstring), so a confirmed IPv4
+    match is unambiguously not a phone number, not a judgment call.
+    """
+    digits_and_dots = re.sub(r"[^0-9.]", "", text)
+    octets = digits_and_dots.split(".")
+    if len(octets) != 4:
+        return True
+    if not all(o.isdigit() and 0 <= int(o) <= 255 for o in octets):
+        return True
+    return False  # valid IPv4 -- reject as a phone number
 
 
 def _analyze(text: str, entities: list) -> list:
     """
-    Run Presidio's analyzer, then drop PERSON matches that fail the
-    plausibility check above. Shared by detect_pii() and redact_text() so
-    the filter can't drift out of sync between the two call sites -- both
-    used to call the analyzer directly and independently.
+    Run Presidio's analyzer, then drop PERSON/PHONE_NUMBER matches that
+    fail their plausibility checks above. Shared by detect_pii() and
+    redact_text() so the filters can't drift out of sync between the two
+    call sites -- both used to call the analyzer directly and
+    independently.
     """
     results = _get_analyzer().analyze(text=text, language="en", entities=entities)
+    plausibility_checks = {
+        "PERSON": _is_plausible_person,
+        "PHONE_NUMBER": _is_plausible_phone,
+    }
     return [
         r for r in results
-        if r.entity_type != "PERSON" or _is_plausible_person(text[r.start:r.end])
+        if r.entity_type not in plausibility_checks
+        or plausibility_checks[r.entity_type](text[r.start:r.end])
     ]
 
 

@@ -74,7 +74,7 @@ claim in the paper, not just a nice-to-have improvement.
 |---|---|---|
 | nDPI substring-match comparison | ⛔ Descoped, 2026-08-20 | nDPI is a network-packet deep-packet-inspection library for classifying raw traffic by protocol signature — a different problem from this guardrail's actual job (matching English override phrases in alert/log text before it reaches the LLM). Never had any references in the repo; dropped rather than force-fit. The relevant underlying idea (fast matching against a larger pattern set) is instead covered by item 13 above — a real, sourced phrase-list expansion — with a proper multi-pattern string algorithm (Aho-Corasick) as the natural next step if list size ever grows enough to need one. |
 | Redo threading vs. multiprocessing benchmark (repeated runs, mean ± spread, larger n) | ⚠️ Partially done | Upgraded from single-shot to n=3 repeats this week; still deferred per your own call ("polish other tasks first, then repeat on the final pipeline") — full-pipeline n is still 6, and the mocked/synthetic-latency variant to separate scheduling overhead from live Groq behavior hasn't been built |
-| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25). **2026-08-21:** the Wazuh alert-type expansion (`docs/all_results.md` #33) surfaced 5 real PERSON false positives on live data (`/profile.php`, `xp_cmdshell('whoami`, `ATT&CK` x2, `2023 Benchmark`) — fixed with a plausibility filter rejecting PERSON matches containing `/()&` or digits (`docs/all_results.md` #35); 0/26 false positives now, no regression on real names or the original bait-test numbers. |
+| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25). **2026-08-21:** the Wazuh alert-type expansion (`docs/all_results.md` #33) surfaced 5 real PERSON false positives on live data (`/profile.php`, `xp_cmdshell('whoami`, `ATT&CK` x2, `2023 Benchmark`) — fixed with a plausibility filter rejecting PERSON matches containing `/()&` or digits (`docs/all_results.md` #35); 0/26 false positives now, no regression on real names or the original bait-test numbers. **2026-08-22:** bait set expanded 14 → 60 (`docs/all_results.md` #38) — raw run showed 7/40 detected, but 2 were false positives ("PII", "enforce bucket" misread as names) caught by checking against known sourced values and fixed with a Title-Case + short-acronym filter rule (`docs/all_results.md` #39); verified result is **5/40 (12.5%, 95% CI [5.5%, 26.1%]), 0/20 false positives**, matches the original n=6 rate almost exactly, now citable. Written into the paper (`paper_draft.md` §4.11). **2026-08-22/23:** live Wazuh set bulk-fired 26 → 139 (`docs/all_results.md` #42) surfaced a third false-positive round, much larger by volume — Presidio's `PHONE_NUMBER` recognizer flags bare IP addresses at the same confidence score real phone numbers get; fixed with an IPv4-structural check, `requires_review` corrected 27.3% → 2.9% (38/139 → 4/139). 4 residual PERSON false positives on rootkit/benchmark proper-noun names disclosed as a known limitation, not force-fixed. |
 | Local RAG-based CVE verification (Chroma + small CPU embedding model) | ❌ Not started | Offline alternative to live NVD calls; would also enable a "recommend similar CVE" feature. No Chroma/RAG code anywhere in the repo. **Evidence this matters, found 2026-08-08:** ran a 60-alert CVE pool (15 real NVD-listed CVEs, bait-style vs. stated-style, see `experiments/results/soc_integration_cve_pool_results.json`) — when the CVE number is withheld and only the exploit behavior is described, the LLM cites the correct ground-truth CVE **0% of the time** (never hallucinates one either — it just doesn't volunteer a number at all). When the CVE is stated directly, it's correctly reflected 100% of the time. Confirms the current pipeline only *verifies claims the LLM already makes*, it never *identifies* a CVE from behavior alone — this RAG item is the fix, not yet built, deliberately deferred behind the higher-priority hybrid-guardrail/eval-set work for Aug 23 |
 | Real test suite | ✅ Done, Week 8 | 92 passing / 1 pre-existing unrelated failure (`experiments/nemo_test/test_rails.py`, async-fixture issue) |
 
@@ -413,6 +413,26 @@ variety; decide on a target n before citing this anywhere; run a bait-style
 (label-withheld) version of the ATT&CK grounding test against real Wazuh
 alerts.
 
+**Update, 2026-08-22/23:** live set bulk-fired from 26 → 139 alerts
+(`docs/all_results.md` #42) — 40 new SSH/20 sudo/50 web-attack synthetic
+log lines plus 10 rootkit markers injected into the agent's monitored
+paths, same mechanism already used for the original alert types. Raw
+`requires_review` spiked to 27.3% (38/139); investigating before reporting
+found Presidio's `PHONE_NUMBER` recognizer flags bare IP addresses at the
+identical 0.4 confidence score real phone numbers get, so no score
+threshold could separate them — fixed with an IPv4-structural-validity
+check (`_is_plausible_phone()` in `pii_guardrail.py`), corrected result is
+**4/139 (2.9%)**. The 4 remaining flags are a disclosed, not-yet-fixed
+residual: single capitalized words ("Mithra", "Maniac", "Bash",
+"Benchmark") the LLM's own report text uses as rootkit/benchmark *names*
+right next to "rootkit"/"CIS ... score" — genuinely ambiguous for the NER
+model, not a clean structural bug like the IP case, so left undone rather
+than overfit to these 4 strings. Also added
+`experiments/evaluation/wazuh_integration/live_demo_loop.py` — a
+standalone, detached background process firing one varied alert every 45s
+into the container purely so the dashboard's Live Feed tab looks active
+during a demo; explicitly NOT part of the citable n=139 dataset.
+
 ---
 
 ## 10. Suggested near-term order
@@ -427,7 +447,7 @@ dataset, re-run comparison, McNemar testing) are now all done as of
 4. ~~Significance test on the guardrail comparison (§8)~~ ✅ done — McNemar's test via `significance_test.py` across all 6 comparisons, Holm-Bonferroni corrected 2026-08-22: only baseline-vs-hybrid survives correction (p<0.001); hybrid-vs-LLM-Guard and the two LLM-Guard-fallback comparisons were raw-significant but do not survive being tested as a family. Full numbers in §8.
 5. ~~Expand CVE-bait set (§3 #7)~~ ✅ done, 2026-08-12 — 6 → 25 → **100** real CVEs (75 sourced from CISA's KEV catalog); re-run resolved the stale-data problem too. Headline 2/100 ungrounded (95% CI [0.6%, 7.0%]) — but both hits come from the 3 alerts that explicitly ask for a CVE citation, not the 97 that don't; true spontaneous rate is 0/97. Of the 2: one is a factually correct citation flagged only by policy (Log4Shell), the other a real-but-wrong misattribution (Follina vs. DogWalk). Full breakdown in §3 item 7. Significance testing on this comparison still not meaningful — only 2 ungrounded cases even at n=100, not enough discordant data for McNemar against a future baseline.
 6. ~~LLM-judge baseline (§3 #5)~~ ✅ done, full coverage 2026-08-20 — built for both CVE-bait and ATT&CK-bait together (`llm_judge.py` + `llm_judge_baseline_test.py`); 100% agreement with the deterministic checker on both sets (`docs/all_results.md` #23), then made citable with a class-balanced n=212 synthetic calibration set (100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+, #24), then extended to a 318-sample hard/construct-validity tier — still 100% across every tier (#26, #28)
-7. ~~SelfCheckGPT comparison (§3 #8)~~ ✅ done, 2026-08-21 — full 60/60 run (#34 in all_results.md), written into the paper draft. Real finding: 18 of 20 "missed" hallucinations are actually the model correctly recalling a withheld CVE from training knowledge, not a fabrication — a temperature-dependent contradiction of item 5's/§4.5's own finding, now stated as such in both sections.
+7. ~~SelfCheckGPT comparison (§3 #8)~~ ✅ done, 2026-08-21 — full 60/60 run (#34 in all_results.md), written into the paper draft. Real finding: 18 of 20 "missed" hallucinations are actually the model correctly recalling a withheld CVE from training knowledge, not a fabrication — a temperature-dependent contradiction of item 5's/§4.5's own finding, now stated as such in both sections. Its paired significance test against the deterministic pipeline (§4.10) is also ✅ done, 2026-08-22 (#40 in all_results.md) — built a separate 60-call run (not a SelfCheckGPT redo) since the original run never persisted raw report text; **McNemar p=0.0118, significant** — deterministic checker uniquely correct 16×, SelfCheckGPT uniquely correct 4× on the same 56 alerts. The one statistically-confirmed performance gap in the whole paper.
 8. ~~Presidio PII redaction (§5)~~ ✅ built, 2026-08-18 — see §5 for details; full-pipeline bait-test run still pending (Groq quota)
 9. Everything else in §5 (nDPI descoped, RAG/Chroma, full benchmark rigor pass) as time allows before Aug 30 write-up
 
@@ -554,13 +574,19 @@ project's actual bottlenecks (Groq daily quota; manual labeling time).
 
 **Tier 3 — optional, only if time remains after Tier 1-2:**
 
-11. **Expand PII bait set (§5, §4.11)** — review's own framing agreed
-    with what's already written (§4.11 already hedges n=6 as "a first
-    real signal, not a citable rate"). Lower priority than Tier 1 items —
-    T3 is not the thesis; only expand if Tier 1-2 finish early.
-12. **Second LLM-judge model family** — qwen/qwen3.6-27b run already in
-    progress (#30, 141/318 as of 2026-08-20) independent of this review;
-    continue opportunistically on quota resets, not a new ask.
+11. **Expand PII bait set (§5, §4.11)** — ✅ done, 2026-08-22. 14 → 60
+    (`docs/all_results.md` #38), sourced from 2 verified synthetic-PII
+    datasets (Gretel, ai4privacy) rather than hand-authoring 46 more from
+    scratch. Verified result 5/40 detected (12.5%, 95% CI [5.5%, 26.1%]),
+    0/20 false positives — now a citable rate, matching the original n=6
+    result. (Raw run showed 7/40; 2 were false positives caught and fixed
+    before reporting, `docs/all_results.md` #39.)
+12. **Second LLM-judge model family** — ✅ done (as far as it's going),
+    2026-08-23. qwen/qwen3.6-27b stopped at 441/450 (98%) — diminishing
+    per-retry progress (1-4 samples per attempt after many resumes) made
+    chasing the last 9 not worth it; 100% accuracy on all 439 scored,
+    matching the same-family result exactly (#41 in all_results.md).
+    Written into the paper honestly as 441/450, not rounded up.
 
 This section supersedes/extends §10's ordering above where they
 overlap — treat §11 as the current priority list, §10 as the historical

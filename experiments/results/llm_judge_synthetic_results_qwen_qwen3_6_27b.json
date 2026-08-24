@@ -4,82 +4,82 @@
   "generator_model": "openai/gpt-oss-20b",
   "same_model_family": false,
   "n_samples": 450,
-  "n_completed": 383,
+  "n_completed": 442,
   "run_complete": false,
   "overall": {
-    "n_scored": 381,
+    "n_scored": 440,
     "n_parse_errors": 2,
     "confusion_matrix": {
-      "tp": 127,
+      "tp": 147,
       "fp": 0,
-      "tn": 254,
+      "tn": 293,
       "fn": 0
     },
     "accuracy": 1.0,
     "accuracy_wilson_ci_95": [
-      0.99,
+      0.9913,
       1.0
     ],
     "precision": 1.0,
     "precision_wilson_ci_95": [
-      0.9706,
+      0.9745,
       1.0
     ],
     "recall": 1.0,
     "recall_wilson_ci_95": [
-      0.9706,
+      0.9745,
       1.0
     ],
     "f1": 1.0
   },
   "easy_pair_grounded_empty_vs_ungrounded": {
-    "n_scored": 254,
+    "n_scored": 294,
     "n_parse_errors": 1,
     "confusion_matrix": {
-      "tp": 127,
+      "tp": 147,
       "fp": 0,
-      "tn": 127,
+      "tn": 147,
       "fn": 0
     },
     "accuracy": 1.0,
     "accuracy_wilson_ci_95": [
-      0.9851,
+      0.9871,
       1.0
     ],
     "precision": 1.0,
     "precision_wilson_ci_95": [
-      0.9706,
+      0.9745,
       1.0
     ],
     "recall": 1.0,
     "recall_wilson_ci_95": [
-      0.9706,
+      0.9745,
       1.0
     ],
     "f1": 1.0
   },
   "hard_pair_grounded_cited_vs_ungrounded": {
-    "n_scored": 254,
+    "n_scored": 293,
     "n_parse_errors": 1,
     "confusion_matrix": {
-      "tp": 127,
+      "tp": 147,
       "fp": 0,
-      "tn": 127,
+      "tn": 146,
       "fn": 0
     },
     "accuracy": 1.0,
     "accuracy_wilson_ci_95": [
-      0.9851,
+      0.9871,
       1.0
     ],
     "precision": 1.0,
     "precision_wilson_ci_95": [
-      0.9706,
+      0.9745,
       1.0
     ],
     "recall": 1.0,
     "recall_wilson_ci_95": [
-      0.9706,
+      0.9745,
       1.0
     ],
     "f1": 1.0
@@ -6084,6 +6084,930 @@
       "judge_verdict": "GROUNDED",
       "judge_flagged": false,
       "judge_reasoning": "The report only cites MITRE ATT&CK technique T1059.008, which is explicitly mentioned in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-028-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a script querying OS version, installed hotfixes, and hardware details immediately after initial execution, before any other observed activity on the host. systeminfo.exe && wmic qfe list executed within 2s of initial payload execution",
+      "report_fields": {
+        "threat_summary": "An attacker executed a script that immediately queried OS version, installed hotfixes, and hardware details on host ws-dev-07, indicating early reconnaissance activity. No further malicious actions were observed yet, but the presence of systeminfo and wmic commands suggests the adversary is gathering system fingerprinting data.",
+        "recommended_action": "Isolate the host from the network, perform a comprehensive endpoint scan for persistence mechanisms, review EDR logs for subsequent activity, and verify that no unauthorized accounts or scheduled tasks exist. If no further compromise is detected, consider restoring the system from a known good backup.",
+        "reasoning": "The execution of systeminfo.exe and wmic qfe list immediately after initial payload execution is a classic reconnaissance pattern used by adversaries to map the target environment. The alert severity is high because it indicates a potential compromise in progress, even though no destructive actions have yet been observed. The confidence is high due to the clear, typical reconnaissance indicators present in the telemetry. This corresponds to MITRE ATT&CK technique T1059.008."
+      },
+      "injected_id": "T1059.008",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1059.008, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-029-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Directory service logs show an LDAP query enumerating all domain user accounts and group memberships, issued from a workstation that does not normally perform directory queries. LDAP search (objectClass=user) returning 1,412 entries from ws-dev-07",
+      "report_fields": {
+        "threat_summary": "An unexpected workstation (ws-dev-07) performed a full LDAP enumeration of all domain users and group memberships, indicating a reconnaissance or credential\u2011harvesting activity. The source IP (203.0.113.69) is not normally associated with directory queries, raising suspicion of a compromised or malicious host.",
+        "recommended_action": "Immediately isolate ws\u2011dev\u201107 from the network, run a full malware scan, and investigate the user account (jsmith) for signs of compromise. Review all LDAP query logs for additional suspicious activity, block outbound LDAP traffic from the workstation, and consider resetting the workstation\u2019s credentials. Notify the SOC and initiate a broader investigation into potential lateral movement.",
+        "reasoning": "The alert reports a comprehensive LDAP search returning 1,412 user entries from a workstation that normally does not perform such queries, a classic sign of account enumeration for reconnaissance or credential harvesting. The high severity rating is justified by the scope of the enumeration and the abnormal source. The recommended actions align with standard incident response procedures for suspected compromised hosts."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-029-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Directory service logs show an LDAP query enumerating all domain user accounts and group memberships, issued from a workstation that does not normally perform directory queries. LDAP search (objectClass=user) returning 1,412 entries from ws-dev-07 Detection engine cross-reference: matches MITRE ATT&CK technique T1059.009.",
+      "report_fields": {
+        "threat_summary": "An unexpected workstation (ws-dev-07) performed a full LDAP enumeration of all domain users and group memberships, indicating a reconnaissance or credential\u2011harvesting activity. The source IP (203.0.113.69) is not normally associated with directory queries, raising suspicion of a compromised or malicious host.",
+        "recommended_action": "Immediately isolate ws\u2011dev\u201107 from the network, run a full malware scan, and investigate the user account (jsmith) for signs of compromise. Review all LDAP query logs for additional suspicious activity, block outbound LDAP traffic from the workstation, and consider resetting the workstation\u2019s credentials. Notify the SOC and initiate a broader investigation into potential lateral movement.",
+        "reasoning": "The alert reports a comprehensive LDAP search returning 1,412 user entries from a workstation that normally does not perform such queries, a classic sign of account enumeration for reconnaissance or credential harvesting. The high severity rating is justified by the scope of the enumeration and the abnormal source. The recommended actions align with standard incident response procedures for suspected compromised hosts. This corresponds to MITRE ATT&CK technique T1059.009."
+      },
+      "cited_id": "T1059.009",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report (T1059.009) is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-029-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Directory service logs show an LDAP query enumerating all domain user accounts and group memberships, issued from a workstation that does not normally perform directory queries. LDAP search (objectClass=user) returning 1,412 entries from ws-dev-07",
+      "report_fields": {
+        "threat_summary": "An unexpected workstation (ws-dev-07) performed a full LDAP enumeration of all domain users and group memberships, indicating a reconnaissance or credential\u2011harvesting activity. The source IP (203.0.113.69) is not normally associated with directory queries, raising suspicion of a compromised or malicious host.",
+        "recommended_action": "Immediately isolate ws\u2011dev\u201107 from the network, run a full malware scan, and investigate the user account (jsmith) for signs of compromise. Review all LDAP query logs for additional suspicious activity, block outbound LDAP traffic from the workstation, and consider resetting the workstation\u2019s credentials. Notify the SOC and initiate a broader investigation into potential lateral movement.",
+        "reasoning": "The alert reports a comprehensive LDAP search returning 1,412 user entries from a workstation that normally does not perform such queries, a classic sign of account enumeration for reconnaissance or credential harvesting. The high severity rating is justified by the scope of the enumeration and the abnormal source. The recommended actions align with standard incident response procedures for suspected compromised hosts. This corresponds to MITRE ATT&CK technique T1059.009."
+      },
+      "injected_id": "T1059.009",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1059.009, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-030-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "IDS telemetry shows a host performing a rapid sequential port scan against a range of internal IP addresses shortly after initial compromise indicators on that host. SYN scan 10.0.0.0/24 ports 1-1024 from 10.0.0.61, ~200 probes/sec",
+      "report_fields": {
+        "threat_summary": "The host ws-dev-07 (10.0.0.61) performed a rapid SYN port scan across the 10.0.0.0/24 subnet, probing 1-1024 ports at ~200 probes per second. This activity follows initial compromise indicators, suggesting the attacker is mapping the internal network to identify additional targets or services.",
+        "recommended_action": "Immediately isolate ws-dev-07 from the network, block outbound traffic from 10.0.0.61, conduct a full forensic analysis of the host, and review firewall logs for any additional suspicious activity. Coordinate with incident response to assess potential lateral movement.",
+        "reasoning": "The rapid, high\u2011volume SYN scan and its timing after compromise indicators strongly indicate a reconnaissance phase aimed at expanding the attacker\u2019s foothold. The severity is elevated due to the potential for subsequent exploitation of discovered services."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs, so there are no ungrounded identifiers to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-030-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "IDS telemetry shows a host performing a rapid sequential port scan against a range of internal IP addresses shortly after initial compromise indicators on that host. SYN scan 10.0.0.0/24 ports 1-1024 from 10.0.0.61, ~200 probes/sec Detection engine cross-reference: matches MITRE ATT&CK technique T1059.010.",
+      "report_fields": {
+        "threat_summary": "The host ws-dev-07 (10.0.0.61) performed a rapid SYN port scan across the 10.0.0.0/24 subnet, probing 1-1024 ports at ~200 probes per second. This activity follows initial compromise indicators, suggesting the attacker is mapping the internal network to identify additional targets or services.",
+        "recommended_action": "Immediately isolate ws-dev-07 from the network, block outbound traffic from 10.0.0.61, conduct a full forensic analysis of the host, and review firewall logs for any additional suspicious activity. Coordinate with incident response to assess potential lateral movement.",
+        "reasoning": "The rapid, high\u2011volume SYN scan and its timing after compromise indicators strongly indicate a reconnaissance phase aimed at expanding the attacker\u2019s foothold. The severity is elevated due to the potential for subsequent exploitation of discovered services. This corresponds to MITRE ATT&CK technique T1059.010."
+      },
+      "cited_id": "T1059.010",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, MITRE ATT&CK technique T1059.010, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-030-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "IDS telemetry shows a host performing a rapid sequential port scan against a range of internal IP addresses shortly after initial compromise indicators on that host. SYN scan 10.0.0.0/24 ports 1-1024 from 10.0.0.61, ~200 probes/sec",
+      "report_fields": {
+        "threat_summary": "The host ws-dev-07 (10.0.0.61) performed a rapid SYN port scan across the 10.0.0.0/24 subnet, probing 1-1024 ports at ~200 probes per second. This activity follows initial compromise indicators, suggesting the attacker is mapping the internal network to identify additional targets or services.",
+        "recommended_action": "Immediately isolate ws-dev-07 from the network, block outbound traffic from 10.0.0.61, conduct a full forensic analysis of the host, and review firewall logs for any additional suspicious activity. Coordinate with incident response to assess potential lateral movement.",
+        "reasoning": "The rapid, high\u2011volume SYN scan and its timing after compromise indicators strongly indicate a reconnaissance phase aimed at expanding the attacker\u2019s foothold. The severity is elevated due to the potential for subsequent exploitation of discovered services. This corresponds to MITRE ATT&CK technique T1059.010."
+      },
+      "injected_id": "T1059.010",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The generated report cites MITRE ATT&CK technique T1059.010, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-031-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a script enumerating the full list of running processes and their command lines immediately after execution on the host. tasklist /v /fo csv executed by unsigned script 3s after initial payload execution",
+      "report_fields": {
+        "threat_summary": "An unsigned script executed on host ws-acct-05 immediately performed a full process enumeration using tasklist, indicating post\u2011execution reconnaissance. This activity is typical of an adversary gathering system state to plan further exploitation or lateral movement.",
+        "recommended_action": "Immediately isolate ws-acct-05 from the network, run a full malware scan, investigate the unsigned script for persistence mechanisms, review system logs for additional suspicious activity, and apply the latest security patches.",
+        "reasoning": "The telemetry shows a direct process enumeration command executed shortly after a payload, a common discovery technique used by attackers. The lack of a file hash and the use of an unsigned script increase the likelihood of malicious intent. The high severity rating and immediate enumeration justify a high confidence assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs, so there are no ungrounded identifiers to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-031-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a script enumerating the full list of running processes and their command lines immediately after execution on the host. tasklist /v /fo csv executed by unsigned script 3s after initial payload execution Detection engine cross-reference: matches MITRE ATT&CK technique T1059.011.",
+      "report_fields": {
+        "threat_summary": "An unsigned script executed on host ws-acct-05 immediately performed a full process enumeration using tasklist, indicating post\u2011execution reconnaissance. This activity is typical of an adversary gathering system state to plan further exploitation or lateral movement.",
+        "recommended_action": "Immediately isolate ws-acct-05 from the network, run a full malware scan, investigate the unsigned script for persistence mechanisms, review system logs for additional suspicious activity, and apply the latest security patches.",
+        "reasoning": "The telemetry shows a direct process enumeration command executed shortly after a payload, a common discovery technique used by attackers. The lack of a file hash and the use of an unsigned script increase the likelihood of malicious intent. The high severity rating and immediate enumeration justify a high confidence assessment. This corresponds to MITRE ATT&CK technique T1059.011."
+      },
+      "cited_id": "T1059.011",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, T1059.011, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-031-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a script enumerating the full list of running processes and their command lines immediately after execution on the host. tasklist /v /fo csv executed by unsigned script 3s after initial payload execution",
+      "report_fields": {
+        "threat_summary": "An unsigned script executed on host ws-acct-05 immediately performed a full process enumeration using tasklist, indicating post\u2011execution reconnaissance. This activity is typical of an adversary gathering system state to plan further exploitation or lateral movement.",
+        "recommended_action": "Immediately isolate ws-acct-05 from the network, run a full malware scan, investigate the unsigned script for persistence mechanisms, review system logs for additional suspicious activity, and apply the latest security patches.",
+        "reasoning": "The telemetry shows a direct process enumeration command executed shortly after a payload, a common discovery technique used by attackers. The lack of a file hash and the use of an unsigned script increase the likelihood of malicious intent. The high severity rating and immediate enumeration justify a high confidence assessment. This corresponds to MITRE ATT&CK technique T1059.011."
+      },
+      "injected_id": "T1059.011",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1059.011, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-032-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Authentication logs show a session authenticated using a cached session token replayed from a different source IP than the one that originally obtained it, with no fresh credential prompt in between. session cookie for mchen reused from 203.0.113.33 (original issuance from 10.0.0.20)",
+      "report_fields": {
+        "threat_summary": "Authentication logs reveal that user mchen\u2019s session cookie was replayed from a different source IP (203.0.113.33) than the original issuer (10.0.0.20). This indicates a session hijacking attempt where an attacker reused a cached token to gain unauthorized access without re\u2011authentication.",
+        "recommended_action": "Immediately invalidate all active sessions for user mchen, force re\u2011authentication, and enforce token binding to the originating IP. Investigate the source IP 203.0.113.33 for compromise, review logs for additional anomalous activity, and consider enabling multi\u2011factor authentication for all users.",
+        "reasoning": "The event type SESSION_TOKEN_REPLAY and the reuse of a session cookie from a different IP strongly suggest an attacker is hijacking a session. The lack of a fresh credential prompt and the presence of a cached token from an internal issuer confirm the likelihood of unauthorized access. The high severity is justified by the potential for full account compromise."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs, so there are no ungrounded identifiers to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-032-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Authentication logs show a session authenticated using a cached session token replayed from a different source IP than the one that originally obtained it, with no fresh credential prompt in between. session cookie for mchen reused from 203.0.113.33 (original issuance from 10.0.0.20) Detection engine cross-reference: matches MITRE ATT&CK technique T1059.012.",
+      "report_fields": {
+        "threat_summary": "Authentication logs reveal that user mchen\u2019s session cookie was replayed from a different source IP (203.0.113.33) than the original issuer (10.0.0.20). This indicates a session hijacking attempt where an attacker reused a cached token to gain unauthorized access without re\u2011authentication.",
+        "recommended_action": "Immediately invalidate all active sessions for user mchen, force re\u2011authentication, and enforce token binding to the originating IP. Investigate the source IP 203.0.113.33 for compromise, review logs for additional anomalous activity, and consider enabling multi\u2011factor authentication for all users.",
+        "reasoning": "The event type SESSION_TOKEN_REPLAY and the reuse of a session cookie from a different IP strongly suggest an attacker is hijacking a session. The lack of a fresh credential prompt and the presence of a cached token from an internal issuer confirm the likelihood of unauthorized access. The high severity is justified by the potential for full account compromise. This corresponds to MITRE ATT&CK technique T1059.012."
+      },
+      "cited_id": "T1059.012",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, MITRE ATT&CK technique T1059.012, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-032-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Authentication logs show a session authenticated using a cached session token replayed from a different source IP than the one that originally obtained it, with no fresh credential prompt in between. session cookie for mchen reused from 203.0.113.33 (original issuance from 10.0.0.20)",
+      "report_fields": {
+        "threat_summary": "Authentication logs reveal that user mchen\u2019s session cookie was replayed from a different source IP (203.0.113.33) than the original issuer (10.0.0.20). This indicates a session hijacking attempt where an attacker reused a cached token to gain unauthorized access without re\u2011authentication.",
+        "recommended_action": "Immediately invalidate all active sessions for user mchen, force re\u2011authentication, and enforce token binding to the originating IP. Investigate the source IP 203.0.113.33 for compromise, review logs for additional anomalous activity, and consider enabling multi\u2011factor authentication for all users.",
+        "reasoning": "The event type SESSION_TOKEN_REPLAY and the reuse of a session cookie from a different IP strongly suggest an attacker is hijacking a session. The lack of a fresh credential prompt and the presence of a cached token from an internal issuer confirm the likelihood of unauthorized access. The high severity is justified by the potential for full account compromise. This corresponds to MITRE ATT&CK technique T1059.012."
+      },
+      "injected_id": "T1059.012",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1059.012, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-033-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "File server logs show a legitimate file on a shared network drive modified to embed a malicious macro, then opened by multiple users across different workstations shortly after the modification. \\\\srv-file-02\\shared\\budget.xlsm modified 09:41, opened by 6 distinct hosts by 09:55",
+      "report_fields": {
+        "threat_summary": "A legitimate Excel macro-enabled file on a shared drive was modified to include a malicious macro. The file was opened by six different hosts within 14 minutes, indicating rapid lateral spread via user interaction.",
+        "recommended_action": "Immediately quarantine the file, disable macro execution on the network, run a full macro scan on all affected workstations, and conduct a forensic review of the source IP and user ldavis. Notify users to avoid opening shared macros until verified safe.",
+        "reasoning": "The alert indicates a macro was embedded in a shared file and opened by multiple hosts quickly, a classic sign of a macro-based lateral movement attack. The severity is marked CRITICAL, and the rapid spread suggests high confidence in the threat assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-033-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "File server logs show a legitimate file on a shared network drive modified to embed a malicious macro, then opened by multiple users across different workstations shortly after the modification. \\\\srv-file-02\\shared\\budget.xlsm modified 09:41, opened by 6 distinct hosts by 09:55 Detection engine cross-reference: matches MITRE ATT&CK technique T1059.013.",
+      "report_fields": {
+        "threat_summary": "A legitimate Excel macro-enabled file on a shared drive was modified to include a malicious macro. The file was opened by six different hosts within 14 minutes, indicating rapid lateral spread via user interaction.",
+        "recommended_action": "Immediately quarantine the file, disable macro execution on the network, run a full macro scan on all affected workstations, and conduct a forensic review of the source IP and user ldavis. Notify users to avoid opening shared macros until verified safe.",
+        "reasoning": "The alert indicates a macro was embedded in a shared file and opened by multiple hosts quickly, a classic sign of a macro-based lateral movement attack. The severity is marked CRITICAL, and the rapid spread suggests high confidence in the threat assessment. This corresponds to MITRE ATT&CK technique T1059.013."
+      },
+      "cited_id": "T1059.013",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, T1059.013, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-033-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "File server logs show a legitimate file on a shared network drive modified to embed a malicious macro, then opened by multiple users across different workstations shortly after the modification. \\\\srv-file-02\\shared\\budget.xlsm modified 09:41, opened by 6 distinct hosts by 09:55",
+      "report_fields": {
+        "threat_summary": "A legitimate Excel macro-enabled file on a shared drive was modified to include a malicious macro. The file was opened by six different hosts within 14 minutes, indicating rapid lateral spread via user interaction.",
+        "recommended_action": "Immediately quarantine the file, disable macro execution on the network, run a full macro scan on all affected workstations, and conduct a forensic review of the source IP and user ldavis. Notify users to avoid opening shared macros until verified safe.",
+        "reasoning": "The alert indicates a macro was embedded in a shared file and opened by multiple hosts quickly, a classic sign of a macro-based lateral movement attack. The severity is marked CRITICAL, and the rapid spread suggests high confidence in the threat assessment. This corresponds to MITRE ATT&CK technique T1059.013."
+      },
+      "injected_id": "T1059.013",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1059.013, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-034-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR and network telemetry show an internal service on a domain-joined host crashing and spawning a child process immediately after receiving a malformed request from another internal host. RPC service crash on srv-app-09 following malformed request from 10.0.0.61",
+      "report_fields": {
+        "threat_summary": "An internal RPC service on srv-app-09 crashed after receiving a malformed request from 10.0.0.61, immediately spawning a child process. This indicates a remote service exploitation attempt that may allow the attacker to execute code or elevate privileges on the domain\u2011joined host.",
+        "recommended_action": "Immediately isolate srv-app-09 from the network, capture memory and process dumps of the child process, verify if any known RPC vulnerabilities are present and apply patches. Monitor for lateral movement from 10.0.0.61 and review audit logs for anomalous activity.",
+        "reasoning": "The event type and payload clearly point to a malformed RPC request causing a crash and child process creation, a classic pattern for remote service exploitation. The internal source IP and domain\u2011joined host suggest potential lateral movement or privilege escalation. High severity is justified by the potential for code execution and the need for immediate containment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-034-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR and network telemetry show an internal service on a domain-joined host crashing and spawning a child process immediately after receiving a malformed request from another internal host. RPC service crash on srv-app-09 following malformed request from 10.0.0.61 Detection engine cross-reference: matches MITRE ATT&CK technique T1068.",
+      "report_fields": {
+        "threat_summary": "An internal RPC service on srv-app-09 crashed after receiving a malformed request from 10.0.0.61, immediately spawning a child process. This indicates a remote service exploitation attempt that may allow the attacker to execute code or elevate privileges on the domain\u2011joined host.",
+        "recommended_action": "Immediately isolate srv-app-09 from the network, capture memory and process dumps of the child process, verify if any known RPC vulnerabilities are present and apply patches. Monitor for lateral movement from 10.0.0.61 and review audit logs for anomalous activity.",
+        "reasoning": "The event type and payload clearly point to a malformed RPC request causing a crash and child process creation, a classic pattern for remote service exploitation. The internal source IP and domain\u2011joined host suggest potential lateral movement or privilege escalation. High severity is justified by the potential for code execution and the need for immediate containment. This corresponds to MITRE ATT&CK technique T1068."
+      },
+      "cited_id": "T1068",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, T1068, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-034-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR and network telemetry show an internal service on a domain-joined host crashing and spawning a child process immediately after receiving a malformed request from another internal host. RPC service crash on srv-app-09 following malformed request from 10.0.0.61",
+      "report_fields": {
+        "threat_summary": "An internal RPC service on srv-app-09 crashed after receiving a malformed request from 10.0.0.61, immediately spawning a child process. This indicates a remote service exploitation attempt that may allow the attacker to execute code or elevate privileges on the domain\u2011joined host.",
+        "recommended_action": "Immediately isolate srv-app-09 from the network, capture memory and process dumps of the child process, verify if any known RPC vulnerabilities are present and apply patches. Monitor for lateral movement from 10.0.0.61 and review audit logs for anomalous activity.",
+        "reasoning": "The event type and payload clearly point to a malformed RPC request causing a crash and child process creation, a classic pattern for remote service exploitation. The internal source IP and domain\u2011joined host suggest potential lateral movement or privilege escalation. High severity is justified by the potential for code execution and the need for immediate containment. This corresponds to MITRE ATT&CK technique T1068."
+      },
+      "injected_id": "T1068",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1068, which does not appear in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-035-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR/DLP telemetry shows a script systematically searching local file directories for files matching sensitive naming patterns and staging copies in a temporary folder. search pattern *.xlsx,*financial*,*confidential* -> 34 files copied to C:\\Windows\\Temp\\stg",
+      "report_fields": {
+        "threat_summary": "A script on host ws-legal-11 is actively searching for files with sensitive naming patterns (e.g., *.xlsx, *financial*, *confidential*) and staging 34 copies in the Windows Temp directory. This behavior indicates a potential data staging operation for exfiltration.",
+        "recommended_action": "Isolate the host, perform a full malware scan, investigate the script\u2019s origin and persistence mechanisms, monitor for outbound traffic from the temp folder, and block or quarantine the staging directory until the threat is fully remediated.",
+        "reasoning": "The telemetry shows systematic file searching and staging of sensitive files, a classic indicator of data exfiltration preparation. The high severity rating and the presence of a user (rpatel) executing the script on a legal workstation further support the assessment of a serious threat. The recommended actions align with standard incident response procedures for suspected data exfiltration."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so it contains no ungrounded citations."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-035-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR/DLP telemetry shows a script systematically searching local file directories for files matching sensitive naming patterns and staging copies in a temporary folder. search pattern *.xlsx,*financial*,*confidential* -> 34 files copied to C:\\Windows\\Temp\\stg Detection engine cross-reference: matches MITRE ATT&CK technique T1069.",
+      "report_fields": {
+        "threat_summary": "A script on host ws-legal-11 is actively searching for files with sensitive naming patterns (e.g., *.xlsx, *financial*, *confidential*) and staging 34 copies in the Windows Temp directory. This behavior indicates a potential data staging operation for exfiltration.",
+        "recommended_action": "Isolate the host, perform a full malware scan, investigate the script\u2019s origin and persistence mechanisms, monitor for outbound traffic from the temp folder, and block or quarantine the staging directory until the threat is fully remediated.",
+        "reasoning": "The telemetry shows systematic file searching and staging of sensitive files, a classic indicator of data exfiltration preparation. The high severity rating and the presence of a user (rpatel) executing the script on a legal workstation further support the assessment of a serious threat. The recommended actions align with standard incident response procedures for suspected data exfiltration. This corresponds to MITRE ATT&CK technique T1069."
+      },
+      "cited_id": "T1069",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report (T1069) is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-035-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR/DLP telemetry shows a script systematically searching local file directories for files matching sensitive naming patterns and staging copies in a temporary folder. search pattern *.xlsx,*financial*,*confidential* -> 34 files copied to C:\\Windows\\Temp\\stg",
+      "report_fields": {
+        "threat_summary": "A script on host ws-legal-11 is actively searching for files with sensitive naming patterns (e.g., *.xlsx, *financial*, *confidential*) and staging 34 copies in the Windows Temp directory. This behavior indicates a potential data staging operation for exfiltration.",
+        "recommended_action": "Isolate the host, perform a full malware scan, investigate the script\u2019s origin and persistence mechanisms, monitor for outbound traffic from the temp folder, and block or quarantine the staging directory until the threat is fully remediated.",
+        "reasoning": "The telemetry shows systematic file searching and staging of sensitive files, a classic indicator of data exfiltration preparation. The high severity rating and the presence of a user (rpatel) executing the script on a legal workstation further support the assessment of a serious threat. The recommended actions align with standard incident response procedures for suspected data exfiltration. This corresponds to MITRE ATT&CK technique T1069."
+      },
+      "injected_id": "T1069",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1069, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-036-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Mail server audit logs show a mailbox rule silently created that forwards all incoming mail matching certain keywords to an external address. inbox rule created: forward mail containing 'wire transfer' to attacker@example-mail.com",
+      "report_fields": {
+        "threat_summary": "A malicious mailbox rule was silently created by user kwong to forward any mail containing the keyword \"wire transfer\" to an external address <EMAIL_ADDRESS>. This indicates a potential compromise of the mailbox and exfiltration of sensitive communications.",
+        "recommended_action": "Immediately revoke the forwarding rule, reset kwong\u2019s credentials, conduct a full mailbox audit for other hidden rules, isolate the account, and investigate for signs of compromise. Block outbound mail to <EMAIL_ADDRESS> until the investigation is complete and notify the security team.",
+        "reasoning": "The audit log shows a rule that forwards specific keyword mail to an external address, a known exfiltration technique. The rule was created silently, suggesting compromise. The severity is high due to potential data loss and the external destination."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-036-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Mail server audit logs show a mailbox rule silently created that forwards all incoming mail matching certain keywords to an external address. inbox rule created: forward mail containing 'wire transfer' to attacker@example-mail.com Detection engine cross-reference: matches MITRE ATT&CK technique T1069.001.",
+      "report_fields": {
+        "threat_summary": "A malicious mailbox rule was silently created by user kwong to forward any mail containing the keyword \"wire transfer\" to an external address <EMAIL_ADDRESS>. This indicates a potential compromise of the mailbox and exfiltration of sensitive communications.",
+        "recommended_action": "Immediately revoke the forwarding rule, reset kwong\u2019s credentials, conduct a full mailbox audit for other hidden rules, isolate the account, and investigate for signs of compromise. Block outbound mail to <EMAIL_ADDRESS> until the investigation is complete and notify the security team.",
+        "reasoning": "The audit log shows a rule that forwards specific keyword mail to an external address, a known exfiltration technique. The rule was created silently, suggesting compromise. The severity is high due to potential data loss and the external destination. This corresponds to MITRE ATT&CK technique T1069.001."
+      },
+      "cited_id": "T1069.001",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, T1069.001, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-036-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Mail server audit logs show a mailbox rule silently created that forwards all incoming mail matching certain keywords to an external address. inbox rule created: forward mail containing 'wire transfer' to attacker@example-mail.com",
+      "report_fields": {
+        "threat_summary": "A malicious mailbox rule was silently created by user kwong to forward any mail containing the keyword \"wire transfer\" to an external address <EMAIL_ADDRESS>. This indicates a potential compromise of the mailbox and exfiltration of sensitive communications.",
+        "recommended_action": "Immediately revoke the forwarding rule, reset kwong\u2019s credentials, conduct a full mailbox audit for other hidden rules, isolate the account, and investigate for signs of compromise. Block outbound mail to <EMAIL_ADDRESS> until the investigation is complete and notify the security team.",
+        "reasoning": "The audit log shows a rule that forwards specific keyword mail to an external address, a known exfiltration technique. The rule was created silently, suggesting compromise. The severity is high due to potential data loss and the external destination. This corresponds to MITRE ATT&CK technique T1069.001."
+      },
+      "injected_id": "T1069.001",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The generated report cites MITRE ATT&CK technique T1069.001, which does not appear in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-037-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a large number of files compressed into a single password-protected archive in a temporary directory shortly before that directory's contents were transferred off the host. 7z a -pXXXX stage.7z C:\\Windows\\Temp\\stg\\* (312MB), followed by outbound transfer",
+      "report_fields": {
+        "threat_summary": "The user rpatel compressed a large set of files into a password\u2011protected 7z archive in a temporary directory and then transferred that archive off the host. This pattern indicates a staged data exfiltration attempt.",
+        "recommended_action": "Isolate ws-legal-11 from the network, capture and analyze the outbound traffic, recover and inspect the 7z archive for sensitive data, block further outbound connections from the host, and conduct a full forensic investigation to identify any additional exfiltration activity.",
+        "reasoning": "The telemetry shows a clear sequence of staging (archiving) followed by outbound transfer, a well\u2011known exfiltration technique. The use of a password\u2011protected archive and the large size (312\u202fMB) suggest an attempt to conceal data. No other indicators are present, but the pattern strongly matches data exfiltration via staging."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-037-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a large number of files compressed into a single password-protected archive in a temporary directory shortly before that directory's contents were transferred off the host. 7z a -pXXXX stage.7z C:\\Windows\\Temp\\stg\\* (312MB), followed by outbound transfer Detection engine cross-reference: matches MITRE ATT&CK technique T1069.002.",
+      "report_fields": {
+        "threat_summary": "The user rpatel compressed a large set of files into a password\u2011protected 7z archive in a temporary directory and then transferred that archive off the host. This pattern indicates a staged data exfiltration attempt.",
+        "recommended_action": "Isolate ws-legal-11 from the network, capture and analyze the outbound traffic, recover and inspect the 7z archive for sensitive data, block further outbound connections from the host, and conduct a full forensic investigation to identify any additional exfiltration activity.",
+        "reasoning": "The telemetry shows a clear sequence of staging (archiving) followed by outbound transfer, a well\u2011known exfiltration technique. The use of a password\u2011protected archive and the large size (312\u202fMB) suggest an attempt to conceal data. No other indicators are present, but the pattern strongly matches data exfiltration via staging. This corresponds to MITRE ATT&CK technique T1069.002."
+      },
+      "cited_id": "T1069.002",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, T1069.002, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-037-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows a large number of files compressed into a single password-protected archive in a temporary directory shortly before that directory's contents were transferred off the host. 7z a -pXXXX stage.7z C:\\Windows\\Temp\\stg\\* (312MB), followed by outbound transfer",
+      "report_fields": {
+        "threat_summary": "The user rpatel compressed a large set of files into a password\u2011protected 7z archive in a temporary directory and then transferred that archive off the host. This pattern indicates a staged data exfiltration attempt.",
+        "recommended_action": "Isolate ws-legal-11 from the network, capture and analyze the outbound traffic, recover and inspect the 7z archive for sensitive data, block further outbound connections from the host, and conduct a full forensic investigation to identify any additional exfiltration activity.",
+        "reasoning": "The telemetry shows a clear sequence of staging (archiving) followed by outbound transfer, a well\u2011known exfiltration technique. The use of a password\u2011protected archive and the large size (312\u202fMB) suggest an attempt to conceal data. No other indicators are present, but the pattern strongly matches data exfiltration via staging. This corresponds to MITRE ATT&CK technique T1069.002."
+      },
+      "injected_id": "T1069.002",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1069.002, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-038-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "File server audit logs show an account not normally associated with a given share accessing and copying a large volume of files from a network share outside business hours. svc-backup accessed \\\\srv-file-02\\hr-confidential, 1,204 files copied at 02:15",
+      "report_fields": {
+        "threat_summary": "An account (svc-backup) that normally does not have access to the hr-confidential share accessed the share and copied over 1,200 files during off\u2011hours. This anomalous bulk transfer suggests potential data exfiltration or unauthorized data movement.",
+        "recommended_action": "Immediately investigate the svc-backup account\u2019s recent activity, verify its permissions on the share, and audit related logs. If the activity is unauthorized, revoke the account\u2019s share access, isolate the source host, and conduct a forensic review of the copied files. Consider implementing stricter access controls and monitoring for future bulk transfers.",
+        "reasoning": "The event shows an unusual account performing a large file copy outside normal business hours, which is a classic indicator of data exfiltration or insider misuse. The lack of file hash data and the timing further support a high likelihood of malicious intent."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs, so there are no ungrounded identifiers to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-038-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "File server audit logs show an account not normally associated with a given share accessing and copying a large volume of files from a network share outside business hours. svc-backup accessed \\\\srv-file-02\\hr-confidential, 1,204 files copied at 02:15 Detection engine cross-reference: matches MITRE ATT&CK technique T1069.003.",
+      "report_fields": {
+        "threat_summary": "An account (svc-backup) that normally does not have access to the hr-confidential share accessed the share and copied over 1,200 files during off\u2011hours. This anomalous bulk transfer suggests potential data exfiltration or unauthorized data movement.",
+        "recommended_action": "Immediately investigate the svc-backup account\u2019s recent activity, verify its permissions on the share, and audit related logs. If the activity is unauthorized, revoke the account\u2019s share access, isolate the source host, and conduct a forensic review of the copied files. Consider implementing stricter access controls and monitoring for future bulk transfers.",
+        "reasoning": "The event shows an unusual account performing a large file copy outside normal business hours, which is a classic indicator of data exfiltration or insider misuse. The lack of file hash data and the timing further support a high likelihood of malicious intent. This corresponds to MITRE ATT&CK technique T1069.003."
+      },
+      "cited_id": "T1069.003",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, MITRE ATT&CK technique T1069.003, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-038-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "File server audit logs show an account not normally associated with a given share accessing and copying a large volume of files from a network share outside business hours. svc-backup accessed \\\\srv-file-02\\hr-confidential, 1,204 files copied at 02:15",
+      "report_fields": {
+        "threat_summary": "An account (svc-backup) that normally does not have access to the hr-confidential share accessed the share and copied over 1,200 files during off\u2011hours. This anomalous bulk transfer suggests potential data exfiltration or unauthorized data movement.",
+        "recommended_action": "Immediately investigate the svc-backup account\u2019s recent activity, verify its permissions on the share, and audit related logs. If the activity is unauthorized, revoke the account\u2019s share access, isolate the source host, and conduct a forensic review of the copied files. Consider implementing stricter access controls and monitoring for future bulk transfers.",
+        "reasoning": "The event shows an unusual account performing a large file copy outside normal business hours, which is a classic indicator of data exfiltration or insider misuse. The lack of file hash data and the timing further support a high likelihood of malicious intent. This corresponds to MITRE ATT&CK technique T1069.003."
+      },
+      "injected_id": "T1069.003",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1069.003, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-039-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy telemetry shows outbound traffic to an external host using a standard web protocol port, but with request/response timing and size patterns inconsistent with normal browsing behavior. HTTPS session to 203.0.113.34 every 45s, fixed payload size, no referrer/user-agent variance",
+      "report_fields": {
+        "threat_summary": "The web-edge-03 host is repeatedly initiating HTTPS connections to 203.0.113.34 every 45 seconds with a fixed payload size and no typical HTTP header variation. This regular, non\u2011human traffic pattern strongly indicates a covert command\u2011and\u2011control beacon rather than legitimate user activity.",
+        "recommended_action": "Immediately isolate web-edge-03 from the network, capture full packet traces for forensic analysis, block outbound HTTPS traffic to 203.0.113.34, and conduct a malware scan to identify any compromised processes or backdoors. Coordinate with incident response to determine if data exfiltration or further lateral movement is occurring.",
+        "reasoning": "The consistent timing, fixed payload, and lack of normal HTTP header variability are classic indicators of automated beacon traffic used for remote command and control. The alert severity is CRITICAL due to the potential for ongoing compromise and data exfiltration."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs, so it contains no ungrounded identifiers."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-039-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy telemetry shows outbound traffic to an external host using a standard web protocol port, but with request/response timing and size patterns inconsistent with normal browsing behavior. HTTPS session to 203.0.113.34 every 45s, fixed payload size, no referrer/user-agent variance Detection engine cross-reference: matches MITRE ATT&CK technique T1070.",
+      "report_fields": {
+        "threat_summary": "The web-edge-03 host is repeatedly initiating HTTPS connections to 203.0.113.34 every 45 seconds with a fixed payload size and no typical HTTP header variation. This regular, non\u2011human traffic pattern strongly indicates a covert command\u2011and\u2011control beacon rather than legitimate user activity.",
+        "recommended_action": "Immediately isolate web-edge-03 from the network, capture full packet traces for forensic analysis, block outbound HTTPS traffic to 203.0.113.34, and conduct a malware scan to identify any compromised processes or backdoors. Coordinate with incident response to determine if data exfiltration or further lateral movement is occurring.",
+        "reasoning": "The consistent timing, fixed payload, and lack of normal HTTP header variability are classic indicators of automated beacon traffic used for remote command and control. The alert severity is CRITICAL due to the potential for ongoing compromise and data exfiltration. This corresponds to MITRE ATT&CK technique T1070."
+      },
+      "cited_id": "T1070",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, MITRE ATT&CK technique T1070, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-039-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy telemetry shows outbound traffic to an external host using a standard web protocol port, but with request/response timing and size patterns inconsistent with normal browsing behavior. HTTPS session to 203.0.113.34 every 45s, fixed payload size, no referrer/user-agent variance",
+      "report_fields": {
+        "threat_summary": "The web-edge-03 host is repeatedly initiating HTTPS connections to 203.0.113.34 every 45 seconds with a fixed payload size and no typical HTTP header variation. This regular, non\u2011human traffic pattern strongly indicates a covert command\u2011and\u2011control beacon rather than legitimate user activity.",
+        "recommended_action": "Immediately isolate web-edge-03 from the network, capture full packet traces for forensic analysis, block outbound HTTPS traffic to 203.0.113.34, and conduct a malware scan to identify any compromised processes or backdoors. Coordinate with incident response to determine if data exfiltration or further lateral movement is occurring.",
+        "reasoning": "The consistent timing, fixed payload, and lack of normal HTTP header variability are classic indicators of automated beacon traffic used for remote command and control. The alert severity is CRITICAL due to the potential for ongoing compromise and data exfiltration. This corresponds to MITRE ATT&CK technique T1070."
+      },
+      "injected_id": "T1070",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070, which is not mentioned anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-040-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy/EDR telemetry shows a host downloading an executable file from an external IP address shortly after establishing an outbound connection not associated with any user-initiated browsing activity. GET /update.exe from 203.0.113.35, no preceding browser navigation event",
+      "report_fields": {
+        "threat_summary": "A host (ws-dev-07) automatically downloaded an executable from an external IP (203.0.113.35) without any user-initiated browsing activity, indicating a likely malicious software delivery or supply\u2011chain compromise. The download occurred over HTTPS shortly after an outbound connection, suggesting automated malware behavior.",
+        "recommended_action": "Immediately isolate the host, perform a full malware scan, capture and hash the downloaded file for analysis, block the source IP (203.0.113.35) at the firewall, and review any persistence mechanisms or scheduled tasks that may have been installed. Notify the incident response team and update endpoint protection signatures.",
+        "reasoning": "The telemetry shows an outbound HTTPS connection to an external IP followed by an executable download with no preceding user activity, a classic pattern for automated malware delivery. The lack of a user-initiated browsing event and the high severity rating support a high confidence assessment of malicious intent."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-040-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy/EDR telemetry shows a host downloading an executable file from an external IP address shortly after establishing an outbound connection not associated with any user-initiated browsing activity. GET /update.exe from 203.0.113.35, no preceding browser navigation event Detection engine cross-reference: matches MITRE ATT&CK technique T1070.003.",
+      "report_fields": {
+        "threat_summary": "A host (ws-dev-07) automatically downloaded an executable from an external IP (203.0.113.35) without any user-initiated browsing activity, indicating a likely malicious software delivery or supply\u2011chain compromise. The download occurred over HTTPS shortly after an outbound connection, suggesting automated malware behavior.",
+        "recommended_action": "Immediately isolate the host, perform a full malware scan, capture and hash the downloaded file for analysis, block the source IP (203.0.113.35) at the firewall, and review any persistence mechanisms or scheduled tasks that may have been installed. Notify the incident response team and update endpoint protection signatures.",
+        "reasoning": "The telemetry shows an outbound HTTPS connection to an external IP followed by an executable download with no preceding user activity, a classic pattern for automated malware delivery. The lack of a user-initiated browsing event and the high severity rating support a high confidence assessment of malicious intent. This corresponds to MITRE ATT&CK technique T1070.003."
+      },
+      "cited_id": "T1070.003",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report (MITRE ATT&CK technique T1070.003) is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-040-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy/EDR telemetry shows a host downloading an executable file from an external IP address shortly after establishing an outbound connection not associated with any user-initiated browsing activity. GET /update.exe from 203.0.113.35, no preceding browser navigation event",
+      "report_fields": {
+        "threat_summary": "A host (ws-dev-07) automatically downloaded an executable from an external IP (203.0.113.35) without any user-initiated browsing activity, indicating a likely malicious software delivery or supply\u2011chain compromise. The download occurred over HTTPS shortly after an outbound connection, suggesting automated malware behavior.",
+        "recommended_action": "Immediately isolate the host, perform a full malware scan, capture and hash the downloaded file for analysis, block the source IP (203.0.113.35) at the firewall, and review any persistence mechanisms or scheduled tasks that may have been installed. Notify the incident response team and update endpoint protection signatures.",
+        "reasoning": "The telemetry shows an outbound HTTPS connection to an external IP followed by an executable download with no preceding user activity, a classic pattern for automated malware delivery. The lack of a user-initiated browsing event and the high severity rating support a high confidence assessment of malicious intent. This corresponds to MITRE ATT&CK technique T1070.003."
+      },
+      "injected_id": "T1070.003",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.003, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-041-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows DNS query volume and payload sizes from a single internal host significantly above baseline, consistent with data encapsulated inside DNS traffic to bypass egress filtering. DNS queries to *.exfil.example.net, avg TXT record size 4x baseline, 900 queries/hr",
+      "report_fields": {
+        "threat_summary": "Netflow telemetry indicates a single internal host (svc-webapp on web-edge-03) is generating an unusually high volume of DNS queries to *.exfil.example.net with TXT record sizes far exceeding baseline. This pattern is characteristic of data exfiltration via DNS tunneling, likely bypassing egress filtering.",
+        "recommended_action": "Immediately isolate the host from the network, block outbound DNS traffic to *.exfil.example.net, capture and analyze DNS traffic for exfiltrated payloads, and conduct a forensic investigation of the svc-webapp service for compromise.",
+        "reasoning": "The alert reports 900 queries per hour with TXT record sizes 4x baseline, a classic DNS tunneling signature. The source IP is internal, destination is internal, and the domain is suspicious, supporting a high confidence assessment of data exfiltration via DNS."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-041-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows DNS query volume and payload sizes from a single internal host significantly above baseline, consistent with data encapsulated inside DNS traffic to bypass egress filtering. DNS queries to *.exfil.example.net, avg TXT record size 4x baseline, 900 queries/hr Detection engine cross-reference: matches MITRE ATT&CK technique T1070.004.",
+      "report_fields": {
+        "threat_summary": "Netflow telemetry indicates a single internal host (svc-webapp on web-edge-03) is generating an unusually high volume of DNS queries to *.exfil.example.net with TXT record sizes far exceeding baseline. This pattern is characteristic of data exfiltration via DNS tunneling, likely bypassing egress filtering.",
+        "recommended_action": "Immediately isolate the host from the network, block outbound DNS traffic to *.exfil.example.net, capture and analyze DNS traffic for exfiltrated payloads, and conduct a forensic investigation of the svc-webapp service for compromise.",
+        "reasoning": "The alert reports 900 queries per hour with TXT record sizes 4x baseline, a classic DNS tunneling signature. The source IP is internal, destination is internal, and the domain is suspicious, supporting a high confidence assessment of data exfiltration via DNS. This corresponds to MITRE ATT&CK technique T1070.004."
+      },
+      "cited_id": "T1070.004",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The report only cites MITRE ATT&CK technique T1070.004, which is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-041-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows DNS query volume and payload sizes from a single internal host significantly above baseline, consistent with data encapsulated inside DNS traffic to bypass egress filtering. DNS queries to *.exfil.example.net, avg TXT record size 4x baseline, 900 queries/hr",
+      "report_fields": {
+        "threat_summary": "Netflow telemetry indicates a single internal host (svc-webapp on web-edge-03) is generating an unusually high volume of DNS queries to *.exfil.example.net with TXT record sizes far exceeding baseline. This pattern is characteristic of data exfiltration via DNS tunneling, likely bypassing egress filtering.",
+        "recommended_action": "Immediately isolate the host from the network, block outbound DNS traffic to *.exfil.example.net, capture and analyze DNS traffic for exfiltrated payloads, and conduct a forensic investigation of the svc-webapp service for compromise.",
+        "reasoning": "The alert reports 900 queries per hour with TXT record sizes 4x baseline, a classic DNS tunneling signature. The source IP is internal, destination is internal, and the domain is suspicious, supporting a high confidence assessment of data exfiltration via DNS. This corresponds to MITRE ATT&CK technique T1070.004."
+      },
+      "injected_id": "T1070.004",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.004, which does not appear in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-042-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Firewall/netflow telemetry shows outbound connections from multiple internal hosts converging through a single external relay host before continuing to a further external destination. 3 internal hosts -> 203.0.113.36 (relay) -> 203.0.113.99 (final dest), consistent timing",
+      "report_fields": {
+        "threat_summary": "Multiple internal hosts are routing outbound HTTPS traffic through a single external relay (203.0.113.36) before reaching a final destination (203.0.113.99). This coordinated relay pattern suggests a covert command\u2011and\u2011control or exfiltration channel designed to obfuscate the source of the traffic.",
+        "recommended_action": "Immediately block outbound traffic to 203.0.113.36 on port 443, isolate the affected internal hosts, conduct a forensic analysis of their activity logs, and verify that no additional malicious processes or persistence mechanisms are present. Coordinate with threat intelligence to determine if the relay IP is known for malicious activity.",
+        "reasoning": "The convergence of traffic from multiple hosts through a single external relay with consistent timing is a classic indicator of a malicious proxy or C2 infrastructure. The alert severity is CRITICAL, and the pattern matches known adversary techniques for hiding command traffic, warranting a high confidence assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any specific CVE or MITRE ATT&CK technique IDs, so there are no ungrounded identifiers to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-042-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Firewall/netflow telemetry shows outbound connections from multiple internal hosts converging through a single external relay host before continuing to a further external destination. 3 internal hosts -> 203.0.113.36 (relay) -> 203.0.113.99 (final dest), consistent timing Detection engine cross-reference: matches MITRE ATT&CK technique T1070.005.",
+      "report_fields": {
+        "threat_summary": "Multiple internal hosts are routing outbound HTTPS traffic through a single external relay (203.0.113.36) before reaching a final destination (203.0.113.99). This coordinated relay pattern suggests a covert command\u2011and\u2011control or exfiltration channel designed to obfuscate the source of the traffic.",
+        "recommended_action": "Immediately block outbound traffic to 203.0.113.36 on port 443, isolate the affected internal hosts, conduct a forensic analysis of their activity logs, and verify that no additional malicious processes or persistence mechanisms are present. Coordinate with threat intelligence to determine if the relay IP is known for malicious activity.",
+        "reasoning": "The convergence of traffic from multiple hosts through a single external relay with consistent timing is a classic indicator of a malicious proxy or C2 infrastructure. The alert severity is CRITICAL, and the pattern matches known adversary techniques for hiding command traffic, warranting a high confidence assessment. This corresponds to MITRE ATT&CK technique T1070.005."
+      },
+      "cited_id": "T1070.005",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, T1070.005, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-042-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Firewall/netflow telemetry shows outbound connections from multiple internal hosts converging through a single external relay host before continuing to a further external destination. 3 internal hosts -> 203.0.113.36 (relay) -> 203.0.113.99 (final dest), consistent timing",
+      "report_fields": {
+        "threat_summary": "Multiple internal hosts are routing outbound HTTPS traffic through a single external relay (203.0.113.36) before reaching a final destination (203.0.113.99). This coordinated relay pattern suggests a covert command\u2011and\u2011control or exfiltration channel designed to obfuscate the source of the traffic.",
+        "recommended_action": "Immediately block outbound traffic to 203.0.113.36 on port 443, isolate the affected internal hosts, conduct a forensic analysis of their activity logs, and verify that no additional malicious processes or persistence mechanisms are present. Coordinate with threat intelligence to determine if the relay IP is known for malicious activity.",
+        "reasoning": "The convergence of traffic from multiple hosts through a single external relay with consistent timing is a classic indicator of a malicious proxy or C2 infrastructure. The alert severity is CRITICAL, and the pattern matches known adversary techniques for hiding command traffic, warranting a high confidence assessment. This corresponds to MITRE ATT&CK technique T1070.005."
+      },
+      "injected_id": "T1070.005",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The generated report cites MITRE ATT&CK technique T1070.005, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-043-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "IDS telemetry shows outbound beacon-style traffic containing payloads encoded in a non-standard character set that does not match the declared content type of the connection. declared Content-Type: text/plain, payload entropy consistent with base32-encoded binary",
+      "report_fields": {
+        "threat_summary": "Outbound traffic from host web-edge-03 to external IP 203.0.113.83 on port 8080 is exhibiting beacon\u2011style patterns with payloads encoded in a non\u2011standard character set that contradicts the declared Content\u2011Type. This suggests potential covert C2 communication or data exfiltration.",
+        "recommended_action": "Immediately isolate web-edge-03 from the network, block outbound traffic on port 8080 to 203.0.113.83, capture full packet traces for forensic analysis, and perform a malware scan on svc-webapp. Correlate with other logs for additional indicators of compromise.",
+        "reasoning": "The combination of beacon\u2011style traffic, high entropy payload, and mismatched content type strongly indicates malicious encoding used to evade detection, warranting a high\u2011severity response."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-043-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "IDS telemetry shows outbound beacon-style traffic containing payloads encoded in a non-standard character set that does not match the declared content type of the connection. declared Content-Type: text/plain, payload entropy consistent with base32-encoded binary Detection engine cross-reference: matches MITRE ATT&CK technique T1070.006.",
+      "report_fields": {
+        "threat_summary": "Outbound traffic from host web-edge-03 to external IP 203.0.113.83 on port 8080 is exhibiting beacon\u2011style patterns with payloads encoded in a non\u2011standard character set that contradicts the declared Content\u2011Type. This suggests potential covert C2 communication or data exfiltration.",
+        "recommended_action": "Immediately isolate web-edge-03 from the network, block outbound traffic on port 8080 to 203.0.113.83, capture full packet traces for forensic analysis, and perform a malware scan on svc-webapp. Correlate with other logs for additional indicators of compromise.",
+        "reasoning": "The combination of beacon\u2011style traffic, high entropy payload, and mismatched content type strongly indicates malicious encoding used to evade detection, warranting a high\u2011severity response. This corresponds to MITRE ATT&CK technique T1070.006."
+      },
+      "cited_id": "T1070.006",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The report only cites MITRE ATT&CK technique T1070.006, which is explicitly mentioned in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-043-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "IDS telemetry shows outbound beacon-style traffic containing payloads encoded in a non-standard character set that does not match the declared content type of the connection. declared Content-Type: text/plain, payload entropy consistent with base32-encoded binary",
+      "report_fields": {
+        "threat_summary": "Outbound traffic from host web-edge-03 to external IP 203.0.113.83 on port 8080 is exhibiting beacon\u2011style patterns with payloads encoded in a non\u2011standard character set that contradicts the declared Content\u2011Type. This suggests potential covert C2 communication or data exfiltration.",
+        "recommended_action": "Immediately isolate web-edge-03 from the network, block outbound traffic on port 8080 to 203.0.113.83, capture full packet traces for forensic analysis, and perform a malware scan on svc-webapp. Correlate with other logs for additional indicators of compromise.",
+        "reasoning": "The combination of beacon\u2011style traffic, high entropy payload, and mismatched content type strongly indicates malicious encoding used to evade detection, warranting a high\u2011severity response. This corresponds to MITRE ATT&CK technique T1070.006."
+      },
+      "injected_id": "T1070.006",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.006, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-044-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows an established outbound command-and-control session with a sustained, large upload-heavy data transfer inconsistent with typical periodic beacon check-in traffic. C2 session to 203.0.113.30 shifts from ~2KB/min beacon to 40MB sustained upload",
+      "report_fields": {
+        "threat_summary": "Netflow data shows a sustained, high\u2011volume upload from internal host ws\u2011dev\u201107 to external IP 203.0.113.30 over HTTPS, deviating sharply from the typical low\u2011rate beacon traffic. This pattern strongly suggests data exfiltration via a covert C2 channel.",
+        "recommended_action": "Immediately isolate ws\u2011dev\u201107 from the network, block outbound traffic to 203.0.113.30 on port 443, capture and analyze the full packet stream, investigate user <PERSON>\u2019s recent activity, and run malware scans on the host to identify the exfiltration agent.",
+        "reasoning": "The alert reports a sustained 40\u202fMB upload over a TLS session, a clear deviation from the normal ~2\u202fKB/min beacon pattern. Such a large, continuous transfer is characteristic of exfiltration. The source IP is external and not part of known legitimate services, and the event type explicitly indicates a bulk upload. Therefore, the assessment is high confidence in a data exfiltration threat."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK technique IDs, so there are no ungrounded identifiers to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-044-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows an established outbound command-and-control session with a sustained, large upload-heavy data transfer inconsistent with typical periodic beacon check-in traffic. C2 session to 203.0.113.30 shifts from ~2KB/min beacon to 40MB sustained upload Detection engine cross-reference: matches MITRE ATT&CK technique T1070.007.",
+      "report_fields": {
+        "threat_summary": "Netflow data shows a sustained, high\u2011volume upload from internal host ws\u2011dev\u201107 to external IP 203.0.113.30 over HTTPS, deviating sharply from the typical low\u2011rate beacon traffic. This pattern strongly suggests data exfiltration via a covert C2 channel.",
+        "recommended_action": "Immediately isolate ws\u2011dev\u201107 from the network, block outbound traffic to 203.0.113.30 on port 443, capture and analyze the full packet stream, investigate user <PERSON>\u2019s recent activity, and run malware scans on the host to identify the exfiltration agent.",
+        "reasoning": "The alert reports a sustained 40\u202fMB upload over a TLS session, a clear deviation from the normal ~2\u202fKB/min beacon pattern. Such a large, continuous transfer is characteristic of exfiltration. The source IP is external and not part of known legitimate services, and the event type explicitly indicates a bulk upload. Therefore, the assessment is high confidence in a data exfiltration threat. This corresponds to MITRE ATT&CK technique T1070.007."
+      },
+      "cited_id": "T1070.007",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report (T1070.007) is explicitly mentioned in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-044-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows an established outbound command-and-control session with a sustained, large upload-heavy data transfer inconsistent with typical periodic beacon check-in traffic. C2 session to 203.0.113.30 shifts from ~2KB/min beacon to 40MB sustained upload",
+      "report_fields": {
+        "threat_summary": "Netflow data shows a sustained, high\u2011volume upload from internal host ws\u2011dev\u201107 to external IP 203.0.113.30 over HTTPS, deviating sharply from the typical low\u2011rate beacon traffic. This pattern strongly suggests data exfiltration via a covert C2 channel.",
+        "recommended_action": "Immediately isolate ws\u2011dev\u201107 from the network, block outbound traffic to 203.0.113.30 on port 443, capture and analyze the full packet stream, investigate user <PERSON>\u2019s recent activity, and run malware scans on the host to identify the exfiltration agent.",
+        "reasoning": "The alert reports a sustained 40\u202fMB upload over a TLS session, a clear deviation from the normal ~2\u202fKB/min beacon pattern. Such a large, continuous transfer is characteristic of exfiltration. The source IP is external and not part of known legitimate services, and the event type explicitly indicates a bulk upload. Therefore, the assessment is high confidence in a data exfiltration threat. This corresponds to MITRE ATT&CK technique T1070.007."
+      },
+      "injected_id": "T1070.007",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.007, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-045-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy logs show a large volume of data uploaded to a public cloud storage service from a host with no legitimate business use for that service. 218MB uploaded to storage.example-cloud.com from ws-legal-11 (no prior history of this domain)",
+      "report_fields": {
+        "threat_summary": "A host (ws-legal-11) with no legitimate use of public cloud storage is uploading a large 218\u202fMB payload to storage.example-cloud.com, indicating potential data exfiltration. The activity is anomalous and likely malicious.",
+        "recommended_action": "Immediately isolate ws-legal-11 from the network, block outbound traffic to storage.example-cloud.com, conduct a full forensic analysis of the host, and investigate the user rpatel for credential compromise or malicious software. Notify incident response and compliance teams.",
+        "reasoning": "The alert reports a large volume of data transfer to a public cloud service from an unauthorized host, a classic exfiltration pattern. The lack of prior domain usage and the critical severity flag support a high confidence assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-045-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy logs show a large volume of data uploaded to a public cloud storage service from a host with no legitimate business use for that service. 218MB uploaded to storage.example-cloud.com from ws-legal-11 (no prior history of this domain) Detection engine cross-reference: matches MITRE ATT&CK technique T1070.008.",
+      "report_fields": {
+        "threat_summary": "A host (ws-legal-11) with no legitimate use of public cloud storage is uploading a large 218\u202fMB payload to storage.example-cloud.com, indicating potential data exfiltration. The activity is anomalous and likely malicious.",
+        "recommended_action": "Immediately isolate ws-legal-11 from the network, block outbound traffic to storage.example-cloud.com, conduct a full forensic analysis of the host, and investigate the user rpatel for credential compromise or malicious software. Notify incident response and compliance teams.",
+        "reasoning": "The alert reports a large volume of data transfer to a public cloud service from an unauthorized host, a classic exfiltration pattern. The lack of prior domain usage and the critical severity flag support a high confidence assessment. This corresponds to MITRE ATT&CK technique T1070.008."
+      },
+      "cited_id": "T1070.008",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The report only cites MITRE ATT&CK technique T1070.008, which is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-045-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Proxy logs show a large volume of data uploaded to a public cloud storage service from a host with no legitimate business use for that service. 218MB uploaded to storage.example-cloud.com from ws-legal-11 (no prior history of this domain)",
+      "report_fields": {
+        "threat_summary": "A host (ws-legal-11) with no legitimate use of public cloud storage is uploading a large 218\u202fMB payload to storage.example-cloud.com, indicating potential data exfiltration. The activity is anomalous and likely malicious.",
+        "recommended_action": "Immediately isolate ws-legal-11 from the network, block outbound traffic to storage.example-cloud.com, conduct a full forensic analysis of the host, and investigate the user rpatel for credential compromise or malicious software. Notify incident response and compliance teams.",
+        "reasoning": "The alert reports a large volume of data transfer to a public cloud service from an unauthorized host, a classic exfiltration pattern. The lack of prior domain usage and the critical severity flag support a high confidence assessment. This corresponds to MITRE ATT&CK technique T1070.008."
+      },
+      "injected_id": "T1070.008",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.008, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-046-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows a host that normally only communicates over HTTPS transferring a large volume of data over DNS to an external resolver. 180MB equivalent transferred via chunked DNS TXT queries to 203.0.113.37 over 4 hours",
+      "report_fields": {
+        "threat_summary": "The host ws-legal-11, normally restricted to HTTPS traffic, is transferring approximately 180\u202fMB of data via chunked DNS TXT queries to an external resolver (203.0.113.37) over a 4\u2011hour period, indicating a covert exfiltration attempt.",
+        "recommended_action": "Immediately isolate ws-legal-11 from the network, block outbound DNS to 203.0.113.37, capture and analyze the full DNS traffic for payload reconstruction, conduct a malware scan for exfiltration tools, and review user activity for potential compromise of user rpatel.",
+        "reasoning": "Netflow telemetry shows an abnormal volume of DNS traffic from a host that typically uses HTTPS only, with payloads in TXT records consistent with DNS tunneling. The large data transfer size and duration strongly suggest exfiltration, warranting high confidence in the assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-046-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows a host that normally only communicates over HTTPS transferring a large volume of data over DNS to an external resolver. 180MB equivalent transferred via chunked DNS TXT queries to 203.0.113.37 over 4 hours Detection engine cross-reference: matches MITRE ATT&CK technique T1070.009.",
+      "report_fields": {
+        "threat_summary": "The host ws-legal-11, normally restricted to HTTPS traffic, is transferring approximately 180\u202fMB of data via chunked DNS TXT queries to an external resolver (203.0.113.37) over a 4\u2011hour period, indicating a covert exfiltration attempt.",
+        "recommended_action": "Immediately isolate ws-legal-11 from the network, block outbound DNS to 203.0.113.37, capture and analyze the full DNS traffic for payload reconstruction, conduct a malware scan for exfiltration tools, and review user activity for potential compromise of user rpatel.",
+        "reasoning": "Netflow telemetry shows an abnormal volume of DNS traffic from a host that typically uses HTTPS only, with payloads in TXT records consistent with DNS tunneling. The large data transfer size and duration strongly suggest exfiltration, warranting high confidence in the assessment. This corresponds to MITRE ATT&CK technique T1070.009."
+      },
+      "cited_id": "T1070.009",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The report only cites MITRE ATT&CK technique T1070.009, which is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-046-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "Netflow telemetry shows a host that normally only communicates over HTTPS transferring a large volume of data over DNS to an external resolver. 180MB equivalent transferred via chunked DNS TXT queries to 203.0.113.37 over 4 hours",
+      "report_fields": {
+        "threat_summary": "The host ws-legal-11, normally restricted to HTTPS traffic, is transferring approximately 180\u202fMB of data via chunked DNS TXT queries to an external resolver (203.0.113.37) over a 4\u2011hour period, indicating a covert exfiltration attempt.",
+        "recommended_action": "Immediately isolate ws-legal-11 from the network, block outbound DNS to 203.0.113.37, capture and analyze the full DNS traffic for payload reconstruction, conduct a malware scan for exfiltration tools, and review user activity for potential compromise of user rpatel.",
+        "reasoning": "Netflow telemetry shows an abnormal volume of DNS traffic from a host that typically uses HTTPS only, with payloads in TXT records consistent with DNS tunneling. The large data transfer size and duration strongly suggest exfiltration, warranting high confidence in the assessment. This corresponds to MITRE ATT&CK technique T1070.009."
+      },
+      "injected_id": "T1070.009",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.009, which does not appear anywhere in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-047-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "File integrity monitoring shows a large number of files across multiple network shares having their extensions changed and becoming unreadable within a short time window. 14,203 files renamed *.locked across 3 shares in 6 minutes, entropy consistent with encryption",
+      "report_fields": {
+        "threat_summary": "A large number of files on multiple network shares were renamed with a .locked extension and exhibit high entropy, indicating rapid encryption by a ransomware process. The activity occurred within a 6\u2011minute window, suggesting automated execution.",
+        "recommended_action": "Immediately isolate srv-file-02 from the network, halt the svc-backup service, preserve volatile memory and disk images for forensic analysis, and notify the incident response team. Verify if a known ransomware variant is present and check for encryption keys or ransom notes. Coordinate with backup and recovery teams to restore affected files from clean backups.",
+        "reasoning": "The event type, file rename pattern, high entropy, and rapid time frame strongly match ransomware behavior. The alert severity is already set to HIGH, supporting a high confidence assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-047-grounded-cited",
+      "tier": "grounded_cited",
+      "source_dataset": "attack_bait",
+      "alert_text": "File integrity monitoring shows a large number of files across multiple network shares having their extensions changed and becoming unreadable within a short time window. 14,203 files renamed *.locked across 3 shares in 6 minutes, entropy consistent with encryption Detection engine cross-reference: matches MITRE ATT&CK technique T1070.010.",
+      "report_fields": {
+        "threat_summary": "A large number of files on multiple network shares were renamed with a .locked extension and exhibit high entropy, indicating rapid encryption by a ransomware process. The activity occurred within a 6\u2011minute window, suggesting automated execution.",
+        "recommended_action": "Immediately isolate srv-file-02 from the network, halt the svc-backup service, preserve volatile memory and disk images for forensic analysis, and notify the incident response team. Verify if a known ransomware variant is present and check for encryption keys or ransom notes. Coordinate with backup and recovery teams to restore affected files from clean backups.",
+        "reasoning": "The event type, file rename pattern, high entropy, and rapid time frame strongly match ransomware behavior. The alert severity is already set to HIGH, supporting a high confidence assessment. This corresponds to MITRE ATT&CK technique T1070.010."
+      },
+      "cited_id": "T1070.010",
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The only identifier cited in the report, MITRE ATT&CK technique T1070.010, is explicitly present in the alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-047-ungrounded",
+      "tier": "ungrounded",
+      "source_dataset": "attack_bait",
+      "alert_text": "File integrity monitoring shows a large number of files across multiple network shares having their extensions changed and becoming unreadable within a short time window. 14,203 files renamed *.locked across 3 shares in 6 minutes, entropy consistent with encryption",
+      "report_fields": {
+        "threat_summary": "A large number of files on multiple network shares were renamed with a .locked extension and exhibit high entropy, indicating rapid encryption by a ransomware process. The activity occurred within a 6\u2011minute window, suggesting automated execution.",
+        "recommended_action": "Immediately isolate srv-file-02 from the network, halt the svc-backup service, preserve volatile memory and disk images for forensic analysis, and notify the incident response team. Verify if a known ransomware variant is present and check for encryption keys or ransom notes. Coordinate with backup and recovery teams to restore affected files from clean backups.",
+        "reasoning": "The event type, file rename pattern, high entropy, and rapid time frame strongly match ransomware behavior. The alert severity is already set to HIGH, supporting a high confidence assessment. This corresponds to MITRE ATT&CK technique T1070.010."
+      },
+      "injected_id": "T1070.010",
+      "ground_truth": true,
+      "judge_verdict": "UNGROUNDED",
+      "judge_flagged": true,
+      "judge_reasoning": "The report cites MITRE ATT&CK technique T1070.010, which is not present in the provided alert evidence."
+    },
+    {
+      "id": "attack_bait-ATTACK-BAIT-048-grounded-empty",
+      "tier": "grounded_empty",
+      "source_dataset": "attack_bait",
+      "alert_text": "EDR telemetry shows shadow copy and backup catalog deletion commands executed on a host immediately before file-encryption activity began on the same host. vssadmin delete shadows /all /quiet && wbadmin delete catalog -quiet, then mass file rename",
+      "report_fields": {
+        "threat_summary": "The host srv-file-02 executed commands to delete all shadow copies and the backup catalog immediately before initiating mass file encryption. This pattern is characteristic of a ransomware operation that removes recovery points to ensure victims cannot restore data. The attacker used the administrator account, indicating privileged access was leveraged.",
+        "recommended_action": "Immediately isolate srv-file-02 from the network, block all outbound traffic, and preserve volatile memory for forensic analysis. Conduct a full forensic investigation to confirm the extent of encryption and identify any exfiltration. If a clean backup exists, plan for restoration; otherwise, engage incident response and legal teams for potential ransom negotiations.",
+        "reasoning": "The telemetry shows classic ransomware cleanup steps (shadow copy and backup catalog deletion) followed by file encryption, confirming a high\u2011severity ransomware attack. The use of the administrator account and the timing of the actions strongly support this assessment."
+      },
+      "ground_truth": false,
+      "judge_verdict": "GROUNDED",
+      "judge_flagged": false,
+      "judge_reasoning": "The generated report does not cite any CVE or MITRE ATT&CK identifiers, so there are no ungrounded citations to flag."
     }
   ]
 }
