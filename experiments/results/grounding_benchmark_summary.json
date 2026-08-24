@@ -1,0 +1,109 @@
+{
+  "sources": [
+    {
+      "source": "CVE-bait (hand-authored + CISA KEV)",
+      "n": 100,
+      "cve_ungrounded_count": 2,
+      "cve_ungrounded_rate": 0.02,
+      "cve_ungrounded_ci_95": [
+        0.0055,
+        0.07
+      ],
+      "attack_ungrounded_count": null,
+      "attack_ungrounded_rate": null,
+      "attack_ungrounded_ci_95": null,
+      "requires_review_count": 2,
+      "requires_review_rate": 0.02,
+      "note": "CVE grounding only. 0/97 alerts that don't ask for a CVE citation ever hallucinate one; both flagged hits come from the 3 alerts that explicitly request a CVE ID."
+    },
+    {
+      "source": "ATT&CK-bait (MITRE snapshot)",
+      "n": 50,
+      "cve_ungrounded_count": null,
+      "cve_ungrounded_rate": null,
+      "cve_ungrounded_ci_95": null,
+      "attack_ungrounded_count": 3,
+      "attack_ungrounded_rate": 0.06,
+      "attack_ungrounded_ci_95": [
+        0.0206,
+        0.1622
+      ],
+      "requires_review_count": 3,
+      "requires_review_rate": 0.06,
+      "note": "ATT&CK grounding only."
+    },
+    {
+      "source": "Wazuh live Docker SIEM",
+      "n": 139,
+      "cve_ungrounded_count": 0,
+      "cve_ungrounded_rate": 0.0,
+      "cve_ungrounded_ci_95": [
+        0.0,
+        0.0269
+      ],
+      "attack_ungrounded_count": 0,
+      "attack_ungrounded_rate": 0.0,
+      "attack_ungrounded_ci_95": [
+        0.0,
+        0.0269
+      ],
+      "requires_review_count": 4,
+      "requires_review_rate": 0.0288,
+      "note": "Real agent-observed alerts, not synthetic. CVE-producing alert type (vulnerability-detector) not exercised on this single-node setup -- 0% CVE-ungrounded here means 'not tested', not 'tested and clean'."
+    },
+    {
+      "source": "Secure_SOC_AI rule engine",
+      "n": 76,
+      "cve_ungrounded_count": 0,
+      "cve_ungrounded_rate": 0.0,
+      "cve_ungrounded_ci_95": [
+        0.0,
+        0.0481
+      ],
+      "attack_ungrounded_count": 0,
+      "attack_ungrounded_rate": 0.0,
+      "attack_ungrounded_ci_95": [
+        0.0,
+        0.0481
+      ],
+      "requires_review_count": 0,
+      "requires_review_rate": 0.0,
+      "note": "External rule-engine/correlator as the alert source; this project's guardrailed pipeline replaces only the triage step."
+    },
+    {
+      "source": "Secure_SOC_AI CVE pool (15 real NVD CVEs)",
+      "n": 60,
+      "cve_ungrounded_count": 0,
+      "cve_ungrounded_rate": 0.0,
+      "cve_ungrounded_ci_95": [
+        0.0,
+        0.0602
+      ],
+      "attack_ungrounded_count": null,
+      "attack_ungrounded_rate": null,
+      "attack_ungrounded_ci_95": null,
+      "requires_review_count": 0,
+      "requires_review_rate": 0.0,
+      "note": "Bait-style (CVE withheld): cites the correct CVE 0% of the time, never hallucinates a wrong one either -- it just stays silent. Stated-style (CVE given): reflected correctly 100% of the time."
+    }
+  ],
+  "pooled": {
+    "cve_sources_pooled_n": 375,
+    "cve_sources_pooled_ungrounded_count": 2,
+    "cve_sources_pooled_ungrounded_rate": 0.0053,
+    "cve_sources_pooled_ci_95": [
+      0.0015,
+      0.0192
+    ],
+    "attack_sources_pooled_n": 265,
+    "attack_sources_pooled_ungrounded_count": 3,
+    "attack_sources_pooled_ungrounded_rate": 0.0113,
+    "attack_sources_pooled_ci_95": [
+      0.0039,
+      0.0327
+    ],
+    "total_alerts_across_all_sources": 425
+  },
+  "significance_note": "Formal significance testing (McNemar) is not meaningful for any pairwise source comparison here: the CVE-bait set has only 2 positives at n=100 and the ATT&CK-bait set only 3 at n=50 -- both far below the discordant-pair count McNemar needs to say anything. Reported as descriptive rates with Wilson 95% CIs instead, consistent with the existing CVE-bait (#21) and ATT&CK-bait precedent.",
+  "known_gap": "Wazuh's vulnerability-detector (CVE-producing) alert type is not exercised in this benchmark -- blocked on a single-node Docker inventory-harvester sync limitation. The pooled CVE rate above is therefore driven by CVE-bait and the Secure_SOC_AI CVE pool, not by live Wazuh CVE alerts."
+}

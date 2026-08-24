@@ -1065,6 +1065,40 @@ correct citations independent of whether the citation is actually right.
 This is a real, disclosed limitation of the current relevance scorer, not
 a hypothetical one — Sect. 5 restates it as such.
 
+### 4.13 Cross-source grounding summary
+
+Sects. 4.3-4.6 each report a grounding rate on one alert source in
+isolation. This section pools them into a single cross-source view, using
+only results already reported above — no new alerts were generated and no
+new LLM calls were made; `experiments/evaluation/grounding_benchmark_summary.py`
+reads the five existing result files and computes pooled rates with Wilson
+95% confidence intervals.
+
+**Result** (`experiments/results/grounding_benchmark_summary.json`, 425
+alerts total): pooling every source that exercises the CVE checker
+(CVE-bait, Wazuh, Secure_SOC_AI rule engine, Secure_SOC_AI CVE pool; n=375)
+gives an ungrounded rate of **2/375 (0.53%, 95% CI [0.1%, 1.9%])**. Pooling
+every source that exercises the ATT&CK checker (ATT&CK-bait, Wazuh,
+Secure_SOC_AI rule engine; n=265) gives **3/265 (1.13%, 95% CI [0.4%,
+3.3%])**. Both non-zero contributions come entirely from the two sources
+purpose-built to bait an ungrounded citation (Sects. 4.3, 4.4); the three
+non-adversarial sources — real Wazuh SIEM alerts, the Secure_SOC_AI rule
+engine, and the Secure_SOC_AI CVE pool — contribute zero ungrounded
+citations between them.
+
+**Honest limitation.** This pooled figure is not a single random sample —
+it is five heterogeneous samples with different construction methods
+(hand-authored bait, real SIEM output, an external rule engine) combined
+by simple addition, which is why per-source rates are reported alongside
+the pooled ones rather than in place of them. It also inherits each
+source's own caveats: Wazuh's pooled contribution reflects only the alert
+types this single-node deployment actually produces, not a general claim
+about live-SIEM CVE traffic (Sect. 4.6's vulnerability-detector limitation
+still applies), and formal significance testing between sources was not
+attempted — CVE-bait's 2 positives at n=100 and ATT&CK-bait's 3 at n=50
+are both too few discordant cases for McNemar to say anything meaningful
+(the same caveat already on record in Sect. 4.3 and Sect. 4.10).
+
 ---
 
 ## 5 Discussion

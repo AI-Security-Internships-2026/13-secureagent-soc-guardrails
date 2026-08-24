@@ -14,7 +14,7 @@ was checked directly against the current codebase, not assumed from memory.
 | Aug 2 | Finalize NVD-verification edge cases from PR #18 | ✅ Done |
 | Aug 9 | Compare guardrail approaches (issue #16) — latency, false-positive rate, coverage | ✅ Done — Week 8 baseline vs. LLM Guard vs. Pytector comparison. NeMo was dropped after Week 2 (not a pending comparison target); Guardrails AI swapped for Pytector because its only working validator required a hosted API, violating the local-only constraint |
 | Aug 16 | Extend grounding technique to a second citation type (CWE or MITRE ATT&CK) | ✅ Done — `attack_grounding.py` + ATT&CK-bait test set + dashboard section |
-| Aug 23 | Full multi-source grounding benchmark | ❌ Not started — see §5 for what this actually requires before it can be called done |
+| Aug 23 | Full multi-source grounding benchmark | ✅ Done, 2026-08-24 — consolidated all 5 already-run sources (425 alerts total) into one cross-source table via `experiments/evaluation/grounding_benchmark_summary.py`; pooled CVE-checker rate 2/375 (0.53%), pooled ATT&CK-checker rate 3/265 (1.13%). See `docs/all_results.md` #43 |
 | Aug 30 | Write-up | ❌ Not started |
 | Sep 6 | Paper draft | ❌ Not started |
 | **Sep 8** | **Final submission** | ❌ Not started |

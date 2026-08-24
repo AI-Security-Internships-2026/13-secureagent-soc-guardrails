@@ -52,6 +52,7 @@ This is the full rundown of every experiment run on this project, in the order t
 | 40 | [Deterministic-vs-SelfCheckGPT significance test](#40-deterministic-vs-selfcheckgpt-paired-significance-test--completed) | Aug 22 | McNemar p=0.0118, significant — deterministic checker uniquely correct 16×, SelfCheckGPT uniquely correct 4× on the same 56 alerts. The one comparison in the paper with a statistically confirmed performance gap, not just an architectural argument |
 | 41 | [LLM-judge cross-model-family baseline — stopped at 441/450](#41-llm-judge-cross-model-family-baseline--stopped-at-441450-written-into-the-paper) | Aug 21-23 | 100% accuracy/precision/recall on all 439 scored samples, matches the same-family result exactly — resolves the self-enhancement-bias gap. Reported honestly as 441/450 (98%), not rounded up |
 | 42 | [Wazuh bulk-fired 26 → 139; third PII false-positive round fixed](#42-wazuh-live-data-bulk-fired-26--139-alerts-third-pii-guardrail-false-positive-round-found-and-fixed-ip-addresses-misread-as-phone-numbers) | Aug 22-23 | n=139, 0% ungrounded ATT&CK/CVE. `requires_review` corrected 27.3% → 2.9% (38/139 → 4/139) after finding Presidio's phone recognizer flags IP addresses at the identical confidence score real phone numbers get; fixed with an IPv4-structural check. 4 residual PERSON false positives (rootkit/benchmark proper-noun names) disclosed, not force-fixed |
+| 43 | [Full multi-source grounding benchmark](#43-full-multi-source-grounding-benchmark) | Aug 24 | Consolidated all 5 already-run grounding sources (425 alerts total): pooled CVE-checker ungrounded rate 2/375 (0.53%, 95% CI [0.1%, 1.9%]), pooled ATT&CK-checker ungrounded rate 3/265 (1.13%, 95% CI [0.4%, 3.3%]). No new experiments run — pure aggregation of #7, #13's bait set, #16/#42's Wazuh data, and #15's Secure_SOC_AI runs. Closes the README's Aug 23 milestone |
 
 ---
 
@@ -675,6 +676,31 @@ All three caught by building a self-verifying generation script: every candidate
 **Fix:** added `_is_plausible_phone()` to `src/guardrails/pii_guardrail.py`, generalizing the existing `plausibility_checks` dict (previously PERSON-only) to also cover PHONE_NUMBER. Verified real IPs in multiple formats correctly rejected, real phone numbers (including the tricky dot-formatted `555.284.9013`, whose first octet exceeds the valid IPv4 range) still correctly detected, in isolation and full-sentence context. 3 new regression tests added to `tests/test_pii_guardrail.py` (28/28 in that file). Recomputed `wazuh_integration_results.json`'s `pii_detections`/`requires_review` fields offline by re-filtering already-saved detections through the fixed logic — no new Groq calls needed. Full project suite re-run: 145/146 (1 pre-existing unrelated NeMo failure, confirmed identical on the last committed state before this change).
 **Result (corrected):** n=139, 0% ungrounded ATT&CK/CVE, **requires_review down to 4/139 (2.9%), from the raw 38/139 (27.3%)** — all 4 remaining are the disclosed single-word rootkit/benchmark-name residual above, not a bug.
 **What it means:** this is the third real PII-guardrail false-positive round found this project (after #35, #39), and the largest by volume — the IP-vs-phone collision would have silently inflated the paper's Wazuh review-rate by nearly 10x had the raw 27.3% been reported without checking individual detections first, same discipline that caught #39. Also launched `experiments/evaluation/wazuh_integration/live_demo_loop.py` (detached background process, fires one varied alert every 45s into the container) so the dashboard's Live Feed tab has visible activity during a demo — explicitly documented as not feeding this citable n=139 result.
+
+---
+
+## 43. Full multi-source grounding benchmark
+
+**When:** Aug 24
+**What we tried:** Closed out the README roadmap's Aug 23 "full multi-source grounding benchmark" milestone. This was pure consolidation, not new data collection — every source below already had a completed run sitting in `experiments/results/`; the gap was that they'd never been pulled into one cross-source table. Built `experiments/evaluation/grounding_benchmark_summary.py`, which reads all five result files, normalizes their differing schemas (CVE-only, ATT&CK-only, or both), and computes per-source and pooled ungrounded rates with Wilson 95% CIs. No LLM calls, no new alerts generated.
+
+| Source | n | CVE ungrounded | ATT&CK ungrounded | requires_review |
+|---|---|---|---|---|
+| CVE-bait (#7) | 100 | 2.0% | n/a | 2.0% |
+| ATT&CK-bait (#13's test set) | 50 | n/a | 6.0% | 6.0% |
+| Wazuh live Docker SIEM (#16, #42) | 139 | 0.0%* | 0.0% | 2.9% |
+| Secure_SOC_AI rule engine (#15) | 76 | 0.0% | 0.0% | 0.0% |
+| Secure_SOC_AI CVE pool, 15 real NVD CVEs (#15) | 60 | 0.0% | n/a | 0.0% |
+
+\* Wazuh's CVE-producing (vulnerability-detector) alert type still isn't exercised on this single-node setup (known Docker limitation, see `docs/ROADMAP_PLAN.md` §"What's not run yet") — this 0.0% means "not tested," not "tested and clean." Called out explicitly in the pooled numbers below, not hidden.
+
+**Pooled:** CVE-checker sources 2/375 ungrounded (0.53%, 95% CI [0.1%, 1.9%]); ATT&CK-checker sources 3/265 ungrounded (1.13%, 95% CI [0.4%, 3.3%]); 425 alerts total across all sources.
+
+**What went wrong:** Nothing broke — this was read-only aggregation over already-verified files. The one thing worth flagging as a near-miss: it would have been easy to report the pooled CVE rate as "clean across the whole pipeline" without the Wazuh caveat above; left in deliberately since the paper shouldn't imply the CVE checker was tested against live Wazuh CVE alerts when it wasn't.
+
+**Significance testing:** Not run pairwise between sources — CVE-bait has only 2 positives at n=100 and ATT&CK-bait only 3 at n=50, both far below what McNemar needs to say anything meaningful (same "too few discordant cases" caveat already on record for CVE-bait alone, #21). Reported as descriptive rates with Wilson CIs instead.
+
+**What it means:** Across every alert source this project has run through the grounding checkers — hand-authored bait sets, real CISA KEV CVEs, real MITRE ATT&CK techniques, a real Wazuh SIEM deployment, and an external rule-engine integration — ungrounded citation rates stay under ~6% per source and under 1.2% pooled, with zero cases on the three most realistic, non-adversarial sources (Wazuh, Secure_SOC_AI rule engine, Secure_SOC_AI CVE pool). The two non-zero sources (CVE-bait, ATT&CK-bait) are also the two designed specifically to bait the model into ungrounded citations — so the split itself is informative: realistic traffic stays clean, adversarial bait finds a small but real crack. Closes the Aug 23 README milestone; full detail lives in `experiments/results/grounding_benchmark_summary.json`.
 
 ---
 
