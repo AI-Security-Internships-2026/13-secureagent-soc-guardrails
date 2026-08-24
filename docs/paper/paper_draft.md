@@ -90,54 +90,41 @@
 
 ## Abstract
 
-*(target: 250 words; current draft: ~344, over budget. Restructured
-2026-08-20 around one central research question per external review
-feedback, rather than an itemized tour of every experiment; Sect. 4.9's
-result folded in 2026-08-21, Sect. 4.10's significance result and the
-cross-family LLM-judge result folded in 2026-08-22/23. Still needs a
-dedicated trim pass — not done here since that risks cutting precision,
-not just length, in a single pass alongside a
-content change.)*
+*(target: ~250 words. Restructured 2026-08-20 around one central research
+question per external review feedback, rather than an itemized tour of
+every experiment; trimmed to budget 2026-08-25 after folding in Sect.
+4.9/4.10's SelfCheckGPT results and the cross-family LLM-judge result.)*
 
 Large language models increasingly generate Security Operations Center
-(SOC) threat reports, citing supporting evidence such as CVE identifiers
-and MITRE ATT&CK techniques. These citations are rarely verified: models
-can fabricate identifiers, misattribute real ones, or recall citations
-the alert never provided — and a flat "flagged/not flagged" treatment
-cannot distinguish an invented CVE from a real-but-unevidenced one,
-though the two carry different risk profiles for an analyst deciding how
-much to trust a report.
+(SOC) threat reports citing CVE identifiers and MITRE ATT&CK techniques
+as supporting evidence. These citations are rarely verified: models can
+fabricate identifiers, misattribute real ones, or recall citations the
+alert never provided, and a flat "flagged/not flagged" treatment cannot
+distinguish an invented CVE from a real-but-unevidenced one, though the
+two pose different risks to an analyst's trust.
 
 We ask whether such reports can be automatically checked for citations
-unsupported by the evidence a model was given, and whether distinguishing
-*why* a citation is unsupported — fabricated, real but irrelevant, or
-real and plausible enough to look correct — provides assurance a binary
-flag cannot. LLMCite answers this with a two-stage pipeline: grounding
-against the source alert, then verification of ungrounded citations
-against authoritative sources (NVD, the MITRE ATT&CK STIX corpus) into a
-four-class taxonomy. The Real-and-Plausible class is the central
-finding — a real, topically appropriate citation never actually stated in
-the evidence is, by construction, the case most likely to evade naive
-human review, precisely because it looks correct.
+unsupported by the evidence given, and whether distinguishing *why* —
+fabricated, irrelevant, or plausible enough to look correct — provides
+assurance a binary flag cannot. LLMCite answers with a two-stage
+pipeline: grounding against the source alert, then verification against
+authoritative sources (NVD, the MITRE ATT&CK STIX corpus) into a
+four-class taxonomy (plus a fifth for withdrawn identifiers). The central
+finding is the Real-and-Plausible class: a real, topically appropriate
+citation never stated in the evidence, the case most likely to evade
+human review because it looks correct.
 
-We evaluate across adversarial, third-party-generated, and live SOC data,
-and separately benchmark a statistically tested input guardrail against
-two open-source alternatives (McNemar's test, n=119). A same-model-family
-LLM-judge baseline (n=318) and a cross-family follow-up addressing
-self-enhancement bias directly (n=441/450, quota-limited) both reproduce
-the pipeline's binary decision at 100% accuracy — a feasibility floor, not
-evidence the deterministic pipeline is unnecessary, since the task is
-close to what it already computes mechanically. A SelfCheckGPT-style
-consistency baseline (n=60, recall 0.31,
-precision 1.0) misses most ungrounded citations — not through
-inconsistent fabrication, but because 18 of 20 misses are the model
-consistently recalling a correct, real identifier from training
-knowledge, the same Real-and-Plausible pattern this paper centers, at far
-higher volume than the pipeline's own low-temperature tests observed; the
-deterministic checker is significantly more accurate on the same alerts
-(McNemar p=0.012, n=56). LLMCite is a domain-specialized
-instance of citation-grounding verification for security-critical LLM
-applications, distinct from prior work targeting scholarly references.
+We evaluate across adversarial bait tests, third-party and live SOC data,
+and a pooled cross-source summary, against two alternative verification
+strategies. An LLM-judge baseline reproduces the pipeline's decisions at
+100% accuracy — a feasibility floor, not evidence it is unnecessary. A
+SelfCheckGPT-style consistency check misses most ungrounded citations
+because most misses are the model consistently recalling a correct
+identifier from training knowledge, the same Real-and-Plausible pattern
+this paper centers; the deterministic checker is significantly more
+accurate on the same alerts (McNemar p=0.012). LLMCite is a
+domain-specialized citation-grounding verifier for security-critical LLM
+applications, distinct from prior work on scholarly references.
 
 ---
 
@@ -176,7 +163,8 @@ available evidence, verify against an authoritative source if not, classify
 the outcome — is established in the hallucination-detection literature,
 most directly in FActScore. **What this paper contributes is not a new
 verification architecture; it is that pattern applied specifically to SOC
-threat reports, with a four-class taxonomy in place of the binary
+threat reports, with a four-class taxonomy (plus a fifth label for
+formally withdrawn identifiers) in place of the binary
 grounded/ungrounded label most such checkers use, and empirical evidence
 that the taxonomy and the pipeline generalize across two distinct claim
 types (CVE identifiers and MITRE ATT&CK techniques) rather than being a
@@ -313,6 +301,8 @@ asks an analyst to trust its output as a black box.
 
 ### 3.1 Threat model
 
+**Table 1** Threat model: attack types addressed by this pipeline's input and output guardrail layers
+
 | # | Attack type | Description | Guardrail layer |
 |---|---|---|---|
 | T1 | Direct prompt injection | Alert/user input contains instruction-override phrases ("ignore previous instructions") attempting to hijack agent behavior | Input |
@@ -370,6 +360,8 @@ authoritative record's own description determines relevance (validated
 against human judgment in Sect. 4.12).
 
 ### 3.5 Classification taxonomy
+
+**Table 2** The four-class outcome taxonomy applied to every ungrounded citation (plus REJECTED/REVOKED for formally withdrawn identifiers)
 
 | Class | Meaning |
 |---|---|
@@ -464,6 +456,8 @@ requiring a hosted-API call — documented in full in
 
 **Results (119 samples):**
 
+**Table 3** Input guardrail comparison: precision/recall/latency/throughput across four implementations on the 119-sample eval set
+
 | | Baseline (deterministic) | LLM Guard | Pytector | Hybrid (deterministic + Pytector fallback) |
 |---|---|---|---|---|
 | Precision | 1.0 | 0.962 | 1.0 | 1.0 |
@@ -480,6 +474,8 @@ rate well above 5%. Both raw and Holm-Bonferroni-corrected p-values are
 reported for that reason — a correction not applied in earlier drafts of
 this evaluation, and one that changes which results can actually be called
 significant:
+
+**Table 4** McNemar significance testing across all 6 pairwise guardrail comparisons, raw and Holm-Bonferroni-corrected
 
 | Comparison | Raw p-value | Sig. (raw α=0.05)? | Holm-Bonferroni p-value | Sig. (corrected)? |
 |---|---|---|---|---|
@@ -598,7 +594,7 @@ consistent with the 0/147 finding above. Of the 2:
   paper's introduction describes** — a model citing a real identifier,
   confused with a closely related one, in a way indistinguishable from a
   correct citation without independent verification. It is also the only
-  one of the 100 alerts where the model's citation was actually *wrong*,
+  one of the 150 alerts where the model's citation was actually *wrong*,
   rather than correct-but-mechanically-flagged.
 
 At n=150, this is now a genuinely citable estimate rather than a
@@ -681,6 +677,8 @@ into **bait** style — exploit behavior described, CVE number withheld — and
 can the model *identify* a CVE from behavior alone, or does the pipeline
 only *verify* citations it is already given?
 
+**Table 5** CVE pool bait-vs-stated comparison: whether the model identifies a withheld CVE from behavior alone, or only verifies one it is given
+
 | Style | n | CVE ungrounded rate | Cited the correct ground-truth CVE |
 |---|---|---|---|
 | Bait (number withheld) | 30 | 0.0% | **0.0%** |
@@ -705,7 +703,7 @@ To demonstrate the pipeline against genuinely live, non-synthetic alert
 data rather than only CICIDS2017 (flagged elsewhere in this project's own
 records as outdated for claiming *current attack-pattern* coverage — see
 Sect. 5), a local Wazuh SIEM/XDR stack was deployed via Docker Compose with
-a real registered agent. Real triggering activity was generated across four
+a real registered agent. Real triggering activity was generated across five
 distinct trigger types, not just passively observed: File Integrity
 Monitoring alerts from an actual file write to a monitored path; a genuine
 SSH brute-force attempt (repeated failed logins against a throwaway local
@@ -782,6 +780,8 @@ CPU-bound guardrail-only workload and the full I/O-bound pipeline (3
 repeats per configuration, mean/stdev reported):
 
 **Full pipeline, threading (n=6 real Groq calls, 3 repeats):**
+
+**Table 6** Full-pipeline threading benchmark: mean elapsed time and throughput across 1/2/4 worker threads
 
 | Threads | Mean elapsed (s) | Stdev | Mean throughput (alerts/sec) |
 |---|---|---|---|
@@ -895,6 +895,8 @@ not lose completed work.
 alerts excluded where every resample declined to cite anything at all —
 nothing to score consistency on, 3 from the stated class, 1 from
 prompted):
+
+**Table 7** SelfCheckGPT self-consistency baseline: correctness by grounded/prompted class (n=60, 4 excluded)
 
 | Class | n scored | SelfCheckGPT correct |
 |---|---|---|
@@ -1290,23 +1292,24 @@ behavior frequency.
 
 We presented LLMCite, a domain-specialized citation-grounding verification
 pipeline for LLM-generated SOC reports, built around a four-class outcome
-taxonomy rather than a binary flagged/not-flagged label. We showed this
+taxonomy (plus a fifth label for formally withdrawn identifiers) rather
+than a binary flagged/not-flagged label. We showed this
 taxonomy and its underlying grounding pattern generalize across two
 distinct claim types (CVE identifiers via live NVD lookup, MITRE ATT&CK
 techniques via a local STIX snapshot), and evaluated the pipeline across
-adversarial bait tests, an independent third-party incident generator, a
-CVE pool isolating identification from verification, live SIEM data
-including a genuinely detected attack, and a statistically tested
+adversarial bait tests at n=150 for each claim type, an independent
+third-party incident generator, a CVE pool isolating identification from
+verification, live SIEM data including a genuinely detected attack, a
+pooled cross-source grounding summary spanning 575 alerts across every
+evaluated source (Sect. 4.13), and a statistically tested
 comparison of the pipeline's input-guardrail layer against maintained
 open-source alternatives, and against a SelfCheckGPT-style self-consistency
 baseline, statistically confirmed against it (Sect. 4.10, p=0.0118) rather
 than argued architecturally alone. We were explicit throughout about what
 remains unproven or bounded: the LLM-judge baseline (Sect. 4.8) now spans
 both a same-family and a cross-family judge, the latter 441/450 (98%)
-complete and quota-gated rather than left as an unaddressed limitation;
-and one adversarial result needs re-verification against a bug fix made
-after it was recorded. T3
-(PII leakage) is implemented and bait-tested at n=60 (Sect. 4.11), a
+complete and quota-gated rather than left as an unaddressed limitation.
+T3 (PII leakage) is implemented and bait-tested at n=60 (Sect. 4.11), a
 citable rate (12.5%, 95% CI [5.5%, 26.1%]) though the interval still has
 room to tighten.
 
@@ -1367,6 +1370,8 @@ listing rather than the placeholder inherited from the literature review.
 
 For a reviewer or collaborator who wants to verify any claim above against
 the actual implementation:
+
+**Table A1** Mapping from each paper section/claim to its supporting code and result files
 
 | Section | Code / data |
 |---|---|
