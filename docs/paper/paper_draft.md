@@ -775,36 +775,90 @@ result in this paper.
 
 ### 4.7 Performance benchmarks
 
-Threading and multiprocessing were compared across 1/2/4 workers for both a
-CPU-bound guardrail-only workload and the full I/O-bound pipeline (3
-repeats per configuration, mean/stdev reported):
+**Original benchmark (superseded below).** Threading and multiprocessing
+were first compared across 1/2/4 workers with repeats looped inside one
+long-running process (3 repeats per configuration). That run showed
+threading's full pipeline improving from 1 to 2 workers (3.20 → 5.16
+alerts/sec) but collapsing sharply at 4 (0.67 alerts/sec, mean elapsed
+8.99s, reproducible across repeats with low stdev) — traced via a
+per-request timestamp diagnostic to one request among several fired
+simultaneously occasionally stalling 5-10x longer than its peers, with no
+client-side limit reached and no exception raised, consistent with (but
+not definitively proven to be) Groq server-side per-key throttling under
+load. Multiprocessing was worse than threading at every worker count
+(1 process: 4.99s mean; 4 processes: 18.19s mean).
 
-**Full pipeline, threading (n=6 real Groq calls, 3 repeats):**
+**Redone 2026-08-25** to close two gaps this original run left open
+(docs/ROADMAP_PLAN.md Sect. 5): repeats looping inside one long-running
+process can let OS scheduler state and memory-allocator warm-up carry
+over between them, and there was no way to separate our own
+guardrail/scheduling overhead from live Groq network variance. Two
+changes: (1) each repeat now runs as a genuinely independent
+`python -m ...` subprocess (`--single-run` mode on both benchmark
+scripts, orchestrated by a new `fresh_process_benchmark.py`); (2) a
+mocked-LLM variant runs the real input guardrail, CVE/ATT&CK grounding,
+and PII redaction, but replaces only the Groq network call with a fixed
+0.3s delay (calibrated from the original real run's mean) — free of API
+cost and rate limits, so it runs at n=30 instead of n=6.
 
-**Table 6** Full-pipeline threading benchmark: mean elapsed time and throughput across 1/2/4 worker threads
+Fresh-process isolation immediately surfaced a real bug: full-pipeline
+runs with more than one thread crashed deep inside torch, traced to an
+unlocked lazy-singleton race in
+`src/guardrails/input_guardrail.py`'s pytector loader — two threads
+racing on the very first concurrent call both saw the singleton as
+unset and both started constructing the DeBERTa model at once. The
+original benchmark never hit this because thread-count=1 always ran
+first in the same long-running process, accidentally warming the
+singleton before any concurrent access. Fixed with double-checked
+locking; this is a real production risk, not just a benchmark artifact,
+since two concurrent requests could hit the live pipeline before the
+model warms up.
 
-| Threads | Mean elapsed (s) | Stdev | Mean throughput (alerts/sec) |
+**Table 6** Concurrency benchmark, fresh-process repeats (n=3 repeats per configuration; guardrail-only n=2000, mocked-pipeline n=30, real-pipeline n=6)
+
+| Workload | Workers | Threading (alerts/sec) | Multiprocessing (alerts/sec) |
 |---|---|---|---|
-| 1 | 1.90 | 0.26 | 3.20 |
-| 2 | 1.17 | 0.05 | 5.16 |
-| 4 | **8.99** | 0.29 | 0.67 |
+| Guardrail-only | 1 | 850,323 ± 115,672 | 648,379 ± 41,175 |
+| Guardrail-only | 2 | 108,456 ± 9,380 | 309 ± 2 |
+| Guardrail-only | 4 | 97,063 ± 14,474 | 230 ± 1 |
+| Full pipeline, mocked LLM | 1 | 1.973 ± 0.032 | 2.031 ± 0.018 |
+| Full pipeline, mocked LLM | 2 | 2.660 ± 0.140 | 1.380 ± 0.006 |
+| Full pipeline, mocked LLM | 4 | 3.284 ± 0.415 | 1.328 ± 0.010 |
+| Full pipeline, real Groq | 1 | 0.839 ± 0.019 | 0.896 ± 0.037 |
+| Full pipeline, real Groq | 2 | 1.196 ± 0.174 | 0.333 ± 0.006 |
+| Full pipeline, real Groq | 4 | 1.243 ± 0.170 | 0.273 ± 0.017 |
 
-The 4-thread slowdown is reproducible (low stdev across repeats) rather
-than a single bad run, and was traced — via a dedicated diagnostic
-instrumenting per-request timestamps — to one request among several fired
-simultaneously occasionally stalling 5-10x longer than its concurrent
-peers, with no client-side connection-pool limit reached and no exception
-raised. This is consistent with Groq applying server-side per-key
-concurrency throttling under load, though we describe this as evidenced
-rather than definitively proven, since the diagnostic run's own severity
-varied run-to-run in a way that tracks live server load rather than being a
-fixed property of "4 threads."
+**What this shows.** The mocked and real-API columns agree in direction
+at every worker count, which validates the mocked variant as a genuine
+stand-in rather than an artifact of its specific delay value. Threading's
+full-pipeline throughput climbs with more workers (real: +48% from 1 to 4
+threads) because the GIL releases during the network wait, letting
+threads overlap I/O. Multiprocessing's full-pipeline throughput falls
+with more workers (real: -70% from 1 to 4 processes) because each
+additional process pays its own model-load and process-creation cost with
+no offsetting I/O-overlap benefit — the original "process overhead
+dominates" finding, now with a concrete measured mechanism (the pytector
+cold-start specifically) behind it rather than a general appeal to
+"overhead." Guardrail-only numbers reproduce the original qualitative
+pattern (more workers hurts a CPU-bound, microsecond-scale task; hurts it
+far more for multiprocessing, since pool-management overhead swamps work
+this cheap), though the 2/4-worker absolute figures are noisier than the
+means alone suggest — `psutil.cpu_percent()`'s 0.1s sampling interval is
+coarse relative to a sub-millisecond total runtime, a measurement-
+resolution limitation disclosed rather than smoothed over.
 
-**Full pipeline, multiprocessing (n=6, 3 repeats):** worse than threading
-at every worker count tested (1 process: 4.99s mean; 4 processes: 18.19s
-mean) — process-creation and per-process Groq-client setup overhead
-dominates a workload this small, and multiprocessing brings no benefit for
-I/O-bound work the way threading's ability to overlap network waits does.
+**Honest discrepancy, not resolved.** The redone real-API run does *not*
+reproduce the original benchmark's sharp 4-thread collapse — 4-thread
+throughput here is the *best* of the three worker counts, not the worst.
+Both runs are n=6, 3 repeats — modest statistical power either way — so
+this could mean the original throttling event was a real but
+non-reproduced instance of live server-side behavior that happened not to
+recur in this run, or that some of the original in-process design's
+cross-run interference (e.g. cumulative rate-limit-window state
+persisting across the sequential 1→2→4 tests within one long process)
+contributed to what looked like a thread-count effect. Both explanations
+are plausible; neither is confirmed. We report both results rather than
+quietly replacing one with the other.
 
 ### 4.8 LLM-judge baseline
 
@@ -1221,10 +1275,12 @@ than what was tested.
   pattern at n=150: 4 of its 6 ungrounded citations are wrong-neighbor or
   revoked-technique cases on less prominent techniques, not concentrated
   on famous ones the way CVE-bait's are.
-- Latency figures (Sects. 4.2, 4.7) are single-run and demonstrably variable
-  run-to-run on shared, uncontrolled hardware; only order-of-magnitude
-  comparisons should be drawn from them until repeated-trial benchmarking
-  is complete.
+- Sect. 4.7's concurrency benchmark now uses fresh-process repeats
+  (n=3, mean ± stdev, 2026-08-25), closing that specific gap. Sect. 4.2's
+  input-guardrail latency comparison has not had the same treatment —
+  it still runs once per invocation with no repeat/aggregation step, on
+  shared, uncontrolled hardware; only order-of-magnitude comparisons
+  should be drawn from those figures specifically until it is.
 - The Wazuh live integration demonstration (Sect. 4.6) is n=139 across
   several manual sessions, spanning five trigger types — a real-world
   sanity check and a genuine bug-finding exercise (Sect. 4.6's two
