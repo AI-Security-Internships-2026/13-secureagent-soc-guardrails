@@ -15,7 +15,7 @@ was checked directly against the current codebase, not assumed from memory.
 | Aug 9 | Compare guardrail approaches (issue #16) — latency, false-positive rate, coverage | ✅ Done — Week 8 baseline vs. LLM Guard vs. Pytector comparison. NeMo was dropped after Week 2 (not a pending comparison target); Guardrails AI swapped for Pytector because its only working validator required a hosted API, violating the local-only constraint |
 | Aug 16 | Extend grounding technique to a second citation type (CWE or MITRE ATT&CK) | ✅ Done — `attack_grounding.py` + ATT&CK-bait test set + dashboard section |
 | Aug 23 | Full multi-source grounding benchmark | ✅ Done, 2026-08-24 — consolidated all 5 already-run sources (425 alerts total) into one cross-source table via `experiments/evaluation/grounding_benchmark_summary.py`; pooled CVE-checker rate 2/375 (0.53%), pooled ATT&CK-checker rate 3/265 (1.13%). See `docs/all_results.md` #43. **Updated 2026-08-25** after CVE-bait/ATT&CK-bait grew to n=150 each and a metric bug was found and fixed in `cve_bait_test.py`: pooled CVE-checker rate now 2/425 (0.47%), pooled ATT&CK-checker rate 6/365 (1.64%). See `docs/all_results.md` #44 |
-| Aug 30 | Write-up | ❌ Not started |
+| Aug 30 | Write-up | ✅ Done, 2026-08-25 — consolidation/polish pass on the already-continuously-updated `paper_draft.md`: fixed stale numbers left over from the n=150 bait-set expansion, trimmed the Abstract to the 250-word Springer target, captioned all 8 tables. Remaining pre-submission-only items (stripping the draft-status scratch note, deciding on figures) deliberately left for the final Sep 6-8 window |
 | Sep 6 | Paper draft | ❌ Not started |
 | **Sep 8** | **Final submission** | ❌ Not started |
 
