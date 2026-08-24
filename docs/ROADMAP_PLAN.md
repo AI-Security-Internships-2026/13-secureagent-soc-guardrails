@@ -658,3 +658,38 @@ re-runs the same alert sets through fresh LLM calls, so N configurations
 × the combined size of all four datasets in API calls. Needs explicit
 quota scheduling like everything else quota-gated in this project, not a
 free add-on.
+
+---
+
+## 13. Independent adversarial review (2026-08-25) — tracked limitations, not action items
+
+A fresh-agent review of the full paper draft (framed as a harsh IJIS
+Reviewer 2, `docs/all_results.md` #46) led to restructuring the paper
+around its strongest finding (SelfCheckGPT-vs-deterministic) rather than
+carrying five threads at equal billing. Most of that review's critique
+was addressed by restructuring/reframing, already done. Two specific
+points were **not** addressed, because more work would not meaningfully
+fix them — recorded here so they stay a deliberate, disclosed choice
+rather than a silently dropped thread:
+
+1. **CVE-bait/ATT&CK-bait rest on only 2 and 6 actual ungrounded-citation
+   events respectively (n=150 each).** The Wilson CIs on top of those
+   counts are arithmetically valid but the underlying signal is thin — and
+   it's very likely structurally thin, not just small-sample noise: 125 of
+   CVE-bait's 150 alerts produced zero citations to analyze at all (§4.2),
+   because the model apparently only volunteers an identifier on famous,
+   heavily-documented vulnerabilities. Chasing a bigger n by adding more
+   CISA-KEV/MITRE entries (the same method already used twice) would very
+   likely just add more zero-signal alerts, not more events — diminishing
+   returns, not a quota or effort problem. **Not planned**, disclosed in
+   the paper (§4.2, §5) as a real, structural limitation instead.
+2. **Single small model (`openai/gpt-oss-20b` via Groq), single provider.**
+   Whether the central REAL_AND_PLAUSIBLE/SelfCheckGPT finding generalizes
+   to GPT-4/Claude-class models — the kind actually used in the commercial
+   SOC copilots §2 contrasts this pipeline against — is untested. Not
+   pursued: would require paid API access to a second provider, is a
+   meaningfully different project scope (cross-model generalization study,
+   not a bug or a gap in the current one), and isn't something the
+   remaining time before submission should be spent on. **Not planned**,
+   disclosed in the paper (§5) as an explicit boundary of the current
+   contribution.
