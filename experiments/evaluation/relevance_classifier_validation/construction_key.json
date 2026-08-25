@@ -1,0 +1,322 @@
+{
+  "BAIT-001__CVE-2017-5638": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2017-5638"
+  },
+  "BAIT-001__CVE-2019-7193": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2017-5638"
+  },
+  "BAIT-003__CVE-2014-0160": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2014-0160"
+  },
+  "BAIT-003__CVE-2024-21287": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2014-0160"
+  },
+  "BAIT-005__CVE-2016-5195": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2016-5195"
+  },
+  "BAIT-005__CVE-2025-61757": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2016-5195"
+  },
+  "BAIT-007__CVE-2014-6271": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2014-6271"
+  },
+  "BAIT-007__CVE-2026-35616": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2014-6271"
+  },
+  "BAIT-009__CVE-2022-22965": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2022-22965"
+  },
+  "BAIT-009__CVE-2024-3273": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2022-22965"
+  },
+  "BAIT-011__CVE-2023-34362": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-34362"
+  },
+  "BAIT-011__CVE-2021-30762": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-34362"
+  },
+  "BAIT-013__CVE-2019-0708": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2019-0708"
+  },
+  "BAIT-013__CVE-2016-7892": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2019-0708"
+  },
+  "BAIT-015__CVE-2018-13379": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2018-13379"
+  },
+  "BAIT-015__CVE-2020-1040": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2018-13379"
+  },
+  "BAIT-017__CVE-2022-30190": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2022-30190"
+  },
+  "BAIT-017__CVE-2023-20273": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2022-30190"
+  },
+  "BAIT-019__CVE-2020-0601": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2020-0601"
+  },
+  "BAIT-019__CVE-2017-6327": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2020-0601"
+  },
+  "BAIT-021__CVE-2022-26134": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2022-26134"
+  },
+  "BAIT-021__CVE-2019-5591": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2022-26134"
+  },
+  "BAIT-023__CVE-2020-11651": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2020-11651"
+  },
+  "BAIT-023__CVE-2024-20439": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2020-11651"
+  },
+  "BAIT-025__CVE-2023-22515": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-22515"
+  },
+  "BAIT-025__CVE-2018-4878": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-22515"
+  },
+  "BAIT-027__CVE-2025-58034": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2025-58034"
+  },
+  "BAIT-027__CVE-2012-5054": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2025-58034"
+  },
+  "BAIT-029__CVE-2023-40044": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-40044"
+  },
+  "BAIT-029__CVE-2018-0296": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-40044"
+  },
+  "BAIT-031__CVE-2025-13223": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2025-13223"
+  },
+  "BAIT-031__CVE-2023-24489": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2025-13223"
+  },
+  "BAIT-033__CVE-2024-29059": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-29059"
+  },
+  "BAIT-033__CVE-2025-14174": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-29059"
+  },
+  "BAIT-035__CVE-2019-7192": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2019-7192"
+  },
+  "BAIT-035__CVE-2024-7593": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2019-7192"
+  },
+  "BAIT-037__CVE-2016-8735": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2016-8735"
+  },
+  "BAIT-037__CVE-2021-21220": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2016-8735"
+  },
+  "BAIT-039__CVE-2024-13161": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-13161"
+  },
+  "BAIT-039__CVE-2026-15410": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-13161"
+  },
+  "BAIT-041__CVE-2016-9563": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2016-9563"
+  },
+  "BAIT-041__CVE-2024-20953": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2016-9563"
+  },
+  "BAIT-043__CVE-2023-1389": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-1389"
+  },
+  "BAIT-043__CVE-2023-46747": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-1389"
+  },
+  "BAIT-045__CVE-2020-3161": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2020-3161"
+  },
+  "BAIT-045__CVE-2018-4939": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2020-3161"
+  },
+  "BAIT-047__CVE-2018-6065": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2018-6065"
+  },
+  "BAIT-047__CVE-2024-6670": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2018-6065"
+  },
+  "BAIT-049__CVE-2023-41763": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-41763"
+  },
+  "BAIT-049__CVE-2023-35078": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-41763"
+  },
+  "BAIT-051__CVE-2024-43468": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-43468"
+  },
+  "BAIT-051__CVE-2023-33009": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-43468"
+  },
+  "BAIT-053__CVE-2022-38028": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2022-38028"
+  },
+  "BAIT-053__CVE-2018-5002": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2022-38028"
+  },
+  "BAIT-055__CVE-2021-42278": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2021-42278"
+  },
+  "BAIT-055__CVE-2022-42856": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2021-42278"
+  },
+  "BAIT-057__CVE-2016-20017": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2016-20017"
+  },
+  "BAIT-057__CVE-2020-25213": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2016-20017"
+  },
+  "BAIT-059__CVE-2026-20245": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2026-20245"
+  },
+  "BAIT-059__CVE-2023-36845": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2026-20245"
+  },
+  "BAIT-061__CVE-2023-44221": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-44221"
+  },
+  "BAIT-061__CVE-2025-68686": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-44221"
+  },
+  "BAIT-063__CVE-2024-45195": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-45195"
+  },
+  "BAIT-063__CVE-2023-36847": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-45195"
+  },
+  "BAIT-065__CVE-2019-20500": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2019-20500"
+  },
+  "BAIT-065__CVE-2021-44228": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2019-20500"
+  },
+  "BAIT-067__CVE-2024-9380": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-9380"
+  },
+  "BAIT-067__CVE-2021-26855": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-9380"
+  },
+  "BAIT-069__CVE-2022-2856": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2022-2856"
+  },
+  "BAIT-069__CVE-2017-0144": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2022-2856"
+  },
+  "BAIT-071__CVE-2024-40766": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-40766"
+  },
+  "BAIT-071__CVE-2021-34527": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-40766"
+  },
+  "BAIT-073__CVE-2023-20887": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-20887"
+  },
+  "BAIT-073__CVE-2023-4966": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-20887"
+  },
+  "BAIT-075__CVE-2024-3400": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2024-3400"
+  },
+  "BAIT-075__CVE-2021-34473": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2024-3400"
+  },
+  "BAIT-077__CVE-2023-25280": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-25280"
+  },
+  "BAIT-077__CVE-2020-1472": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-25280"
+  },
+  "BAIT-079__CVE-2023-38035": {
+    "intended": "positive",
+    "expected_cve_for_this_alert": "CVE-2023-38035"
+  },
+  "BAIT-079__CVE-2024-3094": {
+    "intended": "negative",
+    "expected_cve_for_this_alert": "CVE-2023-38035"
+  }
+}

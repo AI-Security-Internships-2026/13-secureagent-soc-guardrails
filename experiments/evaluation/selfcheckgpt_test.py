@@ -114,10 +114,23 @@ def run():
     all_alerts = [{"class": "stated", **item} for item in STATED_ALERTS] + \
                  [{"class": "prompted", **item} for item in PROMPTED_ALERTS]
 
+    # Resume from a prior checkpoint if one exists -- same free-tier daily
+    # quota constraint as llm_judge_synthetic_test.py means this run can
+    # also span more than one day. Skip any alert id already present in a
+    # previous (possibly incomplete) run.
     results = []
-    for i, item in enumerate(all_alerts):
+    if os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH) as f:
+            prior = json.load(f)
+        if isinstance(prior.get("results"), list):
+            results = prior["results"]
+            print(f"Resuming from checkpoint: {len(results)} alerts already completed\n")
+    done_ids = {r["alert_id"] for r in results}
+    remaining = [item for item in all_alerts if item["alert"].alert_id not in done_ids]
+
+    for i, item in enumerate(remaining):
         alert = item["alert"]
-        print(f"[{i+1}/{len(all_alerts)}] {alert.alert_id} ({item['class']})...")
+        print(f"[{len(results)+1}/{len(all_alerts)}] {alert.alert_id} ({item['class']})...")
         samples = sample_citations(llm, alert, extract_cves, n_samples=N_SAMPLES)
         score = consistency_score(samples)
         citation_occurred = score["majority_id"] is not None

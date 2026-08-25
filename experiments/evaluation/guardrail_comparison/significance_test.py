@@ -114,6 +114,31 @@ def mcnemar(name_a: str, preds_a: dict, name_b: str, preds_b: dict) -> dict:
     }
 
 
+def holm_bonferroni(p_values: list) -> list:
+    """
+    Holm-Bonferroni step-down correction for a family of m hypothesis
+    tests. Needed here because COMPARISON_PAIRS runs 6 McNemar tests on
+    overlapping data (e.g. "hybrid" appears in 4 of the 6 pairs) -- testing
+    6 hypotheses at raw alpha=0.05 each inflates the family-wise false
+    positive rate well above 5%. Holm-Bonferroni controls that rate while
+    being less conservative than plain Bonferroni (dividing by the full m
+    for every test): only the smallest p-value is compared against
+    alpha/m, the next smallest against alpha/(m-1), and so on.
+
+    Returns adjusted p-values in the SAME order as the input list (not
+    sorted) -- each index i corresponds to p_values[i].
+    """
+    m = len(p_values)
+    indexed = sorted(range(m), key=lambda i: p_values[i])
+    adjusted = [0.0] * m
+    running_max = 0.0
+    for rank, orig_idx in enumerate(indexed):
+        adj = min(1.0, (m - rank) * p_values[orig_idx])
+        running_max = max(running_max, adj)
+        adjusted[orig_idx] = running_max
+    return adjusted
+
+
 def main():
     with open(RESULTS_PATH) as f:
         results = json.load(f)
@@ -132,20 +157,34 @@ def main():
         outcome = mcnemar(name_a, all_preds[name_a], name_b, all_preds[name_b])
         comparisons.append(outcome)
 
+    # Family-wise correction across all 6 comparisons -- see holm_bonferroni()
+    # docstring. Applied once all 6 raw p-values are known, not per-comparison.
+    raw_p_values = [c["p_value"] for c in comparisons]
+    corrected_p_values = holm_bonferroni(raw_p_values)
+    for outcome, corrected_p in zip(comparisons, corrected_p_values):
+        outcome["p_value_holm_bonferroni"] = round(corrected_p, 6)
+        outcome["significant_at_0.05_holm_bonferroni"] = bool(corrected_p < 0.05)
+
+    for outcome in comparisons:
+        name_a, name_b = outcome["a"], outcome["b"]
         c = outcome["contingency"]
         sig = "SIGNIFICANT" if outcome["significant_at_0.05"] else "not significant"
+        sig_corrected = "SIGNIFICANT" if outcome["significant_at_0.05_holm_bonferroni"] else "not significant"
         print(f"{name_a} vs {name_b}:")
         print(f"  both correct={c['both_correct']}  "
               f"{name_a}-only={c[f'{name_a}_only_correct']}  "
               f"{name_b}-only={c[f'{name_b}_only_correct']}  "
               f"both wrong={c['both_incorrect']}")
-        print(f"  method={outcome['method']}  p={outcome['p_value']:.4f}  ({sig} at alpha=0.05)\n")
+        print(f"  method={outcome['method']}  p={outcome['p_value']:.4f}  ({sig} at raw alpha=0.05)")
+        print(f"  Holm-Bonferroni corrected p={outcome['p_value_holm_bonferroni']:.4f}  "
+              f"({sig_corrected} after correcting for 6 comparisons)\n")
 
     output = {
         "task": "McNemar significance test on paired guardrail predictions",
         "source": RESULTS_PATH,
         "dataset_size": results["dataset_size"],
         "alpha": 0.05,
+        "multiple_comparisons_correction": "Holm-Bonferroni step-down, family size 6",
         "comparisons": comparisons,
     }
 

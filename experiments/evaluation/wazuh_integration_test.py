@@ -43,7 +43,7 @@ INDEXER_URL = "https://localhost:9200"
 INDEXER_AUTH = ("admin", "SecretPassword")
 ALERT_INDEX = "wazuh-alerts-*"
 MIN_RULE_LEVEL = 5  # drop routine "passed" SCA checks / pure noise below this
-MAX_ALERTS = 100
+MAX_ALERTS = 500  # raised from 100 once the live set grew past that (docs/all_results.md, live-data expansion to n~150) -- the SCA module's repeated-checklist re-indexing means raw alert count is always a multiple of the true unique count after dedup, so this needs real headroom above the target unique n, not just match it
 
 
 def _severity_from_level(level: int) -> str:

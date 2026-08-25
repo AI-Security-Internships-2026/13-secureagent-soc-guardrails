@@ -1,0 +1,749 @@
+{
+  "task": "Relevance classifier (_topical_overlap, threshold=0.15) vs. human judgment",
+  "n_labeled": 80,
+  "n_unlabeled": 0,
+  "confusion_matrix": {
+    "tp": 38,
+    "fp": 4,
+    "tn": 36,
+    "fn": 2
+  },
+  "accuracy": 0.925,
+  "accuracy_wilson_ci_95": [
+    0.8459,
+    0.9652
+  ],
+  "precision": 0.9048,
+  "precision_wilson_ci_95": [
+    0.7793,
+    0.9623
+  ],
+  "recall": 0.95,
+  "recall_wilson_ci_95": [
+    0.835,
+    0.9862
+  ],
+  "f1": 0.9268,
+  "results": [
+    {
+      "pair_id": "BAIT-049__CVE-2023-41763",
+      "alert_id": "BAIT-049",
+      "candidate_cve_id": "CVE-2023-41763",
+      "topical_overlap": 0.1765,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-073__CVE-2023-20887",
+      "alert_id": "BAIT-073",
+      "candidate_cve_id": "CVE-2023-20887",
+      "topical_overlap": 0.619,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-003__CVE-2014-0160",
+      "alert_id": "BAIT-003",
+      "candidate_cve_id": "CVE-2014-0160",
+      "topical_overlap": 0.4286,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-075__CVE-2024-3400",
+      "alert_id": "BAIT-075",
+      "candidate_cve_id": "CVE-2024-3400",
+      "topical_overlap": 0.55,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-065__CVE-2019-20500",
+      "alert_id": "BAIT-065",
+      "candidate_cve_id": "CVE-2019-20500",
+      "topical_overlap": 0.7407,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-073__CVE-2023-4966",
+      "alert_id": "BAIT-073",
+      "candidate_cve_id": "CVE-2023-4966",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-069__CVE-2022-2856",
+      "alert_id": "BAIT-069",
+      "candidate_cve_id": "CVE-2022-2856",
+      "topical_overlap": 0.4815,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-047__CVE-2024-6670",
+      "alert_id": "BAIT-047",
+      "candidate_cve_id": "CVE-2024-6670",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-029__CVE-2023-40044",
+      "alert_id": "BAIT-029",
+      "candidate_cve_id": "CVE-2023-40044",
+      "topical_overlap": 0.4231,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-051__CVE-2023-33009",
+      "alert_id": "BAIT-051",
+      "candidate_cve_id": "CVE-2023-33009",
+      "topical_overlap": 0.1333,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-011__CVE-2023-34362",
+      "alert_id": "BAIT-011",
+      "candidate_cve_id": "CVE-2023-34362",
+      "topical_overlap": 0.1957,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-067__CVE-2024-9380",
+      "alert_id": "BAIT-067",
+      "candidate_cve_id": "CVE-2024-9380",
+      "topical_overlap": 0.3333,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-037__CVE-2016-8735",
+      "alert_id": "BAIT-037",
+      "candidate_cve_id": "CVE-2016-8735",
+      "topical_overlap": 0.4348,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-063__CVE-2023-36847",
+      "alert_id": "BAIT-063",
+      "candidate_cve_id": "CVE-2023-36847",
+      "topical_overlap": 0.0625,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-033__CVE-2024-29059",
+      "alert_id": "BAIT-033",
+      "candidate_cve_id": "CVE-2024-29059",
+      "topical_overlap": 0.1905,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-077__CVE-2020-1472",
+      "alert_id": "BAIT-077",
+      "candidate_cve_id": "CVE-2020-1472",
+      "topical_overlap": 0.1905,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "BAIT-069__CVE-2017-0144",
+      "alert_id": "BAIT-069",
+      "candidate_cve_id": "CVE-2017-0144",
+      "topical_overlap": 0.0741,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-021__CVE-2019-5591",
+      "alert_id": "BAIT-021",
+      "candidate_cve_id": "CVE-2019-5591",
+      "topical_overlap": 0.037,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-019__CVE-2020-0601",
+      "alert_id": "BAIT-019",
+      "candidate_cve_id": "CVE-2020-0601",
+      "topical_overlap": 0.2812,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-001__CVE-2017-5638",
+      "alert_id": "BAIT-001",
+      "candidate_cve_id": "CVE-2017-5638",
+      "topical_overlap": 0.4167,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-031__CVE-2023-24489",
+      "alert_id": "BAIT-031",
+      "candidate_cve_id": "CVE-2023-24489",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-009__CVE-2022-22965",
+      "alert_id": "BAIT-009",
+      "candidate_cve_id": "CVE-2022-22965",
+      "topical_overlap": 0.1892,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-015__CVE-2020-1040",
+      "alert_id": "BAIT-015",
+      "candidate_cve_id": "CVE-2020-1040",
+      "topical_overlap": 0.027,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-025__CVE-2018-4878",
+      "alert_id": "BAIT-025",
+      "candidate_cve_id": "CVE-2018-4878",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-055__CVE-2022-42856",
+      "alert_id": "BAIT-055",
+      "candidate_cve_id": "CVE-2022-42856",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-013__CVE-2019-0708",
+      "alert_id": "BAIT-013",
+      "candidate_cve_id": "CVE-2019-0708",
+      "topical_overlap": 0.1724,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-041__CVE-2024-20953",
+      "alert_id": "BAIT-041",
+      "candidate_cve_id": "CVE-2024-20953",
+      "topical_overlap": 0.0385,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-059__CVE-2023-36845",
+      "alert_id": "BAIT-059",
+      "candidate_cve_id": "CVE-2023-36845",
+      "topical_overlap": 0.0952,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-027__CVE-2012-5054",
+      "alert_id": "BAIT-027",
+      "candidate_cve_id": "CVE-2012-5054",
+      "topical_overlap": 0.1111,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-041__CVE-2016-9563",
+      "alert_id": "BAIT-041",
+      "candidate_cve_id": "CVE-2016-9563",
+      "topical_overlap": 0.5769,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-017__CVE-2023-20273",
+      "alert_id": "BAIT-017",
+      "candidate_cve_id": "CVE-2023-20273",
+      "topical_overlap": 0.0426,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-027__CVE-2025-58034",
+      "alert_id": "BAIT-027",
+      "candidate_cve_id": "CVE-2025-58034",
+      "topical_overlap": 0.7778,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-077__CVE-2023-25280",
+      "alert_id": "BAIT-077",
+      "candidate_cve_id": "CVE-2023-25280",
+      "topical_overlap": 0.5714,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-061__CVE-2023-44221",
+      "alert_id": "BAIT-061",
+      "candidate_cve_id": "CVE-2023-44221",
+      "topical_overlap": 0.6087,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-007__CVE-2026-35616",
+      "alert_id": "BAIT-007",
+      "candidate_cve_id": "CVE-2026-35616",
+      "topical_overlap": 0.1579,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "BAIT-019__CVE-2017-6327",
+      "alert_id": "BAIT-019",
+      "candidate_cve_id": "CVE-2017-6327",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-067__CVE-2021-26855",
+      "alert_id": "BAIT-067",
+      "candidate_cve_id": "CVE-2021-26855",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-011__CVE-2021-30762",
+      "alert_id": "BAIT-011",
+      "candidate_cve_id": "CVE-2021-30762",
+      "topical_overlap": 0.1522,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "BAIT-005__CVE-2025-61757",
+      "alert_id": "BAIT-005",
+      "candidate_cve_id": "CVE-2025-61757",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-043__CVE-2023-46747",
+      "alert_id": "BAIT-043",
+      "candidate_cve_id": "CVE-2023-46747",
+      "topical_overlap": 0.1333,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-059__CVE-2026-20245",
+      "alert_id": "BAIT-059",
+      "candidate_cve_id": "CVE-2026-20245",
+      "topical_overlap": 0.2857,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-001__CVE-2019-7193",
+      "alert_id": "BAIT-001",
+      "candidate_cve_id": "CVE-2019-7193",
+      "topical_overlap": 0.0833,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-017__CVE-2022-30190",
+      "alert_id": "BAIT-017",
+      "candidate_cve_id": "CVE-2022-30190",
+      "topical_overlap": 0.1915,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-003__CVE-2024-21287",
+      "alert_id": "BAIT-003",
+      "candidate_cve_id": "CVE-2024-21287",
+      "topical_overlap": 0.0476,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-047__CVE-2018-6065",
+      "alert_id": "BAIT-047",
+      "candidate_cve_id": "CVE-2018-6065",
+      "topical_overlap": 0.55,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-005__CVE-2016-5195",
+      "alert_id": "BAIT-005",
+      "candidate_cve_id": "CVE-2016-5195",
+      "topical_overlap": 0.3793,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-065__CVE-2021-44228",
+      "alert_id": "BAIT-065",
+      "candidate_cve_id": "CVE-2021-44228",
+      "topical_overlap": 0.1111,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-045__CVE-2018-4939",
+      "alert_id": "BAIT-045",
+      "candidate_cve_id": "CVE-2018-4939",
+      "topical_overlap": 0.1429,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-007__CVE-2014-6271",
+      "alert_id": "BAIT-007",
+      "candidate_cve_id": "CVE-2014-6271",
+      "topical_overlap": 0.3158,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-025__CVE-2023-22515",
+      "alert_id": "BAIT-025",
+      "candidate_cve_id": "CVE-2023-22515",
+      "topical_overlap": 0.1667,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-057__CVE-2016-20017",
+      "alert_id": "BAIT-057",
+      "candidate_cve_id": "CVE-2016-20017",
+      "topical_overlap": 0.6111,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-051__CVE-2024-43468",
+      "alert_id": "BAIT-051",
+      "candidate_cve_id": "CVE-2024-43468",
+      "topical_overlap": 0.2,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-053__CVE-2022-38028",
+      "alert_id": "BAIT-053",
+      "candidate_cve_id": "CVE-2022-38028",
+      "topical_overlap": 0.1,
+      "classifier_predicted": "not_relevant",
+      "human_label": "relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "BAIT-061__CVE-2025-68686",
+      "alert_id": "BAIT-061",
+      "candidate_cve_id": "CVE-2025-68686",
+      "topical_overlap": 0.087,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-075__CVE-2021-34473",
+      "alert_id": "BAIT-075",
+      "candidate_cve_id": "CVE-2021-34473",
+      "topical_overlap": 0.05,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-029__CVE-2018-0296",
+      "alert_id": "BAIT-029",
+      "candidate_cve_id": "CVE-2018-0296",
+      "topical_overlap": 0.1538,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "BAIT-079__CVE-2024-3094",
+      "alert_id": "BAIT-079",
+      "candidate_cve_id": "CVE-2024-3094",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-037__CVE-2021-21220",
+      "alert_id": "BAIT-037",
+      "candidate_cve_id": "CVE-2021-21220",
+      "topical_overlap": 0.0435,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-021__CVE-2022-26134",
+      "alert_id": "BAIT-021",
+      "candidate_cve_id": "CVE-2022-26134",
+      "topical_overlap": 0.1481,
+      "classifier_predicted": "not_relevant",
+      "human_label": "relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "BAIT-049__CVE-2023-35078",
+      "alert_id": "BAIT-049",
+      "candidate_cve_id": "CVE-2023-35078",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-071__CVE-2024-40766",
+      "alert_id": "BAIT-071",
+      "candidate_cve_id": "CVE-2024-40766",
+      "topical_overlap": 0.4286,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-039__CVE-2026-15410",
+      "alert_id": "BAIT-039",
+      "candidate_cve_id": "CVE-2026-15410",
+      "topical_overlap": 0.0417,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-031__CVE-2025-13223",
+      "alert_id": "BAIT-031",
+      "candidate_cve_id": "CVE-2025-13223",
+      "topical_overlap": 0.4667,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-015__CVE-2018-13379",
+      "alert_id": "BAIT-015",
+      "candidate_cve_id": "CVE-2018-13379",
+      "topical_overlap": 0.1892,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-055__CVE-2021-42278",
+      "alert_id": "BAIT-055",
+      "candidate_cve_id": "CVE-2021-42278",
+      "topical_overlap": 0.2,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-045__CVE-2020-3161",
+      "alert_id": "BAIT-045",
+      "candidate_cve_id": "CVE-2020-3161",
+      "topical_overlap": 0.6429,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-063__CVE-2024-45195",
+      "alert_id": "BAIT-063",
+      "candidate_cve_id": "CVE-2024-45195",
+      "topical_overlap": 0.25,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-013__CVE-2016-7892",
+      "alert_id": "BAIT-013",
+      "candidate_cve_id": "CVE-2016-7892",
+      "topical_overlap": 0.1034,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-023__CVE-2020-11651",
+      "alert_id": "BAIT-023",
+      "candidate_cve_id": "CVE-2020-11651",
+      "topical_overlap": 0.275,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-043__CVE-2023-1389",
+      "alert_id": "BAIT-043",
+      "candidate_cve_id": "CVE-2023-1389",
+      "topical_overlap": 0.3333,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-053__CVE-2018-5002",
+      "alert_id": "BAIT-053",
+      "candidate_cve_id": "CVE-2018-5002",
+      "topical_overlap": 0.1,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-035__CVE-2019-7192",
+      "alert_id": "BAIT-035",
+      "candidate_cve_id": "CVE-2019-7192",
+      "topical_overlap": 0.5,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-023__CVE-2024-20439",
+      "alert_id": "BAIT-023",
+      "candidate_cve_id": "CVE-2024-20439",
+      "topical_overlap": 0.025,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-033__CVE-2025-14174",
+      "alert_id": "BAIT-033",
+      "candidate_cve_id": "CVE-2025-14174",
+      "topical_overlap": 0.0476,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-039__CVE-2024-13161",
+      "alert_id": "BAIT-039",
+      "candidate_cve_id": "CVE-2024-13161",
+      "topical_overlap": 0.4167,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-071__CVE-2021-34527",
+      "alert_id": "BAIT-071",
+      "candidate_cve_id": "CVE-2021-34527",
+      "topical_overlap": 0.1429,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-079__CVE-2023-38035",
+      "alert_id": "BAIT-079",
+      "candidate_cve_id": "CVE-2023-38035",
+      "topical_overlap": 0.5185,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-035__CVE-2024-7593",
+      "alert_id": "BAIT-035",
+      "candidate_cve_id": "CVE-2024-7593",
+      "topical_overlap": 0.05,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-057__CVE-2020-25213",
+      "alert_id": "BAIT-057",
+      "candidate_cve_id": "CVE-2020-25213",
+      "topical_overlap": 0.1111,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "BAIT-009__CVE-2024-3273",
+      "alert_id": "BAIT-009",
+      "candidate_cve_id": "CVE-2024-3273",
+      "topical_overlap": 0.0811,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    }
+  ]
+}
