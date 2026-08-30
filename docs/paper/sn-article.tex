@@ -1,870 +1,1162 @@
-%Version 3.1 December 2024
-% See section 11 of the User Manual for version history
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                                                 %%
-%% Please do not use \input{...} to include other tex files.       %%
-%% Submit your LaTeX manuscript as one .tex document.              %%
-%%                                                                 %%
-%% All additional figures and files should be attached             %%
-%% separately and not embedded in the \TeX\ document itself.       %%
-%%                                                                 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Version 3.1 December 2024 (Springer Nature sn-jnl template)
+%%
+%% LLMCite paper, converted from docs/paper/paper_draft.md.
+%% Re-ported 2026-08-29 after a length-reduction pass (target: 12-18 pages,
+%% see docs/paper/paper_draft.md's own text for what was cut and why --
+%% mainly Sect. 4.10 "Supporting evaluation" and the CVE-/ATT&CK-bait
+%% methodology narrative; every number and finding was preserved).
+%% docs/paper/paper_draft.md remains the source of truth for future edits.
+%%
+%% The markdown draft's own "Draft status -- read this first (remove
+%% before submission)" callout is a maintenance/changelog note about the
+%% draft itself, not paper content, and is explicitly marked to be removed
+%% before submission -- so it is kept only as a source comment, not
+%% rendered, consistent with its own instruction.
+%% ---------------------------------------------------------------------
 
-%%\documentclass[referee,sn-basic]{sn-jnl}% referee option is meant for double line spacing
-
-%%=======================================================%%
-%% to print line numbers in the margin use lineno option %%
-%%=======================================================%%
-
-%%\documentclass[lineno,pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
-
-%%=========================================================================================%%
-%% the documentclass is set to pdflatex as default. You can delete it if not appropriate.  %%
-%%=========================================================================================%%
-
-%%\documentclass[sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
-
-%%Note: the following reference styles support Namedate and Numbered referencing. By default the style follows the most common style. To switch between the options you can add or remove Numbered in the optional parenthesis. 
-%%The option is available for: sn-basic.bst, sn-chicago.bst%  
- 
-%%\documentclass[pdflatex,sn-nature]{sn-jnl}% Style for submissions to Nature Portfolio journals
-%%\documentclass[pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
 \documentclass[pdflatex,sn-mathphys-num]{sn-jnl}% Math and Physical Sciences Numbered Reference Style
-%%\documentclass[pdflatex,sn-mathphys-ay]{sn-jnl}% Math and Physical Sciences Author Year Reference Style
-%%\documentclass[pdflatex,sn-aps]{sn-jnl}% American Physical Society (APS) Reference Style
-%%\documentclass[pdflatex,sn-vancouver-num]{sn-jnl}% Vancouver Numbered Reference Style
-%%\documentclass[pdflatex,sn-vancouver-ay]{sn-jnl}% Vancouver Author Year Reference Style
-%%\documentclass[pdflatex,sn-apa]{sn-jnl}% APA Reference Style
-%%\documentclass[pdflatex,sn-chicago]{sn-jnl}% Chicago-based Humanities Reference Style
-
-%%%% Standard Packages
-%%<additional latex packages if required can be included here>
 
 \usepackage{graphicx}%
-\usepackage{multirow}%
 \usepackage{amsmath,amssymb,amsfonts}%
-\usepackage{amsthm}%
-\usepackage{mathrsfs}%
 \usepackage[title]{appendix}%
 \usepackage{xcolor}%
 \usepackage{textcomp}%
-\usepackage{manyfoot}%
 \usepackage{booktabs}%
-\usepackage{algorithm}%
-\usepackage{algorithmicx}%
-\usepackage{algpseudocode}%
-\usepackage{listings}%
-%%%%
-
-%%%%%=============================================================================%%%%
-%%%%  Remarks: This template is provided to aid authors with the preparation
-%%%%  of original research articles intended for submission to journals published 
-%%%%  by Springer Nature. The guidance has been prepared in partnership with 
-%%%%  production teams to conform to Springer Nature technical requirements. 
-%%%%  Editorial and presentation requirements differ among journal portfolios and 
-%%%%  research disciplines. You may find sections in this template are irrelevant 
-%%%%  to your work and are empowered to omit any such section if allowed by the 
-%%%%  journal you intend to submit to. The submission guidelines and policies 
-%%%%  of the journal take precedence. A detailed User Manual is available in the 
-%%%%  template package for technical guidance.
-%%%%%=============================================================================%%%%
-
-%% as per the requirement new theorem styles can be included as shown below
-\theoremstyle{thmstyleone}%
-\newtheorem{theorem}{Theorem}%  meant for continuous numbers
-%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
-%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
-\newtheorem{proposition}[theorem]{Proposition}% 
-%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
-
-\theoremstyle{thmstyletwo}%
-\newtheorem{example}{Example}%
-\newtheorem{remark}{Remark}%
-
-\theoremstyle{thmstylethree}%
-\newtheorem{definition}{Definition}%
+\usepackage{rotating}% sidewaystable
 
 \raggedbottom
-%%\unnumbered% uncomment this for unnumbered level heads
 
 \begin{document}
 
-%\title[Article Title]{Classifying Hallucinated CVE Citations in LLM-Based SOC Agents}
-\title{LLMCite: Grounded Verification of Hallucinated CVE and ATT&CK Citations in LLM-Generated SoSC Reports}
+\title{LLMCite: Grounded Verification of Hallucinated CVE and MITRE ATT\&CK Citations in LLM-Generated SOC Reports}
 
+%% TODO: replace with a real contact email before submission.
+\author*[1]{\fnm{Emaan Afroz} \sur{Khuram}}\email{TODO@example.com}
 
-%%=============================================================%%
-%% GivenName	-> \fnm{Joergen W.}
-%% Particle	-> \spfx{van der} -> surname prefix
-%% FamilyName	-> \sur{Ploeg}
-%% Suffix	-> \sfx{IV}
-%% \author*[1,2]{\fnm{Joergen W.} \spfx{van der} \sur{Ploeg} 
-%%  \sfx{IV}}\email{iauthor@gmail.com}
-%%=============================================================%%
+\affil*[1]{\orgdiv{TECIP}, \orgname{Scuola Superiore Sant'Anna}, \orgaddress{\street{CNIT/PNTLab}, \city{Pisa}, \country{Italy}}}
 
-\author*[1,2]{\fnm{First} \sur{Author}}\email{iauthor@gmail.com}
+\abstract{Large language models increasingly generate Security Operations
+Center (SOC) threat reports citing CVE identifiers and MITRE ATT\&CK
+techniques as supporting evidence. These citations are rarely verified:
+models can fabricate identifiers, misattribute real ones, or recall
+citations the alert never provided, and a flat ``flagged/not flagged''
+treatment cannot distinguish an invented CVE from a real-but-unevidenced
+one, though the two pose different risks to an analyst's trust.
 
-\author[2,3]{\fnm{Second} \sur{Author}}\email{iiauthor@gmail.com}
-\equalcont{These authors contributed equally to this work.}
+We ask whether such reports can be automatically checked for citations
+unsupported by the evidence given, and whether distinguishing \textit{why}
+--- fabricated, irrelevant, or plausible enough to look correct ---
+provides assurance a binary flag cannot. LLMCite answers with a two-stage
+pipeline: grounding against the source alert, then verification against
+authoritative sources (NVD, the MITRE ATT\&CK STIX corpus) into a
+four-class taxonomy (plus a fifth for withdrawn identifiers). The central
+finding is the Real-and-Plausible class: a real, topically appropriate
+citation never stated in the evidence, the case most likely to evade
+human review because it looks correct.
 
-\author[1,2]{\fnm{Third} \sur{Author}}\email{iiiauthor@gmail.com}
-\equalcont{These authors contributed equally to this work.}
+Adversarial bait tests across both claim types confirm the pipeline
+rarely induces spontaneous citation. The central empirical validation: a
+SelfCheckGPT-style self-consistency baseline run on the identical alerts
+correctly identifies grounded citations but misses most ungrounded ones,
+because most misses are the model consistently recalling a real,
+correct-but-uncited identifier from training knowledge --- indistinguishable
+from genuine grounding to a consistency-only signal, but exactly the
+Real-and-Plausible pattern external grounding is built to catch. The
+deterministic checker is significantly more accurate on the same alerts
+(McNemar $p=0.012$). Supporting evaluation --- an LLM-judge baseline,
+third-party and live SIEM data, and the pipeline's input-guardrail and
+PII-redaction layers --- further validates the system without altering this
+central finding. LLMCite is a domain-specialized citation-grounding
+verifier for security-critical LLM applications, distinct from prior work
+on scholarly references.}
 
-\affil*[1]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{100190}, \state{State}, \country{Country}}}
-
-\affil[2]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{10587}, \state{State}, \country{Country}}}
-
-\affil[3]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{610101}, \state{State}, \country{Country}}}
-
-%%==================================%%
-%% Sample for unstructured abstract %%
-%%==================================%%
-
-\abstract{Large language models are increasingly used to generate Security Operations Center (SOC) threat reports, automatically summarizing alerts and citing supporting evidence such as CVE identifiers and MITRE ATT\&CK techniques. These citations are rarely verified: models — particularly smaller, low-latency variants favored for real-time triage — can fabricate plausible-sounding identifiers, misattribute real ones to the wrong context, or recall genuinely correct citations the source alert never actually provided. A flat "flagged/not flagged" treatment of these cases obscures an important distinction: a wholly invented CVE and a real-but-unevidenced one carry different risk profiles for an analyst deciding how much to trust the report.
-
-We present LLMCite, a two-stage groundedness-verification pipeline for LLM-generated SOC reports. Stage one deterministically checks whether a cited CVE or ATT&CK identifier is supported by the source alert; stage two verifies ungrounded citations against authoritative external sources (the National Vulnerability Database and the MITRE ATT&CK STIX corpus) and classifies each into one of four categories — Fabricated, Real-but-Irrelevant, Real-and-Plausible, or Unverified — rather than a binary label. We show that Real-and-Plausible citations, despite superficially appearing legitimate, represent the case most likely to evade existing review triggers, and evaluate SecCite against an adversarial CVE/ATT&CK-citation benchmark and [N] baseline detectors, including an LLM-as-judge comparator. [Headline result once measured, e.g., "LLMCite achieves X\% precision/recall at Yms latency, outperforming..."]. We position SecCite as a domain-specialized instance of citation-grounding verification for security-critical LLM applications, distinct from prior citation-hallucination work targeting scholarly references}
-
-%%================================%%
-%% Sample for structured abstract %%
-%%================================%%
-
-% \abstract{\textbf{Purpose:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
-% 
-% \textbf{Methods:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
-% 
-% \textbf{Results:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
-% 
-% \textbf{Conclusion:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.}
-
-\keywords{keyword1, Keyword2, Keyword3, Keyword4}
-
-%%\pacs[JEL Classification]{D8, H51}
-
-%%\pacs[MSC Classification]{35A01, 65L10, 65L12, 65L20, 65L70}
+\keywords{hallucination detection, CVE grounding, MITRE ATT\&CK, LLM guardrails}
 
 \maketitle
 
-\section{Introduction}\label{sec1}
-
-The Introduction section, of referenced text \cite{bib1} expands on the background of the work (some overlap with the Abstract is acceptable). The introduction should not include subheadings.
-
-Springer Nature does not impose a strict layout as standard however authors are advised to check the individual requirements for the journal they are planning to submit to as there may be journal-level preferences. When preparing your text please also be aware that some stylistic choices are not supported in full text XML (publication version), including coloured font. These will not be replicated in the typeset article if it is accepted. 
-
-\section{Literature Review}\label{sec:litreview}
-
-Eight primary research papers, benchmarks, or actively maintained open-source projects with a documented technical method form the core literature basis for this work. No survey papers are counted in this set; two survey citations are instead kept separately as background/motivational sources (Section~\ref{subsec:litreview-background}).
-
-\subsection{Chosen papers}\label{subsec:litreview-chosen}
-
-\begin{table}[h]
-\caption{Chosen papers for the literature review}\label{tab:litreview-chosen}
-\begin{tabular}{@{}p{0.3cm}p{2.3cm}p{2.6cm}p{6.3cm}@{}}
-\toprule
-\# & Title (short) & Authors & Relevance \\
-\midrule
-1 & InjecAgent & Zhan, Liang, Ying, Kang & Threat model for malicious log entries \\
-2 & SelfCheckGPT & Manakul, Liusie, Gales & Output guardrail hallucination check --- zero-resource consistency method \\
-3 & TRAM (Threat Report ATT\&CK Mapper) & MITRE Engenuity CTID & Direct prior art for ATT\&CK-technique extraction/mapping from text \\
-4 & NeMo Guardrails & Rebedea et al. & Guardrail architecture \& latency \\
-5 & Presidio & Microsoft & PII redaction, leakage metric \\
-6 & FActScore & Min et al. & Grounding methodology --- atomic fact verification against a knowledge source \\
-7 & The Instruction Hierarchy & Wallace, Xiao, Leike, Weng, Heidecke, Beutel (OpenAI) & Injection \textbf{defense}, not just attack --- provenance-aware instruction priority \\
-8 & Judging LLM-as-a-Judge (MT-Bench / Chatbot Arena) & Zheng et al. & Methodology for the planned LLM-judge baseline (Aug 23 milestone) \\
-\botrule
-\end{tabular}
-\end{table}
-
-\subsection{Paper 1 --- InjecAgent \cite{injecagent2024}}\label{subsec:litreview-p1}
-
-\begin{description}
-\item[Full title] InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents
-\item[Authors] Zhan, Q., Liang, Z., Ying, Z., Kang, D.
-\item[Year] 2024
-\item[Venue] Findings of ACL 2024
-\item[URL/DOI] \url{https://arxiv.org/abs/2403.02691}
-\item[Method] Benchmark of 1{,}054 test cases evaluating tool-integrated LLM agents against indirect prompt injection embedded in tool outputs (e.g.\ emails, web content, logs)
-\item[Dataset] Synthetic tool-use scenarios across multiple agent tasks
-\item[Key result] Reinforcing attacker instructions with a ``hacking prompt'' nearly doubles the attack success rate against ReAct-prompted GPT-4
-\item[Limitation] Synthetic benchmark; does not cover real-world SOC log formats or domain-specific injection patterns
-\item[Relevance] Directly models the threat in this project's input guardrail layer --- malicious instructions hidden inside alert/log data that the SOC agent ingests (maps to RQ3)
-\end{description}
-
-\medskip\noindent\textit{Notes:} Most directly applicable paper for the ``Input Guardrail'' box in the architecture diagram. Useful as a template for building our own injection benchmark in \texttt{experiments/}.
-
-\subsection{Paper 2 --- SelfCheckGPT \cite{selfcheckgpt2023}}\label{subsec:litreview-p2}
-
-\begin{description}
-\item[Full title] SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models
-\item[Authors] Manakul, P., Liusie, A., Gales, M.
-\item[Year] 2023
-\item[Venue] EMNLP 2023
-\item[URL/DOI] \url{https://arxiv.org/abs/2303.08896}
-\item[Method] Samples multiple stochastic responses to the same prompt and measures consistency between them --- sentences that vary a lot across samples are flagged as likely hallucinated, with no external knowledge base required
-\item[Dataset] WikiBio-based passages generated by GPT-3, human-annotated for factuality at the sentence level
-\item[Key result] Sentence-level consistency scoring detects non-factual sentences competitively with methods that require access to the model's token-level output probabilities, despite being fully black-box
-\item[Limitation] Zero-resource means it can't confirm a claim is \textit{true} against a ground truth --- only that the model is \textit{inconsistent} about it, which is a weaker (but cheaper) signal than external verification
-\item[Relevance] Direct methodological anchor for the project's planned SelfCheckGPT comparison (Aug 23 milestone) --- contrasts with this project's own approach, which verifies against an authoritative external source (NVD/MITRE) rather than checking self-consistency alone
-\end{description}
-
-\medskip\noindent\textit{Notes:} Replaces the earlier ``Survey on Hallucination in LLMs'' citation --- that survey's own most useful content \textit{was} a description of this paper, so citing SelfCheckGPT directly is strictly better: it's the primary source, and it's the actual technique in scope for the cross-method comparison later in the project.
-
-\subsection{Paper 3 --- TRAM (Threat Report ATT\&CK Mapper) \cite{tram2023}}\label{subsec:litreview-p3}
-
-\begin{description}
-\item[Full title] Threat Report ATT\&CK Mapper (TRAM)
-\item[Authors] MITRE Engenuity Center for Threat-Informed Defense (with CrowdStrike as a contributing partner on the LLM-based version)
-\item[Year] v1: 2021; LLM-based update: 2023
-\item[Venue] Open-source project (GitHub, Center for Threat-Informed Defense)
-\item[URL/DOI] \url{https://github.com/mitre-attack/tram} ; \url{https://ctid.mitre.org/projects/threat-report-attck-mapper-tram-v1/}
-\item[Method] Trains/fine-tunes ML models (originally classical NLP, later LLM-based) to automatically identify MITRE ATT\&CK technique mentions in prose-format cyber threat intelligence reports, with a human-in-the-loop validation UI
-\item[Dataset] Corpus of analyst-annotated threat intelligence reports mapped to ATT\&CK techniques
-\item[Key result] Automates a task that is otherwise manual, slow, and inconsistent across analysts --- mapping free-text threat reports to structured ATT\&CK technique IDs
-\item[Limitation] Extracts/maps technique mentions from \textit{trusted} analyst-authored reports; does not address the adversarial case this project targets --- an LLM \textit{fabricating} a technique ID that was never actually present, or citing a real-but-irrelevant one
-\item[Relevance] Closest existing prior art to this project's MITRE ATT\&CK grounding checker (Week 9). TRAM solves ``find real technique mentions in text''; this project solves the complementary, adversarial problem --- ``verify a \textit{claimed} technique citation is real, current, and topically grounded'' --- worth stating explicitly as the point of differentiation
-\end{description}
-
-\medskip\noindent\textit{Notes:} Replaces the earlier ``AI-Augmented SOC Survey'' citation. This is a much stronger match --- it's the one existing system doing ATT\&CK-from-text extraction, which is exactly the space this project's own contribution sits in. Frame the comparison as extraction (TRAM) vs.\ adversarial verification (this project) --- that contrast is a good sentence for the paper's related-work gap statement.
-
-\subsection{Paper 4 --- NeMo Guardrails \cite{nemoguardrails2023}}\label{subsec:litreview-p4}
-
-\begin{description}
-\item[Full title] NeMo Guardrails: A Toolkit for Controllable and Safe LLM Applications with Programmable Rails
-\item[Authors] Rebedea, T., Dinu, R., et al.
-\item[Year] 2023
-\item[Venue] NVIDIA (toolkit paper)
-\item[URL/DOI] \url{https://www.semanticscholar.org/paper/NeMo-Guardrails}
-\item[Method] Introduces Colang, a domain-specific language for defining programmable guardrail policies that intercept/validate input and output across five pipeline stages
-\item[Dataset] N/A (framework)
-\item[Key result] GPU-accelerated architecture achieves sub-100ms response times; native integration with LangChain/LangGraph
-\item[Limitation] General-purpose conversational control; does not enforce provenance-aware authority ordering between system instructions and untrusted content unless explicitly configured
-\item[Relevance] Evaluated directly in Week 2 as a candidate input-guardrail framework; its LLM-based Colang intent classification proved unreliable on a local 7B model for this project's injection-detection task, motivating the switch to a deterministic Python guardrail (documented as RQ5 in the proposal)
-\end{description}
-
-\medskip\noindent\textit{Notes:} Limitation noted here matters a lot for the SOC use case --- by default it won't distinguish ``trusted system prompt'' from ``untrusted log content'' without explicit configuration. See Paper 7 (Instruction Hierarchy) for a primary paper addressing exactly this gap.
-
-\subsection{Paper 5 --- Presidio \cite{presidio2023}}\label{subsec:litreview-p5}
-
-\begin{description}
-\item[Full title] Presidio: An open-source framework for detecting, redacting, masking, and anonymizing sensitive data (PII)
-\item[Authors] Microsoft
-\item[Year] Ongoing (actively maintained)
-\item[Venue] GitHub / Microsoft open source
-\item[URL/DOI] \url{https://github.com/microsoft/presidio}
-\item[Method] Hybrid PII detection combining Named Entity Recognition (spaCy), regex pattern matching, rule-based logic, and checksum validation
-\item[Dataset] N/A (tool; ships with predefined recognizers for common entity types)
-\item[Key result] Detects entities like names, emails, phone numbers, SSNs, credit cards, and locations, with configurable anonymization operators (replace, mask, hash, redact, encrypt)
-\item[Limitation] Self-documented: automated detection provides no guarantee of catching all sensitive information; additional layered protections are recommended
-\item[Relevance] Direct implementation choice for the output guardrail's PII redaction component; its stated limitation directly informs the ``PII leakage rate'' evaluation metric
-\end{description}
-
-\medskip\noindent\textit{Notes:} The explicit ``no guarantee'' caveat from Microsoft is worth quoting in the final report when discussing residual risk after guardrails are applied.
-
-\subsection{Paper 6 --- FActScore \cite{factscore2023}}\label{subsec:litreview-p6}
-
-\begin{description}
-\item[Full title] FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation
-\item[Authors] Min, S., Krishna, K., Lyu, X., Lewis, M., Yih, W., Koh, P.W., Iyyer, M., Zettlemoyer, L., Hajishirzi, H.
-\item[Year] 2023
-\item[Venue] EMNLP 2023
-\item[URL/DOI] \url{https://arxiv.org/abs/2305.14251}
-\item[Method] Breaks a long-form generation into individual ``atomic facts,'' then checks each one against a reliable knowledge source, reporting the percentage supported
-\item[Dataset] Human-written biographies generated by InstructGPT, ChatGPT, and PerplexityAI, with human factuality annotations; also an automated estimator validated against 6{,}500 generations from 13 LMs
-\item[Key result] Even strong commercial models are far from perfectly factual (ChatGPT: 58\% atomic-fact precision on biographies); the automated FActScore estimator matches human judgment with under 2\% error
-\item[Limitation] Designed for open-domain biographical text with a broad reference corpus (Wikipedia); doesn't address a domain where the ``knowledge source'' is a structured, versioned technical database (like NVD or MITRE ATT\&CK) rather than free-text biography articles
-\item[Relevance] This project's core method --- decompose an LLM report into claims (CVE IDs, ATT\&CK technique IDs), verify each atomically against an authoritative source, classify by outcome --- is structurally the same pattern FActScore establishes, specialized to the security domain. Good citation for justifying the methodology, not just the SOC application
-\end{description}
-
-\medskip\noindent\textit{Notes:} This is the strongest ``prior art for our core method'' citation in the whole review --- worth citing prominently in the methodology section, not just related work, since the four-class taxonomy (\texttt{FABRICATED}/\texttt{REAL\_BUT\_IRRELEVANT}/\texttt{REAL\_AND\_PLAUSIBLE}/\texttt{UNVERIFIED}) is a domain-specialized descendant of this atomic-verification idea.
-
-\subsection{Paper 7 --- The Instruction Hierarchy \cite{instructionhierarchy2024}}\label{subsec:litreview-p7}
-
-\begin{description}
-\item[Full title] The Instruction Hierarchy: Training LLMs to Prioritize Privileged Instructions
-\item[Authors] Wallace, E., Xiao, K., Leike, R., Weng, L., Heidecke, J., Beutel, A.
-\item[Year] 2024
-\item[Venue] arXiv (OpenAI)
-\item[URL/DOI] \url{https://arxiv.org/abs/2404.13208}
-\item[Method] Proposes an explicit instruction hierarchy (system prompt \textgreater\ trusted user input \textgreater\ untrusted third-party content) and an automated synthetic-data generation method to fine-tune models to selectively ignore lower-privileged instructions when they conflict with higher-privileged ones
-\item[Dataset] Synthetically generated conflicting-instruction examples; evaluated against held-out prompt injection and jailbreak attack types not seen during training
-\item[Key result] Substantially increases robustness against injection/jailbreak attacks, including attack types absent from training data, with minimal loss of general capability
-\item[Limitation] Requires fine-tuning access to the base model --- not applicable as a drop-in guardrail for a third-party API model (like this project's Groq-hosted Llama backend), where the defense has to live in the input/output layer instead
-\item[Relevance] Fills the gap left by the InjecAgent paper (attack-side only) --- this is a primary paper on the \textit{defense} side, and it names precisely the property NeMo Guardrails' own documentation admits it lacks by default (see Paper 4's limitation): provenance-aware authority ordering between trusted and untrusted content
-\end{description}
-
-\medskip\noindent\textit{Notes:} Good paragraph pairing: cite Paper 4's limitation, then this paper as ``here is what a principled fix to that gap looks like at the model-training level, versus this project's guardrail-layer approach at inference time.''
-
-\subsection{Paper 8 --- Judging LLM-as-a-Judge \cite{llmjudge2023}}\label{subsec:litreview-p8}
-
-\begin{description}
-\item[Full title] Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena
-\item[Authors] Zheng, L., Chiang, W., Sheng, Y., Zhuang, S., Wu, Z., Zhuang, Y., Lin, Z., Li, Z., Li, D., Xing, E.P., Zhang, H., Gonzalez, J.E., Stoica, I.
-\item[Year] 2023
-\item[Venue] NeurIPS 2023, Datasets and Benchmarks Track
-\item[URL/DOI] \url{https://arxiv.org/abs/2306.05685}
-\item[Method] Uses strong LLMs (e.g.\ GPT-4) as automated judges to score model responses to open-ended questions, then validates judge reliability against large-scale human preference data (MT-Bench, Chatbot Arena)
-\item[Dataset] MT-Bench (multi-turn question set), 3K expert votes, 30K human-preference conversations from Chatbot Arena
-\item[Key result] Strong LLM judges achieve over 80\% agreement with human preferences --- comparable to human-human agreement --- but exhibit documented biases: position bias, verbosity bias, self-enhancement bias, and limited reasoning ability on math/logic questions
-\item[Limitation] Validated on general open-ended chat quality, not on a security-specific, high-stakes factual-verification task like classifying whether a CVE/ATT\&CK citation is grounded --- the documented biases (especially self-enhancement, if the same model family judges and generates) are a real risk to control for
-\item[Relevance] Direct methodology source for the planned LLM-judge baseline (Aug 23 milestone) --- its documented bias list is exactly what to check for/report when using an LLM judge as a comparison point against this project's deterministic, database-grounded verification
-\end{description}
-
-\medskip\noindent\textit{Notes:} When implementing the LLM-judge baseline, deliberately use a different model family for the judge than for the SOC agent's own analysis, to avoid the self-enhancement bias this paper documents.
-
-\subsection{Background sources (not used as primary literature)}\label{subsec:litreview-background}
-
-These two survey papers were part of the original Week 1 chosen-papers set. Surveys are useful for motivating the background/introduction, but they aren't primary research, so they've been moved out of the main literature review (Section~\ref{subsec:litreview-chosen}, which the assignment requires to be primary sources) and kept here for background citations only.
-
-\begin{table}[h]
-\caption{Background survey sources}\label{tab:litreview-background}
-\begin{tabular}{@{}p{3.4cm}p{2.2cm}p{0.8cm}p{6.1cm}@{}}
-\toprule
-Title & Authors & Year & Use \\
-\midrule
-A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions \cite{hallucinationsurvey2024} & Huang, L. et al. & 2024 & Cite in the introduction to establish that hallucination detection is an open problem with no dominant method --- sets up the motivation before narrowing to this project's grounding-based approach. \\
-AI-Augmented SOC: A Survey of LLMs and Agents for Security Automation \cite{aisocsurvey2025} & (MDPI authors) & 2025 & Cite in the introduction for concrete baseline SOC metrics (the cited deployment's false-positive rate and MTTR improvement) to motivate \textit{why} SOC automation matters before discussing its risks. \\
-\botrule
-\end{tabular}
-\end{table}
-
-\subsection{Reference table}\label{subsec:litreview-reftable}
-
-\begin{sidewaystable}
-\caption{Full reference table for the chosen literature}\label{tab:litreview-reftable}
-\begin{tabular*}{\textheight}{@{\extracolsep\fill}p{0.3cm}p{2cm}p{2.2cm}p{1cm}p{4.5cm}p{3cm}p{4.5cm}}
-\toprule
-\# & Title (short) & Authors & Year & Method & Dataset & Relevance \\
-\midrule
-1 & InjecAgent & Zhan, Liang, Ying, Kang & 2024 & Benchmark of indirect prompt injection against tool-using LLM agents & 1{,}054 test cases across tool-integrated agents & RQ3 --- threat model for malicious log entries \\
-2 & SelfCheckGPT & Manakul, Liusie, Gales & 2023 & Zero-resource, sampling-based consistency check for hallucination & WikiBio passages, human-annotated & RQ4 --- comparison baseline for the output guardrail's hallucination check \\
-3 & TRAM & MITRE Engenuity CTID & 2021--2023 & ML/LLM-based extraction of ATT\&CK technique mentions from CTI reports & Analyst-annotated threat reports & Direct prior art for the ATT\&CK-grounding checker (Week 9) \\
-4 & NeMo Guardrails & Rebedea et al. & 2023 & Colang-based programmable rails across 5 pipeline stages & N/A (framework) & RQ1/RQ2 --- evaluated and rejected as the input-guardrail approach \\
-5 & Presidio & Microsoft & Ongoing & Hybrid NER + regex + rule-based PII detection/anonymization & N/A (tool) & Output guardrail --- PII redaction, leakage metric \\
-6 & FActScore & Min et al. & 2023 & Atomic fact decomposition + verification against a knowledge source & Human/model-generated biographies & Core methodological pattern this project specializes to CVE/ATT\&CK grounding \\
-7 & Instruction Hierarchy & Wallace et al. (OpenAI) & 2024 & Fine-tuning models to prioritize privileged instructions & Synthetic conflicting-instruction data & Injection defense --- the gap InjecAgent's attack-only benchmark leaves open \\
-8 & LLM-as-a-Judge & Zheng et al. & 2023 & LLM-judge scoring validated against human preference data & MT-Bench, Chatbot Arena & Methodology for the planned LLM-judge baseline (Aug 23 milestone) \\
-\botrule
-\end{tabular*}
-\end{sidewaystable}
-
-\subsection{Similar projects / comparable systems}\label{subsec:litreview-comparable}
-
-Distinct from the academic literature above --- these are deployed commercial products doing LLM-assisted SOC work, cited via their own technical documentation rather than peer-reviewed papers. Comparing against them (not just against academic prior art) is what makes the ``why does this project matter'' argument concrete: none of them expose \textit{how} a citation is verified, which is precisely this project's contribution.
-
-\begin{itemize}
-\item \textbf{Microsoft Security Copilot} --- \url{https://www.microsoft.com/en-us/security/business/ai-machine-learning/microsoft-security-copilot}
-\item \textbf{Google Chronicle / Gemini for Security (SecLM)} --- \url{https://cloud.google.com/security/ai}
-\item \textbf{IBM QRadar Advisor with Watson} --- \url{https://www.ibm.com/products/qradar-siem}
-\item \textbf{Elastic AI Assistant for Security} --- \url{https://www.elastic.co/security/ai}
-\item \textbf{CrowdStrike Charlotte AI} --- \url{https://www.crowdstrike.com/platform/charlotte-ai/}
-\item \textbf{Dropzone AI, Prophet Security, Radiant Security} --- smaller, more directly comparable AI-SOC-analyst startups; cite via their technical blogs, no single canonical doc
-\end{itemize}
-
-\begin{table}[h]
-\caption{Comparison table for the related-work section}\label{tab:litreview-comparison}
-\begin{tabular}{@{}p{3.4cm}ccccc@{}}
-\toprule
-System & Open-source & Local-only option & Verifiable/grounded citations & Auditable classification taxonomy \\
-\midrule
-This project & Yes & Yes & Yes (NVD/MITRE-grounded) & Yes (4-class taxonomy) \\
-Microsoft / Google / IBM / Elastic / CrowdStrike copilots & No & No & No (black-box) & No \\
-\botrule
-\end{tabular}
-\end{table}
-
-\medskip\noindent\textit{Notes:} This table is a strong closer for the related-work section: every commercial tool listed produces a triage summary an analyst has to trust blindly, while this project's output guardrail makes every CVE/ATT\&CK citation independently checkable against its authoritative source. That's the one-sentence pitch for the paper's contribution.
-
-\subsection{Tools and frameworks}\label{subsec:litreview-tools}
-
-\begin{table}[h]
-\caption{Tools and frameworks referenced throughout this project}\label{tab:litreview-tools}
-\begin{tabular}{@{}p{2.3cm}p{1.7cm}p{4.5cm}p{4.5cm}@{}}
-\toprule
-Name & Type & URL & Notes \\
-\midrule
-NeMo Guardrails & Framework & \url{https://github.com/NVIDIA/NeMo-Guardrails} & Evaluated in Week 2, dropped in favor of a deterministic guardrail \\
-Guardrails AI & Framework & \url{https://github.com/guardrails-ai/guardrails} & Evaluated for issue \#16; its relevant hub validator requires a hosted API call, which violates the project's local-only constraint --- swapped for Pytector instead \\
-Pytector & Framework & \url{https://github.com/pytector} & Used in the issue \#16 guardrail comparison as the local-only substitute for Guardrails AI \\
-LLM Guard & Framework & \url{https://github.com/protectai/llm-guard} & Used in the issue \#16 guardrail comparison \\
-LangGraph & Orchestration & \url{https://github.com/langchain-ai/langgraph} & Agent state machine \\
-Presidio & PII detection & \url{https://github.com/microsoft/presidio} & PII redaction layer \\
-MITRE ATT\&CK & Threat intel & \url{https://attack.mitre.org} & Adversary TTP taxonomy \\
-NVD (National Vulnerability Database) & Threat intel & \url{https://nvd.nist.gov} & Live CVE verification source for the output guardrail \\
-\botrule
-\end{tabular}
-\end{table}
-
-\section{Results}\label{sec2}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
-
-\section{This is an example for first level head---section head}\label{sec3}
-
-\subsection{This is an example for second level head---subsection head}\label{subsec2}
-
-\subsubsection{This is an example for third level head---subsubsection head}\label{subsubsec2}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. 
-
-\section{Equations}\label{sec4}
-
-Equations in \LaTeX\ can either be inline or on-a-line by itself (``display equations''). For
-inline equations use the \verb+$...$+ commands. E.g.: The equation
-$H\psi = E \psi$ is written via the command \verb+$H \psi = E \psi$+.
-
-For display equations (with auto generated equation numbers)
-one can use the equation or align environments:
-\begin{equation}
-\|\tilde{X}(k)\|^2 \leq\frac{\sum\limits_{i=1}^{p}\left\|\tilde{Y}_i(k)\right\|^2+\sum\limits_{j=1}^{q}\left\|\tilde{Z}_j(k)\right\|^2 }{p+q}.\label{eq1}
-\end{equation}
-where,
-\begin{align}
-D_\mu &=  \partial_\mu - ig \frac{\lambda^a}{2} A^a_\mu \nonumber \\
-F^a_{\mu\nu} &= \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g f^{abc} A^b_\mu A^a_\nu \label{eq2}
-\end{align}
-Notice the use of \verb+\nonumber+ in the align environment at the end
-of each line, except the last, so as not to produce equation numbers on
-lines where no equation numbers are required. The \verb+\label{}+ command
-should only be used at the last line of an align environment where
-\verb+\nonumber+ is not used.
-\begin{equation}
-Y_\infty = \left( \frac{m}{\textrm{GeV}} \right)^{-3}
-    \left[ 1 + \frac{3 \ln(m/\textrm{GeV})}{15}
-    + \frac{\ln(c_2/5)}{15} \right]
-\end{equation}
-The class file also supports the use of \verb+\mathbb{}+, \verb+\mathscr{}+ and
-\verb+\mathcal{}+ commands. As such \verb+\mathbb{R}+, \verb+\mathscr{R}+
-and \verb+\mathcal{R}+ produces $\mathbb{R}$, $\mathscr{R}$ and $\mathcal{R}$
-respectively (refer Subsubsection~\ref{subsubsec2}).
-
-\section{Tables}\label{sec5}
-
-Tables can be inserted via the normal table and tabular environment. To put
-footnotes inside tables you should use \verb+\footnotetext[]{...}+ tag.
-The footnote appears just below the table itself (refer Tables~\ref{tab1} and \ref{tab2}). 
-For the corresponding footnotemark use \verb+\footnotemark[...]+
-
-\begin{table}[h]
-\caption{Caption text}\label{tab1}%
-\begin{tabular}{@{}llll@{}}
-\toprule
-Column 1 & Column 2  & Column 3 & Column 4\\
-\midrule
-row 1    & data 1   & data 2  & data 3  \\
-row 2    & data 4   & data 5\footnotemark[1]  & data 6  \\
-row 3    & data 7   & data 8  & data 9\footnotemark[2]  \\
-\botrule
-\end{tabular}
-\footnotetext{Source: This is an example of table footnote. This is an example of table footnote.}
-\footnotetext[1]{Example for a first table footnote. This is an example of table footnote.}
-\footnotetext[2]{Example for a second table footnote. This is an example of table footnote.}
-\end{table}
-
-\noindent
-The input format for the above table is as follows:
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{verbatim}
-\begin{table}[<placement-specifier>]
-\caption{<table-caption>}\label{<table-label>}%
-\begin{tabular}{@{}llll@{}}
-\toprule
-Column 1 & Column 2 & Column 3 & Column 4\\
-\midrule
-row 1 & data 1 & data 2	 & data 3 \\
-row 2 & data 4 & data 5\footnotemark[1] & data 6 \\
-row 3 & data 7 & data 8	 & data 9\footnotemark[2]\\
-\botrule
-\end{tabular}
-\footnotetext{Source: This is an example of table footnote. 
-This is an example of table footnote.}
-\footnotetext[1]{Example for a first table footnote.
-This is an example of table footnote.}
-\footnotetext[2]{Example for a second table footnote. 
-This is an example of table footnote.}
-\end{table}
-\end{verbatim}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-
-\begin{table}[h]
-\caption{Example of a lengthy table which is set to full textwidth}\label{tab2}
-\begin{tabular*}{\textwidth}{@{\extracolsep\fill}lcccccc}
-\toprule%
-& \multicolumn{3}{@{}c@{}}{Element 1\footnotemark[1]} & \multicolumn{3}{@{}c@{}}{Element 2\footnotemark[2]} \\\cmidrule{2-4}\cmidrule{5-7}%
-Project & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ \\
-\midrule
-Element 3  & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$\\
-Element 4  & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$\\
-\botrule
-\end{tabular*}
-\footnotetext{Note: This is an example of table footnote. This is an example of table footnote this is an example of table footnote this is an example of~table footnote this is an example of table footnote.}
-\footnotetext[1]{Example for a first table footnote.}
-\footnotetext[2]{Example for a second table footnote.}
-\end{table}
-
-In case of double column layout, tables which do not fit in single column width should be set to full text width. For this, you need to use \verb+\begin{table*}+ \verb+...+ \verb+\end{table*}+ instead of \verb+\begin{table}+ \verb+...+ \verb+\end{table}+ environment. Lengthy tables which do not fit in textwidth should be set as rotated table. For this, you need to use \verb+\begin{sidewaystable}+ \verb+...+ \verb+\end{sidewaystable}+ instead of \verb+\begin{table*}+ \verb+...+ \verb+\end{table*}+ environment. This environment puts tables rotated to single column width. For tables rotated to double column width, use \verb+\begin{sidewaystable*}+ \verb+...+ \verb+\end{sidewaystable*}+.
-
-\begin{sidewaystable}
-\caption{Tables which are too long to fit, should be written using the ``sidewaystable'' environment as shown here}\label{tab3}
-\begin{tabular*}{\textheight}{@{\extracolsep\fill}lcccccc}
-\toprule%
-& \multicolumn{3}{@{}c@{}}{Element 1\footnotemark[1]}& \multicolumn{3}{@{}c@{}}{Element\footnotemark[2]} \\\cmidrule{2-4}\cmidrule{5-7}%
-Projectile & Energy	& $\sigma_{calc}$ & $\sigma_{expt}$ & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ \\
-\midrule
-Element 3 & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$ \\
-Element 4 & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$ \\
-Element 5 & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$ \\
-Element 6 & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$ \\
-\botrule
-\end{tabular*}
-\footnotetext{Note: This is an example of table footnote this is an example of table footnote this is an example of table footnote this is an example of~table footnote this is an example of table footnote.}
-\footnotetext[1]{This is an example of table footnote.}
-\end{sidewaystable}
-
-\section{Figures}\label{sec6}
-
-As per the \LaTeX\ standards you need to use eps images for \LaTeX\ compilation and \verb+pdf/jpg/png+ images for \verb+PDFLaTeX+ compilation. This is one of the major difference between \LaTeX\ and \verb+PDFLaTeX+. Each image should be from a single input .eps/vector image file. Avoid using subfigures. The command for inserting images for \LaTeX\ and \verb+PDFLaTeX+ can be generalized. The package used to insert images in \verb+LaTeX/PDFLaTeX+ is the graphicx package. Figures can be inserted via the normal figure environment as shown in the below example:
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{verbatim}
-\begin{figure}[<placement-specifier>]
-\centering
-\includegraphics{<eps-file>}
-\caption{<figure-caption>}\label{<figure-label>}
-\end{figure}
-\end{verbatim}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.9\textwidth]{fig.eps}
-\caption{This is a widefig. This is an example of long caption this is an example of long caption  this is an example of long caption this is an example of long caption}\label{fig1}
-\end{figure}
-
-In case of double column layout, the above format puts figure captions/images to single column width. To get spanned images, we need to provide \verb+\begin{figure*}+ \verb+...+ \verb+\end{figure*}+.
-
-For sample purpose, we have included the width of images in the optional argument of \verb+\includegraphics+ tag. Please ignore this. 
-
-\section{Algorithms, Program codes and Listings}\label{sec7}
-
-Packages \verb+algorithm+, \verb+algorithmicx+ and \verb+algpseudocode+ are used for setting algorithms in \LaTeX\ using the format:
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{verbatim}
-\begin{algorithm}
-\caption{<alg-caption>}\label{<alg-label>}
-\begin{algorithmic}[1]
-. . .
-\end{algorithmic}
-\end{algorithm}
-\end{verbatim}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-
-You may refer above listed package documentations for more details before setting \verb+algorithm+ environment. For program codes, the ``verbatim'' package is required and the command to be used is \verb+\begin{verbatim}+ \verb+...+ \verb+\end{verbatim}+. 
-
-Similarly, for \verb+listings+, use the \verb+listings+ package. \verb+\begin{lstlisting}+ \verb+...+ \verb+\end{lstlisting}+ is used to set environments similar to \verb+verbatim+ environment. Refer to the \verb+lstlisting+ package documentation for more details.
-
-A fast exponentiation procedure:
-
-\lstset{texcl=true,basicstyle=\small\sf,commentstyle=\small\rm,mathescape=true,escapeinside={(*}{*)}}
-\begin{lstlisting}
-begin
-  for $i:=1$ to $10$ step $1$ do
-      expt($2,i$);  
-      newline() od                (*\textrm{Comments will be set flush to the right margin}*)
-where
-proc expt($x,n$) $\equiv$
-  $z:=1$;
-  do if $n=0$ then exit fi;
-     do if odd($n$) then exit fi;                 
-        comment: (*\textrm{This is a comment statement;}*)
-        $n:=n/2$; $x:=x*x$ od;
-     { $n>0$ };
-     $n:=n-1$; $z:=z*x$ od;
-  print($z$). 
-end
-\end{lstlisting}
-
-\begin{algorithm}
-\caption{Calculate $y = x^n$}\label{algo1}
-\begin{algorithmic}[1]
-\Require $n \geq 0 \vee x \neq 0$
-\Ensure $y = x^n$ 
-\State $y \Leftarrow 1$
-\If{$n < 0$}\label{algln2}
-        \State $X \Leftarrow 1 / x$
-        \State $N \Leftarrow -n$
-\Else
-        \State $X \Leftarrow x$
-        \State $N \Leftarrow n$
-\EndIf
-\While{$N \neq 0$}
-        \If{$N$ is even}
-            \State $X \Leftarrow X \times X$
-            \State $N \Leftarrow N / 2$
-        \Else[$N$ is odd]
-            \State $y \Leftarrow y \times X$
-            \State $N \Leftarrow N - 1$
-        \EndIf
-\EndWhile
-\end{algorithmic}
-\end{algorithm}
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{minipage}{\hsize}%
-\lstset{frame=single,framexleftmargin=-1pt,framexrightmargin=-17pt,framesep=12pt,linewidth=0.98\textwidth,language=pascal}% Set your language (you can change the language for each code-block optionally)
-%%% Start your code-block
-\begin{lstlisting}
-for i:=maxint to 0 do
-begin
-{ do nothing }
-end;
-Write('Case insensitive ');
-Write('Pascal keywords.');
-\end{lstlisting}
-\end{minipage}
-
-\section{Cross referencing}\label{sec8}
-
-Environments such as figure, table, equation and align can have a label
-declared via the \verb+\label{#label}+ command. For figures and table
-environments use the \verb+\label{}+ command inside or just
-below the \verb+\caption{}+ command. You can then use the
-\verb+\ref{#label}+ command to cross-reference them. As an example, consider
-the label declared for Figure~\ref{fig1} which is
-\verb+\label{fig1}+. To cross-reference it, use the command 
-\verb+Figure \ref{fig1}+, for which it comes up as
-``Figure~\ref{fig1}''. 
-
-To reference line numbers in an algorithm, consider the label declared for the line number 2 of Algorithm~\ref{algo1} is \verb+\label{algln2}+. To cross-reference it, use the command \verb+\ref{algln2}+ for which it comes up as line~\ref{algln2} of Algorithm~\ref{algo1}.
-
-\subsection{Details on reference citations}\label{subsec7}
-
-Standard \LaTeX\ permits only numerical citations. To support both numerical and author-year citations this template uses \verb+natbib+ \LaTeX\ package. For style guidance please refer to the template user manual.
-
-Here is an example for \verb+\cite{...}+: \cite{bib1}. Another example for \verb+\citep{...}+: \citep{bib2}. For author-year citation mode, \verb+\cite{...}+ prints Jones et al. (1990) and \verb+\citep{...}+ prints (Jones et al., 1990).
-
-All cited bib entries are printed at the end of this article: \cite{bib3}, \cite{bib4}, \cite{bib5}, \cite{bib6}, \cite{bib7}, \cite{bib8}, \cite{bib9}, \cite{bib10}, \cite{bib11}, \cite{bib12} and \cite{bib13}.
-
-\section{Examples for theorem like environments}\label{sec10}
-
-For theorem like environments, we require \verb+amsthm+ package. There are three types of predefined theorem styles exists---\verb+thmstyleone+, \verb+thmstyletwo+ and \verb+thmstylethree+ 
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{tabular}{|l|p{19pc}|}
-\hline
-\verb+thmstyleone+ & Numbered, theorem head in bold font and theorem text in italic style \\\hline
-\verb+thmstyletwo+ & Numbered, theorem head in roman font and theorem text in italic style \\\hline
-\verb+thmstylethree+ & Numbered, theorem head in bold font and theorem text in roman style \\\hline
-\end{tabular}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-
-For mathematics journals, theorem styles can be included as shown in the following examples:
-
-\begin{theorem}[Theorem subhead]\label{thm1}
-Example theorem text. Example theorem text. Example theorem text. Example theorem text. Example theorem text. 
-Example theorem text. Example theorem text. Example theorem text. Example theorem text. Example theorem text. 
-Example theorem text. 
-\end{theorem}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
-
-\begin{proposition}
-Example proposition text. Example proposition text. Example proposition text. Example proposition text. Example proposition text. 
-Example proposition text. Example proposition text. Example proposition text. Example proposition text. Example proposition text. 
-\end{proposition}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
-
-\begin{example}
-Phasellus adipiscing semper elit. Proin fermentum massa
-ac quam. Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. Nam ipsum ligula, eleifend
-at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. 
-\end{example}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
-
-\begin{remark}
-Phasellus adipiscing semper elit. Proin fermentum massa
-ac quam. Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. Nam ipsum ligula, eleifend
-at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. 
-\end{remark}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
-
-\begin{definition}[Definition sub head]
-Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. 
-\end{definition}
-
-Additionally a predefined ``proof'' environment is available: \verb+\begin{proof}+ \verb+...+ \verb+\end{proof}+. This prints a ``Proof'' head in italic font style and the ``body text'' in roman font style with an open square at the end of each proof environment. 
-
-\begin{proof}
-Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. 
-\end{proof}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
-
-\begin{proof}[Proof of Theorem~{\upshape\ref{thm1}}]
-Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. 
-\end{proof}
-
-\noindent
-For a quote environment, use \verb+\begin{quote}...\end{quote}+
-\begin{quote}
-Quoted text example. Aliquam porttitor quam a lacus. Praesent vel arcu ut tortor cursus volutpat. In vitae pede quis diam bibendum placerat. Fusce elementum
-convallis neque. Sed dolor orci, scelerisque ac, dapibus nec, ultricies ut, mi. Duis nec dui quis leo sagittis commodo.
-\end{quote}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text (refer Figure~\ref{fig1}). Sample body text. Sample body text. Sample body text (refer Table~\ref{tab3}). 
-
-\section{Methods}\label{sec11}
-
-Topical subheadings are allowed. Authors must ensure that their Methods section includes adequate experimental and characterization data necessary for others in the field to reproduce their work. Authors are encouraged to include RIIDs where appropriate. 
-
-\textbf{Ethical approval declarations} (only required where applicable) Any article reporting experiment/s carried out on (i)~live vertebrate (or higher invertebrates), (ii)~humans or (iii)~human samples must include an unambiguous statement within the methods section that meets the following requirements: 
-
-\begin{enumerate}[1.]
-\item Approval: a statement which confirms that all experimental protocols were approved by a named institutional and/or licensing committee. Please identify the approving body in the methods section
-
-\item Accordance: a statement explicitly saying that the methods were carried out in accordance with the relevant guidelines and regulations
-
-\item Informed consent (for experiments involving humans or human tissue samples): include a statement confirming that informed consent was obtained from all participants and/or their legal guardian/s
+\section{Introduction}\label{sec:introduction}
+
+Large language models (LLMs) are being adopted in Security Operations Centres
+(SOCs) \cite{aisocsurvey2025} to automate alert triage, enrich threat intelligence, and generate
+analyst-facing reports. This promises real efficiency gains, but it
+introduces a specific, under-examined risk: when a model cites a CVE
+identifier or a MITRE ATT\&CK technique as supporting evidence for its
+assessment, nothing in a typical deployment checks whether that citation is
+real, relevant, or actually present in the alert the model was given.
+
+This is not a hypothetical concern. Across our own adversarial testing
+(Sect.~\ref{sec:evaluation}), models given ambiguous or withheld-identifier prompts either stay
+silent or occasionally cite something real but topically unrelated --- and
+critically, a citation that \textit{is} real but \textit{isn't} actually supported by the
+evidence at hand is not obviously distinguishable from a correct one without
+independent verification. An analyst who sees a CVE number in a report has
+no way to know, from the report alone, which of these happened.
+
+Existing guardrail frameworks (NeMo Guardrails, Guardrails AI) are
+general-purpose input/output filters. They were not built with a
+threat-domain ontology for security claims, and none of them verify a
+technical citation's factual grounding against an authoritative external
+source. Existing hallucination-detection research (SelfCheckGPT
+\cite{selfcheckgpt2023}, FActScore \cite{factscore2023}) establishes the
+general pattern of decomposing a generation into checkable claims and
+verifying them, but neither is specialized to a domain where the
+verification source is a structured, versioned technical database (NVD,
+MITRE ATT\&CK) rather than free-text biography or open-domain knowledge.
+
+\textbf{We want to be precise about what is and is not novel here.} The
+underlying pattern --- extract a claim, check if it is grounded in the
+available evidence, verify against an authoritative source if not,
+classify the outcome --- is established in the hallucination-detection
+literature, most directly in FActScore. What this paper contributes is
+not a new verification architecture; it is that pattern applied
+specifically to SOC threat reports, with a four-class taxonomy (plus a
+fifth for formally withdrawn identifiers) in place of the binary
+grounded/ungrounded label most such checkers use, generalizing across two
+distinct claim types (CVE identifiers and MITRE ATT\&CK techniques) rather
+than being a one-off built around a single verification API.
+
+The sharper, evaluation-defining claim is narrower than ``we built a
+taxonomy'': the \texttt{REAL\_AND\_PLAUSIBLE} class this taxonomy introduces
+names a specific failure mode that a leading alternative --- self-consistency
+checking (SelfCheckGPT \cite{selfcheckgpt2023}) --- cannot catch, because a
+model that consistently recalls a real, correct-but-uncited identifier
+from training knowledge is, by definition, self-consistent.
+Sect.~\ref{subsec:selfcheckgpt} demonstrates this directly: on the identical
+alerts, self-consistency checking is fooled by exactly this pattern in 18
+of its 20 failures, while external grounding catches all of them, and the
+gap is large enough to be statistically confirmed (Sect.~\ref{subsec:mcnemar},
+McNemar $p=0.0118$) rather than argued from first principles alone. That
+comparison, not the taxonomy or pipeline in isolation, is this paper's
+central empirical contribution; the broader validation that follows
+(Sect.~\ref{subsec:relevance} onward) establishes that the mechanism generating this
+result works in practice, but is supporting evidence for that one claim,
+not a separate contribution of equal weight.
+
+\subsection{Contributions}\label{subsec:contributions}
+
+\begin{enumerate}
+\item \textbf{A taxonomic distinction that matters empirically, not just
+   conceptually: \texttt{REAL\_AND\_PLAUSIBLE}.} A real, topically appropriate
+   citation never actually stated in the evidence is the case most likely
+   to evade human review, precisely because it looks correct. This is not
+   a hypothetical risk: a SelfCheckGPT-style self-consistency baseline, run
+   on the identical alerts as the deterministic pipeline, cannot
+   distinguish this pattern from genuine grounding --- it is fooled by
+   exactly the citations \texttt{REAL\_AND\_PLAUSIBLE} was designed to catch, in 18 of
+   20 cases where it failed (Sect.~\ref{subsec:selfcheckgpt}). The deterministic checker is
+   significantly more accurate on the same alerts (McNemar $p=0.0118$,
+   Sect.~\ref{subsec:mcnemar}) --- the one comparison in this paper where a performance gap is
+   both large and statistically confirmed, not argued architecturally
+   alone.
+\item \textbf{A domain-specialized, two-stage citation-verification pipeline} for
+   SOC LLM reports: a fast deterministic grounding check, followed by
+   authoritative-source verification (NVD for CVEs, the MITRE ATT\&CK STIX
+   corpus for techniques) only for citations that fail grounding,
+   classified into a four-class taxonomy (plus a fifth, \texttt{REJECTED}/\texttt{REVOKED},
+   for identifiers formally withdrawn by their authority) that generalizes
+   across two distinct claim types.
+\item \textbf{Broad empirical validation}, reported to establish that the pipeline
+   actually works in practice rather than as evidence carrying equal
+   weight to Contribution 1 above: bait-style adversarial tests for both
+   claim types (150 CVE identifiers, 150 MITRE ATT\&CK techniques), a
+   76-incident run through an independent third-party incident generator,
+   a 60-alert CVE pool isolating whether the model can identify a CVE from
+   behavior alone versus merely verify one it is given, 139 real alerts
+   across five distinct trigger types from a live Wazuh SIEM deployment
+   including a genuinely detected brute-force attack, a pooled cross-source
+   summary spanning 575 alerts, and supporting evaluation of the pipeline's
+   other guardrail layers --- an input-guardrail comparison against two
+   maintained open-source alternatives, an LLM-judge baseline (same- and
+   cross-model-family) showing full agreement with the deterministic
+   pipeline, a bait test of a fourth guardrail addressing PII leakage
+   ($n=60$, 12.5\% detection rate), and a human validation of the relevance
+   classifier underlying the taxonomy split (92.5\% accuracy).
 \end{enumerate}
 
-If your manuscript includes potentially identifying patient/participant information, or if it describes human transplantation research, or if it reports results of a clinical trial then  additional information will be required. Please visit (\url{https://www.nature.com/nature-research/editorial-policies}) for Nature Portfolio journals, (\url{https://www.springer.com/gp/authors-editors/journal-author/journal-author-helpdesk/publishing-ethics/14214}) for Springer Nature journals, or (\url{https://www.biomedcentral.com/getpublished/editorial-policies\#ethics+and+consent}) for BMC.
+The remainder of this paper is organized as follows: Sect.~\ref{sec:related-work} reviews related
+work; Sect.~\ref{sec:method} describes the pipeline architecture and taxonomy; Sect.~\ref{sec:evaluation} presents
+the evaluation; Sect.~\ref{sec:discussion} discusses what the results do and do not establish,
+including explicit limitations; Sect.~\ref{sec:conclusion} concludes.
 
-\section{Discussion}\label{sec12}
+\section{Related Work}\label{sec:related-work}
 
-Discussions should be brief and focused. In some disciplines use of Discussion or `Conclusion' is interchangeable. It is not mandatory to use both. Some journals prefer a section `Results and Discussion' followed by a section `Conclusion'. Please refer to Journal-level guidance for any specific requirements. 
+\paragraph{Hallucination detection and grounding.} Hallucination --- fluent,
+confident output not grounded in any real source --- is a well-documented
+failure mode across LLM applications generally \cite{hallucinationsurvey2024}, not specific to the
+SOC domain this paper targets; the detection strategies below are the
+subset of that broader literature most directly relevant to citation
+grounding specifically. SelfCheckGPT \cite{selfcheckgpt2023}
+detects likely-hallucinated sentences by sampling multiple stochastic
+responses to the same prompt and measuring consistency between them, without
+requiring an external knowledge source. This is a fundamentally different
+signal from what LLMCite measures: SelfCheckGPT asks ``is the model
+consistent about this claim,'' while LLMCite asks ``is this claim actually
+true, checked against an authoritative record.'' The two are complementary,
+not competing, and Sect.~\ref{subsec:selfcheckgpt}'s direct comparison makes this empirical
+rather than only architectural: consistency is an accurate signal for the
+grounded class, but blind to a specific failure mode --- a real, correct
+identifier recalled from training knowledge and repeated identically
+across resamples, which is self-consistent by definition even though it
+never appears in the evidence the model was actually given. FActScore
+\cite{factscore2023} is the closer methodological ancestor: it decomposes
+long-form generations into atomic facts and checks each against a reference
+corpus (Wikipedia), reporting even strong commercial models achieve only
+$\sim$58\% atomic-fact precision on biographical text. LLMCite specializes this
+exact pattern --- decompose, ground, verify, classify --- to a domain where the
+reference corpus is a structured, versioned technical database rather than
+open-domain prose, and to claim types (CVE and ATT\&CK identifiers) that have
+an unambiguous ground truth in a way free-text biographical claims do not.
 
-\section{Conclusion}\label{sec13}
+\paragraph{LLM-as-judge evaluation.} Zheng et al. \cite{llmjudge2023} show strong LLM
+judges achieve human-comparable agreement rates on open-ended response
+quality, but document real biases (position, verbosity, self-enhancement)
+that are a specific risk when the judge and the generator share a model
+family. Sect.~\ref{subsubsec:llmjudge} reports two LLM-judge baselines against the same
+CVE/ATT\&CK citation task LLMCite's deterministic pipeline evaluates: a
+same-family judge (\texttt{openai/gpt-oss-20b}, the same model used for report
+generation) and, addressing Zheng et al.'s own recommendation directly
+rather than leaving it as a disclosed gap, a second, independently-hosted
+model family (\texttt{qwen/qwen3.6-27b}) as judge over a calibration set built by
+the identical construction method --- though, as Sect.~\ref{subsubsec:llmjudge} discloses, not
+sample-for-sample the identical set: the underlying bait-alert pool grew
+between the two runs. Both are reported; the cross-family run had not
+fully finished at the time of writing (442/450, Sect.~\ref{subsubsec:llmjudge}) but the
+completed portion is included rather than withheld pending full
+completion.
 
-Conclusions may be used to restate your hypothesis or research question, restate your major findings, explain the relevance and the added value of your work, highlight any limitations of your study, describe future directions for research and recommendations. 
+\paragraph{Prompt injection and guardrail frameworks.} InjecAgent
+\cite{injecagent2024} establishes the threat model this paper's input-guardrail
+layer defends against --- instructions hidden inside tool/log output that a
+downstream agent processes as legitimate input, rather than instructions
+from a trusted user. NeMo Guardrails \cite{nemoguardrails2023} was evaluated
+directly early in this project as a candidate input-guardrail framework; its
+LLM-based Colang intent classification proved unreliable for injection
+detection when run against a small local model, motivating a switch to
+deterministic pattern matching as the first layer of this paper's own
+guardrail (Sect.~\ref{sec:method}). The Instruction Hierarchy \cite{instructionhierarchy2024}
+addresses the same underlying problem --- distinguishing trusted from
+untrusted instruction sources --- at the model-training level via fine-tuning,
+which is the correct fix in principle but is not available as an option when
+the report-generation model is a third-party hosted API rather than a model
+this project can fine-tune. LLMCite's input guardrail is instead a
+runtime, deployment-side control operating on exactly the models available
+in practice.
 
-In some disciplines use of Discussion or 'Conclusion' is interchangeable. It is not mandatory to use both. Please refer to Journal-level guidance for any specific requirements. 
+\paragraph{Grounding for structured security artifacts.} TRAM
+\cite{tram2023} is the closest existing system to LLMCite's ATT\&CK
+component, but solves a different problem: it extracts ATT\&CK technique
+mentions from \textit{trusted}, analyst-authored threat intelligence reports. It
+does not address the adversarial case this paper targets --- a model
+\textit{fabricating} a technique ID that was never present in the source, or citing
+a real-but-irrelevant one. TRAM is extraction from trusted text; LLMCite is
+adversarial verification of a claimed citation.
+
+\paragraph{PII protection.} Presidio \cite{presidio2023} implements this project's third threat
+category (PII leakage in generated reports, T3): Sect.~\ref{subsec:pii-guardrail} describes the
+guardrail architecture, Sect.~\ref{subsubsec:pii-bait} its bait-test result. Unlike the CVE/ATT\&CK
+grounding checks (Sect.~\ref{subsec:output-guardrail}), T3 is a redaction problem, not a
+citation-verification one --- the concern is whether sensitive data present
+in the raw alert survives unredacted into generated text, independent of
+whether any accompanying citation is itself grounded.
+
+\paragraph{Comparable commercial systems.} Deployed LLM-assisted SOC products
+(Microsoft Security Copilot, Google Chronicle/Gemini for Security, IBM
+QRadar Advisor with Watson, Elastic AI Assistant for Security, CrowdStrike
+Charlotte AI) produce analyst-facing triage summaries, but none of their
+public technical documentation describes verifying individual technical
+citations against an authoritative source, and none expose a
+reviewer-auditable classification of \textit{why} a given claim should or should
+not be trusted. This is the concrete ``why does this matter'' contrast for
+LLMCite's contribution: every commercial system in this category currently
+asks an analyst to trust its output as a black box.
+
+\section{Proposed Method}\label{sec:method}
+
+\subsection{Threat model}\label{subsec:threat-model}
+
+\begin{table}[h]
+\caption{Threat model: attack types addressed by this pipeline's input and output guardrail layers}\label{tab:threatmodel}
+\begin{tabular}{@{}p{0.8cm}p{3.0cm}p{6.8cm}p{1.6cm}@{}}
+\toprule
+\# & Attack type & Description & Guardrail layer \\
+\midrule
+T1 & Direct prompt injection & Alert/user input contains instruction-override phrases (``ignore previous instructions'') attempting to hijack agent behavior & Input \\
+T2 & Indirect prompt injection & Adversarial instructions embedded inside ingested alert/log data, processed as part of normal triage & Input \\
+T3 & PII leakage & Sensitive data in raw alerts (names, IPs, emails, SSNs) surfaces unredacted in the generated report & Output \\
+T4 & Hallucinated citation & Agent fabricates or misattributes a CVE ID or ATT\&CK technique not grounded in the source alert & Output \\
+\botrule
+\end{tabular}
+\end{table}
+
+T1/T2 are addressed by the input guardrail (Sect.~\ref{subsec:input-guardrail}); T4 is the paper's
+headline contribution (Sects.~\ref{subsec:output-guardrail}--\ref{subsec:taxonomy}); T3 is addressed by a dedicated redaction
+guardrail (Sect.~\ref{subsec:pii-guardrail}), bait-tested in Sect.~\ref{subsubsec:pii-bait} --- a named threat in the original
+proposal, with ``PII leakage rate'' a committed evaluation metric, now
+implemented rather than only scoped in.
+
+\subsection{Input guardrail layer}\label{subsec:input-guardrail}
+
+The input guardrail runs deterministic substring matching against a fixed
+list of known injection phrases first (near-zero latency). Text that passes
+this check falls back to Pytector \cite{pytector2024}, a local DeBERTa-based prompt-injection
+classifier, so that paraphrased or novel-strategy injection attempts not
+covered by the deterministic list still have a second chance to be caught.
+This ordering matters for both latency (most legitimate traffic never needs
+the model call) and coverage (the deterministic layer alone has a
+significant recall gap --- quantified in Sect.~\ref{subsubsec:inputguardrailcomparison}).
+
+\subsection{Evidence Pack}\label{subsec:evidence-pack}
+
+Rather than running grounding checks against the full formatted alert
+string (a mixture of IPs, timestamps, protocol fields, and free text), an
+explicit Evidence Pack is built per alert, separating structured fields
+(IPs, hosts, users, file hashes, ports) from the free-text \texttt{description} and
+\texttt{payload\_snippet} fields that are the actual surface any CVE/ATT\&CK
+grounding check runs against. This makes the grounding surface an explicit,
+auditable object attached to every report rather than an artifact of how a
+prompt happened to be formatted.
+
+\subsection{Output guardrail: two-stage grounding and verification}\label{subsec:output-guardrail}
+
+\textbf{Stage 1 --- grounding.} Any CVE-style (\texttt{CVE-YYYY-NNNNN}) or ATT\&CK-style
+(\texttt{Txxxx[.xxx]}) identifier is extracted from the generated report's text
+fields via regex. Each extracted identifier is checked against the Evidence
+Pack's \texttt{text} field: if present, it is grounded (the model is not being
+scored against a citation the alert never mentioned). If absent, it proceeds
+to Stage 2.
+
+\textbf{Stage 2 --- authoritative verification.} Ungrounded CVE identifiers are
+looked up live against the National Vulnerability Database \cite{nvd} (NIST's public
+API, no hosted-LLM call, no API key). Ungrounded ATT\&CK identifiers are
+checked against a periodically refreshed local snapshot of the MITRE ATT\&CK \cite{mitreattack}
+Enterprise STIX bundle (858 techniques as of the current snapshot; no
+lightweight per-ID lookup endpoint exists for ATT\&CK the way NVD provides
+for CVEs, so this is a real, disclosed tradeoff rather than treated as
+equivalent to the live CVE lookup). A deterministic, stemmed bag-of-words
+topical-overlap score between the alert's evidence text and the
+authoritative record's own description determines relevance (validated
+against human judgment in Sect.~\ref{subsec:relevance}).
+
+\subsection{Classification taxonomy}\label{subsec:taxonomy}
+
+\begin{table}[h]
+\caption{The four-class outcome taxonomy applied to every ungrounded citation (plus REJECTED/REVOKED for formally withdrawn identifiers)}\label{tab:taxonomy}
+\begin{tabular}{@{}p{3.4cm}p{9.4cm}@{}}
+\toprule
+Class & Meaning \\
+\midrule
+\texttt{FABRICATED} & The identifier does not exist in the authoritative source at all \\
+\texttt{REAL\_BUT\_IRRELEVANT} & The identifier is real but its authoritative description does not topically match the alert \\
+\texttt{REAL\_AND\_PLAUSIBLE} & The identifier is real and topically matches --- likely a correct recall the model made without being given the number, not a fabrication, but still \textit{unverified as actually grounded in this specific alert} \\
+\texttt{UNVERIFIED} & The authority source could not confirm or deny (e.g.\ no English-language description available, or the source was unreachable) \\
+\texttt{REJECTED} (CVE) / \texttt{REVOKED} (ATT\&CK) & The identifier is formally withdrawn/deprecated by its authority \\
+\botrule
+\end{tabular}
+\end{table}
+
+Every ungrounded citation sets \texttt{requires\_review = True} unconditionally,
+regardless of class. This is a deliberate design decision, not an oversight:
+an earlier version of the pipeline treated \texttt{REAL\_AND\_PLAUSIBLE} as
+self-evidently safe and did not flag it for review. We changed this after
+recognizing that \texttt{REAL\_AND\_PLAUSIBLE} is precisely the case a human reviewer
+is \textit{least} likely to catch on manual read-through, since it looks correct ---
+making it the highest-risk category for silent trust, not the lowest.
+
+\subsection{PII redaction guardrail}\label{subsec:pii-guardrail}
+
+Addressing T3, \texttt{src/guardrails/pii\_guardrail.py} runs Presidio's analyzer
+together with spaCy's \texttt{en\_core\_web\_sm} NER model over the generated
+report's text fields (\texttt{threat\_summary}, \texttt{recommended\_action}, \texttt{reasoning}),
+detecting \texttt{PERSON}, \texttt{EMAIL\_ADDRESS}, \texttt{PHONE\_NUMBER}, \texttt{US\_SSN}, and \texttt{CREDIT\_CARD}
+entities and redacting each to a typed placeholder (e.g.\ \texttt{<PERSON>}) via
+Presidio's anonymizer. This runs entirely locally, with no additional
+hosted-API call beyond the report-generation call itself. Its result is
+OR'd into the same \texttt{output\_guardrail\_flagged}/\texttt{requires\_review} signals the
+grounding checks (Sect.~\ref{subsec:output-guardrail}) set, rather than treated as a separate output
+channel a reviewer would need to check independently. \texttt{IP\_ADDRESS} is
+deliberately excluded from the default entity set: the Evidence Pack (Sect.~\ref{subsec:evidence-pack})
+already treats source/destination IPs as operational security telemetry an
+analyst needs to act on, not personal data to hide by default --- redacting
+it would break the report's usefulness for the overwhelming majority of
+alerts, which all carry IPs.
+
+\section{Evaluation}\label{sec:evaluation}
+
+\subsection{Experimental setup}\label{subsec:setup}
+
+Report generation uses Groq's \cite{groq} hosted inference (\texttt{openai/gpt-oss-20b}) as
+the LLM backend throughout --- migrated from an earlier \texttt{llama-3.1-8b-instant}
+baseline; Sects.~\ref{subsubsec:llmjudge} and~\ref{subsubsec:pii-bait} below use this current model. All guardrail
+components (deterministic
+matching, Pytector, LLM Guard, NVD/ATT\&CK verification) run locally with no
+sensitive alert data sent to any hosted API beyond the report-generation
+call itself. The project's core test suite currently stands at
+\textbf{145 passing / 1 failing} (the one failure is a pre-existing
+async-fixture issue in an abandoned, unrelated NeMo Guardrails experiment
+kept for historical record --- not part of the shipped pipeline), verified
+directly against the repository at the time of writing.
+
+\textbf{Reproducibility metadata.} The MITRE ATT\&CK verification path (Sect.~\ref{subsec:output-guardrail})
+uses a local snapshot of the Enterprise STIX bundle
+(\texttt{data/mitre\_attack/enterprise\_attack\_techniques.json}), fetched from
+MITRE's official \texttt{attack-stix-data} GitHub repository on 2026-08-04,
+containing 858 techniques. Unlike the ATT\&CK path, the CVE verification
+path queries NVD's public API live, per citation, at experiment run time
+rather than against a fixed snapshot --- each results file carries the run
+timestamp its own citations were checked against, so a citation verified as
+\texttt{FABRICATED} or \texttt{REAL\_AND\_PLAUSIBLE} reflects NVD's state at that specific time,
+not a fixed point shared across every result in this paper. This asymmetry
+(one path versioned and reproducible, the other live and time-varying) is a
+disclosed property of the two authoritative sources' own APIs, not a
+methodological inconsistency introduced by this pipeline --- restated in
+Sect.~\ref{sec:discussion}'s limitations.
+
+\subsection{Output guardrail: CVE-bait adversarial test}\label{subsec:cve-bait}
+
+The CVE-bait set was expanded from an initial $n=6$ to $n=150$ real CVEs
+across three passes (2026-08-12, 2026-08-12, 2026-08-25), the later
+additions sourced in bulk from CISA's Known Exploited Vulnerabilities
+(KEV) catalog with each alert's behavior description paraphrased from
+that CVE's own published description (vendor/product name and CVE
+framing stripped, so the bait still tests spontaneous citation rather
+than pattern-matching a restated name). Every one of the 150 numbers is
+real and individually verified. 3 of the 150 alerts explicitly ask the
+model to name an identifier it was not given; the remaining 147 are
+purely symptom-only.
+
+\textbf{Result} (\texttt{experiments/results/cve\_bait\_results.json}, $n=150$): 2/150
+alerts (1.3\%, 95\% Wilson CI [0.4\%, 4.7\%]) produced an ungrounded CVE
+citation --- a blended figure that conflates two conditions. \textbf{0/147
+symptom-only alerts ever produced a spontaneous citation} (95\% CI [0.0\%,
+2.6\%]); both hits come from the 3 explicit-ask alerts (2/3), once correct
+and once with a real-but-wrong neighbor (below). The 0/147 figure is the
+correct headline number for spontaneous hallucination rate.
+\texttt{requires\_review} for this set (5/150, 3.3\%) is not the same as the
+ungrounded rate --- 3 of the 5 are the PII guardrail firing on a
+single-word product name (\texttt{Zimbra}, \texttt{Ray}, \texttt{Joomla}) misread as a person's
+name (Sect.~\ref{subsec:pii-guardrail}, \ref{subsubsec:pii-bait}), not a grounding error; a metric-definition bug
+conflating the two was found and fixed at this expansion.
+
+Of the two ungrounded citations: the Log4Shell alert (\texttt{BAIT-002})
+correctly produced \texttt{CVE-2021-44228}, classified \texttt{REAL\_AND\_PLAUSIBLE} ---
+still flagged for review since the alert text never stated the number, a
+policy artifact rather than an error. The Follina alert (\texttt{BAIT-017})
+produced \texttt{CVE-2022-34713} (``DogWalk'') instead of the correct
+\texttt{CVE-2022-30190} --- a real, separate Microsoft MSDT vulnerability from the
+same disclosure window, classified \texttt{REAL\_BUT\_IRRELEVANT}. \textbf{This is a
+concrete instance of exactly the risk this paper's introduction
+describes}: a real identifier, confused with a closely related one,
+indistinguishable from a correct citation without independent
+verification. It is the only one of the 150 alerts where the model's
+citation was actually \textit{wrong}, rather than correct-but-flagged.
+
+\subsection{Output guardrail: ATT\&CK-bait adversarial test}\label{subsec:attack-bait}
+
+A parallel bait set covers MITRE ATT\&CK technique citations, expanded
+from $n=6$ to $n=150$ across two passes (2026-08-21, 2026-08-25). Every
+technique paraphrases its real, official MITRE description into
+symptom-only EDR/log-style telemetry, never stating the technique name or
+ID, with an automated check confirming no ID-shaped token or the
+technique's own name leaks into the alert text. 3 of the 150 alerts
+explicitly request a technique ID, mirroring CVE-bait's ratio.
+
+\textbf{Result} (\texttt{experiments/results/attack\_bait\_results.json}, $n=150$): 6/150
+alerts (4.0\%, 95\% Wilson CI [1.8\%, 8.5\%]) produced an ungrounded ATT\&CK
+citation. Of the 148 symptom-only alerts, \textbf{4/148 (2.7\%, 95\% CI [1.1\%,
+6.7\%])} produced one; both explicit-ask alerts produced one (2/2). Of
+the 6: 2 named the expected technique exactly (\texttt{ATTACK-BAIT-023},
+\texttt{ATTACK-BAIT-081}, both \texttt{REAL\_AND\_PLAUSIBLE}). A new finding beyond
+anything CVE-bait produced: \texttt{ATTACK-BAIT-005} cited \texttt{T1076}, a technique
+ID that exists in the STIX snapshot but is marked \texttt{revoked} --- MITRE's own
+record of a deprecated/superseded ID --- classified \texttt{REVOKED} rather than
+\texttt{REAL\_BUT\_IRRELEVANT}: a real identifier that no longer represents an
+active part of the framework, the ATT\&CK equivalent of citing a withdrawn
+CVE. The remaining 3 (\texttt{ATTACK-BAIT-006}, \texttt{-078}, \texttt{-116}) are
+\texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT} wrong-neighbor citations in the
+same shape as CVE-bait's Follina/DogWalk case --- \texttt{ATTACK-BAIT-006} is a
+particularly close miss, citing sub-technique \texttt{T1542.003} when the
+expected parent technique was \texttt{T1542}.
+
+\textbf{What this shows:} the grounding-and-classify pattern generalizes to a
+second, structurally different claim type (a static STIX snapshot rather
+than a live per-ID API) --- the concrete evidence behind Contribution 2's
+generalization claim. The \texttt{REVOKED} case also shows the taxonomy
+(Sect.~\ref{subsec:taxonomy}) earning its keep on a case CVE-bait's own set never produced:
+a real-but-deprecated identifier, materially different from either a
+correct citation or an outright fabrication.
+
+\subsection{The central empirical result: SelfCheckGPT versus deterministic grounding}\label{subsec:selfcheckgpt}
+
+\textbf{Method.} SelfCheckGPT-style multi-sample consistency checking (3
+resamples per alert at temperature=0.7 --- production runs at
+temperature=0.1, Sect.~\ref{subsec:setup}, and would give resampling no diversity to
+measure) against the same 60-alert CVE pool used in Sect.~\ref{subsec:realworld} (30
+``prompted''/bait, CVE withheld; 30 ``stated'', CVE given). \texttt{sample\_citations()}
+bypasses the guardrail pipeline entirely --- only the raw generator's
+citation behavior across resamples is measured --- to make the
+self-consistency-vs-external-grounding contrast from Sect.~\ref{sec:related-work} empirical
+rather than only architectural.
+
+\textbf{Result} (\texttt{experiments/results/selfcheckgpt\_results.json}, $n=60$; 4
+alerts excluded where every resample declined to cite anything at all ---
+nothing to score consistency on, 3 from the stated class, 1 from
+prompted):
+
+\begin{table}[h]
+\caption{SelfCheckGPT self-consistency baseline: correctness by grounded/prompted class ($n=60$, 4 excluded)}\label{tab:selfcheckgpt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Class & $n$ scored & SelfCheckGPT correct \\
+\midrule
+Stated (grounded) & 27 (3 declined) & 27/27 \\
+Prompted (bait, withheld) & 29 (1 declined) & 9/29 (recall 0.31) \\
+\botrule
+\end{tabular}
+\end{table}
+
+Overall on the 56 scored alerts: accuracy 0.643 (95\% CI [0.512, 0.755]),
+precision 1.0 (95\% CI [0.701, 1.0]), recall 0.310 (95\% CI [0.173,
+0.492]). SelfCheckGPT never false-flags a grounded citation as unstable,
+matching Sect.~\ref{subsec:realworld}'s stated-class finding.
+
+\textbf{The 20 missed prompted-class alerts are not what a bare recall number
+suggests.} All 20 are cases where the model cited the \textit{same} CVE across
+all 3 resamples --- perfectly self-consistent, so SelfCheckGPT correctly
+reports no instability. But checking each majority citation against
+ground truth shows \textbf{18 of the 20 are the correct identifier} --- the
+model consistently recalled the real CVE from its own training knowledge,
+even though it was withheld and never appears in the alert's evidence.
+Only 2 of 20 are genuine misattributions, both citing \texttt{CVE-2021-31207} (a
+real Exchange Server vulnerability from the same 2021 ProxyShell cluster)
+in place of the alerts' actual ground truth (\texttt{CVE-2021-34473},
+\texttt{CVE-2021-26855}).
+
+\textbf{What this means.} SelfCheckGPT cannot distinguish ``consistently
+grounded'' from ``consistently correct but ungrounded,'' because both look
+identical to a consistency-only signal. Eighteen of these twenty cases
+are, functionally, Real-and-Plausible citations (Sect.~\ref{subsec:taxonomy}) at a volume
+this project's low-temperature (0.1) bait tests (Sects.~\ref{subsec:cve-bait},~\ref{subsec:realworld}) never
+observed --- those recorded exactly one such case across their combined
+$n=106$. Raising sampling temperature to what SelfCheckGPT requires makes
+the model volunteer a withheld-but-correct identifier far more often than
+production settings do --- a boundary condition on Sect.~\ref{subsec:realworld}'s ``never
+volunteers when withheld'' finding, which holds at temperature=0.1
+specifically, not as a general property of the model. The deterministic
+grounding checker still correctly flags every one of these 20 as
+ungrounded, since groundedness is about evidence presence, not
+real-world correctness --- the distinction Sect.~\ref{sec:discussion}'s central argument is
+built on. The two misattribution cases echo Sect.~\ref{subsec:cve-bait}'s Follina/DogWalk
+finding at smaller scale: a real identifier from the right cluster, but
+the wrong specific one.
+
+\subsection{Significance testing: deterministic grounding versus SelfCheckGPT}\label{subsec:mcnemar}
+
+A paired McNemar test between the deterministic pipeline and SelfCheckGPT
+needed a separate run rather than reusing Sect.~\ref{subsec:selfcheckgpt}'s data:
+\texttt{sample\_citations()} bypasses the guardrail pipeline, so the
+deterministic checker's actual verdict was never computed on those 60
+alerts --- only the bait/stated construction's ground-truth label was, and
+treating that label as a stand-in for the checker's verdict would make
+the comparison tautological. Generated one fresh report per alert (not
+three --- the deterministic checker needs no resampling) at the same
+temperature=0.7, over the identical 60-alert set, and ran the real
+deterministic checker against each
+(\texttt{experiments/evaluation/selfcheckgpt\_significance\_test.py}).
+
+\textbf{Result} (\texttt{experiments/results/selfcheckgpt\_vs\_deterministic\_mcnemar.json},
+$n=56$ after excluding the same declined-every-sample alerts Sect.~\ref{subsec:selfcheckgpt}
+excludes): \textbf{both correct in 32 cases, the deterministic checker uniquely
+correct in 16, SelfCheckGPT uniquely correct in 4, both wrong in 4 ---
+exact binomial McNemar $p=0.0118$, significant at $\alpha=0.05$.} This is the one
+comparison in this paper where a raw performance difference is both large
+and statistically confirmed rather than resting on argument alone: the
+deterministic checker was right $4\times$ more often than SelfCheckGPT on the
+exact same alerts. The deterministic checker's own accuracy across all 60
+was 52/60 (100\% on the stated class, 73.3\% on the prompted class).
+
+Sect.~\ref{subsubsec:llmjudge}'s LLM-judge result showed zero disagreement with the
+deterministic pipeline (100\% both ways), which --- like Sect.~\ref{subsubsec:inputguardrailcomparison}'s
+degenerate LLM-Guard-vs-hybrid trial --- would itself produce a degenerate,
+zero-discordant-pair McNemar test rather than a meaningful $p$-value, so it
+was not run.
+
+\subsection{Relevance classifier validation}\label{subsec:relevance}
+
+\textbf{Method.} The \texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT} split (Sect.~\ref{subsec:taxonomy})
+rests on Sect.~\ref{subsec:output-guardrail}'s Stage 2 relevance score --- a deterministic, stemmed
+bag-of-words overlap between the alert's evidence text and the
+authoritative record's description, thresholded at 0.15 --- which had
+never been checked against independent judgment before this evaluation.
+
+80 (alert, candidate CVE) pairs were built from the CVE-bait set
+(Sect.~\ref{subsec:cve-bait}): 40 anchor alerts, each paired with its own correct CVE and a
+different real CVE from the same pool by a fixed index shift. Real NVD
+descriptions were fetched live for all 80 candidates --- the same text
+Sect.~\ref{subsec:output-guardrail}'s Stage 2 actually scores. Each pair was labeled
+relevant/not-relevant by a human rater, blind to which CVE was intended
+as correct and blind to row order. An AI-suggested first pass (0/80 rater
+overrides) was followed by a fully blind re-check of the 3 pairs flagged
+as genuinely ambiguous; all 3 held, including the two closest calls ---
+disclosed as AI-suggested, human-confirmed labeling, not fully
+independent from-scratch annotation.
+
+\textbf{Result} (\texttt{experiments/evaluation/relevance\_classifier\_validation/},
+$n=80$): \textbf{accuracy 92.5\% (95\% CI [84.6\%, 96.5\%]), precision 90.5\% (95\% CI
+[77.9\%, 96.2\%]), recall 95.0\% (95\% CI [83.5\%, 98.6\%]), F1 92.7\%}
+(TP=38, FP=4, TN=36, FN=2). All 6 disagreements cluster tightly around
+the 0.15 decision threshold (overlap scores 0.100--0.191) rather than
+spreading across the full range --- a boundary-case failure mode, not
+general unreliability. One genuinely correct citation scored only 0.100
+and was misclassified as irrelevant because its official NVD description
+is just the bare title ``Windows Print Spooler Elevation of Privilege
+Vulnerability,'' almost no text for a word-overlap scorer to match
+against; a second correct citation missed the threshold by one hundredth
+of a point.
+
+\textbf{What this means.} The relevance classifier is reasonably accurate
+against human judgment (92.5\%), which is what makes the
+\texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT} split defensible rather than
+resting on an unchecked heuristic. Its concrete failure mode --- short or
+generic authoritative descriptions starving a bag-of-words scorer ---
+produces false negatives on genuinely correct citations, a disclosed
+limitation restated in Sect.~\ref{sec:discussion}.
+
+\subsection{Real-world validation: third-party incident generator and CVE pool}\label{subsec:realworld}
+
+To move beyond hand-authored bait alerts, \texttt{Secure\_SOC\_AI} \cite{securesocai} (an
+independent, third-party open-source SOC tool) was integrated as an
+incident \textit{generator} only --- its own triage step was not used, since
+replacing exactly that step is this project's contribution. Its rule
+engine and correlator produced 76 incidents across all 7 of its shipped
+detection rules, run through the full LLMCite pipeline.
+
+\textbf{Result:} 0\% ungrounded on both CVE and ATT\&CK citations, 0\% requiring
+review across all 76 incidents --- an expected clean result on
+non-adversarial, rule-engine-generated incidents, included for
+completeness rather than as an adversarial stress test (Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}
+cover that).
+
+A second, purpose-built 60-alert CVE pool (15 real NVD-listed CVEs, split
+into \textbf{bait} style --- exploit behavior described, CVE withheld --- and
+\textbf{stated} style --- CVE given directly) isolates whether the model can
+\textit{identify} a CVE from behavior alone, or only \textit{verify} one it is already
+given.
+
+\begin{table}[h]
+\caption{CVE pool bait-vs-stated comparison: whether the model identifies a withheld CVE from behavior alone, or only verifies one it is given}\label{tab:cvepool}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Style & $n$ & CVE ungrounded rate & Cited the correct ground-truth CVE \\
+\midrule
+Bait (number withheld) & 30 & 0.0\% & \textbf{0.0\%} \\
+Stated (number given) & 30 & 0.0\% & 100\% \\
+\botrule
+\end{tabular}
+\end{table}
+
+\textbf{This is the most important finding in this subsection.} The model never
+fabricates a CVE under either framing, but when the number is withheld it
+also \textbf{never volunteers the correct one} --- it stays silent rather than
+guessing. The pipeline as built only \textit{verifies} claims the model already
+makes; it does not \textit{identify} a CVE from behavior alone --- a genuine
+capability gap motivating specific future work (retrieval-based CVE
+matching against behavioral description), not a guardrail failure. \textbf{This
+finding holds at temperature=0.1; Sect.~\ref{subsec:selfcheckgpt} finds the opposite behavior
+at temperature=0.7} on the same style of alert.
+
+\subsection{Live integration demonstration: real Wazuh SIEM data}\label{subsec:wazuh}
+
+To test against genuinely live, non-synthetic alert data rather than only
+CICIDS2017 \cite{cicids2017} (flagged elsewhere as outdated for current attack-pattern
+coverage --- see Sect.~\ref{sec:discussion}), a local Wazuh \cite{wazuh} SIEM/XDR stack was deployed via
+Docker Compose with a real registered agent, generating real triggering
+activity across five trigger types: File Integrity Monitoring on an
+actual file write; a genuine SSH brute-force attempt that Wazuh's
+correlation engine correctly escalated to a dedicated rule; realistic
+SQLi/XSS/directory-traversal request lines against Wazuh's web-attack
+ruleset; rootkit-signature markers via Wazuh's rootcheck module; and
+sudo/privilege-escalation syslog activity against Wazuh's sudo ruleset.
+
+\textbf{Result:} 139 unique alerts (deduplicated, expanded from an original
+26) run through the full pipeline: \textbf{0\% ungrounded on ATT\&CK/CVE across
+all 139}. Manual inspection confirmed the model's reasoning engaged with
+real MITRE technique IDs present in the alerts (\textbf{T1110} Brute Force on
+SSH alerts; \textbf{T1190} Exploit Public-Facing Application on web-attack
+alerts; \textbf{T1548.003} Sudo and Sudo Caching on privilege-escalation
+alerts), once an adapter bug stripping MITRE tags from SSH-rule alerts
+specifically was found and fixed.
+
+\textbf{Two genuine PII-guardrail bugs surfaced by this live data, neither
+visible on synthetic benchmarks.} First, at $n=26$, 5 alerts triggered a
+\texttt{PERSON} false positive --- the NER model misread technical strings (a URL
+path, a shell-command fragment, ``ATT\&CK'', a document name) as a person's
+name. Fixed with a plausibility filter rejecting matches containing
+characters no real name uses. Second, the bulk expansion to $n=139$ raised
+\texttt{requires\_review} to 27.3\% (38/139) before correction --- $\sim$35 of the 38
+were Presidio's \texttt{PHONE\_NUMBER} recognizer misreading bare IP addresses;
+not threshold-fixable, since a real IP and a real phone number score
+identically, so fixed with a structural check rejecting any
+\texttt{PHONE\_NUMBER} match that parses as a valid IPv4 address. The corrected
+result is \textbf{\texttt{requires\_review} at 4/139 (2.9\%)}, with zero regression on
+real-name or real-phone-number detection. The 4 remaining flags are
+single capitalized words (``Mithra'', ``Maniac'', ``Bash'', ``Benchmark'') the
+model's own report text uses as a rootkit/benchmark name beside
+``rootkit'' or ``CIS \ldots{} score'' --- genuinely ambiguous for the NER model,
+reported as a known limitation rather than overfit to four exact strings.
+
+\textbf{Honest limitation:} $n=139$ is manual, burst-fired activity across
+several sessions rather than continuous production traffic --- sufficient
+to demonstrate the pipeline against many real, live-detected attack
+patterns and to surface two real guardrail bugs, not sufficient for a
+precise statistical claim on its own. Wazuh's built-in
+vulnerability-detector (which would add genuine CVE-tagged alerts) was
+blocked by a single-node Docker inventory-sync limitation and is not
+counted among the 139.
+
+\subsection{Cross-source grounding summary}\label{subsec:crosssource}
+
+Sects.~\ref{subsec:cve-bait}--\ref{subsec:wazuh} each report a grounding rate on one alert source in
+isolation. This section pools them into a single cross-source view using
+only already-reported results --- no new alerts or LLM calls
+(\texttt{experiments/evaluation/grounding\_benchmark\_summary.py}).
+
+\textbf{Result} (\texttt{experiments/results/grounding\_benchmark\_summary.json}, 575
+alerts total): pooling every CVE-checker source (CVE-bait, Wazuh,
+Secure\_SOC\_AI rule engine, Secure\_SOC\_AI CVE pool; $n=425$) gives
+\textbf{2/425 (0.47\%, 95\% CI [0.1\%, 1.7\%])}. Pooling every ATT\&CK-checker
+source (ATT\&CK-bait, Wazuh, Secure\_SOC\_AI rule engine; $n=365$) gives
+\textbf{6/365 (1.64\%, 95\% CI [0.8\%, 3.5\%])}. Both non-zero contributions come
+entirely from the two purpose-built bait sources; the three
+non-adversarial sources contribute zero ungrounded citations between
+them.
+
+\textbf{Honest limitation.} This pooled figure is five heterogeneous samples
+with different construction methods combined by simple addition, not a
+single random sample --- per-source rates are reported alongside it for
+that reason. It inherits each source's own caveats (e.g.\ Wazuh's
+vulnerability-detector gap, Sect.~\ref{subsec:wazuh}), and formal significance testing
+between sources was not attempted --- both bait sets are too few discordant
+cases for McNemar to say anything meaningful even at $n=150$ each.
+
+\subsection{Supporting evaluation: auxiliary guardrails and engineering baselines}\label{subsec:supporting}
+
+Sects.~\ref{subsec:cve-bait}--\ref{subsec:crosssource} above establish and validate this paper's central claim:
+the CVE/ATT\&CK grounding-and-classify pipeline works across two claim
+types, and the \texttt{REAL\_AND\_PLAUSIBLE} class it introduces catches a real,
+statistically confirmed blind spot in the leading self-consistency
+alternative. The four subsections below are reported for completeness ---
+they validate the pipeline's other guardrail layers (input filtering, PII
+redaction), an alternative verification strategy (LLM-as-judge), and
+engineering-level throughput characteristics --- but none of them bear
+directly on the paper's central claim, and none should be read as
+carrying equal evidentiary weight to Sects.~\ref{subsec:cve-bait}--\ref{subsec:crosssource} above.
+
+\subsubsection{Input guardrail comparison}\label{subsubsec:inputguardrailcomparison}
+
+The input guardrail was benchmarked against two maintained open-source
+alternatives --- LLM Guard \cite{llmguard2024} (Protect AI) and Pytector --- on a
+119-sample held-out set (53 injection attempts across exact-pattern,
+paraphrase, and novel-strategy categories, including samples adapted from
+\texttt{deepset/prompt-injections} \cite{deepsetpromptinjections2023} and
+\texttt{TrustAIRLab/in-the-wild-jailbreak-prompts} \cite{trustairlab2024}; 66
+benign samples including real CICIDS2017 network-flow text). Guardrails
+AI was excluded after its relevant hub validator was removed from the
+package index mid-project, its only remaining alternative requiring a
+hosted-API call (full detail:
+\texttt{experiments/evaluation/guardrail\_comparison/README\_guardrail\_comparison.md}).
+
+\begin{table}[h]
+\caption{Input guardrail comparison: precision/recall/latency/throughput across four implementations on the 119-sample eval set}\label{tab:inputguardrail}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & Baseline (deterministic) & LLM Guard & Pytector & Hybrid (det.\ + Pytector fallback) \\
+\midrule
+Precision & 1.0 & 0.962 & 1.0 & 1.0 \\
+Recall & 0.264 & 0.943 & 0.679 & 0.736 \\
+F1 & 0.418 & 0.952 & 0.809 & 0.848 \\
+False positives & 0 & 2 & 0 & 0 \\
+\botrule
+\end{tabular}
+\end{table}
+
+Since all 6 pairwise comparisons this project runs share overlapping
+implementations (\texttt{hybrid} appears in 4 of the 6), both raw and
+Holm-Bonferroni-corrected McNemar $p$-values are reported:
+
+\begin{table}[h]
+\caption{McNemar significance testing across all 6 pairwise guardrail comparisons, raw and Holm-Bonferroni-corrected}\label{tab:mcnemar6}
+\begin{tabular}{@{}p{4.4cm}cccc@{}}
+\toprule
+Comparison & Raw $p$ & Sig.\ (raw $\alpha=0.05$)? & Holm--Bonf.\ $p$ & Sig.\ (corr.)? \\
+\midrule
+Baseline vs.\ Hybrid & $<$0.001 & \textbf{Yes} & $<$0.001 & \textbf{Yes} \\
+Hybrid vs.\ LLM Guard & 0.049 & Yes & 0.196 & \textbf{No} \\
+Hybrid vs.\ Pytector & 0.250 & No & 0.500 & No \\
+Hybrid+LLM-Guard-fallback vs.\ Hybrid & 0.049 & Yes & 0.196 & \textbf{No} \\
+Hybrid+LLM-Guard-fallback vs.\ LLM Guard & 1.000 & No & 1.000 & No \\
+Hybrid+LLM-Guard-fallback vs.\ Pytector & 0.012 & Yes & 0.059 & \textbf{No} \\
+\botrule
+\end{tabular}
+\end{table}
+
+\textbf{Only one of the six comparisons survives correction: hybrid beats the
+naive deterministic-only baseline}, the core safety claim this layer
+depends on. The other three raw-significant results sat close to the raw
+$\alpha=0.05$ line and do not survive correction; LLM Guard is numerically ahead
+on recall, but ``numerically ahead'' and ``statistically distinguishable
+from chance once multiple comparisons are accounted for'' are different
+claims.
+
+A follow-up trial testing LLM Guard as the hybrid's fallback classifier
+(instead of Pytector) produced a \textbf{degenerate McNemar test --- zero
+discordant predictions}, meaning the two are identical sample-for-sample:
+the deterministic pre-filter adds value only against a classifier with
+real blind spots (true for Pytector), not one already near ceiling
+recall. LLM Guard's and Pytector's originally reported latency figures
+were also found to be inflated by a one-time model-loading cost on their
+first call, corrected via an explicit warmup step; single-run latency on
+shared hardware still varies by $\sim$2.6$\times$ between runs, so exact
+millisecond figures are reported as order-of-magnitude comparisons only,
+pending repeated-trial benchmarking.
+
+\subsubsection{LLM-judge baseline}\label{subsubsec:llmjudge}
+
+As an alternative verification strategy, a judge call is prompted
+directly with an (alert evidence, generated report) pair and asked to
+classify citations as grounded/ungrounded, without the deterministic
+pipeline's verdict --- run over a class-balanced calibration set with two
+judges: \texttt{openai/gpt-oss-20b} (same-family) and \texttt{qwen/qwen3.6-27b} (a
+genuinely different, independently-hosted family, addressing Zheng et
+al.'s \cite{llmjudge2023} self-enhancement-bias concern directly). Both reproduced the
+deterministic pipeline's labels exactly: \textbf{100\% accuracy/precision/recall}
+on the same-family run ($n=318$, complete, 95\% CI [98.8\%, 100\%]) and the
+cross-family run ($n=450$, \textbf{442/450 (98\%) completed}, 95\% CI [99.1\%,
+100\%] on 440 scored samples). \textbf{The two sets are not sample-for-sample
+identical} --- the underlying bait-alert pool grew between runs, so the
+same-family 318 are a strict subset of the cross-family 450 (tracked in
+\texttt{docs/ROADMAP\_PLAN.md} \S14); on every shared sample the judges agree
+100\%.
+
+\textbf{This result is weaker evidence than the headline number suggests.} The
+harder tier's discriminating signal is close to what the deterministic
+checker already computes --- an identifier-shaped token appearing in the
+evidence --- so a capable judge matching it is an expected feasibility
+floor, not deep semantic reasoning. The defensible claim is narrower: an
+LLM judge can reproduce this binary decision regardless of model family,
+while the deterministic pipeline keeps real deployment advantages neither
+judge shares --- near-zero latency, no per-call cost or rate-limit exposure,
+no dependence on a hosted API.
+
+\subsubsection{PII redaction guardrail: bait test (Threat T3)}\label{subsubsec:pii-bait}
+
+Unlike Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}'s grounding checks, T3 is a \textit{redaction} threat: does
+the report echo sensitive data present in the raw alert. The guardrail
+(Sect.~\ref{subsec:pii-guardrail}) runs Presidio \cite{presidio2023} and spaCy's \texttt{en\_core\_web\_sm} locally.
+
+\texttt{experiments/evaluation/pii\_bait\_alerts.py} built 40 alerts with
+synthetic PII across 10 scenario types (DLP exfiltration, phishing
+credential harvest, payment-data exposure, database dump, cloud-storage
+misconfiguration, and others), plus 20 clean alerts as a false-positive
+check. Beyond the original 6 PII/8 clean hand-authored alerts, the
+expansion embeds real synthetic entity values --- never real individuals'
+data --- from two verified, actively-maintained datasets (Gretel's
+\texttt{gretel-pii-masking-en-v1}, ai4privacy's \texttt{pii-masking-openpii-1m})
+wrapped in hand-written scenarios, each verified via the guardrail's own
+detector to actually trigger its stated entity type before inclusion.
+
+\textbf{Result} (\texttt{experiments/results/pii\_bait\_results.json}, $n=60$): \textbf{5/40
+PII alerts had a genuine detection (12.5\%, 95\% CI [5.5\%, 26.1\%]), 0/20
+false positives, 0 residual PII after redaction} --- consistent with the
+original $n=6$ rate (16.7\%), now with a real confidence interval. All 5
+detections caught only one of the alert's two expected entity types,
+never both; manual inspection of ``nothing detected'' cases confirms the
+model (\texttt{openai/gpt-oss-20b}) consistently summarizes PII \textit{abstractly}
+rather than quoting raw values.
+
+Two of the initial 7 raw detections were false positives --- the NER model
+flagged the bare word ``PII'' and the phrase ``enforce bucket'' as \texttt{PERSON}
+--- caught by manually checking every detection against its known sourced
+value rather than trusting the aggregate rate. Fixed by extending the
+plausibility filter (real names are Title Case; reject lowercase-starting
+or acronym-shaped spans), correcting the rate from an inflated 17.5\%
+(7/40) to the verified 12.5\% (5/40) above.
+
+\textbf{What this means.} The model's own summarization behavior is itself a
+meaningful T3 mitigation; on the cases where it did quote something
+verbatim, the guardrail worked end to end with zero residual PII and
+zero false positives elsewhere. And checking a guardrail's \textit{aggregate
+rate} is not the same as checking that every individual hit is genuine ---
+a type-level pass/fail check can silently absorb false positives that
+happen to land on the right label.
+
+\subsubsection{Concurrency and throughput benchmarks}\label{subsubsec:concurrency}
+
+An original benchmark (1/2/4 workers, 3 repeats looped inside one
+long-running process) showed threading's full-pipeline throughput
+improving from 1 to 2 workers but collapsing sharply at 4 (0.67
+alerts/sec), consistent with (not definitively proven to be) Groq
+server-side per-key throttling under load; multiprocessing was worse
+than threading at every worker count.
+
+This was \textbf{redone 2026-08-25} to close two gaps: repeats looping
+inside one long-running process can let OS scheduler/allocator state
+carry over between them, and there was no way to separate guardrail
+overhead from live Groq network variance. Fixes: (1) each repeat runs as
+a genuinely independent subprocess (\texttt{fresh\_process\_benchmark.py});
+(2) a mocked-LLM variant runs the real guardrail/grounding/redaction
+pipeline but replaces only the Groq call with a fixed 0.3s delay, free of
+API cost and rate limits, so it runs at $n=30$ instead of $n=6$.
+
+Fresh-process isolation surfaced a real bug: full-pipeline runs with more
+than one thread crashed on an unlocked lazy-singleton race in the
+pytector loader (two threads racing on the first concurrent call both
+started constructing the DeBERTa model at once) --- a real production
+risk, not just a benchmark artifact, fixed with double-checked locking.
+
+\begin{table*}[h]
+\caption{Concurrency benchmark, fresh-process repeats ($n=3$ repeats per configuration; guardrail-only $n=2000$, mocked-pipeline $n=30$, real-pipeline $n=6$)}\label{tab:concurrency}
+\centering
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Workload & Workers & Threading (alerts/sec) & Multiprocessing (alerts/sec) \\
+\midrule
+Guardrail-only & 1 & $850{,}323 \pm 115{,}672$ & $648{,}379 \pm 41{,}175$ \\
+Guardrail-only & 2 & $108{,}456 \pm 9{,}380$ & $309 \pm 2$ \\
+Guardrail-only & 4 & $97{,}063 \pm 14{,}474$ & $230 \pm 1$ \\
+Full pipeline, mocked LLM & 1 & $1.973 \pm 0.032$ & $2.031 \pm 0.018$ \\
+Full pipeline, mocked LLM & 2 & $2.660 \pm 0.140$ & $1.380 \pm 0.006$ \\
+Full pipeline, mocked LLM & 4 & $3.284 \pm 0.415$ & $1.328 \pm 0.010$ \\
+Full pipeline, real Groq & 1 & $0.839 \pm 0.019$ & $0.896 \pm 0.037$ \\
+Full pipeline, real Groq & 2 & $1.196 \pm 0.174$ & $0.333 \pm 0.006$ \\
+Full pipeline, real Groq & 4 & $1.243 \pm 0.170$ & $0.273 \pm 0.017$ \\
+\botrule
+\end{tabular}
+\end{table*}
+
+\textbf{What this shows.} The mocked and real-API columns agree in direction
+at every worker count, validating the mocked variant as a genuine
+stand-in. Threading's full-pipeline throughput climbs with more workers
+(real: $+48\%$ from 1 to 4 threads) since the GIL releases during network
+waits, letting threads overlap I/O. Multiprocessing's falls (real: $-70\%$)
+since each additional process pays its own model-load cost with no
+offsetting I/O-overlap benefit --- the original ``process overhead
+dominates'' finding, now with a concrete measured mechanism (the pytector
+cold-start) behind it. Guardrail-only numbers reproduce the original
+qualitative pattern (more workers hurts a CPU-bound, microsecond-scale
+task, far more so for multiprocessing), though the 2/4-worker figures are
+noisier than the means suggest --- \texttt{psutil.cpu\_percent()}'s 0.1s sampling
+interval is coarse relative to a sub-millisecond runtime.
+
+\textbf{Honest discrepancy, not resolved.} The redone real-API run does \textit{not}
+reproduce the original benchmark's sharp 4-thread collapse --- 4-thread
+throughput here is the \textit{best} of the three worker counts, not the worst.
+Both runs are $n=6$, modest statistical power either way; this could be a
+real but non-reproduced throttling instance, or cross-run interference in
+the original in-process design (e.g.\ rate-limit-window state persisting
+across the sequential 1$\to$2$\to$4 tests). Neither explanation is confirmed ---
+both results are reported rather than one quietly replacing the other.
+
+\section{Discussion}\label{sec:discussion}
+
+\textbf{What \texttt{REAL\_AND\_PLAUSIBLE} means for trust.} The central practical argument
+of this paper is that a citation which is real and topically plausible is
+the \textit{hardest} case for a human reviewer to catch, not the easiest --- it looks
+correct. Sect.~\ref{subsec:taxonomy}'s classification taxonomy and its unconditional review-flag
+policy exist specifically because an earlier version of this pipeline got
+this wrong (treating \texttt{REAL\_AND\_PLAUSIBLE} as self-evidently safe), and the
+fix is documented as a deliberate correction, not presented as though the
+pipeline always worked this way. Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar} make this more than an
+architectural argument: a leading alternative (self-consistency checking)
+is demonstrably fooled by this exact pattern, and the gap is large enough
+to be statistically confirmed. Everything reported after Sect.~\ref{subsec:relevance} in this
+paper's evaluation exists to establish that the mechanism producing this
+result actually works across real, third-party, and live data --- it
+supports this finding, it is not a separate finding of equal weight.
+
+\textbf{What the CVE-pool finding (Sect.~\ref{subsec:realworld}) means.} The 0\%-fabrication /
+0\%-spontaneous-citation result is genuinely two findings, not one: the
+pipeline's grounding check is not the reason the model stays silent (there
+is nothing to ground-check if nothing is cited) --- the model itself,
+independent of any guardrail, does not volunteer technical identifiers it
+wasn't given. This is safe behavior, but it also means the current system
+architecturally cannot help an analyst who needs a CVE \textit{identified} from
+symptoms, only one \textit{verified} once cited. We name this explicitly as the
+boundary of the current contribution rather than implying broader coverage
+than what was tested.
+
+\textbf{Limitations, stated plainly:}
+\begin{itemize}
+\item Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar} (SelfCheckGPT and its McNemar test) are both
+  complete: the deterministic checker is significantly more accurate
+  ($p=0.0118$, $n=56$). Its result also contradicts Sect.~\ref{subsec:realworld}'s ``never
+  volunteers a withheld CVE'' finding at higher sampling temperature (0.7
+  vs.\ 0.1) --- the same model volunteers a withheld-but-correct
+  identifier once sampled at the temperature SelfCheckGPT requires, so
+  Sect.~\ref{subsec:realworld}'s finding should be read as holding at production
+  temperature specifically, not as a general model property.
+  Sect.~\ref{subsubsec:llmjudge}'s LLM-judge baseline now spans same- and
+  cross-model-family judges --- 442/450 (98\%) complete, quota-gated on
+  Groq's free tier rather than a design limitation.
+\item Sect.~\ref{subsubsec:llmjudge}'s 100\% LLM-judge agreement should not be read as
+  strong evidence on its own: the hard tier's discriminating signal is
+  close to what the deterministic checker already computes, a
+  feasibility floor rather than deep semantic reasoning, not evidence
+  against the deterministic pipeline's necessity.
+\item The CVE-bait result (Sect.~\ref{subsec:cve-bait}, $n=150$) gives a citable 95\% CI
+  ([0.4\%, 4.7\%]), but both ungrounded citations occurred on the same
+  two famous vulnerabilities (Log4Shell, Follina) --- the honest claim is
+  ``rarely induces spontaneous citation, catches it on famous cases,''
+  not ``stress-tested against obscure-CVE hallucination.'' The
+  ATT\&CK-bait result (Sect.~\ref{subsec:attack-bait}) differs: 4 of its 6 ungrounded
+  citations are on less prominent, wrong-neighbor or revoked-technique
+  cases.
+\item Sect.~\ref{subsubsec:concurrency}'s concurrency benchmark uses fresh-process repeats; the
+  input-guardrail latency comparison (Sect.~\ref{subsubsec:inputguardrailcomparison}) has not had the
+  same treatment, so only order-of-magnitude comparisons should be drawn
+  from it. The Wazuh live demonstration (Sect.~\ref{subsec:wazuh}, $n=139$) is a
+  real-world sanity check and bug-finding exercise, not a statistically
+  powered claim.
+\item The ATT\&CK verification path relies on a periodically refreshed local
+  snapshot (Sect.~\ref{subsec:setup}) rather than a live per-ID lookup (none exists
+  publicly) --- a disclosed asymmetry with the CVE path's live NVD
+  lookups. CICIDS2017, used for benign-traffic text in
+  Sect.~\ref{subsubsec:inputguardrailcomparison}, is independently flagged as no longer
+  representative of current attack patterns \cite{goldschmidtchuda2025};
+  used here only for \texttt{BENIGN}-labeled text, while the live Wazuh
+  integration (Sect.~\ref{subsec:wazuh}) is relied on for any current-attack-data
+  claim.
+\item T3 (PII leakage, Sect.~\ref{subsec:pii-guardrail}/\ref{subsubsec:pii-bait}) is at $n=60$: 5/40 detected
+  (12.5\%, 95\% CI [5.5\%, 26.1\%]), corrected down from an initial 7/40
+  after 2 false positives were caught by checking sourced values rather
+  than trusting the type-level aggregate.
+\item The report-generation backend is a single small model
+  (\texttt{openai/gpt-oss-20b} via Groq); generalization to larger or
+  differently-trained models is untested.
+\item The relevance classifier behind \texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT}
+  (Sect.~\ref{subsec:output-guardrail}, validated Sect.~\ref{subsec:relevance}) is 92.5\% accurate against human
+  judgment ($n=80$), not perfect --- its 6 disagreements cluster at the
+  0.15 decision threshold, with a known failure mode on short/generic
+  authoritative descriptions. Its labels are AI-suggested and
+  human-confirmed, not independently annotated from scratch.
+\end{itemize}
+
+\textbf{Threats to validity.} The input-guardrail comparison (Sect.~\ref{subsubsec:inputguardrailcomparison})
+uses a dataset partly adapted from public sources rather than fully
+independent attacker data, tracked per-sample via a \texttt{provenance} field
+so this can be audited. The CVE-bait set (Sect.~\ref{subsec:cve-bait}, $n=150$) is not a
+random sample of all CVEs --- it is biased toward well-documented,
+high-profile, actively exploited vulnerabilities (25 individually chosen
+for fame, 125 from CISA's KEV catalog), a deliberate choice (an obscure
+CVE with no public writeup is not a meaningful spontaneous-citation test
+either way) that means the estimated rate should not be read as
+generalizing to arbitrary, less-documented CVEs. The ATT\&CK-bait set
+(Sect.~\ref{subsec:attack-bait}, $n=150$) has the analogous bias in the other direction ---
+technique selection is drawn from the local MITRE snapshot rather than
+any real-world prevalence signal, so its rate reflects how often the
+model reaches for a specific technique ID given a resembling symptom
+description, not attacker behavior frequency.
+
+\section{Conclusion}\label{sec:conclusion}
+
+We presented LLMCite, a domain-specialized citation-grounding verification
+pipeline for LLM-generated SOC reports, built around a four-class outcome
+taxonomy (plus a fifth label for formally withdrawn identifiers) rather
+than a binary flagged/not-flagged label. The taxonomy's central claim ---
+that a real, topically plausible citation never actually stated in the
+evidence (\texttt{REAL\_AND\_PLAUSIBLE}) is the hardest case for a human reviewer to
+catch, precisely because it looks correct --- is not argued architecturally
+alone. Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar} demonstrate it directly: at the sampling temperature
+self-consistency checking requires, the model volunteers real,
+correct-but-uncited identifiers it stays silent on at production
+temperature (Sect.~\ref{subsec:realworld}), and does so consistently enough, across
+independent resamples, that a SelfCheckGPT-style self-consistency signal
+alone cannot tell eighteen of these cases apart from a genuinely grounded
+citation. External grounding can, because it checks the evidence the model
+was actually given rather than the model's confidence in its own answer ---
+and the resulting accuracy gap between the two approaches is large enough
+to be statistically confirmed on the identical alerts (McNemar $p=0.0118$),
+not merely observed. That distinction --- not raw accuracy against a
+baseline --- is what this paper argues a citation-grounding pipeline
+contributes that self-consistency checking alone does not, and it is the
+one comparison in this paper we would ask a reader to remember above the
+rest.
+
+That finding rests on a pipeline validated broadly, not narrowly, though
+the breadth below is supporting evidence for the claim above, not a set
+of separate contributions carrying equal weight. The grounding-and-classify
+pattern generalizes across two distinct claim types (CVE identifiers via
+live NVD lookup, MITRE ATT\&CK techniques via a local STIX snapshot),
+evaluated via adversarial bait tests at $n=150$ for each claim type, an
+independent third-party incident generator, a CVE pool isolating
+identification from verification, live SIEM data including a genuinely
+detected attack, and a pooled cross-source grounding summary spanning 575
+alerts across every evaluated source (Sect.~\ref{subsec:crosssource}). Supporting evaluation of
+the pipeline's other guardrail layers --- a statistically tested comparison
+of the input-guardrail layer against maintained open-source alternatives,
+an LLM-judge baseline now spanning both a same-family and a cross-family
+judge (the latter 442/450, 98\% complete and quota-gated rather than left
+as an unaddressed limitation), and a bait-tested PII-redaction guardrail
+($n=60$, 12.5\% detection rate, 95\% CI [5.5\%, 26.1\%]) --- further validates the
+system without altering the central finding above.
 
 \backmatter
 
-\bmhead{Supplementary information}
-
-If your article has accompanying supplementary file/s please state so here. 
-
-Authors reporting data from electrophoretic gels and blots should supply the full unprocessed scans for key as part of their Supplementary information. This may be requested by the editorial team/s if it is missing.
-
-Please refer to Journal-level guidance for any specific requirements.
-
-\bmhead{Acknowledgements}
-
-Acknowledgements are not compulsory. Where included they should be brief. Grant or contribution numbers may be acknowledged.
-
-Please refer to Journal-level guidance for any specific requirements.
-
 \section*{Declarations}
 
-Some journals require declarations to be submitted in a standardised format. Please check the Instructions for Authors of the journal to which you are submitting to see if you need to complete this section. If yes, your manuscript must contain the following sections under the heading `Declarations':
+%% TODO: fill in before submission -- placeholders below follow Springer
+%% Nature's required Declarations headings (see the template's user manual).
 
 \begin{itemize}
-\item Funding
-\item Conflict of interest/Competing interests (check journal-specific guidelines for which heading to use)
-\item Ethics approval and consent to participate
-\item Consent for publication
-\item Data availability 
-\item Materials availability
-\item Code availability 
-\item Author contribution
+\item \textbf{Funding:} Not applicable.
+\item \textbf{Conflict of interest / Competing interests:} The author declares no competing interests.
+\item \textbf{Ethics approval and consent to participate:} Not applicable --- this work involves no human or animal subjects research. (The relevance-classifier validation in Sect.~\ref{subsec:relevance} involved one human rater labeling technical (alert, CVE) pairs, not human-subjects research.)
+\item \textbf{Consent for publication:} Not applicable.
+\item \textbf{Data availability:} All evaluation result files, evaluation scripts, and the pipeline implementation referenced throughout Sect.~\ref{sec:evaluation} and the Appendix are available in the project repository.
+\item \textbf{Materials availability:} Not applicable.
+\item \textbf{Code availability:} The full pipeline implementation, guardrails, and evaluation harness are available in the project repository (see Appendix~\ref{secA1} for the file-level mapping).
+\item \textbf{Author contribution:} Single-author work; the author designed the pipeline, ran all experiments, and wrote the manuscript.
 \end{itemize}
-
-\noindent
-If any of the sections are not relevant to your manuscript, please include the heading and write `Not applicable' for that section. 
-
-%%===================================================%%
-%% For presentation purpose, we have included        %%
-%% \bigskip command. Please ignore this.             %%
-%%===================================================%%
-\bigskip
-\begin{flushleft}%
-Editorial Policies for:
-
-\bigskip\noindent
-Springer journals and proceedings: \url{https://www.springer.com/gp/editorial-policies}
-
-\bigskip\noindent
-Nature Portfolio journals: \url{https://www.nature.com/nature-research/editorial-policies}
-
-\bigskip\noindent
-\textit{Scientific Reports}: \url{https://www.nature.com/srep/journal-policies/editorial-policies}
-
-\bigskip\noindent
-BMC journals: \url{https://www.biomedcentral.com/getpublished/editorial-policies}
-\end{flushleft}
 
 \begin{appendices}
 
-\section{Section title of first appendix}\label{secA1}
+\section{Mapping this draft back to the codebase}\label{secA1}
 
-An appendix contains supplementary information that is not an essential part of the text itself but which may be helpful in providing a more comprehensive understanding of the research problem or it is information that is too cumbersome to be included in the body of the paper.
+For a reviewer or collaborator who wants to verify any claim above against
+the actual implementation. Paths below are relative to the project
+repository root; \texttt{src/guardrails/} holds the pipeline itself,
+\texttt{experiments/evaluation/} the evaluation scripts, and
+\texttt{experiments/results/} their output (each script's own filename,
+with a \texttt{.json} extension, unless noted otherwise).
 
-%%=============================================%%
-%% For submissions to Nature Portfolio Journals %%
-%% please use the heading ``Extended Data''.   %%
-%%=============================================%%
-
-%%=============================================================%%
-%% Sample for another appendix section			       %%
-%%=============================================================%%
-
-%% \section{Example of another appendix section}\label{secA2}%
-%% Appendices may be used for helpful, supporting or essential material that would otherwise 
-%% clutter, break up or be distracting to the text. Appendices can consist of sections, figures, 
-%% tables and equations etc.
+\begin{table}[h]
+\small
+\caption{Mapping from each paper section/claim to its supporting code}\label{tab:appendixmap}
+\begin{tabular}{@{}p{2.6cm}p{6.4cm}@{}}
+\toprule
+Section & Script / module \\
+\midrule
+\ref{subsec:input-guardrail} & \texttt{input\_guardrail.py} \\
+\ref{subsec:evidence-pack} & \texttt{evidence\_pack.py} \\
+\ref{subsec:output-guardrail}--\ref{subsec:taxonomy} & \texttt{output\_guardrail.py}, \texttt{attack\_grounding.py} \\
+\ref{subsec:pii-guardrail} & \texttt{pii\_guardrail.py} \\
+\ref{subsec:cve-bait} & \texttt{cve\_bait\_alerts.py} \\
+\ref{subsec:attack-bait} & \texttt{attack\_bait\_alerts.py} \\
+\ref{subsec:selfcheckgpt} & \texttt{selfcheckgpt\_test.py} \\
+\ref{subsec:mcnemar} & \texttt{selfcheckgpt\_significance\_test.py} \\
+\ref{subsec:relevance} & \texttt{relevance\_classifier\_validation/} \\
+\ref{subsec:realworld} & \texttt{soc\_integration\_test.py}, \texttt{soc\_integration/cve\_pool.py} \\
+\ref{subsec:wazuh} & \texttt{wazuh\_integration\_test.py} \\
+\ref{subsec:crosssource} & \texttt{grounding\_benchmark\_summary.py} \\
+\ref{subsubsec:inputguardrailcomparison} & \texttt{guardrail\_comparison/} \\
+\ref{subsubsec:llmjudge} & \texttt{llm\_judge\_synthetic\_test.py} \\
+\ref{subsubsec:pii-bait} & \texttt{pii\_bait\_alerts.py} \\
+\ref{subsubsec:concurrency} & \texttt{threading\_benchmark.py}, \texttt{multiprocessing\_benchmark.py}, \texttt{fresh\_process\_benchmark.py} \\
+\botrule
+\end{tabular}
+\end{table}
 
 \end{appendices}
 
-%%===========================================================================================%%
-%% If you are submitting to one of the Nature Portfolio journals, using the eJP submission   %%
-%% system, please include the references within the manuscript file itself. You may do this  %%
-%% by copying the reference list from your .bbl file, paste it into the main manuscript .tex %%
-%% file, and delete the associated \verb+\bibliography+ commands.                            %%
-%%===========================================================================================%%
-
 \bibliography{sn-bibliography}% common bib file
-%% if required, the content of .bbl file can be included here once bbl is generated
-%%\input sn-article.bbl
 
 \end{document}

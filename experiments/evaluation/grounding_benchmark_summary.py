@@ -65,7 +65,7 @@ def build_summary() -> dict:
             cve_bait["total_tested"],
             cve_bait["ungrounded_count"], None,
             cve_bait["requires_review_count"],
-            note="CVE grounding only. 0/97 alerts that don't ask for a CVE citation ever "
+            note="CVE grounding only. 0/147 alerts that don't ask for a CVE citation ever "
                  "hallucinate one; both flagged hits come from the 3 alerts that explicitly "
                  "request a CVE ID.",
         ),
@@ -126,8 +126,8 @@ def build_summary() -> dict:
 
     significance_note = (
         "Formal significance testing (McNemar) is not meaningful for any pairwise "
-        "source comparison here: the CVE-bait set has only 2 positives at n=100 and "
-        "the ATT&CK-bait set only 3 at n=50 -- both far below the discordant-pair "
+        "source comparison here: the CVE-bait set has only 2 positives at n=150 and "
+        "the ATT&CK-bait set only 6 at n=150 -- both far below the discordant-pair "
         "count McNemar needs to say anything. Reported as descriptive rates with "
         "Wilson 95% CIs instead, consistent with the existing CVE-bait (#21) and "
         "ATT&CK-bait precedent."

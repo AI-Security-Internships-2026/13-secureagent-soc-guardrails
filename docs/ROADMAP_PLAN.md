@@ -693,3 +693,33 @@ rather than a silently dropped thread:
    remaining time before submission should be spent on. **Not planned**,
    disclosed in the paper (§5) as an explicit boundary of the current
    contribution.
+
+## 14. LLM-judge same-family vs. cross-model pools are mismatched — tracked, not fixed (2026-08-27)
+
+Flagged in PR #26 review (engranaabubakar): the same-family judge baseline
+(`llm_judge_synthetic_results.json`, 318 samples) and the cross-model
+qwen judge baseline (`llm_judge_synthetic_results_qwen_qwen3_6_27b.json`,
+442/450 samples) aren't apples-to-apples. Root cause, confirmed by reading
+`llm_judge_synthetic_test.py`: `build_synthetic_samples()` has no frozen
+sample file — it rebuilds live off however many alerts currently exist in
+`cve_bait_results.json`/`attack_bait_results.json`. Those files kept
+growing after each judge run started (106 base alerts → 318 samples at the
+same-family run; 150 base alerts → 450 samples at the qwen run), and by
+now both bait files sit at 150/150, so a fresh build today would yield 300
+base alerts / 900 samples — a third, still-mismatched size, not a fix.
+
+Verified the 318 same-family ids are a strict subset of the 442 completed
+qwen ids, which are in turn a strict subset of today's full 900-sample
+pool — nothing was ever removed or reshuffled, the pool just kept growing
+underneath each run. On every sample the two runs do share, the judges
+agree 100%, which is why this is being tracked rather than fixed now.
+
+**Not planned right now** — three options were considered (filter today's
+build down to the existing 450 ids and only re-run same-family against
+those, ~2-3 sessions; run both judges against the full current 900-sample
+pool, ~2x the sessions; leave as-is). Decided to leave as-is: the reviewer
+called it low-priority since overlapping samples already agree perfectly,
+and Week 12 has other priorities. Revisit if the paper ever makes a direct
+same-family-vs-cross-model comparison claim that needs matched n — until
+then it stays a disclosed inconsistency between two result files, not a
+correctness problem with either result.
