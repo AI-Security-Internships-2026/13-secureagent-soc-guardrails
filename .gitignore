@@ -46,3 +46,4 @@ docs/paper/**/*.fdb_latexmk
 docs/paper/**/*.bbl
 docs/paper/**/*.blg
 docs/paper/**/*.pdf
+!docs/paper/figures/*.pdf
