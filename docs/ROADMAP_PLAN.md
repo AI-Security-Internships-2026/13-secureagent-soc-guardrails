@@ -635,29 +635,69 @@ confirming there's no hidden redundancy between components, not "does
 disabling one component change another's accuracy" — reordering the
 pipeline is a separate, not-yet-scoped question if it ever comes up.
 
-**Rough method (refine when actually building this):**
-1. Add toggle parameters to `analyse_alert()` — same precedent as the
-   existing `verify_cves_with_nvd: bool = True` — e.g.
-   `enable_input_guardrail`, `enable_cve_check`, `enable_attack_check`,
-   `enable_pii_redaction`, all defaulting to `True` (today's behavior
-   unchanged).
-2. Re-run the existing test sets (CVE-bait n=100, ATT&CK-bait n=50,
-   PII-bait n=14, input-guardrail eval n=119) under each
-   single-component-disabled configuration, plus a handful of meaningful
-   combinations (all-on baseline, all-off floor, each pair).
-3. Measure per configuration: latency (mean/median per alert), the
-   `requires_review`/`guardrail_blocked` rate, and — the actual
-   headline number — how many alerts were caught *only* because of one
-   specific component (would have gone through unflagged if that one
-   component were off). That's the real "how much does each guardrail
-   matter" answer, not raw detection rate measured in isolation.
+**Phase 1 — code changes: ✅ done, 2026-08-31.** `analyse_alert()`
+(`src/agent/soc_agent.py`) gained 4 toggle params —
+`input_guardrail_enabled`, `cve_guardrail_enabled`,
+`attack_guardrail_enabled`, `pii_guardrail_enabled` — all defaulting to
+`True`, same precedent as the existing `verify_cves_with_nvd: bool =
+True`. Gated purely at the orchestrator call site (only `soc_agent.py`
+touched, not the 4 individual guardrail modules): a disabled stage's
+check function is never called (not called-then-discarded, so ablation
+timing reflects the stage genuinely not running), while every key that
+stage would normally set (`hallucinated_cves`, `cve_verifications`,
+`hallucinated_attack_techniques`, `attack_technique_verifications`,
+`pii_detections`) stays present in the report, just holding its empty/
+not-flagged value — so disabled-stage reports stay directly comparable
+to enabled-stage ones field-for-field, and the final
+`output_guardrail_flagged`/`requires_review` aggregation line needed no
+changes at all. Pipeline order unchanged. No tests added/run yet
+(deliberately deferred to Phase 2) and no ablation runs executed yet —
+this phase was pure wiring.
 
-**Cost:** cheap in engineering effort (mostly boolean flags on an
-already-built pipeline), moderate in Groq-quota cost — each configuration
-re-runs the same alert sets through fresh LLM calls, so N configurations
-× the combined size of all four datasets in API calls. Needs explicit
-quota scheduling like everything else quota-gated in this project, not a
-free add-on.
+**Phase 2 — smoke validation (not yet started).** Before spending any
+Groq quota on the real ablation: run 1 normal alert + 1 CVE-bait + 1
+ATT&CK-bait + 1 PII-bait alert through each toggle combination and
+confirm (a) the function still returns valid report dicts with every
+schema key present, (b) each toggle disables *only* its intended stage
+(no cross-talk), (c) `output_guardrail_flagged`/`requires_review` still
+aggregate correctly when a stage is off. Est. 1-2 hours. Regression
+tests for the 4 touched guardrail test files
+(`test_input_guardrail.py`, `test_output_guardrail.py`,
+`test_attack_grounding.py`, `test_pii_guardrail.py`) belong here too,
+once smoke validation passes.
+
+**Phase 3 — the actual ablation run (not yet started).** Minimum viable
+matrix, 6 configs: all-on, input-off, CVE-off, ATT&CK-off, PII-off,
+all-off. Run by dataset (not by pooled alert list) to keep checkpointing
+and quota management simple: CVE-bait x 6 configs, ATT&CK-bait x 6,
+PII-bait x 6, input-guardrail eval x 6 = 24 dataset/config runs total.
+Using the existing benchmark sizes (~479 alerts pooled across all four
+datasets), that's roughly 6 x 479 ≈ 2,874 live model calls for the
+minimum study, ~2.3-4.3M tokens at this project's observed ~800-1,500
+tokens/call — a "single serious ablation" budget, not a one-shot run;
+expect it to need multiple Groq daily-quota windows and checkpointing,
+same pattern as every other multi-hundred-call run in this project.
+Rough time: 1-3 days wall-clock (quota-gated) + 1-2 hours result
+aggregation + 1-2 hours write-up in `docs/all_results.md`.
+
+**Phase 4 — optional pairwise expansion (only if Phase 3 shows
+ambiguity).** Adds ~4 more configs: CVE+ATT&CK off, CVE+PII off,
+ATT&CK+PII off, input+output off. Only worth running if Phase 3's
+single-component results suggest real overlap/redundancy between
+components that a pairwise test would clarify. Adds roughly another
+1.5-2.5M tokens and 0.5-1.5 days wall-clock.
+
+**Decision on scope:** do Phase 3's 6-config minimum matrix first — it
+directly answers the two questions in "Why" above (latency cost per
+component; whether any component is redundant with another). Only
+expand to Phase 4's pairwise runs if Phase 3's results actually show
+overlap worth investigating, rather than running the fuller matrix
+speculatively.
+
+**Cost summary:** Phase 1 (done) was cheap — boolean flags on an
+already-built pipeline, no new files. Phases 2-4 are quota-gated like
+everything else in this project; Phase 3 alone is a multi-session
+commitment, not a free add-on.
 
 ---
 
