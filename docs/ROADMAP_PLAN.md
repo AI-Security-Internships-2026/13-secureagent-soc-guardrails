@@ -654,31 +654,59 @@ changes at all. Pipeline order unchanged. No tests added/run yet
 (deliberately deferred to Phase 2) and no ablation runs executed yet —
 this phase was pure wiring.
 
-**Phase 2 — smoke validation (not yet started).** Before spending any
-Groq quota on the real ablation: run 1 normal alert + 1 CVE-bait + 1
-ATT&CK-bait + 1 PII-bait alert through each toggle combination and
-confirm (a) the function still returns valid report dicts with every
-schema key present, (b) each toggle disables *only* its intended stage
-(no cross-talk), (c) `output_guardrail_flagged`/`requires_review` still
-aggregate correctly when a stage is off. Est. 1-2 hours. Regression
-tests for the 4 touched guardrail test files
-(`test_input_guardrail.py`, `test_output_guardrail.py`,
-`test_attack_grounding.py`, `test_pii_guardrail.py`) belong here too,
-once smoke validation passes.
+**Phase 2 — smoke validation: ✅ done, 2026-09-01.** Built
+`experiments/evaluation/ablation_smoke_test.py`, running all 6 of
+Phase 3's planned configs against 5 alerts (the roadmap's scoped 4 --
+normal, CVE-bait, ATT&CK-bait, PII-bait -- plus a real prompt-injection
+alert added so `input_guardrail_enabled` toggling is actually
+falsifiable, since none of the other 4 would ever trip it either way).
+**30/30 checks passed** (26 live Groq calls; 4 of the 30 combinations
+short-circuit before the LLM is called). All three acceptance criteria
+confirmed non-trivially: (a) schema always complete; (b) the injection
+alert was blocked with the input guardrail on and passed through with
+it off, in every config, no cross-talk observed; (c) a real PII hit on
+the attack-bait alert under `cve-off` correctly drove
+`output_guardrail_flagged`/`requires_review` to `True` while CVE/ATT&CK
+stayed empty, proving the aggregation logic was exercised on live
+non-zero data, not just an all-clear case. Regression tests for the 4
+touched guardrail test files: 137/137 passing. Full suite: 145
+passing / 1 failing, identical to the pre-existing baseline (unrelated
+NeMo issue) -- no regressions from Phase 1's wiring. Full writeup:
+`docs/all_results.md` #59.
 
-**Phase 3 — the actual ablation run (not yet started).** Minimum viable
-matrix, 6 configs: all-on, input-off, CVE-off, ATT&CK-off, PII-off,
-all-off. Run by dataset (not by pooled alert list) to keep checkpointing
-and quota management simple: CVE-bait x 6 configs, ATT&CK-bait x 6,
-PII-bait x 6, input-guardrail eval x 6 = 24 dataset/config runs total.
-Using the existing benchmark sizes (~479 alerts pooled across all four
-datasets), that's roughly 6 x 479 ≈ 2,874 live model calls for the
-minimum study, ~2.3-4.3M tokens at this project's observed ~800-1,500
-tokens/call — a "single serious ablation" budget, not a one-shot run;
-expect it to need multiple Groq daily-quota windows and checkpointing,
-same pattern as every other multi-hundred-call run in this project.
-Rough time: 1-3 days wall-clock (quota-gated) + 1-2 hours result
-aggregation + 1-2 hours write-up in `docs/all_results.md`.
+**Phase 3 — the actual ablation run: 🔄 launched, 2026-09-01, in
+progress.** Scope corrected from this section's original draft before
+any quota was spent: the 4th dataset named below
+(`input-guardrail eval x 6`) turned out to be a mismatch --
+`eval_dataset.json` is raw `{id, label, text}` samples with no
+CVE/ATT&CK/PII ground truth, built to compare guardrail
+*implementations* (already covered by Sect. 4.10.1's Table 5/6), not a
+`SecurityAlert` set `analyse_alert()` can meaningfully ablate against.
+Dropped that dataset rather than force-adapt it; corrected matrix is 3
+datasets x 6 configs: CVE-bait (150), ATT&CK-bait (150), PII-bait (60,
+same 40 `PII_ALERTS` + 20 `CLEAN_ALERTS` set `pii_bait_test.py` already
+uses) = 360 alerts x 6 configs ≈ **2,160 live calls** (not the ~2,874
+originally estimated), ~1.7-3.2M tokens. User confirmed this corrected
+scope before launch (`docs/all_results.md` #60).
+
+Built `experiments/evaluation/ablation_study.py` -- one output file per
+dataset, checkpointed after every (config, alert) pair, same
+resume-from-checkpoint convention as `cve_bait_test.py` et al. A cheap
+2-alert dry run before the real launch caught a genuine bug: Pytector's
+one-time model-load cost (already known from
+`guardrail_comparison/adapters.py`'s `WARMUPS`) was polluting whichever
+config happened to run first in the sequential-config design; fixed
+with the same explicit-warmup pattern before the timed loop. Launched as
+a detached background process (`--dataset all`) plus a live progress
+watch; expect this to hit Groq's daily quota and stop before finishing,
+same as every other multi-hundred-call run in this project -- re-running
+the same command resumes from checkpoint. Full write-up:
+`docs/all_results.md` #60.
+
+Original text retained below for context on what was initially scoped:
+run by dataset (not pooled) to keep checkpointing simple; est. 1-3 days
+wall-clock (quota-gated) + 1-2 hours result aggregation + 1-2 hours
+write-up once complete.
 
 **Phase 4 — optional pairwise expansion (only if Phase 3 shows
 ambiguity).** Adds ~4 more configs: CVE+ATT&CK off, CVE+PII off,
