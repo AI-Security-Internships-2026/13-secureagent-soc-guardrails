@@ -791,3 +791,74 @@ and Week 12 has other priorities. Revisit if the paper ever makes a direct
 same-family-vs-cross-model comparison claim that needs matched n — until
 then it stays a disclosed inconsistency between two result files, not a
 correctness problem with either result.
+
+---
+
+## 15. GitHub issue backlog (#40-51) — live tracker, so this list survives a session break
+
+12 issues opened 2026-09-03, auto-generated with detailed task breakdowns,
+organized into 6 milestones with explicit ordering dependencies (M1 must
+close before M2 opens, etc.). Full triage in `docs/all_results.md` #62-#64.
+
+**Standing caution, applies to every issue below, not just the ones
+already worked:** several issues contain claims that don't match this
+repo — wrong file paths (`/mnt/d/NUST/ONT/SIP-2026/...` instead of this
+repo's actual location), WSL2 + Python 3.11 instructions this project has
+never used, a nonexistent alert fixture name (`SECURITY_ALERT_001`), a
+false "nemoguardrails is unused" claim (#46), a mock-patch target that
+doesn't work against the actual code (#47), and — the most serious one —
+three fabricated/misdated literature references in #41/R2 that don't
+exist in the venues claimed. Verify every factual claim in an issue
+against the actual repo/literature before acting on it; do not execute
+an issue's instructions at face value.
+
+### M1 — Freeze Desk-Reject Risks (P0)
+
+| # | Issue | Status |
+|---|---|---|
+| 46 | E1 · Dependency freeze (`requirements.txt` + lock file) | ✅ **Done**, 2026-09-05. All 7 AC met. `docs/all_results.md` #62. |
+| 47 | E2 · Regression suite green + schema-parity test | ✅ **Done**, 2026-09-05. All 7 AC met. `docs/all_results.md` #63. |
+| 41 | R2 · Literature 2026 pass + resolve `[?]` refs + sharpen novelty | 🔶 **Partially done, paused.** Task 1 (dangling `[?]` refs) confirmed already clean, needs no work. Tasks 2-3 (add 3 new "2026" references, sharpen novelty paragraph around them) are **paused, not abandoned** — all three required references turned out to be fabricated or misdated (see `docs/all_results.md` #64 for the full verification). User is asking their supervisor how to proceed before this resumes. **Do not add the three references as originally specified.** |
+
+### M2 — Close the Central Scientific Gap (P0)
+
+| # | Issue | Status |
+|---|---|---|
+| 40 | R1 · ATT&CK SelfCheckGPT + McNemar replication (both model families) | ❌ Not started. Mirrors the existing 60-alert CVE-pool design (Sect. 4.4-4.5 of the paper) onto ATT&CK citations — the paper's central finding is currently CVE-only. |
+| 42 | R3 · Ablation study, 6 configs × **479-alert pool** → Table T6 + UpSet/Venn diagram | ❌ Not started, **and scope conflict flagged, unresolved.** This is *not* the same thing as the Phase 3 component-ablation study already run this session (#59-#61): that one covers 3 datasets / 360 alerts (CVE-bait, ATT&CK-bait, PII-bait) with no visualization deliverable; #42 wants a 479-alert pool (likely the existing cross-source `grounding_benchmark_summary` pool, unconfirmed) plus a Table T6 and an UpSet/Venn overlap diagram, neither of which the current study produces. Decide whether to adapt the existing run's output or scope a fresh one before starting. |
+
+### M3 — Methodological Credibility (P1)
+
+| # | Issue | Status |
+|---|---|---|
+| 43 | R4 · Two-annotator Cohen's κ + ATT&CK relevance validation | ❌ Not started. **Blocked on annotator time** — needs a second human labeler, the one item in this backlog that can't be done solo. |
+
+### M4 — Reproducibility & Release (P1-P2)
+
+| # | Issue | Status |
+|---|---|---|
+| 48 | E3 · NVD snapshot mode + SHA-256 manifest (~290 CVE lookups frozen locally) | ❌ Not started. |
+| 49 | E4 · Top-level Dockerfile (reproducible runtime, mocked-LLM smoke test) | ❌ Not started. Depends on E1 (done) for the lock file it installs from. |
+| 50 | E5 · `REPRODUCIBILITY.md` canonical file + `paper-v1.0` git tag | ❌ Not started. Depends on E1 (done), E3, E4, E2 (done) all landing first — 2 of its 4 dependencies are now clear. |
+
+### M5 — Manuscript Polish (P2)
+
+| # | Issue | Status |
+|---|---|---|
+| 45 | R6 · Explicit RQ1-RQ4 section + evaluation reordering + de-fluff | ❌ Not started. No "Research Questions" subsection exists in the paper yet — confirmed via grep. |
+
+### M6 — Enhancers (only if everything else finishes early)
+
+| # | Issue | Status |
+|---|---|---|
+| 44 | R5 · Temperature-sensitivity sweep (t ∈ {0.1,0.3,0.5,0.7,1.0}) → new figure | ❌ Not started. Explicitly blocked until M1-M5 close, per the issue's own text. |
+| 51 | E6 · System architecture (SYS1) + 5-tier taxonomy decision-tree (TAX1) figures | ❌ Not started. Explicitly last in the stack, per the issue's own text. |
+
+### Suggested next-up, per the milestone ordering
+
+With M1's two engineering issues (E1, E2) done and R2 paused pending
+supervisor input, the milestone-ordering logic says M1 is otherwise clear
+to move past. Reasonable next targets: **R1** (#40, closes the paper's
+disclosed CVE-only limitation on its central finding) or resolving **R3's
+scope conflict** (#42, needed before that ablation work can even start
+cleanly) — both M2, both P0, both currently blocking M2 from closing.

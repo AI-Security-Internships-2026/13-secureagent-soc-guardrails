@@ -22,6 +22,8 @@ datasets/**/*.pcap
 checkpoints/
 logs/
 *.log
+# Exception: intentionally committed as reproducibility evidence (Issue E2).
+!tests/last_run.log
 .env
 .env.*
 secrets/

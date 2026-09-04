@@ -434,10 +434,33 @@ additionally reports package versions and environment details alongside
 its results file
 (\texttt{experiments/results/guardrail\_comparison.json}) for
 reproducibility. The project's core test suite currently stands at
-\textbf{145 passing / 1 failing} --- the one failure is a pre-existing
-async-fixture issue in an abandoned, unrelated NeMo Guardrails
-experiment kept for historical record, not part of the shipped
-pipeline.
+\textbf{158 passing / 1 skipped}, with zero failures --- the one skip
+is a pre-existing async-fixture issue in an abandoned, unrelated NeMo
+Guardrails experiment kept for historical record and explicitly
+excluded from the production dependency set (below), not part of the
+shipped pipeline. The 158 includes a dedicated end-to-end schema-parity
+test (\texttt{tests/test\_soc\_agent\_schema\_parity.py}) that runs the
+full pipeline under a mocked LLM response across all 6 toggle
+configurations used by this project's component ablation study
+(per-stage on/off switches added to \texttt{analyse\_alert()}),
+confirming every configuration --- including every guardrail
+disabled --- produces a structurally identical report schema, offline
+and with zero live API calls.
+
+\textbf{Dependency freeze.} All code dependencies were installed and
+verified on a clean Python 3.12 virtual environment using the
+committed \texttt{requirements-lock.txt} --- a snapshot of pinned
+versions produced by \texttt{pip freeze} on a fresh install of
+\texttt{requirements.txt}. The two packages the pipeline actually
+imports at runtime, \texttt{langchain-groq} and \texttt{groq}, are now
+declared explicitly in \texttt{requirements.txt}; previously they were
+only available via transitive resolution through \texttt{langchain},
+which is not a stable guarantee across future dependency updates. Five
+packages present in earlier versions of \texttt{requirements.txt} but
+never imported anywhere in the committed source tree
+(\texttt{langgraph}, \texttt{fastapi}, \texttt{uvicorn},
+\texttt{nemoguardrails}, \texttt{guardrails-ai}) have been removed from
+the explicit requirement set.
 
 \textbf{Reproducibility metadata.} The MITRE ATT\&CK verification path
 (Sect.~\ref{subsec:output-guardrail}) uses a local snapshot of the
