@@ -14,8 +14,8 @@ was checked directly against the current codebase, not assumed from memory.
 | Aug 2 | Finalize NVD-verification edge cases from PR #18 | ✅ Done |
 | Aug 9 | Compare guardrail approaches (issue #16) — latency, false-positive rate, coverage | ✅ Done — Week 8 baseline vs. LLM Guard vs. Pytector comparison. NeMo was dropped after Week 2 (not a pending comparison target); Guardrails AI swapped for Pytector because its only working validator required a hosted API, violating the local-only constraint |
 | Aug 16 | Extend grounding technique to a second citation type (CWE or MITRE ATT&CK) | ✅ Done — `attack_grounding.py` + ATT&CK-bait test set + dashboard section |
-| Aug 23 | Full multi-source grounding benchmark | ❌ Not started — see §5 for what this actually requires before it can be called done |
-| Aug 30 | Write-up | ❌ Not started |
+| Aug 23 | Full multi-source grounding benchmark | ✅ Done, 2026-08-24 — consolidated all 5 already-run sources (425 alerts total) into one cross-source table via `experiments/evaluation/grounding_benchmark_summary.py`; pooled CVE-checker rate 2/375 (0.53%), pooled ATT&CK-checker rate 3/265 (1.13%). See `docs/all_results.md` #43. **Updated 2026-08-25** after CVE-bait/ATT&CK-bait grew to n=150 each and a metric bug was found and fixed in `cve_bait_test.py`: pooled CVE-checker rate now 2/425 (0.47%), pooled ATT&CK-checker rate 6/365 (1.64%). See `docs/all_results.md` #44 |
+| Aug 30 | Write-up | ✅ Done, 2026-08-25 — consolidation/polish pass on the already-continuously-updated `paper_draft.md`: fixed stale numbers left over from the n=150 bait-set expansion, trimmed the Abstract to the 250-word Springer target, captioned all 8 tables. Remaining pre-submission-only items (stripping the draft-status scratch note, deciding on figures) deliberately left for the final Sep 6-8 window |
 | Sep 6 | Paper draft | ❌ Not started |
 | **Sep 8** | **Final submission** | ❌ Not started |
 
@@ -51,7 +51,7 @@ claim in the paper, not just a nice-to-have improvement.
 | 4 | Evidence Pack (structured fields, explicit grounding surface) | ✅ Done | `evidence_pack.py`; `soc_agent.py` passes `evidence_pack["text"]` into both grounding checks instead of the raw `format_alert()` blob |
 | 5 | LLM-judge baseline added to CVE-bait benchmark | ✅ Done, full coverage 2026-08-20 | `src/guardrails/llm_judge.py` + `experiments/evaluation/llm_judge_baseline_test.py`, built for both CVE-bait and ATT&CK-bait together. 100% agreement with the deterministic checker on both sets, but only 4 positive cases total (2 CVE + 2 ATT&CK) — #23. Made citable via `experiments/evaluation/llm_judge_synthetic_test.py`: a class-balanced n=212 calibration set (106 grounded / 106 with a real-but-foreign identifier injected). **100% accuracy/precision/recall, 95% Wilson CI floor 96.5%+ on every metric** — #24. Extended to a harder construct-validity tier (distractor injected into evidence *and* report, not just report) per PR #25 review feedback — full 318-sample run completed 2026-08-20 after a resume-from-checkpoint fix (Groq's daily quota is smaller than one full run needs — #26). **Still 100% accuracy/precision/recall on every tier (easy, hard, overall)** — #28. |
 | 6 | Re-run CVE-bait-style adversarial test against the ATT&CK checker | ✅ Done | `attack_bait_test.py` / `attack_bait_alerts.py` — real run: 2/6 ungrounded (33%), both classified REAL_BUT_IRRELEVANT |
-| 7 | Expand the CVE-bait test set size | ✅ Done, 2026-08-12 | Expanded in two passes: `cve_bait_alerts.py` grown 6 → 25 (individually web-verified real CVEs) → **100** (75 more sourced directly from CISA's official Known Exploited Vulnerabilities catalog, behavior descriptions derived from CISA's own real per-CVE text rather than hand-recalled). Re-run at n=100 (also resolves the earlier stale-data problem — the old n=6 result predated the stemmer and `requires_review` fixes): **2/100 ungrounded (2.0%), 2/100 requires_review (2.0%, matches ungrounded exactly — fix confirmed active)**. 95% Wilson CI on the rate: **[0.6%, 7.0%]** — a real, citable estimate now (was a 22.7-point-wide band at n=25). **Important nuance, found 2026-08-12 when double-checking the two flagged cases individually:** 97 of the 100 alerts never mention a CVE at all — 0/97 of these ever produced an ungrounded citation, so the true *spontaneous* hallucination rate is 0%, not 2%. Only 3 alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the model to cite a CVE identifier it wasn't given (a deliberate second variant, not the main methodology) — and both of the 2 flagged hits come from that subset of 3, not from the 97. `BAIT-011`, the third explicitly-asked alert, produced no ungrounded citation. Of the 2 flagged: `BAIT-002` cited `CVE-2021-44228` (Log4Shell) — **factually correct**, still flagged `REAL_AND_PLAUSIBLE`/review-required purely because the guardrail's rule is mechanical (not present in the input evidence = ungrounded, regardless of real-world correctness — a deliberately conservative design, not a false claim about accuracy). `BAIT-017` cited `CVE-2022-34713` "DogWalk" instead of the correct `CVE-2022-30190` Follina — both real MSDT vulnerabilities from the same year, `REAL_BUT_IRRELEVANT` — a genuine, concrete instance of the exact misattribution risk this project's paper is about, and the only one of the 100 that's a *wrong* citation rather than a correct-but-mechanically-flagged one. Results in `experiments/results/cve_bait_results.json`. Caught and fixed two real bugs while building the generator: a truncated-mid-write file (caught before running anything, via import check) and an unescaped-quote syntax error in one payload template. |
+| 7 | Expand the CVE-bait test set size | ✅ Done, 2026-08-12 | Expanded in two passes: `cve_bait_alerts.py` grown 6 → 25 (individually web-verified real CVEs) → **100** (75 more sourced directly from CISA's official Known Exploited Vulnerabilities catalog, behavior descriptions derived from CISA's own real per-CVE text rather than hand-recalled). Re-run at n=100 (also resolves the earlier stale-data problem — the old n=6 result predated the stemmer and `requires_review` fixes): **2/100 ungrounded (2.0%), 2/100 requires_review (2.0%, matches ungrounded exactly — fix confirmed active)**. 95% Wilson CI on the rate: **[0.6%, 7.0%]** — a real, citable estimate now (was a 22.7-point-wide band at n=25). **Important nuance, found 2026-08-12 when double-checking the two flagged cases individually:** 97 of the 100 alerts never mention a CVE at all — 0/97 of these ever produced an ungrounded citation, so the true *spontaneous* hallucination rate is 0%, not 2%. Only 3 alerts (`BAIT-002`, `BAIT-011`, `BAIT-017`) explicitly ask the model to cite a CVE identifier it wasn't given (a deliberate second variant, not the main methodology) — and both of the 2 flagged hits come from that subset of 3, not from the 97. `BAIT-011`, the third explicitly-asked alert, produced no ungrounded citation. Of the 2 flagged: `BAIT-002` cited `CVE-2021-44228` (Log4Shell) — **factually correct**, still flagged `REAL_AND_PLAUSIBLE`/review-required purely because the guardrail's rule is mechanical (not present in the input evidence = ungrounded, regardless of real-world correctness — a deliberately conservative design, not a false claim about accuracy). `BAIT-017` cited `CVE-2022-34713` "DogWalk" instead of the correct `CVE-2022-30190` Follina — both real MSDT vulnerabilities from the same year, `REAL_BUT_IRRELEVANT` — a genuine, concrete instance of the exact misattribution risk this project's paper is about, and the only one of the 100 that's a *wrong* citation rather than a correct-but-mechanically-flagged one. Results in `experiments/results/cve_bait_results.json`. Caught and fixed two real bugs while building the generator: a truncated-mid-write file (caught before running anything, via import check) and an unescaped-quote syntax error in one payload template. **Update, 2026-08-25:** grown 100 → **150** (50 more, pulled live from CISA's KEV catalog, same methodology). Re-run: 2/150 ungrounded (1.3%). In the process, found and fixed a real bug in `cve_bait_test.py` itself -- its "ungrounded" metric had silently been computed from the blended `output_guardrail_flagged` field (CVE grounding OR'd with PII) rather than `hallucinated_cves` directly, which coincidentally never diverged at n=100 but did at n=150 when 3 new product names ("Zimbra"/"Ray"/"Joomla") tripped the same PII false-positive class as items below. Corrected metric now reports CVE-grounding and PII-driven review separately. Full detail in `docs/all_results.md` #44. |
 | 8 | SelfCheckGPT comparison, actually implemented and run | ✅ Done, 2026-08-21 | `experiments/evaluation/selfcheckgpt_test.py` + `selfcheckgpt_alerts.py` (60 stated/prompted alerts, 3 resamples each) and `src/guardrails/selfcheckgpt.py`. Full 60/60 run complete (#34 in all_results.md): recall 0.31, precision 1.0 — but 18 of the 20 "misses" are the model correctly recalling a withheld CVE from training knowledge, not a fabrication, which directly contradicts item 15/§4.5's "never volunteers when withheld" finding at this run's higher sampling temperature (0.7 vs. 0.1). Written into `docs/paper/paper_draft.md` §4.9, plus the abstract, §2, §4.5, §4.10, §5, §6. |
 
 ---
@@ -73,8 +73,8 @@ claim in the paper, not just a nice-to-have improvement.
 | Item | Status | Notes |
 |---|---|---|
 | nDPI substring-match comparison | ⛔ Descoped, 2026-08-20 | nDPI is a network-packet deep-packet-inspection library for classifying raw traffic by protocol signature — a different problem from this guardrail's actual job (matching English override phrases in alert/log text before it reaches the LLM). Never had any references in the repo; dropped rather than force-fit. The relevant underlying idea (fast matching against a larger pattern set) is instead covered by item 13 above — a real, sourced phrase-list expansion — with a proper multi-pattern string algorithm (Aho-Corasick) as the natural next step if list size ever grows enough to need one. |
-| Redo threading vs. multiprocessing benchmark (repeated runs, mean ± spread, larger n) | ⚠️ Partially done | Upgraded from single-shot to n=3 repeats this week; still deferred per your own call ("polish other tasks first, then repeat on the final pipeline") — full-pipeline n is still 6, and the mocked/synthetic-latency variant to separate scheduling overhead from live Groq behavior hasn't been built |
-| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25). **2026-08-21:** the Wazuh alert-type expansion (`docs/all_results.md` #33) surfaced 5 real PERSON false positives on live data (`/profile.php`, `xp_cmdshell('whoami`, `ATT&CK` x2, `2023 Benchmark`) — fixed with a plausibility filter rejecting PERSON matches containing `/()&` or digits (`docs/all_results.md` #35); 0/26 false positives now, no regression on real names or the original bait-test numbers. **2026-08-22:** bait set expanded 14 → 60 (`docs/all_results.md` #38) — raw run showed 7/40 detected, but 2 were false positives ("PII", "enforce bucket" misread as names) caught by checking against known sourced values and fixed with a Title-Case + short-acronym filter rule (`docs/all_results.md` #39); verified result is **5/40 (12.5%, 95% CI [5.5%, 26.1%]), 0/20 false positives**, matches the original n=6 rate almost exactly, now citable. Written into the paper (`paper_draft.md` §4.11). **2026-08-22/23:** live Wazuh set bulk-fired 26 → 139 (`docs/all_results.md` #42) surfaced a third false-positive round, much larger by volume — Presidio's `PHONE_NUMBER` recognizer flags bare IP addresses at the same confidence score real phone numbers get; fixed with an IPv4-structural check, `requires_review` corrected 27.3% → 2.9% (38/139 → 4/139). 4 residual PERSON false positives on rootkit/benchmark proper-noun names disclosed as a known limitation, not force-fixed. |
+| Redo threading vs. multiprocessing benchmark (repeated runs, mean ± spread, larger n) | ✅ Done, 2026-08-25 | Both remaining gaps closed: (1) fresh-process repeats via new `--single-run` mode + `experiments/evaluation/fresh_process_benchmark.py` orchestrator, replacing in-process repeat loops; (2) mocked-latency variant (`analyse_alert_mocked()`, real guardrails + fixed-delay stand-in for the Groq call) lets the mocked full-pipeline run at n=30 instead of n=6, no API cost. Fresh-process isolation surfaced and led to fixing a real unlocked-singleton thread-safety race in `input_guardrail.py`'s pytector loader. Real-API and mocked results agree in direction at every worker count: threading +48% throughput 1→4 threads, multiprocessing -70% 1→4 processes. Full detail in `docs/all_results.md` #45 |
+| Presidio-based PII redaction | ✅ Built, 2026-08-18 | `src/guardrails/pii_guardrail.py` — Presidio + spaCy `en_core_web_sm` (local, no network/LLM calls), detects/redacts PERSON/EMAIL_ADDRESS/PHONE_NUMBER/US_SSN/CREDIT_CARD across `REPORT_TEXT_FIELDS`. Wired into `soc_agent.py` (OR'd into `output_guardrail_flagged`/`requires_review`). IP_ADDRESS deliberately excluded from the default redaction set — `evidence_pack.py` already treats alert IPs as core operational telemetry, not personal data (see module docstring for the reasoning). 16 real pytest assertions in `tests/test_pii_guardrail.py` (111/111 full suite passing); also caught and documented a real small-model NER gap (`en_core_web_sm` misses at least one non-Western name, "Priya Nair", entirely). Dashboard section + summary tile added (`dashboard/app.py`), verified rendering in-browser. `pii_bait_alerts.py` (6 PII / 8 clean) + `pii_bait_test.py` harness built and run for real, Aug 18 — 1/6 PII alerts had a detection, 0/8 false positives, 0 residual after redaction (`docs/all_results.md` #25). **2026-08-21:** the Wazuh alert-type expansion (`docs/all_results.md` #33) surfaced 5 real PERSON false positives on live data (`/profile.php`, `xp_cmdshell('whoami`, `ATT&CK` x2, `2023 Benchmark`) — fixed with a plausibility filter rejecting PERSON matches containing `/()&` or digits (`docs/all_results.md` #35); 0/26 false positives now, no regression on real names or the original bait-test numbers. **2026-08-22:** bait set expanded 14 → 60 (`docs/all_results.md` #38) — raw run showed 7/40 detected, but 2 were false positives ("PII", "enforce bucket" misread as names) caught by checking against known sourced values and fixed with a Title-Case + short-acronym filter rule (`docs/all_results.md` #39); verified result is **5/40 (12.5%, 95% CI [5.5%, 26.1%]), 0/20 false positives**, matches the original n=6 rate almost exactly, now citable. Written into the paper (`paper_draft.md` §4.11). **2026-08-22/23:** live Wazuh set bulk-fired 26 → 139 (`docs/all_results.md` #42) surfaced a third false-positive round, much larger by volume — Presidio's `PHONE_NUMBER` recognizer flags bare IP addresses at the same confidence score real phone numbers get; fixed with an IPv4-structural check, `requires_review` corrected 27.3% → 2.9% (38/139 → 4/139). 4 residual PERSON false positives on rootkit/benchmark proper-noun names disclosed as a known limitation, not force-fixed. **2026-08-25:** the CVE-bait/ATT&CK-bait expansion to n=150 each (`docs/all_results.md` #44) surfaced a fourth round of the same PERSON false-positive class on new product names (`Zimbra`, `Ray`, `Joomla`) — no guardrail code change needed this time (still the same known, disclosed limitation), but it exposed a real bug in `cve_bait_test.py`'s own metric definition, which was silently counting these PII-only flags as CVE hallucinations; fixed there instead. |
 | Local RAG-based CVE verification (Chroma + small CPU embedding model) | ❌ Not started | Offline alternative to live NVD calls; would also enable a "recommend similar CVE" feature. No Chroma/RAG code anywhere in the repo. **Evidence this matters, found 2026-08-08:** ran a 60-alert CVE pool (15 real NVD-listed CVEs, bait-style vs. stated-style, see `experiments/results/soc_integration_cve_pool_results.json`) — when the CVE number is withheld and only the exploit behavior is described, the LLM cites the correct ground-truth CVE **0% of the time** (never hallucinates one either — it just doesn't volunteer a number at all). When the CVE is stated directly, it's correctly reflected 100% of the time. Confirms the current pipeline only *verifies claims the LLM already makes*, it never *identifies* a CVE from behavior alone — this RAG item is the fix, not yet built, deliberately deferred behind the higher-priority hybrid-guardrail/eval-set work for Aug 23 |
 | Real test suite | ✅ Done, Week 8 | 92 passing / 1 pre-existing unrelated failure (`experiments/nemo_test/test_rails.py`, async-fixture issue) |
 
@@ -204,8 +204,12 @@ and hybrid alike by a similar ratio (~480ms → ~180ms each) — more than
 outlier-exclusion alone explains, most likely ordinary run-to-run system
 variance rather than something caused by the fix itself. **Honest
 limitation, not yet resolved**: single-run latency benchmarks on shared,
-uncontrolled hardware aren't stable enough to cite precisely — same caveat
-already on record for the threading/multiprocessing benchmark in §5.
+uncontrolled hardware aren't stable enough to cite precisely. This is the
+same class of issue the threading/multiprocessing benchmark in §5 had —
+that one is now fixed with fresh-process repeats (2026-08-25,
+`docs/all_results.md` #45) — but this guardrail-comparison latency
+benchmark (`run_comparison.py`) hasn't had the same treatment applied yet;
+it still runs once per invocation with no repeat/aggregation step.
 Repeated trials (fresh process per implementation, mean ± spread) are
 needed before any millisecond figure from this benchmark goes in the
 paper as more than an order-of-magnitude comparison. Full writeup in
@@ -524,7 +528,11 @@ project's actual bottlenecks (Groq daily quota; manual labeling time).
    95% CI [0.4%, 10.9%]) — same shape as CVE-bait's n=100 result. No
    additional REAL_AND_PLAUSIBLE case surfaced at this n (still n=1
    through the real pipeline, see item 4's note above), so the n=1
-   framing stands as written, now on a larger denominator.
+   framing stands as written, now on a larger denominator. **Update,
+   2026-08-25:** grown 50 → **150** (100 more, pulled from the local
+   MITRE snapshot, 0/100 leak-checked before use). Re-run: 6/150
+   ungrounded overall (4.0%), 4/148 symptom-only (2.7%). Full detail in
+   `docs/all_results.md` #44.
 6. **Validate the relevance classifier itself (§3.4 Stage 2)** — ✅ done,
    2026-08-22 (`docs/all_results.md` #36). 80 (alert, real CVE) pairs
    built from the CVE-bait alerts with real NVD descriptions fetched
@@ -627,26 +635,230 @@ confirming there's no hidden redundancy between components, not "does
 disabling one component change another's accuracy" — reordering the
 pipeline is a separate, not-yet-scoped question if it ever comes up.
 
-**Rough method (refine when actually building this):**
-1. Add toggle parameters to `analyse_alert()` — same precedent as the
-   existing `verify_cves_with_nvd: bool = True` — e.g.
-   `enable_input_guardrail`, `enable_cve_check`, `enable_attack_check`,
-   `enable_pii_redaction`, all defaulting to `True` (today's behavior
-   unchanged).
-2. Re-run the existing test sets (CVE-bait n=100, ATT&CK-bait n=50,
-   PII-bait n=14, input-guardrail eval n=119) under each
-   single-component-disabled configuration, plus a handful of meaningful
-   combinations (all-on baseline, all-off floor, each pair).
-3. Measure per configuration: latency (mean/median per alert), the
-   `requires_review`/`guardrail_blocked` rate, and — the actual
-   headline number — how many alerts were caught *only* because of one
-   specific component (would have gone through unflagged if that one
-   component were off). That's the real "how much does each guardrail
-   matter" answer, not raw detection rate measured in isolation.
+**Phase 1 — code changes: ✅ done, 2026-08-31.** `analyse_alert()`
+(`src/agent/soc_agent.py`) gained 4 toggle params —
+`input_guardrail_enabled`, `cve_guardrail_enabled`,
+`attack_guardrail_enabled`, `pii_guardrail_enabled` — all defaulting to
+`True`, same precedent as the existing `verify_cves_with_nvd: bool =
+True`. Gated purely at the orchestrator call site (only `soc_agent.py`
+touched, not the 4 individual guardrail modules): a disabled stage's
+check function is never called (not called-then-discarded, so ablation
+timing reflects the stage genuinely not running), while every key that
+stage would normally set (`hallucinated_cves`, `cve_verifications`,
+`hallucinated_attack_techniques`, `attack_technique_verifications`,
+`pii_detections`) stays present in the report, just holding its empty/
+not-flagged value — so disabled-stage reports stay directly comparable
+to enabled-stage ones field-for-field, and the final
+`output_guardrail_flagged`/`requires_review` aggregation line needed no
+changes at all. Pipeline order unchanged. No tests added/run yet
+(deliberately deferred to Phase 2) and no ablation runs executed yet —
+this phase was pure wiring.
 
-**Cost:** cheap in engineering effort (mostly boolean flags on an
-already-built pipeline), moderate in Groq-quota cost — each configuration
-re-runs the same alert sets through fresh LLM calls, so N configurations
-× the combined size of all four datasets in API calls. Needs explicit
-quota scheduling like everything else quota-gated in this project, not a
-free add-on.
+**Phase 2 — smoke validation: ✅ done, 2026-09-01.** Built
+`experiments/evaluation/ablation_smoke_test.py`, running all 6 of
+Phase 3's planned configs against 5 alerts (the roadmap's scoped 4 --
+normal, CVE-bait, ATT&CK-bait, PII-bait -- plus a real prompt-injection
+alert added so `input_guardrail_enabled` toggling is actually
+falsifiable, since none of the other 4 would ever trip it either way).
+**30/30 checks passed** (26 live Groq calls; 4 of the 30 combinations
+short-circuit before the LLM is called). All three acceptance criteria
+confirmed non-trivially: (a) schema always complete; (b) the injection
+alert was blocked with the input guardrail on and passed through with
+it off, in every config, no cross-talk observed; (c) a real PII hit on
+the attack-bait alert under `cve-off` correctly drove
+`output_guardrail_flagged`/`requires_review` to `True` while CVE/ATT&CK
+stayed empty, proving the aggregation logic was exercised on live
+non-zero data, not just an all-clear case. Regression tests for the 4
+touched guardrail test files: 137/137 passing. Full suite: 145
+passing / 1 failing, identical to the pre-existing baseline (unrelated
+NeMo issue) -- no regressions from Phase 1's wiring. Full writeup:
+`docs/all_results.md` #59.
+
+**Phase 3 — the actual ablation run: 🔄 launched, 2026-09-01, in
+progress.** Scope corrected from this section's original draft before
+any quota was spent: the 4th dataset named below
+(`input-guardrail eval x 6`) turned out to be a mismatch --
+`eval_dataset.json` is raw `{id, label, text}` samples with no
+CVE/ATT&CK/PII ground truth, built to compare guardrail
+*implementations* (already covered by Sect. 4.10.1's Table 5/6), not a
+`SecurityAlert` set `analyse_alert()` can meaningfully ablate against.
+Dropped that dataset rather than force-adapt it; corrected matrix is 3
+datasets x 6 configs: CVE-bait (150), ATT&CK-bait (150), PII-bait (60,
+same 40 `PII_ALERTS` + 20 `CLEAN_ALERTS` set `pii_bait_test.py` already
+uses) = 360 alerts x 6 configs ≈ **2,160 live calls** (not the ~2,874
+originally estimated), ~1.7-3.2M tokens. User confirmed this corrected
+scope before launch (`docs/all_results.md` #60).
+
+Built `experiments/evaluation/ablation_study.py` -- one output file per
+dataset, checkpointed after every (config, alert) pair, same
+resume-from-checkpoint convention as `cve_bait_test.py` et al. A cheap
+2-alert dry run before the real launch caught a genuine bug: Pytector's
+one-time model-load cost (already known from
+`guardrail_comparison/adapters.py`'s `WARMUPS`) was polluting whichever
+config happened to run first in the sequential-config design; fixed
+with the same explicit-warmup pattern before the timed loop. Launched as
+a detached background process (`--dataset all`) plus a live progress
+watch; expect this to hit Groq's daily quota and stop before finishing,
+same as every other multi-hundred-call run in this project -- re-running
+the same command resumes from checkpoint. Full write-up:
+`docs/all_results.md` #60.
+
+Original text retained below for context on what was initially scoped:
+run by dataset (not pooled) to keep checkpointing simple; est. 1-3 days
+wall-clock (quota-gated) + 1-2 hours result aggregation + 1-2 hours
+write-up once complete.
+
+**Phase 4 — optional pairwise expansion (only if Phase 3 shows
+ambiguity).** Adds ~4 more configs: CVE+ATT&CK off, CVE+PII off,
+ATT&CK+PII off, input+output off. Only worth running if Phase 3's
+single-component results suggest real overlap/redundancy between
+components that a pairwise test would clarify. Adds roughly another
+1.5-2.5M tokens and 0.5-1.5 days wall-clock.
+
+**Decision on scope:** do Phase 3's 6-config minimum matrix first — it
+directly answers the two questions in "Why" above (latency cost per
+component; whether any component is redundant with another). Only
+expand to Phase 4's pairwise runs if Phase 3's results actually show
+overlap worth investigating, rather than running the fuller matrix
+speculatively.
+
+**Cost summary:** Phase 1 (done) was cheap — boolean flags on an
+already-built pipeline, no new files. Phases 2-4 are quota-gated like
+everything else in this project; Phase 3 alone is a multi-session
+commitment, not a free add-on.
+
+---
+
+## 13. Independent adversarial review (2026-08-25) — tracked limitations, not action items
+
+A fresh-agent review of the full paper draft (framed as a harsh IJIS
+Reviewer 2, `docs/all_results.md` #46) led to restructuring the paper
+around its strongest finding (SelfCheckGPT-vs-deterministic) rather than
+carrying five threads at equal billing. Most of that review's critique
+was addressed by restructuring/reframing, already done. Two specific
+points were **not** addressed, because more work would not meaningfully
+fix them — recorded here so they stay a deliberate, disclosed choice
+rather than a silently dropped thread:
+
+1. **CVE-bait/ATT&CK-bait rest on only 2 and 6 actual ungrounded-citation
+   events respectively (n=150 each).** The Wilson CIs on top of those
+   counts are arithmetically valid but the underlying signal is thin — and
+   it's very likely structurally thin, not just small-sample noise: 125 of
+   CVE-bait's 150 alerts produced zero citations to analyze at all (§4.2),
+   because the model apparently only volunteers an identifier on famous,
+   heavily-documented vulnerabilities. Chasing a bigger n by adding more
+   CISA-KEV/MITRE entries (the same method already used twice) would very
+   likely just add more zero-signal alerts, not more events — diminishing
+   returns, not a quota or effort problem. **Not planned**, disclosed in
+   the paper (§4.2, §5) as a real, structural limitation instead.
+2. **Single small model (`openai/gpt-oss-20b` via Groq), single provider.**
+   Whether the central REAL_AND_PLAUSIBLE/SelfCheckGPT finding generalizes
+   to GPT-4/Claude-class models — the kind actually used in the commercial
+   SOC copilots §2 contrasts this pipeline against — is untested. Not
+   pursued: would require paid API access to a second provider, is a
+   meaningfully different project scope (cross-model generalization study,
+   not a bug or a gap in the current one), and isn't something the
+   remaining time before submission should be spent on. **Not planned**,
+   disclosed in the paper (§5) as an explicit boundary of the current
+   contribution.
+
+## 14. LLM-judge same-family vs. cross-model pools are mismatched — tracked, not fixed (2026-08-27)
+
+Flagged in PR #26 review (engranaabubakar): the same-family judge baseline
+(`llm_judge_synthetic_results.json`, 318 samples) and the cross-model
+qwen judge baseline (`llm_judge_synthetic_results_qwen_qwen3_6_27b.json`,
+442/450 samples) aren't apples-to-apples. Root cause, confirmed by reading
+`llm_judge_synthetic_test.py`: `build_synthetic_samples()` has no frozen
+sample file — it rebuilds live off however many alerts currently exist in
+`cve_bait_results.json`/`attack_bait_results.json`. Those files kept
+growing after each judge run started (106 base alerts → 318 samples at the
+same-family run; 150 base alerts → 450 samples at the qwen run), and by
+now both bait files sit at 150/150, so a fresh build today would yield 300
+base alerts / 900 samples — a third, still-mismatched size, not a fix.
+
+Verified the 318 same-family ids are a strict subset of the 442 completed
+qwen ids, which are in turn a strict subset of today's full 900-sample
+pool — nothing was ever removed or reshuffled, the pool just kept growing
+underneath each run. On every sample the two runs do share, the judges
+agree 100%, which is why this is being tracked rather than fixed now.
+
+**Not planned right now** — three options were considered (filter today's
+build down to the existing 450 ids and only re-run same-family against
+those, ~2-3 sessions; run both judges against the full current 900-sample
+pool, ~2x the sessions; leave as-is). Decided to leave as-is: the reviewer
+called it low-priority since overlapping samples already agree perfectly,
+and Week 12 has other priorities. Revisit if the paper ever makes a direct
+same-family-vs-cross-model comparison claim that needs matched n — until
+then it stays a disclosed inconsistency between two result files, not a
+correctness problem with either result.
+
+---
+
+## 15. GitHub issue backlog (#40-51) — live tracker, so this list survives a session break
+
+12 issues opened 2026-09-03, auto-generated with detailed task breakdowns,
+organized into 6 milestones with explicit ordering dependencies (M1 must
+close before M2 opens, etc.). Full triage in `docs/all_results.md` #62-#64.
+
+**Standing caution, applies to every issue below, not just the ones
+already worked:** several issues contain claims that don't match this
+repo — wrong file paths (`/mnt/d/NUST/ONT/SIP-2026/...` instead of this
+repo's actual location), WSL2 + Python 3.11 instructions this project has
+never used, a nonexistent alert fixture name (`SECURITY_ALERT_001`), a
+false "nemoguardrails is unused" claim (#46), a mock-patch target that
+doesn't work against the actual code (#47), and — the most serious one —
+three fabricated/misdated literature references in #41/R2 that don't
+exist in the venues claimed. Verify every factual claim in an issue
+against the actual repo/literature before acting on it; do not execute
+an issue's instructions at face value.
+
+### M1 — Freeze Desk-Reject Risks (P0)
+
+| # | Issue | Status |
+|---|---|---|
+| 46 | E1 · Dependency freeze (`requirements.txt` + lock file) | ✅ **Done**, 2026-09-05. All 7 AC met. `docs/all_results.md` #62. |
+| 47 | E2 · Regression suite green + schema-parity test | ✅ **Done**, 2026-09-05. All 7 AC met. `docs/all_results.md` #63. |
+| 41 | R2 · Literature 2026 pass + resolve `[?]` refs + sharpen novelty | 🔶 **Partially done, paused.** Task 1 (dangling `[?]` refs) confirmed already clean, needs no work. Tasks 2-3 (add 3 new "2026" references, sharpen novelty paragraph around them) are **paused, not abandoned** — all three required references turned out to be fabricated or misdated (see `docs/all_results.md` #64 for the full verification). User is asking their supervisor how to proceed before this resumes. **Do not add the three references as originally specified.** |
+
+### M2 — Close the Central Scientific Gap (P0)
+
+| # | Issue | Status |
+|---|---|---|
+| 40 | R1 · ATT&CK SelfCheckGPT + McNemar replication (both model families) | ❌ Not started. Mirrors the existing 60-alert CVE-pool design (Sect. 4.4-4.5 of the paper) onto ATT&CK citations — the paper's central finding is currently CVE-only. |
+| 42 | R3 · Ablation study, 6 configs × **479-alert pool** → Table T6 + UpSet/Venn diagram | ❌ Not started, **and scope conflict flagged, unresolved.** This is *not* the same thing as the Phase 3 component-ablation study already run this session (#59-#61): that one covers 3 datasets / 360 alerts (CVE-bait, ATT&CK-bait, PII-bait) with no visualization deliverable; #42 wants a 479-alert pool (likely the existing cross-source `grounding_benchmark_summary` pool, unconfirmed) plus a Table T6 and an UpSet/Venn overlap diagram, neither of which the current study produces. Decide whether to adapt the existing run's output or scope a fresh one before starting. |
+
+### M3 — Methodological Credibility (P1)
+
+| # | Issue | Status |
+|---|---|---|
+| 43 | R4 · Two-annotator Cohen's κ + ATT&CK relevance validation | ❌ Not started. **Blocked on annotator time** — needs a second human labeler, the one item in this backlog that can't be done solo. |
+
+### M4 — Reproducibility & Release (P1-P2)
+
+| # | Issue | Status |
+|---|---|---|
+| 48 | E3 · NVD snapshot mode + SHA-256 manifest (~290 CVE lookups frozen locally) | ❌ Not started. |
+| 49 | E4 · Top-level Dockerfile (reproducible runtime, mocked-LLM smoke test) | ❌ Not started. Depends on E1 (done) for the lock file it installs from. |
+| 50 | E5 · `REPRODUCIBILITY.md` canonical file + `paper-v1.0` git tag | ❌ Not started. Depends on E1 (done), E3, E4, E2 (done) all landing first — 2 of its 4 dependencies are now clear. |
+
+### M5 — Manuscript Polish (P2)
+
+| # | Issue | Status |
+|---|---|---|
+| 45 | R6 · Explicit RQ1-RQ4 section + evaluation reordering + de-fluff | ❌ Not started. No "Research Questions" subsection exists in the paper yet — confirmed via grep. |
+
+### M6 — Enhancers (only if everything else finishes early)
+
+| # | Issue | Status |
+|---|---|---|
+| 44 | R5 · Temperature-sensitivity sweep (t ∈ {0.1,0.3,0.5,0.7,1.0}) → new figure | ❌ Not started. Explicitly blocked until M1-M5 close, per the issue's own text. |
+| 51 | E6 · System architecture (SYS1) + 5-tier taxonomy decision-tree (TAX1) figures | ❌ Not started. Explicitly last in the stack, per the issue's own text. |
+
+### Suggested next-up, per the milestone ordering
+
+With M1's two engineering issues (E1, E2) done and R2 paused pending
+supervisor input, the milestone-ordering logic says M1 is otherwise clear
+to move past. Reasonable next targets: **R1** (#40, closes the paper's
+disclosed CVE-only limitation on its central finding) or resolving **R3's
+scope conflict** (#42, needed before that ablation work can even start
+cleanly) — both M2, both P0, both currently blocking M2 from closing.

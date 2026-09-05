@@ -1,20 +1,13 @@
 # LLM & agent orchestration
 langchain
-langgraph
+langchain-groq>=0.2.0
+groq>=0.11.0
 openai
-
-# Guardrail frameworks
-nemoguardrails
-guardrails-ai
 
 # PII detection & redaction
 presidio-analyzer
 presidio-anonymizer
 spacy
-
-# API & serving
-fastapi
-uvicorn
 
 # Dashboard
 streamlit

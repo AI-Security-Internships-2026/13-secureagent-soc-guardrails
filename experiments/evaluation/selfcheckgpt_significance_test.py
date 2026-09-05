@@ -37,10 +37,23 @@ experiments/evaluation/guardrail_comparison/significance_test.py.
 
 Usage:
     python -m experiments.evaluation.selfcheckgpt_significance_test
+
+    Report-generation model defaults to MODEL_NAME (src/agent/soc_agent.py,
+    openai/gpt-oss-20b), same as selfcheckgpt_test.py. Set GENERATOR_MODEL
+    to the same alternate model used for that script's run (e.g.
+    "qwen/qwen3.6-27b") to generate the matching deterministic-checker data
+    and pair it against that model's SelfCheckGPT results instead of the
+    gpt-oss-20b baseline:
+
+        GENERATOR_MODEL=qwen/qwen3.6-27b python -m experiments.evaluation.selfcheckgpt_significance_test
+
+    Writes to its own results/McNemar files (*_<model>.json) rather than
+    overwriting the completed gpt-oss-20b baseline.
 """
 
 import json
 import os
+import re
 
 from dotenv import load_dotenv
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -55,12 +68,41 @@ from experiments.evaluation.selfcheckgpt_alerts import STATED_ALERTS, PROMPTED_A
 
 load_dotenv()
 
-OUTPUT_PATH = "experiments/results/selfcheckgpt_significance_results.json"
-SELFCHECKGPT_RESULTS_PATH = "experiments/results/selfcheckgpt_results.json"
+# Report-generation model is independently selectable from the project
+# default (MODEL_NAME) via GENERATOR_MODEL -- must match whatever
+# selfcheckgpt_test.py was run with, so the two get paired correctly below.
+GENERATOR_MODEL_NAME = os.getenv("GENERATOR_MODEL", MODEL_NAME)
+
+
+def _slug(model: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9]+", "_", model).strip("_").lower()
+
+
+def _output_path_for(generator_model: str) -> str:
+    if generator_model == MODEL_NAME:
+        return "experiments/results/selfcheckgpt_significance_results.json"
+    return f"experiments/results/selfcheckgpt_significance_results_{_slug(generator_model)}.json"
+
+
+def _selfcheckgpt_results_path_for(generator_model: str) -> str:
+    if generator_model == MODEL_NAME:
+        return "experiments/results/selfcheckgpt_results.json"
+    return f"experiments/results/selfcheckgpt_results_{_slug(generator_model)}.json"
+
+
+def _mcnemar_output_path_for(generator_model: str) -> str:
+    if generator_model == MODEL_NAME:
+        return "experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json"
+    return f"experiments/results/selfcheckgpt_vs_deterministic_mcnemar_{_slug(generator_model)}.json"
+
+
+OUTPUT_PATH = _output_path_for(GENERATOR_MODEL_NAME)
+SELFCHECKGPT_RESULTS_PATH = _selfcheckgpt_results_path_for(GENERATOR_MODEL_NAME)
+MCNEMAR_OUTPUT_PATH = _mcnemar_output_path_for(GENERATOR_MODEL_NAME)
 
 EXACT_THRESHOLD = 25  # same convention as guardrail_comparison/significance_test.py
 
-llm = ChatGroq(api_key=os.getenv("GROQ_API_KEY"), model=MODEL_NAME, temperature=SAMPLING_TEMPERATURE)
+llm = ChatGroq(api_key=os.getenv("GROQ_API_KEY"), model=GENERATOR_MODEL_NAME, temperature=SAMPLING_TEMPERATURE)
 
 
 def _generate_report(alert) -> tuple:
@@ -86,7 +128,7 @@ def _generate_report(alert) -> tuple:
 def _write_output(results: list, complete: bool) -> dict:
     output = {
         "task": "Deterministic checker run at SelfCheckGPT's sampling temperature, for a paired McNemar test",
-        "model": MODEL_NAME,
+        "model": GENERATOR_MODEL_NAME,
         "sampling_temperature": SAMPLING_TEMPERATURE,
         "n_total": len(STATED_ALERTS) + len(PROMPTED_ALERTS),
         "n_completed": len(results),
@@ -100,6 +142,10 @@ def _write_output(results: list, complete: bool) -> dict:
 
 
 def run():
+    print(f"Generator model: {GENERATOR_MODEL_NAME}")
+    print(f"Output: {OUTPUT_PATH}")
+    print(f"Pairing against: {SELFCHECKGPT_RESULTS_PATH}\n")
+
     all_items = STATED_ALERTS + PROMPTED_ALERTS
     n_total = len(all_items)
 
@@ -209,14 +255,14 @@ def _run_mcnemar(det_results: list):
         "significant_at_0.05": bool(p_value < 0.05),
     }
 
-    with open("experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json", "w") as f:
+    with open(MCNEMAR_OUTPUT_PATH, "w") as f:
         json.dump(output, f, indent=2)
 
     print(f"\n=== McNemar: deterministic vs. SelfCheckGPT (n={n}) ===")
     print(f"both correct={both_correct}  deterministic-only={det_only_correct}  "
           f"selfcheckgpt-only={scgpt_only_correct}  both wrong={both_incorrect}")
     print(f"method={method}  p={p_value:.6f}  ({'SIGNIFICANT' if p_value < 0.05 else 'not significant'} at alpha=0.05)")
-    print(f"\nresults saved to experiments/results/selfcheckgpt_vs_deterministic_mcnemar.json")
+    print(f"\nresults saved to {MCNEMAR_OUTPUT_PATH}")
 
 
 if __name__ == "__main__":
