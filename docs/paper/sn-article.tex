@@ -236,6 +236,47 @@ that setting has no equivalent for: not just whether a CVE or technique
 exists, but whether the specific alert in front of the model actually
 supports citing it.
 
+\paragraph{Cross-model verification and RAG entity grounding.} Two 2026
+papers bear directly on the general problem this paper specializes.
+Adnan et al. \cite{ieee_2026_cross_self_verif_cyber} run 5 LLMs (three
+cloud, two local) across 150 security queries spanning CVE analysis,
+hardening commands, and malware TTP/IOC description, human-labeling all
+736 resulting responses (three independent raters, Fleiss' $\kappa=0.79$)
+as correct, minor-error, major-error, or incorrect. Their central
+finding is that cross-model verification (one model judging another's
+output, 56\% agreement with human labels) significantly outperforms
+self-verification (a model judging its own output, 36.4\%, $p=0.034$)
+--- and that neither is well-calibrated: verifiers flag errors at
+similar rates regardless of the true underlying error rate, which they
+note gives false confidence in high-error domains and unnecessary doubt
+in low-error ones. LLMCite differs in three ways: (1) it targets a
+narrower, structurally distinct failure --- a fabricated or unsupported
+\textit{identifier citation} --- rather than free-form factual/technical
+correctness across an entire response; (2) verification is anchored to
+authoritative per-identifier sources (NVD, MITRE ATT\&CK STIX) rather
+than human judgment, so it doesn't inherit the calibration problem Adnan
+et al. document for LLM-as-verifier setups; and (3) the
+REAL\_AND\_PLAUSIBLE class --- a real, on-topic identifier the evidence
+never supplied --- has no equivalent in their four-label taxonomy, which
+would fold it into either ``correct'' or ``incorrect'' depending on
+whether the identifier happens to be real. Separately, Jia et al.
+\cite{acl_findings_2026_entity_verif_rag} propose Evidence-Aligned
+Entity Verification (EAEV), which detects entity-level hallucination in
+retrieval-augmented generation by aligning generated entities against
+retrieved passages along three complementary dimensions plus a
+counterfactual-stability check (87.89\% AUROC on LLaMA2-13B across RAG
+benchmarks). EAEV and LLMCite share the entity/identifier-grounding
+framing, but operate over structurally different evidence: EAEV verifies
+against snippets retrieved at inference time from an open corpus, while
+LLMCite verifies against a fixed, versioned, domain-authoritative
+ontology (a CVE either is or isn't in NVD; a technique either is or
+isn't in the current MITRE ATT\&CK release) --- closer to a lookup than
+a retrieval-relevance judgment, and the reason a
+REAL\_AND\_PLAUSIBLE-style distinction doesn't arise in EAEV's setting:
+an entity either matches retrieved evidence or it doesn't, without
+LLMCite's further question of whether a \textit{real, verifiable} entity
+was actually supplied by the source at hand.
+
 \paragraph{LLM-as-judge evaluation.} Zheng et al. \cite{llmjudge2023}
 show strong LLM judges reach human-comparable agreement on open-ended
 response quality, but document real biases --- position, verbosity,
