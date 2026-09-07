@@ -63,10 +63,7 @@ def _class_breakdown(path):
     return out
 
 
-def make_figure1_selfcheckgpt_by_class():
-    gpt_oss = _class_breakdown(os.path.join(RESULTS_DIR, "selfcheckgpt_results.json"))
-    qwen = _class_breakdown(os.path.join(RESULTS_DIR, "selfcheckgpt_results_qwen_qwen3_6_27b.json"))
-
+def _draw_class_panel(ax, gpt_oss, qwen, title):
     classes = ["Stated\n(grounded)", "Prompted\n(bait, withheld)"]
     gpt_oss_rate = [gpt_oss["stated"][0] / gpt_oss["stated"][1] * 100,
                     gpt_oss["prompted"][0] / gpt_oss["prompted"][1] * 100]
@@ -80,7 +77,6 @@ def make_figure1_selfcheckgpt_by_class():
     x = np.arange(len(classes))
     width = 0.32
 
-    fig, ax = plt.subplots(figsize=(5.2, 3.6))
     bars1 = ax.bar(x - width / 2, gpt_oss_rate, width, label="openai/gpt-oss-20b",
                     color=COLOR_GPT_OSS, edgecolor="white", linewidth=0.6)
     bars2 = ax.bar(x + width / 2, qwen_rate, width, label="qwen/qwen3.6-27b",
@@ -92,14 +88,29 @@ def make_figure1_selfcheckgpt_by_class():
                         xytext=(0, 3), textcoords="offset points",
                         ha="center", va="bottom", fontsize=8.5)
 
-    ax.set_ylabel("SelfCheckGPT correct (%)")
     ax.set_ylim(0, 112)
     ax.set_xticks(x)
     ax.set_xticklabels(classes)
-    ax.set_title("SelfCheckGPT self-consistency: correctness by class and generator model",
-                 fontsize=10)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2, frameon=False, fontsize=9)
+    ax.set_title(title, fontsize=9.5)
     ax.axhline(100, color="gray", linewidth=0.6, linestyle=":", zorder=0)
+
+
+def make_figure1_selfcheckgpt_by_class():
+    cve_gpt_oss = _class_breakdown(os.path.join(RESULTS_DIR, "selfcheckgpt_results.json"))
+    cve_qwen = _class_breakdown(os.path.join(RESULTS_DIR, "selfcheckgpt_results_qwen_qwen3_6_27b.json"))
+    attack_gpt_oss = _class_breakdown(os.path.join(RESULTS_DIR, "selfcheckgpt_results_attack.json"))
+    attack_qwen = _class_breakdown(os.path.join(RESULTS_DIR, "selfcheckgpt_results_attack_qwen_qwen3_6_27b.json"))
+
+    fig, axes = plt.subplots(1, 2, figsize=(9.4, 3.8), sharey=True)
+    _draw_class_panel(axes[0], cve_gpt_oss, cve_qwen, "CVE identifiers")
+    _draw_class_panel(axes[1], attack_gpt_oss, attack_qwen, "MITRE ATT&CK techniques")
+    axes[0].set_ylabel("SelfCheckGPT correct (%)")
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=2, frameon=False,
+               fontsize=9, bbox_to_anchor=(0.5, -0.06))
+    fig.suptitle("SelfCheckGPT self-consistency: correctness by class, generator model, and citation family",
+                 fontsize=10.5, y=1.02)
 
     fig.tight_layout()
     os.makedirs(OUT_DIR, exist_ok=True)

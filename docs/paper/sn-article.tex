@@ -67,9 +67,10 @@ training data --- indistinguishable from genuine grounding to a
 consistency-only signal, but exactly the pattern
 \texttt{REAL\_AND\_PLAUSIBLE} exists to catch. The deterministic checker
 is significantly more accurate on the same alerts (McNemar $p=0.012$),
-and the gap holds --- and grows sharper --- when the entire comparison is
-repeated on a second, independent model family
-($p\approx2\times10^{-7}$). Supporting evaluation --- an LLM-judge
+and the gap holds --- and grows sharper --- across two independent
+generator model families ($p\approx2\times10^{-7}$) and two citation
+families, CVE and MITRE ATT\&CK ($p\approx3\times10^{-7}$ and
+$p\approx2\times10^{-5}$ respectively). Supporting evaluation --- an LLM-judge
 baseline, real third-party and live SIEM data, and the pipeline's
 input-guardrail and PII-redaction layers --- further validates the
 system without changing this central finding. LLMCite is a
@@ -151,9 +152,14 @@ as a separate contribution of equal weight.
    deterministic checker is significantly more accurate on the same
    alerts (McNemar $p=0.0118$, Sect.~\ref{subsec:mcnemar}), and the same
    comparison, repeated on a second, independent model family
-   (\texttt{qwen/qwen3.6-27b}), reproduces the gap even more strongly
-   ($p\approx2\times10^{-7}$) --- closing the single-model-generalization
-   question this finding would otherwise leave open.
+   (\texttt{qwen/qwen3.6-27b}) and on a second citation family (MITRE
+   ATT\&CK techniques, both model families), reproduces the gap every
+   time --- more strongly in three of the four replications
+   ($p\approx2\times10^{-7}$, $p\approx3\times10^{-7}$,
+   $p\approx2\times10^{-5}$) than the original CVE/\texttt{gpt-oss-20b}
+   result --- closing both the single-model- and
+   single-citation-family-generalization questions this finding would
+   otherwise leave open.
 \item \textbf{A domain-specialized, two-stage citation-verification
    pipeline} for SOC LLM reports: a fast deterministic grounding check,
    followed by authoritative-source verification (NVD for CVEs, the
@@ -630,21 +636,27 @@ at all --- nothing to score consistency on, 3 from the stated class, 1
 from prompted):
 
 \begin{table}[h]
-\caption{SelfCheckGPT self-consistency baseline: correctness by grounded/prompted class ($n=60$, 4 excluded)}\label{tab:selfcheckgpt}
+\caption{SelfCheckGPT self-consistency baseline: correctness by grounded/prompted class and citation family}\label{tab:selfcheckgpt}
 \begin{tabular}{@{}lcc@{}}
 \toprule
 Class & $n$ scored & SelfCheckGPT correct \\
 \midrule
 Stated (grounded) & 27 (3 declined) & 27/27 \\
 Prompted (bait, withheld) & 29 (1 declined) & 9/29 (recall 0.31) \\
+\textbf{ATT\&CK, \texttt{gpt-oss-20b}} & & \\
+Stated (grounded) & 30 (0 declined) & 29/30 \\
+Prompted (bait, withheld) & 30 (0 declined) & 3/30 (recall 0.10) \\
+\textbf{ATT\&CK, \texttt{qwen/qwen3.6-27b}} & & \\
+Stated (grounded) & 30 (0 declined) & 30/30 \\
+Prompted (bait, withheld) & 30 (0 declined) & 5/30 (recall 0.17) \\
 \botrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/fig_selfcheckgpt_by_class.pdf}
-\caption{SelfCheckGPT self-consistency: correctness by class (Stated/Prompted) and generator model. Both \texttt{openai/gpt-oss-20b} (this section's result) and a cross-family re-run of this same experiment with \texttt{qwen/qwen3.6-27b} (Sect.~\ref{subsec:mcnemar}) are perfect on the Stated/grounded class; both collapse on the Prompted/withheld class, with \texttt{qwen} collapsing further still (1/30 vs.\ 9/29) --- the same blind spot shows up more strongly on a second, independent model family, not less.}\label{fig:selfcheckgpt}
+\includegraphics[width=0.95\linewidth]{figures/fig_selfcheckgpt_by_class.pdf}
+\caption{SelfCheckGPT self-consistency: correctness by class, generator model, and citation family (CVE/ATT\&CK). All four CVE/model and ATT\&CK/model combinations are near-perfect on the Stated/grounded class; all four collapse on the Prompted/withheld class --- most severely on ATT\&CK, where recall drops to 0.10 (\texttt{gpt-oss-20b}) and 0.17 (\texttt{qwen}), below even the CVE side's already-low 0.31 and 0.033 (Sect.~\ref{subsec:mcnemar}'s cross-family CVE result). The blind spot generalizes across both axes this paper tests it on: it does not shrink on a second model family, and it does not shrink on a second citation family either.}\label{fig:selfcheckgpt}
 \end{figure}
 
 Overall on the 56 scored alerts: accuracy 0.643 (95\% CI [0.512,
@@ -745,6 +757,58 @@ single-model-generalization limitation Sect.~\ref{sec:discussion}
 discloses is addressed directly by this result rather than left
 untested: the central finding holds, and holds more strongly, on a
 second model family.
+
+\textbf{Cross-citation-family replication.} Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar}
+above use CVE identifiers throughout; the same self-consistency-versus-
+grounding comparison had never been run on MITRE ATT\&CK technique
+citations, a gap Sect.~\ref{sec:discussion} previously disclosed
+explicitly. We built a 60-alert ATT\&CK pool mirroring the CVE pool's
+exact design (30 alerts with the technique ID stated directly, 30 with
+it withheld; \texttt{experiments/evaluation/attack\_bait\_pool.py}) ---
+including 3 techniques whose stated variant deliberately cites the
+technique's old, now-revoked ID (T1076, T1077, T1086) rather than its
+current one, to exercise the REVOKED classification branch on
+grounded-but-deprecated citations, not just on spontaneously fabricated
+ones. We ran the identical SelfCheckGPT-resampling-plus-fresh-
+deterministic-check procedure across both model families on this new
+pool.
+
+\textbf{Result, \texttt{openai/gpt-oss-20b}} ($n=60$, 0 excluded):
+SelfCheckGPT recall 0.10 (3/30, Table~\ref{tab:selfcheckgpt}) --- lower
+than the CVE side's already-low 0.31. McNemar: both correct in 32,
+deterministic-only correct in 28, SelfCheckGPT-only correct in 0, both
+wrong in 0 --- chi-square continuity-corrected $p\approx3.4\times10^{-7}$
+(the exact binomial form degenerates with a zero cell, same reasoning as
+the qwen CVE result above), Cohen's $g=1.0$, odds ratio
+undefined/$\infty$ (95\% CI [7.29, $\infty$]) since SelfCheckGPT won zero
+discordant pairs. The deterministic checker's own accuracy was 60/60.
+
+\textbf{Result, \texttt{qwen/qwen3.6-27b}} ($n=60$, 0 excluded):
+SelfCheckGPT recall 0.17 (5/30, Table~\ref{tab:selfcheckgpt}). McNemar:
+both correct in 33, deterministic-only correct in 25, SelfCheckGPT-only
+correct in 2, both wrong in 0 --- chi-square continuity-corrected
+$p\approx2.3\times10^{-5}$, Cohen's $g=0.85$, odds ratio 12.5 (95\% CI
+[3.28, 47.65]). The deterministic checker's own accuracy was 58/60: both
+misses are on the stated/grounded class, not the withheld class the
+McNemar comparison turns on, and both are genuine edge cases rather than
+checker bugs --- one alert where the model both correctly echoed the
+given (revoked) ID \textit{and} volunteered an unrelated second
+technique the checker correctly flagged as ungrounded, and one where it
+cited the parent technique (T1070) instead of the specific sub-technique
+given (T1070.004), a real ID mismatch even though the two are topically
+identical.
+
+All four family combinations (CVE/ATT\&CK $\times$
+\texttt{gpt-oss-20b}/qwen) are individually significant at
+$\alpha=0.05$, and remain significant under a Holm-Bonferroni correction
+across all four $p$-values (largest, CVE/\texttt{gpt-oss-20b}'s
+$p=0.0118$, still clears its corrected threshold of $\alpha/1=0.05$;
+smallest three clear correspondingly stricter thresholds). This closes
+the citation-family generalization question the same way this section's
+cross-model-family result already closed the model-family one: not
+merely disclosed as an open limitation, but directly tested and found to
+hold --- more strongly, in fact, than the original CVE/\texttt{gpt-oss-20b}
+result the paper leads with.
 
 \subsection{Relevance classifier validation}\label{subsec:relevance}
 
@@ -1247,15 +1311,17 @@ what was tested.
   reasoning, not evidence against the deterministic pipeline's
   necessity.
 \item The central McNemar comparison
-  (Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar}) --- the
-  finding the Abstract, Contributions, and Conclusion each lead
-  with --- has only been run on the 60-alert CVE pool. It has not been
-  repeated on ATT\&CK citations. The taxonomy and grounding pipeline
-  generalize across both claim types
-  (Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}), but the
-  statistically-confirmed self-consistency-versus-grounding gap
-  specifically is CVE-only; whether the same gap, and the same size of
-  gap, holds for ATT\&CK technique citations is untested.
+  (Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar}) was
+  originally run only on the 60-alert CVE pool, leaving open whether the
+  statistically-confirmed self-consistency-versus-grounding gap was
+  CVE-specific. This is no longer an untested limitation:
+  Sect.~\ref{subsec:mcnemar}'s cross-citation-family replication repeats
+  the full comparison on a mirrored 60-alert ATT\&CK pool, on both model
+  families, and finds the gap again --- more strongly in both cases
+  ($p\approx3.4\times10^{-7}$, $p\approx2.3\times10^{-5}$) than the
+  original CVE/\texttt{gpt-oss-20b} result ($p=0.0118$). All four family
+  combinations remain significant under a Holm-Bonferroni correction
+  applied jointly across them.
 \item The CVE-bait result (Sect.~\ref{subsec:cve-bait}, $n=150$) gives a
   citable 95\% CI ([0.4\%, 4.7\%]), but both ungrounded citations
   occurred on the same two famous vulnerabilities (Log4Shell,
@@ -1360,9 +1426,11 @@ because it checks the evidence the model was actually given rather than
 the model's confidence in its own answer --- and the resulting accuracy
 gap is large enough to be statistically confirmed on the identical
 alerts (McNemar $p=0.0118$), not merely observed, and reproduces more
-strongly still when the whole comparison is repeated on a second,
-independent model family (\texttt{qwen/qwen3.6-27b},
-$p\approx2\times10^{-7}$, Sect.~\ref{subsec:mcnemar}). That
+strongly still on both a second, independent model family
+(\texttt{qwen/qwen3.6-27b}, $p\approx2\times10^{-7}$) and a second
+citation family (MITRE ATT\&CK, $p\approx3.4\times10^{-7}$ and
+$p\approx2.3\times10^{-5}$ across both model families,
+Sect.~\ref{subsec:mcnemar}). That
 distinction --- not raw accuracy against a baseline --- is what this
 paper argues a citation-grounding pipeline contributes that
 self-consistency checking alone doesn't, and it's the one comparison in

@@ -824,7 +824,7 @@ an issue's instructions at face value.
 
 | # | Issue | Status |
 |---|---|---|
-| 40 | R1 · ATT&CK SelfCheckGPT + McNemar replication (both model families) | ❌ Not started. Mirrors the existing 60-alert CVE-pool design (Sect. 4.4-4.5 of the paper) onto ATT&CK citations — the paper's central finding is currently CVE-only. |
+| 40 | R1 · ATT&CK SelfCheckGPT + McNemar replication (both model families) | ✅ **Done**, 2026-09-07. All 7 AC met: 60-item ATT&CK pool built (leakage guard passed, 3 REVOKED IDs represented), both model families run on both legs, McNemar/Cohen's g/odds-ratio reported for all 4 combinations (all significant, all survive joint Holm-Bonferroni correction), Table 3/Fig. 1 expanded, CVE-only limitation bullet updated to reflect the now-closed gap. `docs/all_results.md` #66-#67. |
 | 42 | R3 · Ablation study, 6 configs × **479-alert pool** → Table T6 + UpSet/Venn diagram | ❌ Not started, **and scope conflict flagged, unresolved.** This is *not* the same thing as the Phase 3 component-ablation study already run this session (#59-#61): that one covers 3 datasets / 360 alerts (CVE-bait, ATT&CK-bait, PII-bait) with no visualization deliverable; #42 wants a 479-alert pool (likely the existing cross-source `grounding_benchmark_summary` pool, unconfirmed) plus a Table T6 and an UpSet/Venn overlap diagram, neither of which the current study produces. Decide whether to adapt the existing run's output or scope a fresh one before starting. |
 
 ### M3 — Methodological Credibility (P1)

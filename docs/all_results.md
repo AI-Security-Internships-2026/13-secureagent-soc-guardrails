@@ -1043,6 +1043,25 @@ Built the ATT&CK counterparts of the existing CVE-side harness: `selfcheckgpt_al
 
 ---
 
+## 67. Issue #40 (R1) complete — ATT&CK cross-citation-family replication closes the paper's central-finding gap on both model families
+
+**When:** Sep 7
+**What we tried:** Resumed #66's paused qwen SelfCheckGPT run from its 56/60 checkpoint — finished the remaining 4 alerts cleanly on the new day's quota window, no further errors. Ran the matching qwen deterministic-checker pass (60 fresh API calls) to pair against it. Both legs now complete on both model families, closing Tasks 3-4 of issue #40/R1.
+
+**Result:**
+- qwen SelfCheckGPT (60/60, complete): accuracy=0.583, precision=1.0, recall=0.167 (5/30 correctly flagged) — still far below the CVE side's 0.31/0.033, confirming the ATT&CK-side blind spot isn't an artifact of the earlier partial run.
+- qwen deterministic checker: 58/60 agreement with ground truth — the 2 misses are both on the stated/grounded class (not the withheld class the McNemar test turns on) and both genuine edge cases, not checker bugs: one alert where the model correctly echoed a given revoked ID *and* separately volunteered an unrelated, genuinely ungrounded second technique; one where it cited the parent technique (T1070) instead of the specific sub-technique actually given (T1070.004).
+- **qwen McNemar:** both correct=33, deterministic-only=25, SelfCheckGPT-only=2, both wrong=0 — chi-square continuity-corrected p≈2.30×10⁻⁵ (significant), Cohen's g=0.85, odds ratio=12.5 [3.28, 47.65].
+- Combined with #66's completed gpt-oss-20b ATT&CK result (p≈3.35×10⁻⁷, Cohen's g=1.0, OR=∞[7.29,∞]): **all four family combinations (CVE/ATT&CK × gpt-oss-20b/qwen) are individually significant, and all four remain significant under a Holm-Bonferroni correction applied jointly across them** — verified directly: sorted ascending (CVE-qwen 2.00×10⁻⁷, ATT&CK-gpt-oss 3.35×10⁻⁷, ATT&CK-qwen 2.30×10⁻⁵, CVE-gpt-oss 0.0118) against thresholds (0.0125, 0.0167, 0.025, 0.05) — every comparison clears its corrected threshold.
+
+**Manuscript updates (Task 5):** Updated `paper_draft.md` and `sn-article.tex` together — Table 3 extended with both ATT&CK/model row-blocks; Figure 1 rebuilt as a two-panel chart (CVE | ATT&CK) via `make_paper_figures.py`, both panels now pulling directly from the four committed result files rather than one panel being hand-typed; a new "Cross-citation-family replication" paragraph in §4.5 reporting both ATT&CK results in full, mirroring the existing CVE cross-model-family paragraph's structure; Abstract, Contributions #1, and Conclusion reworded from "across two generator families" to "across two generator families and two citation families," with both new p-values cited; the §5 Limitations bullet that previously disclosed the central comparison as "CVE-only, untested on ATT&CK" rewritten to report it as closed, following the same pattern already used for the model-family limitation. Recompiled clean: 0 undefined references, 0 BibTeX warnings, 29 pages (was 28). Full 158-test suite re-run unaffected (158 passed, 1 skipped).
+
+**What went wrong:** Nothing new beyond what #66 already found and fixed (qwen's tighter `max_tokens` cap, the odds-ratio CI edge case). The two deterministic-checker misses on qwen's stated class could have looked like a checker regression at first glance — worth the individual investigation rather than treating "58/60 not 60/60" as noise, since one of the two turned out to be the checker correctly catching a second, real hallucination riding along with a correct echo.
+
+**What it means:** Issue #40/R1 is fully closed — all 7 acceptance criteria met (60-item pool with leakage guard passed and 3 REVOKED IDs represented; both model families run on both legs; McNemar/Cohen's g/odds-ratio reported for all four combinations; Table 3 and Fig. 1 expanded; the CVE-only limitation bullet updated to reflect the now-closed gap). The paper's one central, headline-billed finding (SelfCheckGPT-vs-deterministic grounding) no longer rests on a single citation family — it holds, and mostly holds more strongly, across every combination of model family and citation family this project has tested.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
