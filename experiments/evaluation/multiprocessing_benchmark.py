@@ -52,7 +52,12 @@ import psutil
 from src.agent.alert_schema import SAMPLE_ALERTS
 from src.agent.soc_agent import format_alert
 from src.guardrails.input_guardrail import check_injection
-from experiments.evaluation.threading_benchmark import analyse_alert_with_retry, aggregate_runs
+from experiments.evaluation.threading_benchmark import (
+    DEFAULT_MOCK_DELAY_SEC,
+    aggregate_runs,
+    analyse_alert_mocked,
+    analyse_alert_with_retry,
+)
 
 
 class CpuMonitor:
@@ -108,6 +113,13 @@ def _pipeline_worker(alert):
     return analyse_alert_with_retry(alert)
 
 
+def _pipeline_worker_mock(alert_and_delay):
+    # ProcessPoolExecutor.map only passes one positional arg per call, so
+    # the (alert, mock_delay) pair travels together through pickling.
+    alert, mock_delay = alert_and_delay
+    return analyse_alert_mocked(alert, mock_delay)
+
+
 def run_guardrail_only(alerts, num_processes: int):
     texts = [format_alert(a) for a in alerts]
 
@@ -132,6 +144,18 @@ def run_guardrail_only(alerts, num_processes: int):
 
 
 def run_full_pipeline(alerts, num_processes: int):
+    # At num_processes==1 there is no ProcessPoolExecutor -- this is plain
+    # serial execution in the same single process, architecturally
+    # identical to threading_benchmark.py's num_threads==1 case. Warming
+    # pytector here too (excluded from timing) keeps that baseline
+    # comparable to threading's; at num_processes>1, a real
+    # ProcessPoolExecutor spawns separate processes and each pays its own
+    # cold-start, which is left unwarmed deliberately -- that per-process
+    # cost is a genuine, disclosed part of what multiprocessing costs here.
+    if num_processes == 1:
+        from experiments.evaluation.threading_benchmark import _warmup_pytector
+        _warmup_pytector()
+
     with CpuMonitor() as monitor:
         start = time.perf_counter()
         if num_processes == 1:
@@ -154,6 +178,42 @@ def run_full_pipeline(alerts, num_processes: int):
     }
 
 
+def run_full_pipeline_mock(alerts, num_processes: int, mock_delay: float = DEFAULT_MOCK_DELAY_SEC):
+    # At num_processes==1, warm up the same way run_full_pipeline (real)
+    # and threading_benchmark.py's num_threads==1 case do -- no pool exists
+    # yet, so this is plain serial execution in one process. At
+    # num_processes>1, a real ProcessPoolExecutor spawns separate processes
+    # with their own memory space, so a parent-process warmup wouldn't
+    # reach them anyway; each worker pays its own ~10-15s pytector
+    # cold-start on its first assigned task there -- a real, disclosed cost
+    # specific to multiprocessing's per-process isolation, not a bug, and
+    # consistent with this benchmark's existing "process-creation/setup
+    # overhead dominates" finding.
+    if num_processes == 1:
+        from experiments.evaluation.threading_benchmark import _warmup_pytector
+        _warmup_pytector()
+
+    pairs = [(a, mock_delay) for a in alerts]
+    with CpuMonitor() as monitor:
+        start = time.perf_counter()
+        if num_processes == 1:
+            results = [_pipeline_worker_mock(p) for p in pairs]
+        else:
+            with ProcessPoolExecutor(max_workers=num_processes) as pool:
+                results = list(pool.map(_pipeline_worker_mock, pairs))
+        elapsed = time.perf_counter() - start
+
+    throughput = len(alerts) / elapsed if elapsed > 0 else float("inf")
+    return {
+        "num_processes": num_processes,
+        "n": len(alerts),
+        "elapsed_sec": elapsed,
+        "throughput_per_sec": throughput,
+        "avg_cpu_percent": monitor.avg_cpu,
+        "max_cpu_percent": monitor.max_cpu,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--guardrail-n", type=int, default=2000,
@@ -167,7 +227,30 @@ def main():
     parser.add_argument("--repeats", type=int, default=3,
                          help="How many times to repeat each process-count configuration, "
                               "reporting mean/stdev instead of a single-shot number")
+    parser.add_argument("--single-run", action="store_true",
+                         help="Run exactly one (mode, process-count) measurement and print its "
+                              "JSON result to stdout, then exit. Used by "
+                              "fresh_process_benchmark.py to get true fresh-process isolation "
+                              "between repeats instead of looping in one long-running process.")
+    parser.add_argument("--mode", choices=["guardrail", "pipeline", "pipeline-mock"],
+                         help="Which measurement to run in --single-run mode")
+    parser.add_argument("--workers", type=int, help="Process count for --single-run mode")
+    parser.add_argument("--n", type=int, help="Alert count for --single-run mode")
+    parser.add_argument("--mock-delay", type=float, default=DEFAULT_MOCK_DELAY_SEC,
+                         help="Fixed delay (seconds) standing in for the real Groq call in "
+                              "pipeline-mock mode")
     args = parser.parse_args()
+
+    if args.single_run:
+        alerts = build_workload(args.n)
+        if args.mode == "guardrail":
+            result = run_guardrail_only(alerts, args.workers)
+        elif args.mode == "pipeline":
+            result = run_full_pipeline(alerts, args.workers)
+        else:
+            result = run_full_pipeline_mock(alerts, args.workers, args.mock_delay)
+        print(json.dumps(result))
+        return
 
     results = {"guardrail_only": [], "full_pipeline": []}
 

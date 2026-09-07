@@ -201,3 +201,35 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 ### Next week plan
 - Resume and complete SelfCheckGPT, the ATT&CK-bait run, and the cross-model LLM-judge run as Groq quota allows; document final numbers in `docs/all_results.md`.
 - Continue paper draft revisions.
+
+---
+
+## Week 12
+
+**Branch:** `emaan-week-12`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/27
+
+### Completed this week
+- [x] Finished the two runs left mid-flight from Week 11: **SelfCheckGPT (60/60)** and the **ATT&CK-bait set**, and built + ran the **SelfCheckGPT paired significance test** for the first time — deterministic checker significantly more accurate than self-consistency checking (McNemar p=0.0118, n=56), the paper's first statistically-confirmed result.
+- [x] Found and fixed a real PII guardrail bug: Presidio's phone-number recognizer was misreading bare IP addresses as phone numbers (identical confidence score to real ones, not threshold-fixable — needed a structural "is this a valid IPv4?" check). Bulk-fired Wazuh live-alert generation from 26 → 139 real alerts across 5 trigger types, cutting the false-alarm rate from 27.3% to 2.9% after the fix.
+- [x] Built the **relevance classifier validation** (92.5% accuracy vs. human judgment, n=80, `docs/all_results.md` #36) and applied a Holm-Bonferroni multiple-comparisons correction to the guardrail significance testing — walked back an earlier "LLM Guard beats hybrid" claim once corrected (only baseline-vs-hybrid survives correction).
+- [x] Consolidated every already-run grounding source into one **cross-source benchmark** (575 alerts pooled, #43).
+- [x] Expanded both **CVE-bait and ATT&CK-bait sets to n=150 each**; found and fixed a real metric-definition bug where PII-only review flags were silently being counted as CVE hallucinations (#44).
+- [x] **Redid the concurrency/throughput benchmark** with genuinely independent fresh-process repeats and a mocked-LLM variant to separate guardrail overhead from live Groq network variance — found and fixed a real unlocked race condition in the pytector model loader along the way (#45).
+- [x] Commissioned an **independent adversarial peer review** of the full paper draft (a fresh AI agent, no prior context, briefed as a harsh IJIS Reviewer 2) — restructured the whole paper around its one genuinely novel, statistically-confirmed finding (SelfCheckGPT vs. deterministic grounding) instead of five roughly-equal-weight experiments; logged the review and two disclosed-not-planned limitations it surfaced (#46).
+- [x] Ran a **full accuracy review pass** on the paper draft: cross-checked every headline number against its actual source result file, found and fixed 6 issues (an off-by-one completion count repeated across 6 places, a stale test-suite count, an overclaimed "identical calibration set," bibliography hygiene — orphan references, missing citation numbers) (#47).
+- [x] **Cut the paper's length** (31 pages once ported to LaTeX) toward a 12-18 page target — condensed the "Supporting Evaluation" section and the bait-test expansion history, without cutting a single number or finding (#48).
+- [x] **Ported the full paper to LaTeX** (`docs/paper/sn-article.tex`), replacing the unfilled Springer Nature template with the actual content — fixed missing bibliography entries, a title-page rendering bug, and an unnecessary landscape table page; verified with a real `pdflatex`+`bibtex` compile (21/21 citations resolving) (#49).
+- [x] **Re-ran the paper's central comparison on a second, independent model family** (`qwen/qwen3.6-27b`) to directly close the paper's disclosed single-model-generalization limitation rather than leave it disclosed-and-untested: the deterministic checker's advantage held and got sharper — McNemar p≈2×10⁻⁷ vs. the original p=0.0118, with SelfCheckGPT never winning a single disagreement on qwen-generated reports (#50, #51).
+- [x] Added **two figures** to the paper (SelfCheckGPT correctness by class/model; concurrency throughput vs. worker count), generated directly from committed result files via a new script rather than hand-typed (#52).
+- [x] Opened PR #27 (Week 12 → `dev`).
+
+### Problems / Blockers
+- Groq's daily token quota (200k tokens/model/day) meant the qwen cross-family SelfCheckGPT run (180 calls) and its paired significance test (60 calls) together spanned roughly a dozen resume-from-checkpoint cycles across 3 days — the single biggest time cost of the week, not a technical blocker.
+- The paper's compiled length (24-25 pages) is still above the 12-18 page target discussed this week; decided to hold that decision open rather than cut further without first confirming the venue's actual length policy.
+- Two administrative items remain before an actual submission (a real contact email, finalizing the Declarations section) — not blocking, not yet finalized.
+
+### Next week plan
+- Close out the qwen LLM-judge cross-family run if worth finishing (currently 442/450, quota-gated, diminishing returns per retry — same-family and cross-family already agree 100% on every shared sample).
+- Resolve the paper's page-count gap: either trim further or confirm the venue's real length policy and accept the current length.
+- Final full read-through / submission-readiness pass.

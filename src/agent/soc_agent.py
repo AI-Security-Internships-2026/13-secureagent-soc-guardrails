@@ -58,16 +58,35 @@ Hostname: {alert.hostname or 'Unknown'}
 File Hash: {alert.file_hash or 'None'}
 """
 
-def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> dict:
+def analyse_alert(
+    alert: SecurityAlert,
+    verify_cves_with_nvd: bool = True,
+    input_guardrail_enabled: bool = True,
+    cve_guardrail_enabled: bool = True,
+    attack_guardrail_enabled: bool = True,
+    pii_guardrail_enabled: bool = True,
+) -> dict:
     """
     verify_cves_with_nvd: set False to skip the NVD network lookup (e.g. for
     fast local batch runs or when offline) — falls back to grounding-only
     CVE checking with an "UNVERIFIED" classification for any ungrounded CVE.
+
+    input_guardrail_enabled / cve_guardrail_enabled / attack_guardrail_enabled /
+    pii_guardrail_enabled: per-stage on/off toggles for the component ablation
+    study (all default True, i.e. identical behavior to before these flags
+    existed). Disabling a stage skips its check entirely rather than running
+    it and discarding the result, so the ablation's cost/latency numbers
+    reflect the stage genuinely not running. The report schema is unchanged
+    either way — every key a disabled stage would have set is still present,
+    just holding its "nothing found" value (empty list / not flagged), so
+    disabled-stage reports remain directly comparable to enabled-stage ones
+    field-for-field. Pipeline order is unchanged; only whether each stage
+    runs is gated.
     """
     alert_text = format_alert(alert)
     evidence_pack = build_evidence_pack(alert)
 
-    if check_injection_hybrid(alert_text):
+    if input_guardrail_enabled and check_injection_hybrid(alert_text):
         return {
             "alert_id": alert.alert_id,
             "severity_assessment": "BLOCKED",
@@ -115,19 +134,33 @@ def analyse_alert(alert: SecurityAlert, verify_cves_with_nvd: bool = True) -> di
     report["agent_version"] = "guardrail-v0.4"
     report["guardrail_blocked"] = False
 
-    cve_check = check_hallucinated_cves_verified(report, evidence_pack["text"], verify_with_nvd=verify_cves_with_nvd)
-    report = annotate_ungrounded_citations(report, cve_check["verifications"])
-    report["hallucinated_cves"] = cve_check["ungrounded_cves"]
-    report["cve_verifications"] = cve_check["verifications"]
+    if cve_guardrail_enabled:
+        cve_check = check_hallucinated_cves_verified(report, evidence_pack["text"], verify_with_nvd=verify_cves_with_nvd)
+        report = annotate_ungrounded_citations(report, cve_check["verifications"])
+        report["hallucinated_cves"] = cve_check["ungrounded_cves"]
+        report["cve_verifications"] = cve_check["verifications"]
+    else:
+        cve_check = {"flagged": False, "requires_review": False}
+        report["hallucinated_cves"] = []
+        report["cve_verifications"] = []
 
-    attack_check = check_hallucinated_attack_techniques_verified(report, evidence_pack["text"])
-    report = annotate_ungrounded_attack_citations(report, attack_check["verifications"])
-    report["hallucinated_attack_techniques"] = attack_check["ungrounded_attack_techniques"]
-    report["attack_technique_verifications"] = attack_check["verifications"]
+    if attack_guardrail_enabled:
+        attack_check = check_hallucinated_attack_techniques_verified(report, evidence_pack["text"])
+        report = annotate_ungrounded_attack_citations(report, attack_check["verifications"])
+        report["hallucinated_attack_techniques"] = attack_check["ungrounded_attack_techniques"]
+        report["attack_technique_verifications"] = attack_check["verifications"]
+    else:
+        attack_check = {"flagged": False, "requires_review": False}
+        report["hallucinated_attack_techniques"] = []
+        report["attack_technique_verifications"] = []
 
-    pii_result = redact_report_fields(report)
-    report.update(pii_result["redacted_fields"])
-    report["pii_detections"] = pii_result["detections"]
+    if pii_guardrail_enabled:
+        pii_result = redact_report_fields(report)
+        report.update(pii_result["redacted_fields"])
+        report["pii_detections"] = pii_result["detections"]
+    else:
+        pii_result = {"pii_found": False}
+        report["pii_detections"] = []
 
     report["output_guardrail_flagged"] = cve_check["flagged"] or attack_check["flagged"] or pii_result["pii_found"]
     report["requires_review"] = cve_check["requires_review"] or attack_check["requires_review"] or pii_result["pii_found"]

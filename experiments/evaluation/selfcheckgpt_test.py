@@ -33,10 +33,25 @@ regardless of factual correctness).
 
 Usage:
     python -m experiments.evaluation.selfcheckgpt_test
+
+    Report-generation model defaults to MODEL_NAME (src/agent/soc_agent.py,
+    openai/gpt-oss-20b) -- the paper's central SelfCheckGPT-vs-deterministic
+    result was only ever run against this one model/provider, a disclosed
+    generalization gap (docs/paper/paper_draft.md §5). To test whether that
+    result is a pipeline property or a gpt-oss-20b-specific artifact, set
+    GENERATOR_MODEL to a genuinely different, currently-active Groq model
+    (confirmed live via the groq SDK's client.models.list() on 2026-08-29 --
+    e.g. "qwen/qwen3.6-27b", a different lab/training lineage):
+
+        GENERATOR_MODEL=qwen/qwen3.6-27b python -m experiments.evaluation.selfcheckgpt_test
+
+    Writes to its own results file (selfcheckgpt_results_<model>.json)
+    rather than overwriting the completed gpt-oss-20b baseline.
 """
 
 import json
 import os
+import re
 
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -50,10 +65,30 @@ from experiments.evaluation.selfcheckgpt_alerts import STATED_ALERTS, PROMPTED_A
 
 load_dotenv()
 
-llm = ChatGroq(api_key=os.getenv("GROQ_API_KEY"), model=MODEL_NAME, temperature=SAMPLING_TEMPERATURE)
+# Report-generation model is independently selectable from the project
+# default (MODEL_NAME) via GENERATOR_MODEL. Defaults to MODEL_NAME so
+# existing behavior/output (the completed 60/60 gpt-oss-20b baseline) is
+# untouched when the env var isn't set. Same pattern as
+# llm_judge_synthetic_test.py's LLM_JUDGE_MODEL/JUDGE_MODEL_NAME.
+GENERATOR_MODEL_NAME = os.getenv("GENERATOR_MODEL", MODEL_NAME)
+
+llm = ChatGroq(api_key=os.getenv("GROQ_API_KEY"), model=GENERATOR_MODEL_NAME, temperature=SAMPLING_TEMPERATURE)
 
 N_SAMPLES = 3
-OUTPUT_PATH = "experiments/results/selfcheckgpt_results.json"
+
+
+def _output_path_for(generator_model: str) -> str:
+    # Default model keeps the original path so the completed 60/60
+    # gpt-oss-20b baseline and its checkpoint-resume history are never
+    # touched. A different generator model writes to its own file instead
+    # of overwriting or being conflated with the baseline result.
+    if generator_model == MODEL_NAME:
+        return "experiments/results/selfcheckgpt_results.json"
+    slug = re.sub(r"[^a-zA-Z0-9]+", "_", generator_model).strip("_").lower()
+    return f"experiments/results/selfcheckgpt_results_{slug}.json"
+
+
+OUTPUT_PATH = _output_path_for(GENERATOR_MODEL_NAME)
 
 
 def wilson_ci(successes: int, n: int, alpha: float = 0.05) -> tuple:
@@ -84,7 +119,7 @@ def _write_output(all_alerts: list, results: list, complete: bool) -> dict:
 
     output = {
         "task": "SelfCheckGPT-style resampling-consistency baseline vs. deterministic/LLM-judge grounding checks",
-        "model": MODEL_NAME,
+        "model": GENERATOR_MODEL_NAME,
         "sampling_temperature": SAMPLING_TEMPERATURE,
         "n_samples_per_alert": N_SAMPLES,
         "n_alerts_total": len(all_alerts),
@@ -111,6 +146,9 @@ def _write_output(all_alerts: list, results: list, complete: bool) -> dict:
 
 
 def run():
+    print(f"Generator model: {GENERATOR_MODEL_NAME}")
+    print(f"Output: {OUTPUT_PATH}\n")
+
     all_alerts = [{"class": "stated", **item} for item in STATED_ALERTS] + \
                  [{"class": "prompted", **item} for item in PROMPTED_ALERTS]
 
