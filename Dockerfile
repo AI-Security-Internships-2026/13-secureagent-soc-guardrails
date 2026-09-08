@@ -25,6 +25,12 @@ RUN apt-get update \
 # (if only source code changes below, this cached layer is reused, pip install doesn't re-run)
 COPY requirements-lock.txt /app/requirements-lock.txt
 RUN pip install --upgrade pip \
+ # torch's default PyPI wheel drags in ~2-3GB of NVIDIA CUDA libraries
+ # (cudnn, cusparselt, nccl, cublas, ...) that this CPU-only, GPU-less
+ # reproducibility image never uses. Installing the CPU-only build first,
+ # pinned to the exact version requirements-lock.txt expects, satisfies
+ # that pin so the subsequent full install doesn't pull the GPU variant.
+ && pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cpu \
  && pip install -r requirements-lock.txt \
  && python -m spacy download en_core_web_sm
 
