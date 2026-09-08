@@ -34,6 +34,24 @@ RUN pip install --upgrade pip \
  && pip install -r requirements-lock.txt \
  && python -m spacy download en_core_web_sm
 
+# Pre-warm pytector's prompt-injection classifier (HuggingFace
+# protectai/deberta-v3-base-prompt-injection, ~350MB) into the image at
+# build time, the same reason spacy's model is downloaded above rather
+# than left for first use. Without this, the very first `docker run`
+# silently triggers a live multi-hundred-MB download from the HF Hub --
+# directly contradicting this image's "offline, no API key needed"
+# claim, since src/guardrails/input_guardrail.py's Pytector fallback is
+# exercised by the default schema-parity CMD below. model_name_or_url
+# matches that module's own instantiation exactly.
+RUN python -c "from pytector import PromptInjectionDetector; PromptInjectionDetector(model_name_or_url='deberta')"
+
+# Once cached, force transformers/huggingface_hub to skip their default
+# network freshness-check (a HEAD request against the Hub even when the
+# model is already cached locally) -- without this, "offline" would
+# still make one small network call per run.
+ENV HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1
+
 # NOW copy the rest of the repository (code, data snapshots, tests).
 COPY . /app/
 

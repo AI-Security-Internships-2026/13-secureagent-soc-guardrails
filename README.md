@@ -130,6 +130,24 @@ git checkout -b emaan-week-01
 
 ---
 
+## Reproducibility via Docker
+
+We ship a minimal reproducibility image that runs the offline mocked schema-parity test at the end of `docker build` — no API key required.
+
+```bash
+docker build -t llmcite .
+docker run --rm llmcite
+```
+
+To run the full test suite you will need a valid `GROQ_API_KEY` environment variable (see [Getting Started](#getting-started) above for setup):
+```bash
+docker run --rm -e GROQ_API_KEY=$GROQ_API_KEY llmcite /bin/bash -c "cd /app && pytest tests/ -v"
+```
+
+This is a **reproducibility image only** — not a web service, REST server, frontend, or deployment target. See the comment block at the top of the `Dockerfile` for the full anti-scope-creep note.
+
+---
+
 ## Roadmap to September 8, 2026
 
 **Current state:** NVD-verified output guardrail merged (PR #18) — classifying CVE citations as FABRICATED/REAL_BUT_IRRELEVANT/REAL_AND_PLAUSIBLE/UNVERIFIED, plus a multiprocessing-vs-threading benchmark. Strongest guardrail stack in the cohort (NeMo Guardrails + Guardrails AI + Presidio + LangGraph). Previously only had generic undated weekly checkboxes — this replaces those with real milestones.

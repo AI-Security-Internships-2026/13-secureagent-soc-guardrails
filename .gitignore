@@ -24,6 +24,8 @@ logs/
 *.log
 # Exception: intentionally committed as reproducibility evidence (Issue E2).
 !tests/last_run.log
+# Exception: intentionally committed as reproducibility evidence (Issue E4).
+!tests/docker_build.log
 .env
 .env.*
 secrets/

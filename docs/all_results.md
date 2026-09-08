@@ -1094,6 +1094,19 @@ Built the ATT&CK counterparts of the existing CVE-side harness: `selfcheckgpt_al
 
 ---
 
+## 70. Issue #49 (E4) complete — offline-model fix verified, all 4 acceptance criteria met
+
+**When:** Sep 9
+**What we tried:** Fixed #69's live-model-download bug. Added a build-time step instantiating `pytector.PromptInjectionDetector(model_name_or_url="deberta")` — exact same call `src/guardrails/input_guardrail.py` makes at runtime — right after the main `pip install` layer, so the ~350MB `protectai/deberta-v3-base-prompt-injection` model gets baked into the image the same way spacy's model already is. Also set `HF_HUB_OFFLINE=1`/`TRANSFORMERS_OFFLINE=1` as image-level `ENV` so `transformers`/`huggingface_hub` skip their default network freshness-check against the Hub even with a warm cache — otherwise "offline" would still make one small network call per run.
+
+**Result:** Rebuilt — the earlier `pip install` layer was cached (Docker reused it unchanged), so only the new pre-warm step re-ran (~4 min, one-time download at build time, not run time). Image: `llmcite:latest`, 4.53GB (up from 3.11GB — the DeBERTa weights, a reasonable tradeoff for genuine offline reproducibility). Verified network I/O directly via `docker stats` during `docker run --rm llmcite`: **1.05kB** total (container startup only) versus 604MB+ before the fix. Default CMD (schema-parity, offline): **13 passed, 25.18s**. Full suite with a real `GROQ_API_KEY` (`docker run ... pytest tests/ -v`): **158 passed, 17.65s** — matches the host's 158-passed count exactly (the host's extra "1 skipped" is `experiments/nemo_test/test_rails.py`, outside the `tests/` scope this command targets, not a discrepancy). Saved the build log as `tests/docker_build.log` (needed a `!tests/docker_build.log` exception in `.gitignore`'s blanket `*.log` rule, same fix pattern as `tests/last_run.log` for issue E2). Added the `## Reproducibility via Docker` section to `README.md`.
+
+**What went wrong:** A minor Git Bash gotcha, not a real bug: running `docker run ... llmcite /bin/bash -c "..."` initially failed because Git Bash auto-converts the leading `/bin/bash` to a Windows path before Docker ever sees it (`stat C:/Program Files/Git/.../bash: no such file`). Fixed by setting `MSYS_NO_PATHCONV=1` for that command.
+
+**What it means:** Issue #49/E4 is fully verified — all 4 acceptance criteria met: `Dockerfile` + `.dockerignore` committed (AC1); `docker build --no-cache` succeeds, schema-parity CMD all-green with genuinely zero network calls, build log committed (AC2); README section added and renders (AC3); anti-scope-creep comment present at the top of `Dockerfile` (AC4). A reviewer with no internet access can now build and run the reproducibility image end-to-end exactly as the issue's Data-Availability framing promises — this wasn't true before today's fix, despite the Dockerfile technically existing and building.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
