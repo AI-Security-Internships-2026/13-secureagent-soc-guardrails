@@ -525,7 +525,16 @@ reflects NVD's state at that specific time, not one fixed point shared
 across every result in this paper. This asymmetry --- one path versioned
 and reproducible, the other live and time-varying --- is a disclosed
 property of the two authoritative sources' own APIs, restated in
-Sect.~\ref{sec:discussion}'s limitations.
+Sect.~\ref{sec:discussion}'s limitations. National Vulnerability
+Database (NVD) lookups for all 152 CVE IDs referenced in the committed
+evaluation result files are frozen as a committed snapshot under
+\texttt{data/nvd\_snapshot/} with SHA-256 manifest
+\texttt{e150c71a5de62ac68930b30e72d1529267172147ec4ec45b2e488d9345278aca}.
+Reviewers can re-run all published CVE-side experiments with the
+\texttt{--use-snapshot} CLI flag across evaluation scripts to reproduce
+Sects.~\ref{subsec:cve-bait}, \ref{subsec:selfcheckgpt},
+\ref{subsec:relevance} without any network access to the NVD API,
+eliminating the time-dependence of live REST lookups described above.
 
 \subsection{Output guardrail: CVE-bait adversarial test}\label{subsec:cve-bait}
 

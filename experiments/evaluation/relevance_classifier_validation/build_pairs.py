@@ -50,7 +50,7 @@ import random
 
 from experiments.evaluation.cve_bait_alerts import CVE_BAIT_ALERTS, EXPECTED_CVE
 from src.guardrails.evidence_pack import build_evidence_pack
-from src.guardrails.output_guardrail import _query_nvd
+from src.guardrails.output_guardrail import _query_nvd, _query_nvd_snapshot, DEFAULT_NVD_SNAPSHOT_DIR
 
 N_ANCHORS = 40
 DISTRACTOR_SHIFT = 37  # arbitrary, non-zero mod 100 -- never lands on the same CVE as the anchor
@@ -61,7 +61,7 @@ PAIRS_CSV_PATH = os.path.join(OUTPUT_DIR, "pairs_to_label.csv")
 CONSTRUCTION_KEY_PATH = os.path.join(OUTPUT_DIR, "construction_key.json")
 
 
-def build():
+def build(use_snapshot: bool = False):
     alerts_by_id = {a.alert_id: a for a in CVE_BAIT_ALERTS}
     ordered_ids = sorted(EXPECTED_CVE)  # BAIT-001 .. BAIT-100, stable order
     assert len(ordered_ids) == 100, len(ordered_ids)
@@ -86,11 +86,11 @@ def build():
         pair_specs.append(("positive", anchor_id, positive_cve))
         pair_specs.append(("negative", anchor_id, negative_cve))
 
-    print(f"Fetching real NVD descriptions for {len(needed_cve_ids)} unique CVEs "
-          f"(~{len(needed_cve_ids)}s at NVD's public rate limit)...")
+    source = "frozen snapshot (issue #48/E3)" if use_snapshot else "live NVD API"
+    print(f"Fetching NVD descriptions for {len(needed_cve_ids)} unique CVEs from the {source}...")
     descriptions = {}
     for i, cve_id in enumerate(sorted(needed_cve_ids), 1):
-        result = _query_nvd(cve_id)
+        result = _query_nvd_snapshot(cve_id, DEFAULT_NVD_SNAPSHOT_DIR) if use_snapshot else _query_nvd(cve_id)
         if result.get("description"):
             descriptions[cve_id] = result["description"]
         else:
@@ -141,4 +141,10 @@ def build():
 
 
 if __name__ == "__main__":
-    build()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--use-snapshot", action="store_true",
+                         help="Fetch CVE descriptions from the frozen data/nvd_snapshot/ "
+                              "snapshot (issue #48/E3) instead of the live NVD API.")
+    args = parser.parse_args()
+    build(use_snapshot=args.use_snapshot)

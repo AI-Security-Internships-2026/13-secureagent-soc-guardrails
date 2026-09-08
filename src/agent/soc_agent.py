@@ -65,11 +65,20 @@ def analyse_alert(
     cve_guardrail_enabled: bool = True,
     attack_guardrail_enabled: bool = True,
     pii_guardrail_enabled: bool = True,
+    use_nvd_snapshot: bool = False,
+    nvd_snapshot_dir: str = "data/nvd_snapshot",
 ) -> dict:
     """
     verify_cves_with_nvd: set False to skip the NVD network lookup (e.g. for
     fast local batch runs or when offline) — falls back to grounding-only
     CVE checking with an "UNVERIFIED" classification for any ungrounded CVE.
+
+    use_nvd_snapshot / nvd_snapshot_dir: reproducibility mode (issue #48/E3)
+    — reads NVD data from the frozen data/nvd_snapshot/ snapshot instead of
+    the live API, so a re-run years later gets byte-identical CVE records
+    rather than whatever NVD returns then. Only meaningful when
+    verify_cves_with_nvd is True; raises if a needed CVE ID has no snapshot
+    file rather than silently falling back to a live call.
 
     input_guardrail_enabled / cve_guardrail_enabled / attack_guardrail_enabled /
     pii_guardrail_enabled: per-stage on/off toggles for the component ablation
@@ -135,7 +144,10 @@ def analyse_alert(
     report["guardrail_blocked"] = False
 
     if cve_guardrail_enabled:
-        cve_check = check_hallucinated_cves_verified(report, evidence_pack["text"], verify_with_nvd=verify_cves_with_nvd)
+        cve_check = check_hallucinated_cves_verified(
+            report, evidence_pack["text"], verify_with_nvd=verify_cves_with_nvd,
+            use_snapshot=use_nvd_snapshot, snapshot_dir=nvd_snapshot_dir,
+        )
         report = annotate_ungrounded_citations(report, cve_check["verifications"])
         report["hallucinated_cves"] = cve_check["ungrounded_cves"]
         report["cve_verifications"] = cve_check["verifications"]

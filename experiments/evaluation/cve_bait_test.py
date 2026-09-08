@@ -89,7 +89,7 @@ def _write_output(results: list, total_target: int) -> dict:
     return output
 
 
-def run():
+def run(use_snapshot: bool = False):
     # Resume from a prior checkpoint if one exists.
     results = []
     if os.path.exists(OUTPUT_PATH):
@@ -103,7 +103,7 @@ def run():
 
     for alert in remaining:
         print(f"\n[{len(results)+1}/{len(CVE_BAIT_ALERTS)}] Processing {alert.alert_id} ({alert.event_type})...")
-        report = analyse_alert(alert)
+        report = analyse_alert(alert, use_nvd_snapshot=use_snapshot)
         report["expected_cve"] = EXPECTED_CVE[alert.alert_id]
         results.append(report)
 
@@ -144,4 +144,11 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--use-snapshot", action="store_true",
+                         help="Verify CVEs against the frozen data/nvd_snapshot/ snapshot "
+                              "(issue #48/E3) instead of live NVD lookups, for byte-identical "
+                              "reproducibility of the paper's published numbers.")
+    args = parser.parse_args()
+    run(use_snapshot=args.use_snapshot)
