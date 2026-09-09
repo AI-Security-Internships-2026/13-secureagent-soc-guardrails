@@ -845,7 +845,7 @@ an issue's instructions at face value.
 
 | # | Issue | Status |
 |---|---|---|
-| 45 | R6 · Explicit RQ1-RQ4 section + evaluation reordering + de-fluff | ❌ Not started. No "Research Questions" subsection exists in the paper yet — confirmed via grep. |
+| 45 | R6 · Explicit RQ1-RQ4 section + evaluation reordering + de-fluff | ✅ **Done**, 2026-09-09. All 6 AC met. Full §4 reorder done in one pass (not deferred) — 58 cross-references individually traced and fixed, not blindly renumbered. New §4.8 Ablation section written with honest in-progress status (R3 not done yet); only its body text needs a later edit when R3 lands, no renumbering needed again. `docs/all_results.md` #73. |
 
 ### M6 — Enhancers (only if everything else finishes early)
 
@@ -856,9 +856,21 @@ an issue's instructions at face value.
 
 ### Suggested next-up, per the milestone ordering
 
-With M1's two engineering issues (E1, E2) done and R2 paused pending
-supervisor input, the milestone-ordering logic says M1 is otherwise clear
-to move past. Reasonable next targets: **R1** (#40, closes the paper's
-disclosed CVE-only limitation on its central finding) or resolving **R3's
-scope conflict** (#42, needed before that ablation work can even start
-cleanly) — both M2, both P0, both currently blocking M2 from closing.
+7 of 12 issues now done (E1, E2, E3, E4, E5, R1, R6) or effectively done
+pending supervisor input (R2). Only two real items remain, both
+genuinely blocked rather than just unstarted:
+
+- **R3** (#42, ablation study) — scope conflict still unresolved (the
+  issue's claimed 479-alert pool doesn't match this project's real
+  575-alert pooled data), and on Groq alone the full run is realistically
+  2-3 weeks of calendar time given this project's own quota history. User
+  is holding this pending a possible switch to self-hosted CNIT lab
+  compute, not yet set up.
+- **R4** (#43, two-annotator Cohen's κ) — blocked on a second human
+  labeler's real time, the one item in this backlog that can't be
+  completed solo.
+
+The two lowest-priority items (**R5** #44, **E6** #51) are both
+explicitly scoped by their own issue text as "only if everything else
+finishes early" / "last in the stack" — reasonable to leave until R3/R4
+resolve.

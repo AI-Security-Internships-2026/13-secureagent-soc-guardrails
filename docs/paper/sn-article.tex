@@ -31,8 +31,7 @@
 
 \title{LLMCite: Grounded Verification of Hallucinated CVE and MITRE ATT\&CK Citations in LLM-Generated SOC Reports}
 
-%% TODO: replace with a real contact email before submission.
-\author*[1]{\fnm{Emaan Afroz} \sur{Khuram}}\email{TODO@example.com}
+\author*[1]{\fnm{Emaan Afroz} \sur{Khuram}}\email{ekhuram.bscs23seecs@seecs.edu.pk}
 
 \affil*[1]{\orgdiv{TECIP}, \orgname{Scuola Superiore Sant'Anna}, \orgaddress{\street{CNIT/PNTLab}, \city{Pisa}, \country{Italy}}}
 
@@ -184,9 +183,37 @@ as a separate contribution of equal weight.
    relevance classifier underlying the taxonomy split (92.5\% accuracy).
 \end{enumerate}
 
+\subsection{Research Questions}\label{subsec:rqs}
+
+\textbf{RQ1.} Can authoritative evidence-grounding --- anchored to
+per-identifier domain ontologies rather than general factuality ---
+distinguish between grounded, fabricated, irrelevant-to-alert, and
+real-but-unsupported CVE and MITRE ATT\&CK citations in LLM-generated
+SOC analyst reports?
+
+\textbf{RQ2.} Does grounded verification (LLMCite) detect unsupported
+citations more reliably than sampling-based self-consistency
+(SelfCheckGPT) on the same paired examples?
+
+\textbf{RQ3.} Does the performance gap between grounded verification and
+self-consistency generalize both across LLM generator families
+(\texttt{openai/gpt-oss-20b} vs.\ \texttt{qwen/qwen3.6-27b}) and across
+citation families (CVE vs.\ MITRE ATT\&CK)? Both axes are fully tested:
+model-family generalization (Sect.~\ref{subsec:mcnemar}) and
+citation-family generalization (Sect.~\ref{subsec:mcnemar}, closing what
+was an open question earlier in this project) both hold.
+
+\textbf{RQ4.} How do individual pipeline stages (input guardrail, CVE
+checker, ATT\&CK checker, PII redaction) individually affect detection
+outcomes and operational latency? Per-stage toggles are implemented and
+schema-parity-validated (Sect.~\ref{subsec:setup}); a full ablation
+across the paper's pooled evaluation set was in progress at the time of
+writing and is not yet reported in this draft.
+
 The rest of the paper is organized as follows: Sect.~\ref{sec:related-work}
 reviews related work; Sect.~\ref{sec:method} describes the pipeline and
-taxonomy; Sect.~\ref{sec:evaluation} presents the evaluation;
+taxonomy; Sect.~\ref{sec:evaluation} presents the evaluation, with each
+subsection opening by naming the research question it addresses;
 Sect.~\ref{sec:discussion} discusses what the results do and don't
 establish, including limitations; Sect.~\ref{sec:conclusion} concludes.
 
@@ -588,6 +615,39 @@ CVE --- so that fifth class is exercised on the ATT\&CK side
 untriggered, not just unobserved, on the CVE side across all 150
 CVE-bait alerts.
 
+A second, purpose-built 60-alert CVE pool (15 real NVD-listed CVEs,
+split into \textbf{bait} style --- exploit behavior described, CVE
+withheld --- and \textbf{stated} style --- CVE given directly) isolates
+a narrower question than the bait set above: not just ``does the model
+spontaneously cite a CVE,'' but whether it can \textit{identify} a CVE
+from behavior alone, or only \textit{verify} one it's already given.
+
+\begin{table}[h]
+\caption{CVE pool bait-vs-stated comparison: whether the model identifies a withheld CVE from behavior alone, or only verifies one it is given}\label{tab:cvepool}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Style & $n$ & CVE ungrounded rate & Cited the correct ground-truth CVE \\
+\midrule
+Bait (number withheld) & 30 & 0.0\% & \textbf{0.0\%} \\
+Stated (number given) & 30 & 0.0\% & 100\% \\
+\botrule
+\end{tabular}
+\end{table}
+
+\textbf{This is the most important finding from this pool.} The
+model never fabricates a CVE under either framing, but when the number
+is withheld it also \textbf{never volunteers the correct one} --- it
+stays silent rather than guessing. The pipeline as built only
+\textit{verifies} claims the model already makes; it doesn't
+\textit{identify} a CVE from behavior alone --- a genuine capability gap
+motivating specific future work (retrieval-based CVE matching against
+behavioral description), not a guardrail failure. This finding holds at
+temperature=0.1; Sect.~\ref{subsec:selfcheckgpt} finds the opposite
+behavior at temperature=0.7 on the same style of alert --- this same
+60-alert pool is reused directly as
+Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar}'s
+SelfCheckGPT/McNemar data source.
+
 \subsection{Output guardrail: ATT\&CK-bait adversarial test}\label{subsec:attack-bait}
 
 A parallel bait set covers MITRE ATT\&CK technique citations, expanded
@@ -635,7 +695,7 @@ outright fabrication.
 resamples per alert at temperature=0.7 --- production runs at
 temperature=0.1, Sect.~\ref{subsec:setup}, and would give resampling no
 diversity to measure) against the same 60-alert CVE pool used in
-Sect.~\ref{subsec:realworld} (30 ``prompted''/bait alerts with the CVE
+Sect.~\ref{subsec:cve-bait} (30 ``prompted''/bait alerts with the CVE
 withheld, 30 ``stated'' alerts with the CVE given).
 \texttt{sample\_citations()} bypasses the guardrail pipeline entirely,
 so only the raw generator's citation behavior across resamples is
@@ -675,7 +735,7 @@ Prompted (bait, withheld) & 30 (0 declined) & 5/30 (recall 0.17) \\
 Overall on the 56 scored alerts: accuracy 0.643 (95\% CI [0.512,
 0.755]), precision 1.0 (95\% CI [0.701, 1.0]), recall 0.310 (95\% CI
 [0.173, 0.492]). SelfCheckGPT never false-flags a grounded citation as
-unstable, matching Sect.~\ref{subsec:realworld}'s stated-class finding.
+unstable, matching Sect.~\ref{subsec:cve-bait}'s stated-class finding.
 
 \textbf{The 20 missed prompted-class alerts aren't what a bare recall
 number suggests.} All 20 are cases where the model cited the
@@ -695,12 +755,12 @@ grounded'' from ``consistently correct but ungrounded,'' because both
 look identical to a consistency-only signal. Eighteen of these twenty
 cases are, functionally, \texttt{REAL\_AND\_PLAUSIBLE} citations
 (Sect.~\ref{subsec:taxonomy}) at a volume this project's low-temperature
-(0.1) bait tests (Sects.~\ref{subsec:cve-bait},~\ref{subsec:realworld})
+(0.1) bait tests (Sect.~\ref{subsec:cve-bait}, including its CVE pool)
 never observed --- those recorded exactly one such case across a
 combined $n=106$. Raising the sampling temperature to what SelfCheckGPT
 requires makes the model volunteer a withheld-but-correct identifier far
 more often than production settings do --- a boundary condition on
-Sect.~\ref{subsec:realworld}'s ``never volunteers when withheld''
+Sect.~\ref{subsec:cve-bait}'s ``never volunteers when withheld''
 finding, which holds at temperature=0.1 specifically, not as a general
 property of the model. The deterministic grounding checker still
 correctly flags every one of these 20 as ungrounded, since groundedness
@@ -867,9 +927,14 @@ failure mode --- short or generic authoritative descriptions starving a
 bag-of-words scorer --- produces false negatives on genuinely correct
 citations, a disclosed limitation restated in Sect.~\ref{sec:discussion}.
 
-\subsection{Real-world validation: third-party incident generator and CVE pool}\label{subsec:realworld}
+\subsection{Real-world deployment validation: third-party incident generator and live Wazuh SIEM data}\label{subsec:realworld}
 
-To move beyond hand-authored bait alerts, \texttt{Secure\_SOC\_AI}
+This subsection doesn't answer RQ1-RQ4 directly; it provides supporting
+real-world evidence for RQ1's grounding claim, under both non-adversarial
+(Secure\_SOC\_AI) and genuinely live (Wazuh) conditions, and surfaces two
+real guardrail bugs no synthetic benchmark exposed.
+
+\textbf{Third-party incident generator.} To move beyond hand-authored bait alerts, \texttt{Secure\_SOC\_AI}
 \cite{securesocai} (an independent, third-party open-source SOC tool)
 was integrated as an incident \textit{generator} only --- its own triage
 step was not used, since replacing exactly that step is this project's
@@ -883,38 +948,7 @@ on non-adversarial, rule-engine-generated incidents, included for
 completeness rather than as an adversarial stress test
 (Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait} cover that).
 
-A second, purpose-built 60-alert CVE pool (15 real NVD-listed CVEs,
-split into \textbf{bait} style --- exploit behavior described, CVE
-withheld --- and \textbf{stated} style --- CVE given directly) isolates
-whether the model can \textit{identify} a CVE from behavior alone, or
-only \textit{verify} one it's already given.
-
-\begin{table}[h]
-\caption{CVE pool bait-vs-stated comparison: whether the model identifies a withheld CVE from behavior alone, or only verifies one it is given}\label{tab:cvepool}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Style & $n$ & CVE ungrounded rate & Cited the correct ground-truth CVE \\
-\midrule
-Bait (number withheld) & 30 & 0.0\% & \textbf{0.0\%} \\
-Stated (number given) & 30 & 0.0\% & 100\% \\
-\botrule
-\end{tabular}
-\end{table}
-
-\textbf{This is the most important finding in this subsection.} The
-model never fabricates a CVE under either framing, but when the number
-is withheld it also \textbf{never volunteers the correct one} --- it
-stays silent rather than guessing. The pipeline as built only
-\textit{verifies} claims the model already makes; it doesn't
-\textit{identify} a CVE from behavior alone --- a genuine capability gap
-motivating specific future work (retrieval-based CVE matching against
-behavioral description), not a guardrail failure. This finding holds at
-temperature=0.1; Sect.~\ref{subsec:selfcheckgpt} finds the opposite
-behavior at temperature=0.7 on the same style of alert.
-
-\subsection{Live integration demonstration: real Wazuh SIEM data}\label{subsec:wazuh}
-
-To test against genuinely live, non-synthetic alert data rather than
+\textbf{Live Wazuh SIEM data.}\label{subsec:wazuh} To test against genuinely live, non-synthetic alert data rather than
 only CICIDS2017 \cite{cicids2017} (flagged elsewhere as outdated for
 current attack-pattern coverage --- see Sect.~\ref{sec:discussion}), a
 local Wazuh \cite{wazuh} SIEM/XDR stack was deployed via Docker Compose
@@ -965,9 +999,36 @@ vulnerability-detector, which would add genuine CVE-tagged alerts, was
 blocked by a single-node Docker inventory-sync limitation and isn't
 counted among the 139.
 
+\subsection{Component ablation study}\label{subsec:ablation}
+
+This subsection addresses RQ4. \texttt{analyse\_alert()} accepts four
+independent per-stage toggles ---
+\texttt{input\_guardrail\_enabled}, \texttt{cve\_guardrail\_enabled},
+\texttt{attack\_guardrail\_enabled}, \texttt{pii\_guardrail\_enabled}
+(all default \texttt{True}, i.e.\ unchanged behavior from before these
+flags existed) --- gated purely at the orchestrator call site, so a
+disabled stage's check function is never called at all rather than
+called-then-discarded, keeping the ablation's latency numbers honest.
+
+\textbf{Status at the time of writing.} A 2-alert $\times$
+6-configuration schema-parity smoke test is complete and passing: every
+configuration, including every guardrail disabled, produces a
+structurally identical report schema (this is also exercised directly by
+\texttt{tests/test\_soc\_agent\_schema\_parity.py}, part of the 158-test
+suite reported in Sect.~\ref{subsec:setup}). The full evaluation --- 6
+configurations across the paper's pooled alert set, reporting per-config
+ungrounded/review/PII/latency numbers and each guardrail's
+uniquely-caught-alert contribution --- was in progress at the time of
+writing and is not yet reported in this draft; see the project roadmap
+and committed, timestamped result files in the repository for current
+status. We report this honestly as ongoing rather than either
+fabricating numbers or silently omitting the subsection RQ4 is meant to
+answer.
+
 \subsection{Cross-source grounding summary}\label{subsec:crosssource}
 
-Sects.~\ref{subsec:cve-bait}--\ref{subsec:wazuh} each report a grounding
+This subsection addresses RQ1, synthesizing every prior grounding source
+into one pooled view. Sects.~\ref{subsec:cve-bait}--\ref{subsec:realworld} each report a grounding
 rate on one alert source in isolation. This section pools them into a
 single cross-source view using only already-reported results --- no new
 alerts or LLM calls
@@ -994,6 +1055,7 @@ anything meaningful even at $n=150$ each.
 
 \subsection{Supporting evaluation: auxiliary guardrails and engineering baselines}\label{subsec:supporting}
 
+None of the four subsections below answer RQ1-RQ4 directly.
 Sects.~\ref{subsec:cve-bait}--\ref{subsec:crosssource} above establish
 and validate this paper's central claim: the CVE/ATT\&CK
 grounding-and-classify pipeline works across two claim types, and the
@@ -1009,7 +1071,8 @@ Sects.~\ref{subsec:cve-bait}--\ref{subsec:crosssource} above.
 
 \subsubsection{Input guardrail comparison}\label{subsubsec:inputguardrailcomparison}
 
-The input guardrail was benchmarked against two maintained open-source
+Supporting evaluation (see Sect.~\ref{subsec:supporting}); not a direct
+answer to RQ1-RQ4. The input guardrail was benchmarked against two maintained open-source
 alternatives --- LLM Guard \cite{llmguard2024} (Protect AI) and
 Pytector --- on a 119-sample held-out set: 53 injection attempts across
 exact-pattern, paraphrase, and novel-strategy categories, including
@@ -1079,7 +1142,7 @@ benchmarking.
 
 \subsubsection{LLM-judge baseline}\label{subsubsec:llmjudge}
 
-As an alternative verification strategy, a judge call is prompted
+Supporting evaluation; not a direct answer to RQ1-RQ4. As an alternative verification strategy, a judge call is prompted
 directly with an (alert evidence, generated report) pair and asked to
 classify citations as grounded/ungrounded, without the deterministic
 pipeline's verdict --- run over a class-balanced calibration set with
@@ -1108,7 +1171,7 @@ per-call cost or rate-limit exposure, no dependence on a hosted API.
 
 \subsubsection{PII redaction guardrail: bait test (Threat T3)}\label{subsubsec:pii-bait}
 
-Unlike Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}'s
+Supporting evaluation; not a direct answer to RQ1-RQ4. Unlike Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}'s
 grounding checks, T3 is a \textit{redaction} threat: does the report
 echo sensitive data present in the raw alert. The guardrail
 (Sect.~\ref{subsec:pii-guardrail}) runs Presidio \cite{presidio2023} and
@@ -1154,7 +1217,7 @@ absorb false positives that happen to land on the right label.
 
 \subsubsection{Concurrency and throughput benchmarks}\label{subsubsec:concurrency}
 
-An original benchmark (1/2/4 workers, 3 repeats looped inside one
+Supporting evaluation; not a direct answer to RQ1-RQ4. An original benchmark (1/2/4 workers, 3 repeats looped inside one
 long-running process) showed threading's full-pipeline throughput
 improving from 1 to 2 workers but collapsing sharply at 4 (0.67
 alerts/sec), consistent with (though not definitively proven to be)
@@ -1269,7 +1332,7 @@ citation-grounding task at all.
 Second, and more consequential: the comparison runs at
 temperature=0.7, because SelfCheckGPT's resampling needs diversity to
 measure anything, while production runs at 0.1
-(Sect.~\ref{subsec:setup}) --- and Sect.~\ref{subsec:realworld}, run at
+(Sect.~\ref{subsec:setup}) --- and Sect.~\ref{subsec:cve-bait}'s CVE pool, run at
 the production temperature on the same style of alert, shows the model
 volunteering a withheld-but-correct CVE 0\% of the time. That's a real
 confound, not a footnote: it's entirely plausible that most of what
@@ -1290,7 +1353,7 @@ temperature=0.7, and that dependency should be read as attached to
 Sect.~\ref{subsec:selfcheckgpt}'s headline number, not to the mechanism
 itself.
 
-\textbf{What the CVE-pool finding (Sect.~\ref{subsec:realworld}) means.}
+\textbf{What the CVE-pool finding (Sect.~\ref{subsec:cve-bait}) means.}
 The 0\%-fabrication / 0\%-spontaneous-citation result is really two
 findings, not one: the pipeline's grounding check isn't the reason the
 model stays silent (there's nothing to ground-check if nothing is
@@ -1307,11 +1370,11 @@ what was tested.
 \item Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar}
   (SelfCheckGPT and its McNemar test) are both complete: the
   deterministic checker is significantly more accurate ($p=0.0118$,
-  $n=56$). Its result also contradicts Sect.~\ref{subsec:realworld}'s
+  $n=56$). Its result also contradicts Sect.~\ref{subsec:cve-bait}'s
   ``never volunteers a withheld CVE'' finding at higher sampling
   temperature (0.7 vs.\ 0.1) --- the same model volunteers a
   withheld-but-correct identifier once sampled at the temperature
-  SelfCheckGPT requires, so Sect.~\ref{subsec:realworld}'s finding
+  SelfCheckGPT requires, so Sect.~\ref{subsec:cve-bait}'s finding
   should be read as holding at production temperature specifically, not
   as a general model property. Sect.~\ref{subsubsec:llmjudge}'s
   LLM-judge baseline now spans same- and cross-model-family
@@ -1431,7 +1494,7 @@ looks correct --- isn't argued architecturally alone.
 Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar} demonstrate it
 directly: at the sampling temperature self-consistency checking
 requires, the model volunteers real, correct-but-uncited identifiers it
-stays silent on at production temperature (Sect.~\ref{subsec:realworld}),
+stays silent on at production temperature (Sect.~\ref{subsec:cve-bait}'s CVE pool),
 and does so consistently enough across independent resamples that a
 SelfCheckGPT-style signal alone cannot tell eighteen of these cases
 apart from a genuinely grounded citation. External grounding can,
@@ -1472,9 +1535,6 @@ altering the central finding above.
 
 \section*{Declarations}
 
-%% TODO: fill in before submission -- placeholders below follow Springer
-%% Nature's required Declarations headings (see the template's user manual).
-
 \begin{itemize}
 \item \textbf{Funding:} Not applicable.
 \item \textbf{Conflict of interest / Competing interests:} The author declares no competing interests.
@@ -1509,14 +1569,16 @@ Section & Script / module \\
 \ref{subsec:output-guardrail}--\ref{subsec:taxonomy} & \texttt{output\_guardrail.py}, \texttt{attack\_grounding.py} \\
 \ref{subsec:pii-guardrail} & \texttt{pii\_guardrail.py} \\
 \ref{subsec:cve-bait} & \texttt{cve\_bait\_alerts.py} \\
+\ref{subsec:cve-bait} (CVE pool, Table~\ref{tab:cvepool}) & \texttt{soc\_integration/cve\_pool.py} \\
 \ref{subsec:attack-bait} & \texttt{attack\_bait\_alerts.py} \\
 \ref{subsec:selfcheckgpt} & \texttt{selfcheckgpt\_test.py} \\
 \ref{subsec:selfcheckgpt} (cross-family, Fig.~\ref{fig:selfcheckgpt}) & \texttt{selfcheckgpt\_test.py} (\texttt{GENERATOR\_MODEL=qwen/qwen3.6-27b}) \\
 \ref{subsec:mcnemar} & \texttt{selfcheckgpt\_significance\_test.py} \\
 \ref{subsec:mcnemar} (cross-family) & \texttt{selfcheckgpt\_significance\_test.py} (\texttt{GENERATOR\_MODEL=qwen/qwen3.6-27b}) \\
 \ref{subsec:relevance} & \texttt{relevance\_classifier\_validation/} \\
-\ref{subsec:realworld} & \texttt{soc\_integration\_test.py}, \texttt{soc\_integration/cve\_pool.py} \\
+\ref{subsec:realworld} (Secure\_SOC\_AI) & \texttt{soc\_integration\_test.py} \\
 \ref{subsec:wazuh} & \texttt{wazuh\_integration\_test.py} \\
+\ref{subsec:ablation} & \texttt{ablation\_smoke\_test.py}, \texttt{ablation\_study.py} \\
 \ref{subsec:crosssource} & \texttt{grounding\_benchmark\_summary.py} \\
 \ref{subsubsec:inputguardrailcomparison} & \texttt{guardrail\_comparison/} \\
 \ref{subsubsec:llmjudge} & \texttt{llm\_judge\_synthetic\_test.py} \\
