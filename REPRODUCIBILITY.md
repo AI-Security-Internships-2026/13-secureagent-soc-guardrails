@@ -12,7 +12,7 @@ than repeated.
 ## 1. Commit & Environment
 
 - **Paper release tag:** `paper-v1.0` (see §8 below)
-- **Commit SHA:** `394553cd0b989e08c983770bd2c12bc37c680939`
+- **Commit SHA:** exact commit hash of `paper-v1.0` — run `git rev-parse paper-v1.0` (a hardcoded hash here would go stale the moment this file itself changes again, since the file's own commit hash depends on its content; the tag is the stable reference)
 - **Date of evaluation runs:** `2026-06-10` – `2026-09-09` (repo's first commit to this document's writing date; see `docs/all_results.md` for the dated, numbered log of every individual experiment)
 - **Operating system:** Native Windows 11 Home, build `26200` (this project has never run under WSL2 — the issue template that requested this file assumed WSL2/Ubuntu, which is incorrect for this repo's actual development environment)
 - **CPU / RAM:** 13th Gen Intel Core i7-1355U · 12 logical cores · 16 GB RAM
@@ -156,6 +156,6 @@ This checklist is honest, not pre-ticked — several items above are genuinely s
 ## 12. Git Tag
 
 ```
-paper-v1.0 -> 394553cd0b989e08c983770bd2c12bc37c680939
+paper-v1.0 -> (run `git rev-parse paper-v1.0` for the exact commit hash)
 ```
 Created locally via `git tag -a paper-v1.0`, working tree clean at the time of tagging. **Not pushed to `origin`** — per the source issue's own instruction, this is held for supervisor review before becoming a public release marker.
