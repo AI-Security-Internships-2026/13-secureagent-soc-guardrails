@@ -2,6 +2,8 @@
 
 > **CNIT/PNTLab Pisa · TECIP · Scuola Superiore Sant'Anna — AI Security Internship 2026**
 
+📘 **Submission release:** See [`REPRODUCIBILITY.md`](./REPRODUCIBILITY.md) for exact `paper-v1.0` metadata, hashes, commands, and integrity checklist.
+
 ---
 
 ## Research Problem

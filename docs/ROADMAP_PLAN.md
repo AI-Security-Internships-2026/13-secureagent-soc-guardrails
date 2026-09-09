@@ -839,7 +839,7 @@ an issue's instructions at face value.
 |---|---|---|
 | 48 | E3 · NVD snapshot mode + SHA-256 manifest (~290 CVE lookups frozen locally) | ✅ **Done**, 2026-09-09. All 5 AC met. Real count is 152 CVEs (not the issue's guessed ~290 — that assumed no source overlap); real NVD rate limit is 5/30s (not the issue's wrong "5/10s"), verified against NVD's own docs before writing the downloader. `docs/all_results.md` #71. |
 | 49 | E4 · Top-level Dockerfile (reproducible runtime, mocked-LLM smoke test) | ✅ **Done**, 2026-09-09. All 4 AC met. Fixed two real bugs the issue's own template didn't anticipate: `requirements-lock.txt` needs Python 3.12 (not the template's 3.11), and torch's default wheel pulls ~2-3GB of unused CUDA libs (fixed via the CPU-only index) plus pytector's DeBERTa model needing a build-time pre-warm to be genuinely offline. `docs/all_results.md` #68-#70. |
-| 50 | E5 · `REPRODUCIBILITY.md` canonical file + `paper-v1.0` git tag | ❌ Not started. Depends on E1 (done), E3, E4, E2 (done) all landing first — 2 of its 4 dependencies are now clear. |
+| 50 | E5 · `REPRODUCIBILITY.md` canonical file + `paper-v1.0` git tag | ✅ **Done**, 2026-09-09. All 8 AC met. Issue's template had multiple wrong specifics (WSL2, Python 3.11, non-existent prompt files, non-existent 479-alert pool) — corrected throughout with real, verified values. `paper-v1.0` tag created locally, not pushed (per issue's own instruction, pending supervisor review). `docs/all_results.md` #72. |
 
 ### M5 — Manuscript Polish (P2)
 
