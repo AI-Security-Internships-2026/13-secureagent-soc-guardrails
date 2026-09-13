@@ -489,6 +489,105 @@ with tab_results:
     soc_cve_pool_results = load_json("soc_integration_cve_pool_results.json")
     wazuh_results = load_json("wazuh_integration_results.json")
 
+    # Added for the paper's central finding + supporting-evaluation sections
+    # (previously computed/reported but never wired into this dashboard).
+    mcnemar_gpt = load_json("selfcheckgpt_vs_deterministic_mcnemar.json")
+    mcnemar_qwen = load_json("selfcheckgpt_vs_deterministic_mcnemar_qwen_qwen3_6_27b.json")
+    selfcheckgpt_qwen_results = load_json("selfcheckgpt_results_qwen_qwen3_6_27b.json")
+    grounding_summary = load_json("grounding_benchmark_summary.json")
+    llm_judge_same = load_json("llm_judge_synthetic_results.json")
+    llm_judge_qwen = load_json("llm_judge_synthetic_results_qwen_qwen3_6_27b.json")
+    guardrail_comparison = load_json("guardrail_comparison.json")
+    guardrail_comparison_sig = load_json("guardrail_comparison_significance.json")
+    fresh_process_results = load_json("fresh_process_benchmark_results.json")
+    relevance_classifier_results = None
+    _rc_path = "experiments/evaluation/relevance_classifier_validation/relevance_classifier_validation_results.json"
+    if os.path.exists(_rc_path):
+        with open(_rc_path) as f:
+            relevance_classifier_results = json.load(f)
+
+    st.header("Central finding: SelfCheckGPT vs. deterministic grounding")
+    st.caption(
+        "The paper's one statistically-confirmed result: does the deterministic "
+        "grounding checker catch citations that a self-consistency-only signal "
+        "(SelfCheckGPT — same claim, resampled 3x, flagged unstable if it "
+        "disagrees with itself) misses? Tested on the identical 60-alert CVE "
+        "pool, on two independent model families, so this isn't a one-model "
+        "artifact."
+    )
+
+    fig1_path = "docs/paper/figures/fig_selfcheckgpt_by_class.png"
+    if os.path.exists(fig1_path):
+        st.image(fig1_path, use_container_width=False, width=650)
+
+    mc1, mc2 = st.columns(2)
+    with mc1:
+        st.markdown("**`openai/gpt-oss-20b` (report-generation model)**")
+        if mcnemar_gpt is not None:
+            ct = mcnemar_gpt["contingency"]
+            st.dataframe(
+                pd.DataFrame([ct]).T.rename(columns={0: "count"}),
+                use_container_width=True,
+            )
+            sig = "significant" if mcnemar_gpt["significant_at_0.05"] else "not significant"
+            st.metric("McNemar p-value", f"{mcnemar_gpt['p_value']:.4f}", f"{sig} at α=0.05")
+        else:
+            st.info("Run: python -m experiments.evaluation.selfcheckgpt_significance_test")
+    with mc2:
+        st.markdown("**`qwen/qwen3.6-27b` (cross-family replication)**")
+        if mcnemar_qwen is not None:
+            ct = mcnemar_qwen["contingency"]
+            st.dataframe(
+                pd.DataFrame([ct]).T.rename(columns={0: "count"}),
+                use_container_width=True,
+            )
+            sig = "significant" if mcnemar_qwen["significant_at_0.05"] else "not significant"
+            st.metric("McNemar p-value", f"{mcnemar_qwen['p_value']:.2e}", f"{sig} at α=0.05")
+            st.caption(
+                "SelfCheckGPT-only-correct = 0 — it never once beat the "
+                "deterministic checker on a qwen-generated report."
+            )
+        else:
+            st.info(
+                "Run: GENERATOR_MODEL=qwen/qwen3.6-27b python -m "
+                "experiments.evaluation.selfcheckgpt_significance_test"
+            )
+
+    if selfcheckgpt_qwen_results is not None and selfcheckgpt_qwen_results.get("run_complete"):
+        st.caption(
+            f"qwen SelfCheckGPT baseline: recall {selfcheckgpt_qwen_results['recall']:.1%} "
+            f"(vs. {selfcheckgpt_results['recall']:.1%} for gpt-oss-20b, if available above) — "
+            f"qwen recalls a withheld-but-correct CVE *more* consistently across resamples, "
+            f"so the self-consistency blind spot is stronger, not weaker, on the second model."
+        )
+
+    st.divider()
+
+    st.subheader("Cross-source grounding summary")
+    st.caption(
+        "Pools every already-run grounding source (bait tests + real/third-party data) "
+        "into one view — no new alerts or LLM calls, pure aggregation."
+    )
+    if grounding_summary is not None:
+        pooled = grounding_summary["pooled"]
+        gs1, gs2, gs3 = st.columns(3)
+        gs1.metric(
+            "CVE-checker sources (pooled)",
+            f"{pooled['cve_sources_pooled_ungrounded_count']}/{pooled['cve_sources_pooled_n']}",
+            f"{pooled['cve_sources_pooled_ungrounded_rate']:.2%}",
+        )
+        gs2.metric(
+            "ATT&CK-checker sources (pooled)",
+            f"{pooled['attack_sources_pooled_ungrounded_count']}/{pooled['attack_sources_pooled_n']}",
+            f"{pooled['attack_sources_pooled_ungrounded_rate']:.2%}",
+        )
+        gs3.metric("Total alerts pooled", pooled["total_alerts_across_all_sources"])
+        st.dataframe(pd.DataFrame(grounding_summary["sources"]), hide_index=True, use_container_width=True)
+    else:
+        st.info("Run: python -m experiments.evaluation.grounding_benchmark_summary")
+
+    st.divider()
+
     st.subheader("Summary")
 
     c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(8)
@@ -795,6 +894,134 @@ with tab_results:
     else:
         st.info("No results found yet — run: python -m experiments.evaluation.wazuh_integration_test "
                 "(requires the local Wazuh Docker stack to be running)")
+
+    st.divider()
+
+    st.header("Supporting evaluation")
+    st.caption(
+        "Validates the pipeline's other layers and an alternative verification "
+        "strategy — none of these carry equal weight to the central finding above, "
+        "reported here for completeness."
+    )
+
+    st.subheader("LLM-judge baseline (alternative verification strategy)")
+    st.caption(
+        "Instead of a deterministic checker, ask an LLM to directly judge whether "
+        "a citation is grounded. Tested with two judges: the same model that "
+        "generates reports (same-family) and a genuinely different, "
+        "independently-hosted model (cross-family) — rules out the judge simply "
+        "favoring its own model family's output."
+    )
+    lj1, lj2 = st.columns(2)
+    with lj1:
+        st.markdown("**Same-family judge (`openai/gpt-oss-20b`)**")
+        if llm_judge_same is not None:
+            o = llm_judge_same["overall"]
+            st.metric(
+                f"Accuracy (n={llm_judge_same['n_completed']}/{llm_judge_same['n_samples']})",
+                f"{o['accuracy']:.1%}",
+                f"precision {o['precision']:.1%} / recall {o['recall']:.1%}",
+            )
+        else:
+            st.info("Run: python -m experiments.evaluation.llm_judge_synthetic_test")
+    with lj2:
+        st.markdown("**Cross-family judge (`qwen/qwen3.6-27b`)**")
+        if llm_judge_qwen is not None:
+            o = llm_judge_qwen["overall"]
+            complete = "complete" if llm_judge_qwen.get("run_complete") else "in progress"
+            st.metric(
+                f"Accuracy (n={llm_judge_qwen['n_completed']}/{llm_judge_qwen['n_samples']}, {complete})",
+                f"{o['accuracy']:.1%}",
+                f"precision {o['precision']:.1%} / recall {o['recall']:.1%}",
+            )
+        else:
+            st.info(
+                "Run: LLM_JUDGE_MODEL=qwen/qwen3.6-27b python -m "
+                "experiments.evaluation.llm_judge_synthetic_test"
+            )
+
+    st.divider()
+
+    st.subheader("Relevance classifier validation")
+    st.caption(
+        "The REAL_AND_PLAUSIBLE/REAL_BUT_IRRELEVANT split rests on a topical-overlap "
+        "score — validated here against independent human judgment (80 labeled "
+        "alert/CVE pairs) rather than left as an unchecked heuristic."
+    )
+    if relevance_classifier_results is not None:
+        r = relevance_classifier_results
+        rc1, rc2, rc3, rc4 = st.columns(4)
+        rc1.metric("Accuracy", f"{r['accuracy']:.1%}", f"n={r['n_labeled']}")
+        rc2.metric("Precision", f"{r['precision']:.1%}")
+        rc3.metric("Recall", f"{r['recall']:.1%}")
+        rc4.metric("F1", f"{r['f1']:.1%}")
+        cm = r["confusion_matrix"]
+        st.caption(f"TP={cm['tp']}, FP={cm['fp']}, TN={cm['tn']}, FN={cm['fn']} — all 6 disagreements "
+                   f"cluster at the 0.15 decision threshold, a boundary-case failure mode not general unreliability.")
+    else:
+        st.info("Run: experiments/evaluation/relevance_classifier_validation/score_labels.py")
+
+    st.divider()
+
+    st.subheader("Input guardrail comparison")
+    st.caption(
+        "Our hybrid (deterministic pattern list + Pytector fallback) vs. two "
+        "maintained open-source alternatives, on a 119-sample held-out set."
+    )
+    if guardrail_comparison is not None:
+        impl_rows = []
+        for name, impl in guardrail_comparison["implementations"].items():
+            impl_rows.append({
+                "implementation": name,
+                "precision": impl["precision"],
+                "recall": impl["recall"],
+                "f1": impl["f1"],
+                "false_positives": impl["confusion_matrix"]["fp"],
+                "median_latency_ms": impl.get("median_latency_ms"),
+            })
+        st.dataframe(pd.DataFrame(impl_rows), hide_index=True, use_container_width=True)
+    else:
+        st.info("Run: python -m experiments.evaluation.guardrail_comparison.run_comparison")
+
+    if guardrail_comparison_sig is not None:
+        st.markdown("**McNemar significance, raw vs. Holm-Bonferroni corrected "
+                     f"(family size {guardrail_comparison_sig['comparisons'].__len__()})**")
+        sig_rows = []
+        for c in guardrail_comparison_sig["comparisons"]:
+            sig_rows.append({
+                "comparison": f"{c['a']} vs. {c['b']}",
+                "raw_p": round(c["p_value"], 4),
+                "sig_raw": c["significant_at_0.05"],
+                "holm_bonferroni_p": round(c["p_value_holm_bonferroni"], 4),
+                "sig_corrected": c["significant_at_0.05_holm_bonferroni"],
+            })
+        st.dataframe(pd.DataFrame(sig_rows), hide_index=True, use_container_width=True)
+        st.caption(
+            "Only baseline-vs-hybrid survives correction — the other raw-significant "
+            "results sat close to the α=0.05 line and don't survive being tested as a family."
+        )
+    else:
+        st.info("Run: python -m experiments.evaluation.guardrail_comparison.significance_test")
+
+    st.divider()
+
+    st.subheader("Concurrency benchmark (fresh-process repeats, redone)")
+    st.caption(
+        "Redone with each repeat as a genuinely independent subprocess (not looped "
+        "in one long-running process) plus a mocked-LLM variant to separate guardrail "
+        "overhead from live Groq network variance. Found and fixed a real unlocked "
+        "race condition in the pytector model loader along the way."
+    )
+    fig2_path = "docs/paper/figures/fig_concurrency_throughput.png"
+    if os.path.exists(fig2_path):
+        st.image(fig2_path, use_container_width=True)
+    if fresh_process_results is not None:
+        with st.expander("Raw fresh-process benchmark tables"):
+            for key, rows in fresh_process_results.items():
+                st.markdown(f"**{key}**")
+                st.dataframe(pd.DataFrame(flatten_benchmark_rows(rows)), hide_index=True, use_container_width=True)
+    else:
+        st.info("Run: python -m experiments.evaluation.fresh_process_benchmark")
 
     st.divider()
 

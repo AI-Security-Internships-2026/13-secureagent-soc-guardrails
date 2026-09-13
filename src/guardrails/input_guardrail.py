@@ -1,3 +1,5 @@
+import threading
+
 INJECTION_PATTERNS = [
     "ignore previous instructions",
     "ignore all previous instructions",
@@ -46,16 +48,27 @@ def check_injection(text: str) -> bool:
 
 
 _pytector_detector = None
+_pytector_lock = threading.Lock()
 
 
 def _get_pytector_detector():
     # Lazy singleton, same pattern as
     # experiments/evaluation/guardrail_comparison/adapters.py -- avoids
     # loading the DeBERTa model until it's actually needed, and only once.
+    # Double-checked locking: without the lock, two threads racing on the
+    # very first concurrent call both see `is None` and both start
+    # constructing PromptInjectionDetector (loading the torch/transformers
+    # model) at once, corrupting shared torch global state -- found via
+    # experiments/evaluation/threading_benchmark.py's fresh-process
+    # single-run mode, which (unlike the original benchmark's single
+    # long-running process) has no earlier single-threaded call to
+    # accidentally warm the singleton safely before concurrent access.
     global _pytector_detector
     if _pytector_detector is None:
-        from pytector import PromptInjectionDetector
-        _pytector_detector = PromptInjectionDetector(model_name_or_url="deberta")
+        with _pytector_lock:
+            if _pytector_detector is None:
+                from pytector import PromptInjectionDetector
+                _pytector_detector = PromptInjectionDetector(model_name_or_url="deberta")
     return _pytector_detector
 
 

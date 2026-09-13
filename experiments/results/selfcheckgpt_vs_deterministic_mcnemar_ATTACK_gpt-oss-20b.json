@@ -1,0 +1,22 @@
+{
+  "task": "McNemar's test: deterministic checker vs. SelfCheckGPT, paired on the same ATT&CK alerts",
+  "citation_family": "ATT&CK",
+  "model": "openai/gpt-oss-20b",
+  "n_samples": 60,
+  "n_excluded_declined_every_sample": 0,
+  "contingency": {
+    "both_correct": 32,
+    "deterministic_only_correct": 28,
+    "selfcheckgpt_only_correct": 0,
+    "both_incorrect": 0
+  },
+  "discordant_pairs": 28,
+  "method": "chi_square_continuity_corrected",
+  "statistic": 26.035714285714285,
+  "p_value": 3.3515963071550914e-07,
+  "significant_at_0.05": true,
+  "cohens_g": 1.0,
+  "odds_ratio_point": Infinity,
+  "odds_ratio_95ci_low": 7.2889,
+  "odds_ratio_95ci_high": Infinity
+}

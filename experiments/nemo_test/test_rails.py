@@ -1,6 +1,19 @@
 import asyncio
+import pytest
+
+nemoguardrails = pytest.importorskip(
+    "nemoguardrails",
+    reason="nemoguardrails is not a project dependency (see requirements.txt / issue E1) -- "
+           "this abandoned early-week experiment is not part of the shipped pipeline.",
+)
 from nemoguardrails import RailsConfig, LLMRails
 
+
+@pytest.mark.skip(
+    reason="Abandoned NeMo Guardrails baseline; dropped in favor of the deterministic-first "
+           "input guardrail (src/guardrails/input_guardrail.py). Not part of the production "
+           "pipeline -- kept for historical record only."
+)
 async def test():
     config = RailsConfig.from_path("experiments/nemo_test")
     rails = LLMRails(config)

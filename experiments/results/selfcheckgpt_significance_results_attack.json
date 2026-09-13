@@ -1,0 +1,676 @@
+{
+  "task": "Deterministic ATT&CK checker run at SelfCheckGPT's sampling temperature, for a paired McNemar test",
+  "model": "openai/gpt-oss-20b",
+  "sampling_temperature": 0.7,
+  "n_total": 60,
+  "n_completed": 60,
+  "run_complete": true,
+  "results": [
+    {
+      "alert_id": "ATTACKPOOL-003",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-003\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The EDR rule detected 14 consecutive authentication failures for the account 'svc-backup' originating from a single source within 90 seconds, indicating a brute\u2011force password guessing attempt. No account lockout was triggered, suggesting the attacker may be probing for weak credentials or attempting to bypass lockout policies.\",\"threat_type\":\"Password Guessing (Brute Force)\",\"recommended_action\":\"Immediately lock or disable the affected account, block the source IP (203.0.113.160), enable multi\u2011factor authentication for privileged accounts, and conduct a forensic review of the account\u2019s activity logs to determine if credentials were compromised. Consider implementing stricter account lockout thresholds and monitoring for similar patterns across the environment.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly cites T1110.001 and reports multiple failed logons without lockout, a classic brute\u2011force indicator. The short time window and high attempt count elevate the threat to critical. The recommended actions align with standard incident response procedures for credential guessing attacks.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-004",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-004\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The EDR rule flagged 14 consecutive failed logon attempts for the privileged account 'svc-backup' from a single source within 90 seconds, indicating a password guessing brute\u2011force attempt. The lack of an account lockout suggests weak or disabled lockout policies, increasing the risk of credential compromise.\",\"threat_type\":\"Password Guessing (Brute Force)\",\"recommended_action\":\"Immediately block the source IP (203.0.113.170), enforce an account lockout policy for 'svc-backup', enable MFA for privileged accounts, and conduct a thorough audit of related authentication logs for signs of lateral movement or credential theft. Additionally, review and strengthen password complexity and rotation policies.\",\"confidence_score\":0.95,\"reasoning\":\"The alert matches MITRE ATT&CK T1110.001 with repeated authentication failures and no lockout, indicating a high\u2011severity brute\u2011force attack targeting a privileged account.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-007",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-007\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An NTLM authentication event was detected that matches the Pass the Hash technique (T1550.002). The EDR flagged a logon type 3 using a replayed hash on SMB (port 445), indicating an attacker may be attempting lateral movement or credential reuse.\",\"threat_type\":\"Pass the Hash (NTLM authentication hijacking)\",\"recommended_action\":\"Immediately isolate the source IP or affected host from the network, perform a full credential audit, enable SMB signing and enforce strong password policies, run a credential dumping scan on the target system, and investigate any lateral movement activity. Notify incident response team and consider applying the latest Windows security updates.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly references T1550.002 and provides a payload snippet confirming a hash replay over SMB, which is a definitive indicator of Pass the Hash activity. The lack of user and host information suggests an unknown or compromised account, raising the likelihood of a high-impact attack. Therefore, a high confidence score is justified.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-008",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-008\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An NTLM authentication event on TCP port 445 indicates an attempt to replay a stolen NTLM hash (Pass the Hash). The EDR flagged a logon type 3 without any keyboard input, suggesting a remote credential replay likely for lateral movement within the network.\",\"threat_type\":\"Pass the Hash\",\"recommended_action\":\"Immediately isolate the affected host, investigate the source IP 203.0.113.240 for malicious activity, enforce multi\u2011factor authentication, reset the compromised account passwords, block SMB traffic from the source, and monitor for further NTLM hash replay attempts.\",\"confidence_score\":0.95,\"reasoning\":\"The event matches MITRE T1550.002 with clear indicators of a hash\u2011replay attack, and the severity is marked CRITICAL, warranting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-011",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-011\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"A new scheduled task named 'WinUpdateCheck' was created to run 'C:\\\\Users\\\\Public\\\\upd.exe' every 5 minutes, indicating an attempt to establish persistence on the target host. The task was flagged by Sysmon as matching MITRE ATT&CK T1053.005. No user or hostname was identified, raising suspicion of a stealthy or automated installation.\",\n    \"threat_type\": \"Persistence \u2013 Scheduled Task\",\n    \"recommended_action\": \"Immediately locate and delete the 'WinUpdateCheck' task, quarantine or remove 'upd.exe', identify the user context that created the task, and perform a full host integrity check for other malicious artifacts or lateral movement indicators.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The Sysmon correlation and explicit reference to T1053.005 provide strong evidence of a persistence mechanism. The lack of user and hostname details, combined with the creation of a frequent task, suggests a potential compromise. The critical severity matches the high impact of persistent malicious activity.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-012",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-012\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker created a scheduled task named \\\"WinUpdateCheck\\\" that runs a program located at C:\\\\Users\\\\Public\\\\upd.exe every five minutes. This indicates an attempt to establish persistence via Windows Task Scheduler (MITRE T1053.005). The task creation was flagged by Sysmon, suggesting a malicious or unauthorized activity.\",\"threat_type\":\"Persistence: Scheduled Task\",\"recommended_action\":\"Immediately investigate the scheduled task on the affected host, verify the legitimacy of upd.exe, quarantine or delete the file if malicious, and remove or disable the task. Conduct a thorough host forensics search for related artifacts and monitor for additional persistence mechanisms.\",\"confidence_score\":0.95,\"reasoning\":\"The alert contains a clear Sysmon correlation to T1053.005, a known persistence technique. The task is scheduled to run frequently, indicating active persistence. No conflicting evidence is present, giving high confidence in the assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-015",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1086",
+      "is_revoked_id": true,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-015\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An obfuscated PowerShell script was executed by WINWORD.EXE on the target system, bypassing AMSI and Sysmon detection. The execution used the -nop and -w hidden flags with a base64\u2011encoded payload, indicating a likely malicious activity aimed at executing hidden code on the host.\",\"threat_type\":\"Malicious PowerShell Execution\",\"recommended_action\":\"Immediately isolate the affected host from the network, collect memory and disk evidence, block the source IP 198.51.100.60, and conduct a full forensic analysis to identify the payload and any persistence mechanisms.\",\"confidence_score\":0.95,\"reasoning\":\"The alert includes AMSI/Sysmon correlation, obfuscated PowerShell execution, and the use of a hidden window, which are strong indicators of a malicious PowerShell-based attack. The source IP is external and the activity is flagged as CRITICAL, supporting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-016",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1086",
+      "is_revoked_id": true,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-016\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An obfuscated PowerShell payload was executed via WINWORD.EXE, bypassing AMSI and Sysmon detection. The command uses common PowerShell evasion flags (-nop, -w hidden, -enc) and was triggered by an unknown user on an unknown host, indicating a likely malicious compromise. The activity aligns with the MITRE ATT&CK T1086 technique and suggests a potential persistence or command\u2011and\u2011control operation.\",\n    \"threat_type\": \"Execution: PowerShell\",\n    \"recommended_action\": \"Immediately isolate the affected host from the network, perform a full endpoint forensic analysis, identify the base64 payload, and search for related persistence mechanisms. Deploy updated AMSI bypass detection rules, and apply the latest PowerShell hardening policies. Notify incident response and consider blocking the source IP (198.51.100.70) while monitoring for further activity.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The alert shows classic signs of an AMSI bypass with obfuscated PowerShell execution, a high\u2011impact technique used by advanced threat actors. The lack of user and host context, combined with the CRITICAL severity rating, strongly suggests a malicious compromise. The evidence aligns with known execution tactics, warranting a high confidence assessment.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-019",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1077",
+      "is_revoked_id": true,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-019\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates a write operation to the ADMIN$ share on a Windows workstation, followed by an attempt to create a service using sc.exe \u2013 a classic lateral\u2011movement technique (T1077). The activity originates from an internal IP (10.0.4.12) with no user or hostname identified, suggesting a compromised or malicious insider account.\",\"threat_type\":\"Lateral Movement via SMB Admin Shares\",\"recommended_action\":\"Immediately isolate the affected host (10.0.23.51) from the network, block SMB traffic to ADMIN$ shares, and perform a full forensic analysis of the workstation. Investigate the source IP (10.0.4.12) for compromise, check for other lateral\u2011movement indicators, and apply necessary patches or access controls.\",\"confidence_score\":0.9,\"reasoning\":\"The EDR rule matched a known SMB/Windows Admin Shares technique, the payload shows a write to ADMIN$ and a service creation command \u2013 both high\u2011impact indicators. Lack of user context and the critical severity level support a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-020",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1077",
+      "is_revoked_id": true,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-020\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker is attempting lateral movement within the network by writing a malicious executable to the ADMIN$ share of a target workstation and creating a new service via sc.exe. This activity matches the known SMB/Windows Admin Shares technique (T1077).\",\"threat_type\":\"SMB Admin Share Lateral Movement\",\"recommended_action\":\"Immediately isolate the affected host(s), block outbound SMB traffic on port 445 to internal IPs, conduct a full forensic investigation of the target machine, identify and quarantine the uploaded executable, and verify that no persistence mechanisms remain. Additionally, update firewall rules to restrict ADMIN$ access and review group policy settings for SMB permissions.\",\"confidence_score\":0.95,\"reasoning\":\"The EDR rule triggered on a write to the ADMIN$ share followed by a service creation command, a classic pattern for T1077. The lack of user or file hash data does not diminish the high confidence in the lateral movement intent, as the sequence of actions is definitive for this technique.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-023",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1076",
+      "is_revoked_id": true,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-023\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An anomalous RDP session was detected from IP 198.51.100.140 to internal host 10.0.27.91 using account svc-monitor, which has no prior interactive logon history. This indicates a likely unauthorized remote access attempt or lateral movement within the network.\",\"threat_type\":\"Remote Desktop Protocol Exploitation / Lateral Movement\",\"recommended_action\":\"Immediately block the source IP, isolate the target host, investigate the svc-monitor account for compromise, review RDP logs for additional sessions, and enforce multi\u2011factor authentication for remote access. Conduct a full forensic analysis of the host and surrounding network to identify potential lateral movement.\",\"confidence_score\":0.92,\"reasoning\":\"The alert flags a T1076 RDP logon with an account lacking historical usage, implying suspicious activity. The presence of the RDP port and the lack of prior logon history for the service account strongly suggest an unauthorized session, warranting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-024",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1076",
+      "is_revoked_id": true,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-024\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An anomalous RDP session was detected from IP 198.51.100.150 to internal host 10.0.28.101 on port 3389. The session used the account 'svc-monitor', which has no recorded interactive\u2011logon history, indicating a likely unauthorized or compromised credential.\",\n    \"threat_type\": \"Remote Desktop Protocol (T1076) \u2013 Unauthorized Remote Access\",\n    \"recommended_action\": \"Immediately isolate the source IP, investigate the 'svc-monitor' account for compromise or misuse, review all RDP logs for related activity, enforce MFA for RDP, and consider blocking RDP from external networks until verification is complete.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The SIEM rule flagged a known RDP technique with no prior logon history for the account, a strong indicator of suspicious activity. The critical severity and lack of authentication history support a high confidence assessment.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-027",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-027\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An unknown host is sending periodic HTTPS beacon traffic every ~60 seconds to a newly\u2011registered domain, indicating an established command\u2011and\u2011control channel. The JA3 fingerprint matches a known C2 framework, confirming the use of web protocols for remote control.\",\"threat_type\":\"Command and Control (C&C) via Web Protocols\",\"recommended_action\":\"Immediately block outbound HTTPS to the newly\u2011registered domain from the source IP 198.51.100.180, isolate the affected host, conduct host\u2011based forensic analysis to identify the malware, and update internal threat\u2011intelligence feeds with the JA3 fingerprint and domain information.\",\"confidence_score\":0.95,\"reasoning\":\"The alert references T1071.001, a known C&C technique, and provides a JA3 fingerprint that matches a recognized C2 framework. The consistent beacon interval and HTTPS usage strongly suggest malicious activity, warranting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-028",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-028\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates a beaconing activity over HTTPS every ~60 seconds to a newly registered domain, using a JA3 fingerprint linked to a known C2 framework. This is characteristic of a command\u2011and\u2011control channel established via web protocols.\",\"threat_type\":\"Command and Control (C2) via Web Protocols\",\"recommended_action\":\"Immediately isolate the affected host, block outbound traffic to the identified domain and any related IPs, conduct a full forensic analysis of the host, and review network logs for additional beaconing activity.\",\"confidence_score\":0.95,\"reasoning\":\"The alert explicitly matches MITRE T1071.001 with consistent timing, HTTPS transport, and a known C2 JA3 fingerprint, indicating a high\u2011confidence C2 operation.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-031",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-031\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"Massive file rename to .locked25 and ransom note dropped across multiple shares indicates a ransomware infection that is encrypting or locking data for extortion.\",\n    \"threat_type\": \"Ransomware\",\n    \"recommended_action\": \"Immediately isolate the affected hosts and shares to prevent further spread, preserve volatile and disk evidence, identify the ransomware strain via hash or file names, apply known mitigations (e.g., block known malicious IPs), and coordinate with incident response to contain, eradicate, and restore from backups.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The alert matches MITRE ATT&CK T1486 with clear indicators (mass file rename, ransom note). The severity level and rapid spread across shares justify a high confidence in a ransomware event.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-032",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-032\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"Massive file rename activity was detected, with over 14,200 files across six shares renamed to .locked25 in just four minutes, accompanied by ransom notes dropped in each directory. This pattern aligns with ransomware behavior targeting data for impact. The source IP 203.0.113.150 is likely the attacker\u2019s command and control point.\",\"threat_type\":\"Ransomware\",\"recommended_action\":\"Immediately isolate the affected shares and hosts from the network to prevent further spread, preserve volatile memory and disk images for forensic analysis, block the attacker IP (203.0.113.150) at the firewall, and initiate a backup restoration plan if backups are available. Notify incident response and legal teams.\",\"confidence_score\":0.95,\"reasoning\":\"The alert matches the MITRE T1486 technique and exhibits classic ransomware indicators: rapid mass file renaming, ransom notes, and no known legitimate user context. The severity field in the alert is CRITICAL, reinforcing the high confidence in the assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-035",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-035\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An unknown entity from IP 203.0.113.180 has executed commands to clear Windows Security and System event logs and then deleted its own binary. This indicates a deliberate attempt to erase forensic evidence and remove the malicious payload from the target system.\",\n    \"threat_type\": \"Defense Evasion \u2013 Log Clearing / File Deletion\",\n    \"recommended_action\": \"Immediately isolate the affected host (10.0.24.61) from the network, preserve volatile memory and disk images for forensic analysis, block the source IP 203.0.113.180 at the perimeter, investigate the execution path for persistence mechanisms, and restore any critical logs from backups if available.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"The alert explicitly cites T1070.004 (File Deletion) and shows typical log\u2011clearing commands. The severity is marked CRITICAL and the behavior is consistent with advanced adversary tactics to erase evidence.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-036",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-036\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates that an unknown source executed Windows Event Log clearing commands followed by self\u2011deletion of a malicious binary. This behavior aligns with the MITRE ATT&CK technique T1070.004 (File Deletion) used to erase forensic evidence and avoid detection.\",\"threat_type\":\"Log Clearing & File Deletion\",\"recommended_action\":\"Immediately isolate the affected host, preserve volatile memory, conduct a forensic analysis of the system state, verify if persistence mechanisms exist, and restore critical logs from backups. Coordinate with incident response to investigate the origin of the command execution.\",\"confidence_score\":0.92,\"reasoning\":\"The presence of explicit wevtutil commands to clear Security and System logs combined with a self\u2011deletion cmd line strongly suggests a targeted effort to remove traces. The alert\u2019s severity is marked CRITICAL and the activity matches a known destructive technique, supporting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-039",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-039\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An unsigned binary on the target host performed an LSASS memory read, pulling approximately 40\u202fMB of process memory via OpenProcess and ReadProcessMemory calls. This is a classic credential\u2011dumping activity matching the MITRE ATT&CK T1003.001 technique, indicating an attempt to exfiltrate user credentials from memory.\",\"threat_type\":\"Credential Dumping\",\"recommended_action\":\"Immediately isolate the affected host from the network, capture a full memory dump for forensic analysis, investigate the unsigned binary (check file hash, origin, and persistence mechanisms), block the source IP (203.0.113.250) at the perimeter, and run a comprehensive credential\u2011detection scan across the environment.\",\"confidence_score\":0.95,\"reasoning\":\"The event matches the T1003.001 technique with a large memory read from lsass.exe, a known indicator of credential dumping. The source IP is external and the binary is unsigned, raising a high\u2011confidence flag for malicious activity. The severity is marked CRITICAL, supporting a high confidence score.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-040",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-040\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An unsigned binary performed a large LSASS memory read, indicating an attempt to dump credentials from memory. The operation matches MITRE ATT&CK T1003.001 and is flagged by EDR as a critical credential\u2011access event.\",\"threat_type\":\"Credential Dumping\",\"recommended_action\":\"Isolate the host, terminate the suspicious process, run a full memory forensic analysis, investigate for persistence or lateral movement, block the unsigned binary, and update detection rules to prevent future LSASS reads.\",\"confidence_score\":0.95,\"reasoning\":\"The event matches the LSASS Memory technique (T1003.001), involves a large memory read via OpenProcess/ReadProcessMemory, and originates from an unsigned binary\u2014typical indicators of credential dumping. The severity is set to CRITICAL due to the potential for credential compromise.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-043",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-043\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"A system executed an unattended curl.exe command to download a payload from an external IP, with no browser or known user context. The transfer matches the ATT&CK technique T1105 (Ingress Tool Transfer), indicating potential remote tool acquisition. The activity originates from an unknown host, raising immediate concern for a possible compromise.\",\n    \"threat_type\": \"Ingress Tool Transfer\",\n    \"recommended_action\": \"Isolate the affected host, perform a forensic scan for malicious binaries, block the source IP 203.0.113.90, and investigate any persistence mechanisms. Also verify network logs for related outbound activity.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The alert includes a clear curl.exe command downloading a file from an external address, matching the known T1105 technique. No user or browser process is linked, suggesting automated or malicious execution. The absence of a file hash but presence of a suspicious download provides strong evidence of an intrusion attempt.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-044",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-044\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A remote attacker used curl.exe to download a binary from an external IP to a target machine, bypassing typical browser processes and indicating a stealthy tool transfer. The activity matches MITRE T1105 (Ingress Tool Transfer) and suggests the host may be compromised with a malicious payload.\",\"threat_type\":\"Ingress Tool Transfer\",\"recommended_action\":\"Isolate the affected host, perform a forensic analysis to confirm execution of p.exe, collect memory and disk evidence, block the external IP 203.0.113.90 at the firewall, and investigate any persistence mechanisms. Update endpoint protection and patch any known vulnerabilities.\",\"confidence_score\":0.95,\"reasoning\":\"The log shows a curl download over HTTP from an external source with no browser parent chain, matching the T1105 technique. The absence of a user context and unknown hostname further indicates suspicious activity. The severity is set to CRITICAL due to the potential for immediate compromise.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-047",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-047\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An off\u2011hours interactive logon to the domain account svc-sql was detected from a previously unseen workstation (WKSTN-206), followed immediately by a domain group enumeration command. The activity matches MITRE ATT&CK T1078.002 (Domain Accounts) and indicates potential credential abuse or lateral movement. This pattern suggests an attacker may have compromised svc-sql credentials to pivot within the domain.\",\"threat_type\":\"Domain Account Abuse\",\"recommended_action\":\"Isolate WKSTN-206 from the network, conduct a forensic review of its system logs and memory, verify the integrity of svc-sql credentials, and perform a domain-wide audit for unauthorized group membership changes. If suspicious, reset svc-sql password and enable MFA for all domain accounts.\",\"confidence_score\":0.92,\"reasoning\":\"The alert reports an anomalous logon outside normal business hours, immediately followed by a group enumeration command\u2014both classic indicators of domain account abuse. The UEBA correlation and reference to T1078.002 support this assessment. No additional data contradicts the hypothesis, yielding high confidence.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-048",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-048\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An off\u2011hours interactive logon of a domain service account (svc-sql) from a previously unseen workstation, followed by domain group enumeration, indicates likely abuse of domain credentials for lateral movement or reconnaissance. The activity matches MITRE ATT&CK T1078.002 (Valid Accounts).\",\n    \"threat_type\": \"Domain Account Abuse / Credential Abuse\",\n    \"recommended_action\": \"Immediately isolate WKSTN-206, verify the legitimacy of the svc-sql login, review domain controller and event logs for related activity, reset the svc-sql account credentials, enforce MFA for service accounts, and conduct a full host forensic analysis.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"UEBA flagged off\u2011hours activity, the logon and subsequent enumeration directly map to T1078.002, and the presence of a first\u2011seen host with domain account usage strongly suggests malicious credential exploitation.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-051",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-051\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The EDR system detected a command that deletes all shadow copies and disables Windows recovery, a classic indicator of ransomware attempting to prevent data restoration. This activity matches MITRE ATT&CK T1490 (Inhibit System Recovery).\",\"threat_type\":\"Ransomware\",\"recommended_action\":\"Immediately isolate the affected host (10.0.25.71) from the network, block the source IP (198.51.100.120), conduct a full forensic analysis of the system, recover data from backups, and verify that shadow copies and recovery options are restored. Apply patches and update anti\u2011malware signatures to block similar commands.\",\"confidence_score\":0.95,\"reasoning\":\"The EDR flagged a known ransomware technique (T1490) with explicit commands to delete VSS snapshots and disable recovery. The severity level is CRITICAL and the presence of this command strongly indicates an active ransomware threat.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-052",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-052\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The EDR system detected an attempt to delete all shadow copies and disable the Windows recovery feature on the target host, indicating an attempt to prevent system recovery typically used by ransomware actors. The command sequence matches the MITRE ATT&CK technique T1490 (Inhibit System Recovery). This is a high\u2011impact activity that could lock the victim out of recovery options and facilitate data encryption or deletion.\",\"threat_type\":\"Ransomware\",\"recommended_action\":\"Immediately isolate the affected host from the network, perform a forensic disk image, verify the integrity of backups, and investigate for additional malicious processes or persistence mechanisms. Apply the latest security patches and consider restoring the system from a known good backup if encryption is suspected.\",\"confidence_score\":0.95,\"reasoning\":\"The payload directly contains the T1490 technique and the EDR flagged it as a critical rule. Shadow copy deletion and disabling recovery are well\u2011known ransomware tactics, giving high confidence in the assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-055",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\n    \"alert_id\": \"ATTACKPOOL-055\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"A suspicious rundll32.exe process was spawned from Outlook.exe, loading a DLL from a user download folder. This pattern matches the known T1218.011 technique for executing arbitrary code via rundll32, indicating a potential malicious payload execution. The source IP is external and the destination is an internal host, suggesting a remote compromise attempt.\",\n    \"threat_type\": \"Malicious DLL execution via Rundll32\",\n    \"recommended_action\": \"Immediately isolate the affected host from the network, perform a full forensic analysis of the DLL file and its parent process, block rundll32.exe usage for non-system processes, and update endpoint protection signatures. Review email logs for potential phishing delivery and conduct a broader network scan for similar activity.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The alert matches a known ATT&CK technique (T1218.011) with clear indicators: rundll32 invocation, DLL from Downloads, parent process Outlook.exe. The lack of hash and unknown user increases uncertainty, but the combination of external source IP and internal destination strongly suggests malicious intent.\"\n}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-056",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-056\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A rundll32 invocation was detected that attempts to load a DLL from a user\u2019s Downloads folder, with Outlook.exe as the parent process. This pattern matches the ATT&CK T1218.011 technique and indicates a likely malicious code execution attempt.\",\"threat_type\":\"Malicious Execution via Rundll32\",\"recommended_action\":\"Immediately isolate the affected host, perform a forensic analysis of the DLL and its parent process, quarantine or delete the suspicious DLL, block rundll32 usage for unapproved DLLs, and investigate for additional persistence mechanisms.\",\"confidence_score\":0.9,\"reasoning\":\"Sysmon flagged the rundll32 call as matching a known malicious technique, the payload snippet shows an arbitrary DLL being loaded from a non-system location, and Outlook.exe is commonly used as a foothold. These indicators strongly suggest malicious activity, warranting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-059",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-059\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"The alert indicates a rapid execution of system information discovery commands (systeminfo.exe and WMIC queries) within 4 seconds of a parent process start, matching the ATT&CK technique T1082. This pattern is typical of an adversary attempting to gather host details for reconnaissance or lateral\u2011movement planning.\",\"threat_type\":\"Information Discovery\",\"recommended_action\":\"Immediately isolate the affected host, perform a full forensic analysis of the parent process and its children, block the source IP (198.51.100.200) at the perimeter firewall, and conduct a broader sweep for additional reconnaissance activity.\",\"confidence_score\":0.9,\"reasoning\":\"The alert matches a known ATT&CK technique with a rapid execution pattern, indicating a high likelihood of malicious reconnaissance. The absence of a user or hostname suggests the activity may be automated or conducted under a compromised account, warranting urgent containment.\"}"
+    },
+    {
+      "alert_id": "ATTACKPOOL-060",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": false,
+      "ungrounded_attack_techniques": [],
+      "raw_report_text": "{\"alert_id\":\"ATTACKPOOL-060\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A rapid sequence of system discovery commands (systeminfo.exe and WMIC queries) was executed within 4 seconds, indicating an automated reconnaissance attempt. The activity matches the MITRE ATT&CK T1082 technique, suggesting the attacker is gathering detailed system information to facilitate further exploitation.\",\"threat_type\":\"Discovery\",\"recommended_action\":\"Immediately isolate the affected host from the network, conduct a full malware scan, review event logs for additional lateral movement indicators, and block the source IP 198.51.100.210. Apply any pending OS and application patches to reduce exploitation risk.\",\"confidence_score\":0.9,\"reasoning\":\"The alert explicitly flags a T1082 match, the rapid execution window and use of standard discovery tools imply malicious intent. The severity is CRITICAL as it could lead to broader compromise if not contained.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-001",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1110.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-001\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"The alert indicates that a single source attempted 14 password guesses against the account 'svc-backup' within 90 seconds, a pattern consistent with a manual or scripted credential\u2011guessing attack. No account lockout was triggered, suggesting the target may have weak lockout policies or the attacker is exploiting a short window before lockout applies. Immediate investigation and mitigation are required to prevent potential credential compromise.\",\"threat_type\":\"Credential Access \u2013 Password Guessing\",\"recommended_action\":\"1. Verify the source IP (203.0.113.140) and block it if malicious. 2. Review and tighten account lockout settings for 'svc-backup'. 3. Enable multi\u2011factor authentication for the account. 4. Monitor account activity for further anomalous logins. 5. Conduct a forensic review of related logs to identify any additional compromise indicators.\",\"confidence_score\":0.9,\"reasoning\":\"The behavior matches MITRE ATT&CK technique T1110.001 \u2013 Password Guessing, as indicated by repeated login attempts within a short timeframe without lockout. The logs provide clear evidence of credential-guessing activity, supporting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-002",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1110.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-002\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"Multiple rapid failed login attempts against the 'svc-backup' account from a single source indicate a credential-guessing attack. The pattern of repeated password submissions without triggering lockout suggests manual or scripted brute force activity.\",\"threat_type\":\"Credential Access \u2013 Brute Force\",\"recommended_action\":\"Immediately block the source IP (203.0.113.150), enforce account lockout policies for 'svc-backup', enable MFA on the account, and conduct a forensic review of authentication logs for additional suspicious activity.\",\"confidence_score\":0.95,\"reasoning\":\"The alert shows 14 failed logons within 90 seconds from one IP, a classic sign of password guessing (MITRE ATT&CK T1110.001). No lockout was triggered, implying potential policy gaps. The high number of attempts and short interval strongly support a credential-guessing attack.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-005",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1078.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-005\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker from 203.0.113.180 performed a pass\u2011the\u2011hash NTLM authentication against the SMB service on 10.0.24.61. The log shows a successful NTLM logon type 3 without any local keyboard or console input, indicating that credential material was replayed rather than entered interactively.\",\"threat_type\":\"Credential Access \u2013 Pass the Hash\",\"recommended_action\":\"Isolate the source host and target share, block the source IP, reset the affected user\u2019s NTLM hash, run a full endpoint scan for lateral movement indicators, and enable SMB signing or disable NTLM on critical servers.\",\"confidence_score\":0.9,\"reasoning\":\"The log indicates a successful NTLM logon type 3 using a hash value directly, which matches MITRE ATT&CK technique T1078.001 (Valid Accounts: NTLM Hash). This behavior is characteristic of pass\u2011the\u2011hash attacks, commonly used for lateral movement and credential compromise.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-006",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1075"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-ATTACK-PROMPTED-006\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"A Windows authentication log indicates a successful NTLM logon using a hash replayed from a remote source without any local user interaction. The event occurred over SMB (TCP/445) from IP 203.0.113.190 to internal host 10.0.25.71, suggesting credential theft and lateral movement.\",\n    \"threat_type\": \"Credential Access: Pass the Hash\",\n    \"recommended_action\": \"Immediately isolate the source IP and investigate the originating host for compromise. Reset the affected credentials, enforce SMB signing or disable NTLM, and conduct a full audit of internal lateral movement. Deploy network segmentation and monitor for further hash replay attempts.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The log shows an NTLM logon type 3 with no keyboard/console input event, a classic indicator of pass-the-hash activity, which maps to MITRE ATT&CK technique T1075. The absence of interactive password entry and the use of SMB port 445 strongly support this assessment.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-009",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1053.005"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-009\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A new Windows Scheduled Task named 'WinUpdateCheck' was created to run an unsigned executable from a user-writable temp directory every five minutes, indicating a likely persistence or execution mechanism. The task was established shortly after a suspicious process execution, suggesting an automated setup for ongoing malicious activity.\",\"threat_type\":\"Malicious Scheduled Task\",\"recommended_action\":\"Immediately investigate and delete the 'WinUpdateCheck' task, quarantine or remove the 'upd.exe' binary, perform a full host scan for additional persistence mechanisms, review system logs for related activity, and apply hardening measures to prevent task creation from untrusted locations.\",\"confidence_score\":0.9,\"reasoning\":\"The alert describes the creation of a Windows Scheduled Task (T1053.005) executing an unsigned binary from a writable temp directory, a common technique for persistence and execution. The recurrence interval and timing relative to a suspicious process strongly indicate malicious intent. This aligns with MITRE ATT&CK technique T1053.005, which is used for scheduled task creation to maintain persistence or execute code.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-010",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1053.005"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-010\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker has created a scheduled task named WinUpdateCheck that runs an unsigned executable from a user-writable temp directory every five minutes. This indicates a persistence mechanism that could allow repeated execution of malicious code.\",\"threat_type\":\"Persistence via Scheduled Task\",\"recommended_action\":\"Immediately investigate the scheduled task, locate and analyze the upd.exe binary, quarantine or delete it, and remove the task. Perform a full host scan for additional persistence mechanisms and review audit logs for related activity.\",\"confidence_score\":0.9,\"reasoning\":\"The creation of a Windows Task Scheduler entry (T1053.005) that runs an unsigned binary from a writable directory is a classic persistence technique. The unusual recurrence interval and proximity to a suspicious initial process further support an attacker\u2019s intent to maintain foothold. The behavior matches the MITRE ATT&CK technique T1053.005, which is used for scheduled task execution for persistence or privilege escalation.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-013",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1059.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1027",
+        "T1059.001"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-ATTACK-PROMPTED-013\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"A PowerShell instance was launched by a document\u2011handling application (WINWORD.EXE) with the -nop and -w hidden flags, executing an encoded command via the -enc argument. This behavior indicates an attempt to stealthily run malicious code without user awareness, likely as part of a larger compromise.\",\n    \"threat_type\": \"Execution\",\n    \"recommended_action\": \"Isolate the affected host, capture the full PowerShell command and any child processes, run a comprehensive malware scan, check for persistence mechanisms, and monitor the network for additional outbound activity from the host.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The alert matches MITRE ATT&CK technique T1059.001 (PowerShell) and the use of encoded commands and hidden windows aligns with T1027 (Obfuscated/Encrypted Information). The child process spawned by WINWORD.EXE indicates a drive\u2011by compromise scenario.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-014",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1059.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1059.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-014\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A PowerShell process was launched with an encoded command and hidden console, spawned by WINWORD.EXE immediately after a document was opened. This indicates a likely exploitation of a document to execute malicious PowerShell code without user awareness.\",\"threat_type\":\"Command and Scripting Interpreter: PowerShell\",\"recommended_action\":\"Investigate the WinWord process chain, capture the PowerShell command from memory, isolate the affected host, and perform a full malware scan. Review the document source and apply the latest Office security patches.\",\"confidence_score\":0.92,\"reasoning\":\"The encoded PowerShell command and hidden execution window are classic indicators of the ATT&CK technique T1059.001 (Command and Scripting Interpreter: PowerShell). The child process spawning from WINWORD.EXE immediately after document opening is a typical delivery vector for this technique, supporting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-017",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1050",
+        "T1077"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-017\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An attacker authenticated to the ADMIN$ share on a domain workstation, copied an executable into the system directory, and registered it as a new service. This indicates lateral movement and persistence via a malicious service.\",\"threat_type\":\"Lateral Movement\",\"recommended_action\":\"Block the source IP 198.51.100.80, isolate the affected workstation, investigate the copied file for malicious code, remove the newly registered service, and run a full endpoint scan. Also review other systems for similar SMB activity and ensure proper patching of SMB vulnerabilities.\",\"confidence_score\":0.9,\"reasoning\":\"The activity matches MITRE ATT&CK technique T1077 (Windows Admin Shares) for lateral movement and T1050 (New Service) for persistence. The attacker used the ADMIN$ share to copy an executable to the system directory and then created a service pointing to that executable, a classic persistence strategy. The high severity reflects the potential for system compromise and further lateral spread.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-018",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1543.003"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-018\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A remote host authenticated to the ADMIN$ share on a domain workstation, copied an executable into the Windows system directory, and then registered a new Windows service pointing to that file. This sequence indicates an attacker is establishing persistence and likely attempting lateral movement across the network.\",\"threat_type\":\"Persistence via Windows Service\",\"recommended_action\":\"Isolate the affected workstation, terminate the malicious service, delete the injected executable, run a full malware scan, review authentication logs for additional compromised accounts, and apply necessary SMB security hardening. Continue monitoring for further service registrations or lateral movement attempts.\",\"confidence_score\":0.92,\"reasoning\":\"The attacker used the ADMIN$ share (valid account exploitation) to transfer a payload and then executed \\u2018sc.exe create\\u2019 to register a new service, which matches ATT&CK technique T1543.003 (Create or Modify System Process: Windows Service). This behavior demonstrates both lateral movement and persistence, warranting a critical severity assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-021",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1071.001",
+        "T1078.004"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-ATTACK-PROMPTED-021\",\n    \"severity_assessment\": \"CRITICAL\",\n    \"threat_summary\": \"An unexpected RDP session was initiated from an internal workstation to a domain controller using a service account that normally does not perform interactive logons. This indicates potential misuse of a privileged service account to gain remote access to critical infrastructure.\",\n    \"threat_type\": \"Account Abuse\",\n    \"recommended_action\": \"Immediately investigate the RDP session logs, verify the legitimacy of the service account usage, disable or restrict the account for interactive logons, audit the workstation for malware or unauthorized changes, and review domain controller access controls. If suspicious, isolate the workstation and conduct a full forensic analysis.\",\n    \"confidence_score\": 0.85,\n    \"reasoning\": \"The behavior matches MITRE ATT&CK T1078.004 (Valid Accounts: Service Account) and T1071.001 (Remote Services: RDP). The use of a service account for interactive logons is not typical and suggests potential credential abuse or lateral movement. The severity is high due to the critical nature of the domain controller and the remote access via RDP.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-022",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1021.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-022\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An internal workstation initiated an RDP session to a domain controller using a service account that is not normally allowed for interactive logons, suggesting possible misuse of privileged credentials or lateral movement.\",\"threat_type\":\"Lateral Movement via Remote Services\",\"recommended_action\":\"Immediately investigate the RDP session, verify the legitimacy of the connection, audit the service account activity, enforce MFA for RDP, consider disabling RDP for domain controllers, reset the service account password, and review group membership and permissions for potential privilege escalation.\",\"confidence_score\":0.9,\"reasoning\":\"The activity matches MITRE ATT&CK technique T1021.001 (Remote Services: RDP) and indicates potential abuse of a service account for interactive logons.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-025",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1071.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-025\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"Outbound HTTPS beaconing traffic from an internal host to a newly registered external domain indicates a likely command\u2011and\u2011control (C2) channel. The regular 60\u2011second intervals, low volume, and known JA3 fingerprint point to a stealthy C2 framework.\",\"threat_type\":\"Command and Control\",\"recommended_action\":\"Immediately isolate the affected host, block outbound traffic to the identified domain, and conduct a forensic investigation to identify any compromised credentials or additional C2 endpoints. Consider deploying network segmentation and monitoring for further beaconing activity.\",\"confidence_score\":0.85,\"reasoning\":\"The traffic pattern matches the ATT&CK technique T1071.001 (Application Layer Protocol: Web Protocols) for C2 over HTTPS, combined with beaconing intervals and a known JA3 fingerprint from a C2 framework family. The newly registered domain and consistent timing strongly suggest a stealthy C2 operation.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-026",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1071.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-026\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"The internal host is repeatedly establishing outbound HTTPS connections to a newly registered domain at regular intervals, consistent with a covert command\u2011and\u2011control beacon. The low\u2011volume, time\u2011synchronized traffic and known JA3 fingerprint strongly suggest malicious activity.\",\"threat_type\":\"Command and Control\",\"recommended_action\":\"Immediately isolate the host from the network, block the destination domain and any related IPs, capture and analyze further traffic for payloads, and conduct a forensic investigation of the host to identify any installed malware or persistence mechanisms.\",\"confidence_score\":0.92,\"reasoning\":\"The pattern of regular, low\u2011volume HTTPS beaconing to a new domain matches MITRE ATT&CK technique T1071.001 (Application Layer Protocol: Web Protocols) for C2. The presence of a known C2 framework JA3 fingerprint and the beacon timing strongly indicate malicious command\u2011and\u2011control activity.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-029",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1486"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-029\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"Large-scale file encryption attack observed: 14,200 files across six shares were renamed with .locked25 extension within four minutes, accompanied by a ransom note in each directory.\",\"threat_type\":\"Ransomware\",\"recommended_action\":\"Immediately isolate affected hosts from the network, preserve volatile evidence, verify backups, perform forensic analysis, remove malicious code, patch vulnerabilities, and block the source IP 198.51.100.200.\",\"confidence_score\":0.95,\"reasoning\":\"The alert shows mass file renaming and ransom notes, characteristic of ransomware. This aligns with MITRE ATT&CK technique T1486: Data Encrypted for Impact. The short time window and large number of files indicate automated ransomware activity.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-030",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1486"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-030\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A large-scale ransomware operation has rewritten thousands of files across multiple network shares, appending the .locked25 extension and dropping identical ransom notes in each directory. The rapid execution within four minutes indicates a highly automated attack, likely aimed at encrypting or locking critical data to extort payment.\",\"threat_type\":\"Ransomware\",\"recommended_action\":\"Immediately isolate affected shares and block the source IP (198.51.100.210). Perform a full forensic analysis to confirm encryption status, preserve evidence, and initiate ransomware removal procedures. Notify stakeholders, enforce backup restoration, and coordinate with incident response and law\u2011enforcement teams.\",\"confidence_score\":0.95,\"reasoning\":\"The behavior matches MITRE ATT&CK technique T1486 (Data Encrypted for Impact), evidenced by mass file renaming and ransom note distribution across network shares. The speed and volume of the operation indicate a coordinated ransomware campaign. No other technique IDs are explicitly required for this scenario.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-033",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1070.001",
+        "T1107"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-033\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A malicious process on the host executed commands to clear Windows Security and System event logs and then deleted its own binary from disk, indicating an attempt to erase forensic evidence of its activity.\",\"threat_type\":\"Defense Evasion\",\"recommended_action\":\"Immediately isolate the affected host from the network, preserve volatile memory and disk images, investigate the origin of the suspicious process, identify any persistence mechanisms, block the source IP (203.0.113.160), and apply necessary patches or mitigations. Conduct a full forensic analysis to recover deleted artifacts and update intrusion detection rules.\",\"confidence_score\":0.95,\"reasoning\":\"The behavior matches ATT&CK technique T1070.001 (Clear Windows Event Logs) for log wiping and T1107 (File Deletion) for self\u2011deletion, indicating a classic indicator removal on host strategy aimed at evading detection.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-034",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1070.001",
+        "T1107"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-034\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A suspicious process on host 10.0.23.51 executed commands to clear the Windows Security and System event logs and then deleted its own binary from disk. This indicates an attempt to cover tracks and remove evidence of compromise.\",\"threat_type\":\"Defense Evasion\",\"recommended_action\":\"Immediately isolate the affected host from the network, perform a forensic image of the system, investigate the originating process and its command line, check for additional persistence mechanisms, and run malware analysis on any recovered artifacts. Ensure log integrity by restoring from backups or using immutable logging solutions.\",\"confidence_score\":0.85,\"reasoning\":\"The event matches MITRE ATT&CK technique T1070.001 (Clear Windows Event Logs) combined with T1107 (File Deletion). The behavior of clearing logs and self\u2011deleting a binary is a classic defense\u2011evasion tactic used by malware to hide its presence and activity.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-037",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1003.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-037\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An unsigned binary opened a handle to lsass.exe with read permissions and performed a large memory read, indicating an attempt to dump credentials from the system\u2019s local security authority process.\",\"threat_type\":\"Credential Dumping\",\"recommended_action\":\"Isolate the affected host, identify and terminate the malicious process, run a memory forensic analysis to confirm credential extraction, ensure the system is patched against known LSASS exploitation vectors, and review authentication logs for abnormal activity.\",\"confidence_score\":0.9,\"reasoning\":\"The behavior matches MITRE ATT&CK technique T1003.001 (LSASS Memory). The large ReadProcessMemory call is a classic credential dumping pattern, warranting a high severity assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-038",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1003.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-038\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"An unsigned binary opened a handle to the LSASS process with memory\u2011read rights and performed a large memory read, indicating a credential\u2011dumping attempt. This activity is consistent with an adversary trying to exfiltrate secrets from the system.\",\"threat_type\":\"Credential Dumping\",\"recommended_action\":\"Identify and terminate the unsigned process, isolate the affected host, run a memory integrity check, and investigate for additional persistence or lateral movement indicators. Apply the latest security patches and consider implementing memory integrity controls such as Windows Defender Credential Guard.\",\"confidence_score\":0.85,\"reasoning\":\"The event matches MITRE ATT&CK technique T1003.001 (Credential Dumping: LSASS Memory), where an adversary reads LSASS memory to obtain credentials.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-041",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1105"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-ATTACK-PROMPTED-041\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"An internal host established an outbound TCP connection to a raw file-hosting URL and downloaded an executable directly into a temp directory without any user-initiated browser activity. This indicates automated malware acquisition, likely part of a lateral movement or initial compromise stage.\",\n    \"threat_type\": \"Ingress Tool Transfer\",\n    \"recommended_action\": \"Isolate the affected host, block outbound traffic to the malicious IP (203.0.113.90), run a full malware scan, review for persistence mechanisms, and investigate the source of the curl.exe command. Notify the incident response team for further containment.\",\n    \"confidence_score\": 0.92,\n    \"reasoning\": \"The behavior matches ATT&CK technique T1105 (Ingress Tool Transfer), where an adversary transfers a tool or malware from a remote system to the target. The lack of user interaction and the direct write to a temp directory strongly suggest automated malicious activity.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-042",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1105"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-042\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An internal host autonomously downloaded an executable from an external URL and saved it to a temporary directory, indicating a potential malicious payload delivery without user interaction.\",\"threat_type\":\"Ingress Tool Transfer (Malware Delivery)\",\"recommended_action\":\"Immediately isolate the affected host, block outbound traffic to 203.0.113.90, conduct a forensic analysis of C:\\\\Windows\\\\Temp\\\\p.exe, run updated antivirus and endpoint detection tools, and review related logs for further indicators of compromise.\",\"confidence_score\":0.95,\"reasoning\":\"The behavior matches MITRE ATT&CK technique T1105 (Ingress Tool Transfer), where an attacker transfers a tool to a target system via an outbound connection. The absence of browser activity and the direct write to a temp directory suggest automated malware delivery, warranting a high confidence assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-045",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1069.002"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-045\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"A domain service account (svc-sql) performed an interactive logon at 3:14\u202fAM from an unknown host (WKSTN-206) and immediately executed directory\u2011enumeration commands. This indicates an unauthorized, time\u2011of\u2011day anomaly and potential lateral movement or reconnaissance activity.\",\"threat_type\":\"Credential Abuse / Reconnaissance\",\"recommended_action\":\"Isolate WKSTN-206 from the network, disable svc-sql account, conduct a forensic review of the host and account activity, and perform a full domain group enumeration audit to detect any unauthorized changes.\",\"confidence_score\":0.92,\"reasoning\":\"The logon outside business hours from a never\u2011seen host combined with net group /domain enumeration is indicative of T1069.002 (Permission Groups Discovery: Domain Groups). This behavior aligns with known credential abuse and reconnaissance tactics, warranting a critical severity assessment.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-046",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1069.001"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-046\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A domain service account (svc-sql) performed an interactive logon at 3:14\u202fAM from an unfamiliar workstation (WKSTN-206) and immediately executed directory\u2011enumeration commands. This indicates an unauthorized or compromised account used to probe the domain for group and user information outside normal business hours.\",\"threat_type\":\"Account Discovery & Lateral Movement\",\"recommended_action\":\"1. Immediately isolate WKSTN-206 from the network and block svc-sql from further authentication.\\n2. Conduct a full forensic analysis of the host and the domain controller to detect any persistence mechanisms or additional compromised accounts.\\n3. Review account activity logs for related anomalous events and enforce stricter MFA on svc-sql.\\n4. Apply necessary patches and consider resetting the account password.\\n5. Notify incident response team and update the incident ticket with findings.\",\"confidence_score\":0.9,\"reasoning\":\"The event matches MITRE ATT&CK T1069.001 (Permission Groups Discovery: Domain Groups) due to the net group /domain enumeration. The use of a domain service account outside business hours from a new host strongly suggests an adversary leveraging compromised credentials for lateral movement. The high severity is justified by the potential for domain-wide compromise.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-049",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1490"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-049\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"Malicious commands were executed to disable Windows shadow copies and boot recovery options, immediately preceding a mass file encryption event on the host, indicating a ransomware attack in progress.\",\"threat_type\":\"Ransomware\",\"recommended_action\":\"Immediately isolate the affected host from the network, preserve volatile and disk evidence, conduct a forensic analysis to confirm ransomware presence, restore encrypted files from known good backups, and block the source IP (198.51.100.100) at the perimeter firewall.\",\"confidence_score\":0.9,\"reasoning\":\"The execution of vssadmin delete shadows /all and bcdedit /set {default} recoveryenabled No corresponds to ATT&CK technique T1490 (Impair Defenses: Disable or Modify System Tools). The timing before file encryption and the disabling of backup/recovery mechanisms strongly suggests a ransomware attack. This behavior is classified as HIGH severity due to the potential for rapid data loss.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-050",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1490"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-ATTACK-PROMPTED-050\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"The host executed commands to delete all VSS shadow copies and disable Windows recovery options just before mass file encryption, indicating a ransomware operation that is actively preparing to lock the system and prevent recovery.\",\n    \"threat_type\": \"Ransomware\",\n    \"recommended_action\": \"Immediately isolate the affected host from the network, terminate any suspicious processes, preserve volatile memory for analysis, and restore system state from a known clean backup. Conduct a full forensic investigation to identify the ransomware variant and ensure all recovery options are re-enabled.\",\n    \"confidence_score\": 0.95,\n    \"reasoning\": \"Disabling shadow copies and boot recovery options is a classic use of the MITRE ATT&CK technique T1490 (Inhibit System Recovery). The timing of these commands just before encryption strongly suggests a ransomware attack aiming to prevent data recovery.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-053",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1085",
+        "T1574.001"
+      ],
+      "raw_report_text": "{\n    \"alert_id\": \"SELFCHECK-ATTACK-PROMPTED-053\",\n    \"severity_assessment\": \"HIGH\",\n    \"threat_summary\": \"An attacker used the legitimate Windows utility rundll32.exe to load and execute a DLL from a user\u2011writable Downloads folder, following a phishing attachment opened in Outlook. This indicates a malicious DLL was injected and executed via a common execution technique, likely to establish persistence or execute further payloads.\",\n    \"threat_type\": \"Execution via Rundll32 DLL\",\n    \"recommended_action\": \"Immediately isolate the affected host from the network, block rundll32.exe from executing non\u2011system DLLs, run a full malware scan, investigate the Outlook attachment for indicators of compromise, and review user activity logs for additional suspicious behavior. Apply security patches and reinforce phishing awareness training.\",\n    \"confidence_score\": 0.9,\n    \"reasoning\": \"The behavior matches MITRE ATT&CK technique T1085 (Rundll32), a known method for executing malicious DLLs. The DLL was loaded from a non\u2011standard, user\u2011writable directory, further indicating DLL hijacking (T1574.001). This combination strongly suggests a malicious execution attempt following a phishing event.\"\n}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-054",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1118"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-054\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker used a phishing attachment to launch rundll32.exe, which loaded a malicious DLL from the user\u2019s Downloads folder, indicating a DLL-based execution technique. The DLL was executed under the context of Outlook, suggesting a successful credential or privilege escalation attempt.\",\"threat_type\":\"DLL-based Execution via Rundll32\",\"recommended_action\":\"Isolate the affected host from the network, terminate rundll32.exe and Outlook.exe processes, delete the malicious DLL from the Downloads folder, conduct a full malware scan, review and block the phishing source, and apply security hardening to prevent DLL execution from user-writable directories.\",\"confidence_score\":0.92,\"reasoning\":\"The observed use of rundll32.exe to load a DLL from a user-writable directory is a classic execution technique identified as MITRE ATT&CK T1118 (RunDLL32). The context of a phishing attachment and execution under Outlook further supports this as a malicious activity. The severity is assessed as CRITICAL due to the potential for system compromise and lateral movement.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-057",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1082"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-057\",\"severity_assessment\":\"CRITICAL\",\"threat_summary\":\"An attacker executed a parent process that immediately triggered a rapid series of system enumeration commands (systeminfo.exe, wmic qfe list, wmic csproduct get), collecting OS, patch, and hardware details within seconds. This indicates a reconnaissance phase targeting host configuration.\",\"threat_type\":\"Discovery\",\"recommended_action\":\"Isolate the affected host from the network, terminate any suspicious processes, perform a full forensic analysis of the parent process and its provenance, block the source IP 198.51.100.180, and update detection rules to flag rapid execution of system discovery commands.\",\"confidence_score\":0.95,\"reasoning\":\"The observed behavior matches MITRE ATT&CK technique T1082 (System Information Discovery), as the attacker is gathering detailed system data through built\u2011in utilities within a very short time frame. The rapid, sequential execution of these commands is characteristic of automated reconnaissance scripts commonly used in advanced attacks.\"}"
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-058",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "deterministic_flagged_ungrounded": true,
+      "ungrounded_attack_techniques": [
+        "T1082"
+      ],
+      "raw_report_text": "{\"alert_id\":\"SELFCHECK-ATTACK-PROMPTED-058\",\"severity_assessment\":\"HIGH\",\"threat_summary\":\"A suspicious process spawned a rapid sequence of built\u2011in enumeration commands (systeminfo.exe, wmic qfe list, wmic csproduct get) within 4 seconds, gathering OS, patch, and hardware details. This indicates reconnaissance activity aimed at profiling the target system.\",\"threat_type\":\"Reconnaissance\",\"recommended_action\":\"Identify and isolate the parent process, capture its executable for analysis, run a full malware scan on the host, check for persistence mechanisms, and monitor for further enumeration or lateral movement. Block the source IP 198.51.100.190 if malicious activity is confirmed.\",\"confidence_score\":0.95,\"reasoning\":\"The rapid execution of systeminfo and WMIC commands aligns with MITRE ATT&CK technique T1082 (System Information Discovery), confirming a reconnaissance step following an initial suspicious process.\"}"
+    }
+  ]
+}

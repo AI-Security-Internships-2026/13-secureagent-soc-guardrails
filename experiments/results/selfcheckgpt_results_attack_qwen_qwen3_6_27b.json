@@ -1,0 +1,1597 @@
+{
+  "task": "SelfCheckGPT-style resampling-consistency baseline vs. deterministic ATT&CK grounding check",
+  "model": "qwen/qwen3.6-27b",
+  "sampling_temperature": 0.7,
+  "n_samples_per_alert": 3,
+  "n_alerts_total": 60,
+  "n_alerts_completed": 60,
+  "run_complete": true,
+  "n_scored": 60,
+  "n_declined_every_sample": 0,
+  "confusion_matrix": {
+    "tp": 5,
+    "fp": 0,
+    "tn": 30,
+    "fn": 25
+  },
+  "accuracy": 0.5833,
+  "accuracy_wilson_ci_95": [
+    0.4573,
+    0.6994
+  ],
+  "precision": 1.0,
+  "precision_wilson_ci_95": [
+    0.5655,
+    1.0
+  ],
+  "recall": 0.1667,
+  "recall_wilson_ci_95": [
+    0.0734,
+    0.3356
+  ],
+  "stable_but_wrong_alert_ids": [
+    "SELFCHECK-ATTACK-PROMPTED-001",
+    "SELFCHECK-ATTACK-PROMPTED-002",
+    "SELFCHECK-ATTACK-PROMPTED-005",
+    "SELFCHECK-ATTACK-PROMPTED-006",
+    "SELFCHECK-ATTACK-PROMPTED-009",
+    "SELFCHECK-ATTACK-PROMPTED-013",
+    "SELFCHECK-ATTACK-PROMPTED-017",
+    "SELFCHECK-ATTACK-PROMPTED-021",
+    "SELFCHECK-ATTACK-PROMPTED-022",
+    "SELFCHECK-ATTACK-PROMPTED-025",
+    "SELFCHECK-ATTACK-PROMPTED-029",
+    "SELFCHECK-ATTACK-PROMPTED-030",
+    "SELFCHECK-ATTACK-PROMPTED-033",
+    "SELFCHECK-ATTACK-PROMPTED-034",
+    "SELFCHECK-ATTACK-PROMPTED-037",
+    "SELFCHECK-ATTACK-PROMPTED-038",
+    "SELFCHECK-ATTACK-PROMPTED-041",
+    "SELFCHECK-ATTACK-PROMPTED-042",
+    "SELFCHECK-ATTACK-PROMPTED-045",
+    "SELFCHECK-ATTACK-PROMPTED-046",
+    "SELFCHECK-ATTACK-PROMPTED-049",
+    "SELFCHECK-ATTACK-PROMPTED-050",
+    "SELFCHECK-ATTACK-PROMPTED-054",
+    "SELFCHECK-ATTACK-PROMPTED-057",
+    "SELFCHECK-ATTACK-PROMPTED-058"
+  ],
+  "results": [
+    {
+      "alert_id": "ATTACKPOOL-003",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1110.001"
+        ],
+        [
+          "T1110.001"
+        ],
+        [
+          "T1110.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1110.001",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-004",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1110.001"
+        ],
+        [
+          "T1110",
+          "T1110.001"
+        ],
+        [
+          "T1110.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1110.001",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-007",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1550.002",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-008",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1550.002",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-011",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1053.005",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-012",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1053.005",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-015",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1086",
+      "is_revoked_id": true,
+      "samples": [
+        [
+          "T1059.001",
+          "T1086"
+        ],
+        [
+          "T1086"
+        ],
+        [
+          "T1059.001",
+          "T1086"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1059.001",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-016",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1086",
+      "is_revoked_id": true,
+      "samples": [
+        [
+          "T1086"
+        ],
+        [
+          "T1086"
+        ],
+        [
+          "T1086"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1086",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-019",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1077",
+      "is_revoked_id": true,
+      "samples": [
+        [
+          "T1077"
+        ],
+        [
+          "T1077"
+        ],
+        [
+          "T1077"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1077",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-020",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1077",
+      "is_revoked_id": true,
+      "samples": [
+        [
+          "T1077"
+        ],
+        [
+          "T1077"
+        ],
+        [
+          "T1077"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1077",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-023",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1076",
+      "is_revoked_id": true,
+      "samples": [
+        [
+          "T1076"
+        ],
+        [
+          "T1076"
+        ],
+        [
+          "T1076"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1076",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-024",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1076",
+      "is_revoked_id": true,
+      "samples": [
+        [
+          "T1076"
+        ],
+        [
+          "T1076"
+        ],
+        [
+          "T1076"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1076",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-027",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1071.001"
+        ],
+        [
+          "T1071.001"
+        ],
+        [
+          "T1071.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1071.001",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-028",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1071.001"
+        ],
+        [
+          "T1071.001"
+        ],
+        [
+          "T1071.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1071.001",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-031",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1486",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-032",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1486",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-035",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1070.004"
+        ],
+        [
+          "T1070.004"
+        ],
+        [
+          "T1070.004"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1070.004",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-036",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1070.001",
+          "T1070.004"
+        ],
+        [
+          "T1070.004"
+        ],
+        [
+          "T1070.004"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1070.004",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-039",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1003.001",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-040",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1003",
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1003.001",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-043",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1105"
+        ],
+        [
+          "T1105"
+        ],
+        [
+          "T1105"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1105",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-044",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1105"
+        ],
+        [
+          "T1105"
+        ],
+        [
+          "T1105"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1105",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-047",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1078.002"
+        ],
+        [
+          "T1078.002"
+        ],
+        [
+          "T1078.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1078.002",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-048",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1078.002"
+        ],
+        [
+          "T1078.002"
+        ],
+        [
+          "T1078.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1078.002",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-051",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1490"
+        ],
+        [
+          "T1490"
+        ],
+        [
+          "T1490"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1490",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-052",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1490"
+        ],
+        [
+          "T1490"
+        ],
+        [
+          "T1490"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1490",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-055",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1218.011"
+        ],
+        [
+          "T1218",
+          "T1218.011"
+        ],
+        [
+          "T1218.011"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1218.011",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-056",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1218.011"
+        ],
+        [
+          "T1218.011"
+        ],
+        [
+          "T1218",
+          "T1218.011"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1218.011",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-059",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1082"
+        ],
+        [
+          "T1082"
+        ],
+        [
+          "T1082"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1082",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "ATTACKPOOL-060",
+      "class": "stated",
+      "expected_ungrounded": false,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1082"
+        ],
+        [
+          "T1082"
+        ],
+        [
+          "T1082"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1082",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-001",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1110"
+        ],
+        [
+          "T1110",
+          "T1110.001",
+          "T1110.003"
+        ],
+        [
+          "T1110",
+          "T1110.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1110",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-002",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1110.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1110"
+        ],
+        [
+          "T1110"
+        ],
+        [
+          "T1110"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1110",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-005",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1550.002",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-006",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1550.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ],
+        [
+          "T1550.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1550.002",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-009",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1053.005",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-010",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1053.005",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1053",
+          "T1053.005"
+        ],
+        [
+          "T1053.003",
+          "T1053.005"
+        ],
+        [
+          "T1053.005"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1053",
+      "agreement_rate": 0.333,
+      "flagged_unstable": true,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-013",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1059.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1059.001",
+          "T1204.002"
+        ],
+        [
+          "T1059.001"
+        ],
+        [
+          "T1059",
+          "T1059.001",
+          "T1204.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1059.001",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-014",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1059.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1059.001",
+          "T1204.002"
+        ],
+        [
+          "T1027.001",
+          "T1059",
+          "T1059.001",
+          "T1059.005",
+          "T1140",
+          "T1204",
+          "T1204.002"
+        ],
+        [
+          "T1047",
+          "T1059.001",
+          "T1059.005",
+          "T1204.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1059.001",
+      "agreement_rate": 0.333,
+      "flagged_unstable": true,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-017",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1021.002",
+          "T1035",
+          "T1053.005",
+          "T1105",
+          "T1543.003",
+          "T1569.002"
+        ],
+        [
+          "T1035",
+          "T1105",
+          "T1543",
+          "T1543.003"
+        ],
+        [
+          "T1021.002",
+          "T1027",
+          "T1035",
+          "T1105",
+          "T1543.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1021.002",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-018",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1035",
+          "T1059",
+          "T1105",
+          "T1543",
+          "T1543.003"
+        ],
+        [
+          "T1053",
+          "T1105",
+          "T1543",
+          "T1543.003"
+        ],
+        [
+          "T1021.002",
+          "T1035",
+          "T1078.002",
+          "T1105",
+          "T1543",
+          "T1543.003",
+          "T1569",
+          "T1569.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1035",
+      "agreement_rate": 0.333,
+      "flagged_unstable": true,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-021",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1021.001",
+          "T1078"
+        ],
+        [
+          "T1021",
+          "T1021.001",
+          "T1078"
+        ],
+        [
+          "T1021",
+          "T1021.001",
+          "T1078",
+          "T1550"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1021",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-022",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1021.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1021.001",
+          "T1078"
+        ],
+        [
+          "T1021.001",
+          "T1078",
+          "T1078.001",
+          "T1078.004"
+        ],
+        [
+          "T1021.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1021.001",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-025",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1043",
+          "T1071",
+          "T1071.001",
+          "T1090",
+          "T1095",
+          "T1568",
+          "T1571",
+          "T1573"
+        ],
+        [
+          "T1071",
+          "T1071.001",
+          "T1090",
+          "T1095",
+          "T1133",
+          "T1573",
+          "T1573.002"
+        ],
+        [
+          "T1071",
+          "T1071.001",
+          "T1090",
+          "T1095",
+          "T1132",
+          "T1573",
+          "T1573.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1071",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-026",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1071.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1071.001",
+          "T1133",
+          "T1573"
+        ],
+        [
+          "T1043",
+          "T1071.004",
+          "T1571",
+          "T1573.001",
+          "T1573.002"
+        ],
+        [
+          "T1071",
+          "T1071.001",
+          "T1095",
+          "T1132",
+          "T1573",
+          "T1573.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1071.001",
+      "agreement_rate": 0.333,
+      "flagged_unstable": true,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-029",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1486",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-030",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1486",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ],
+        [
+          "T1486"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1486",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-033",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1070",
+          "T1070.001",
+          "T1070.004"
+        ],
+        [
+          "T1070.001",
+          "T1070.004"
+        ],
+        [
+          "T1070",
+          "T1070.001",
+          "T1070.004"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1070",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-034",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1070.004",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1070.001"
+        ],
+        [
+          "T1070",
+          "T1070.001",
+          "T1070.004"
+        ],
+        [
+          "T1070",
+          "T1070.001",
+          "T1070.004",
+          "T1140"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1070",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-037",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1003",
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1003.001",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-038",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1003.001",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1003.001"
+        ],
+        [
+          "T1003.001"
+        ],
+        [
+          "T1003"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1003.001",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-041",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1059",
+          "T1105",
+          "T1105.001",
+          "T1204"
+        ],
+        [
+          "T1105"
+        ],
+        [
+          "T1059",
+          "T1105",
+          "T1204.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1059",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-042",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1105",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1047",
+          "T1059",
+          "T1071",
+          "T1105"
+        ],
+        [
+          "T1059",
+          "T1105",
+          "T1204"
+        ],
+        [
+          "T1059",
+          "T1105"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1059",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-045",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1021.002",
+          "T1078",
+          "T1087",
+          "T1087.002"
+        ],
+        [
+          "T1021",
+          "T1021.002",
+          "T1078",
+          "T1078.004",
+          "T1087.002",
+          "T1098",
+          "T1136.003"
+        ],
+        [
+          "T1021.002",
+          "T1078",
+          "T1078.004",
+          "T1087"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1021.002",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-046",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1078.002",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1021",
+          "T1069",
+          "T1069.002",
+          "T1069.003",
+          "T1078",
+          "T1087",
+          "T1087.002"
+        ],
+        [
+          "T1021",
+          "T1078",
+          "T1087",
+          "T1087.002",
+          "T1135"
+        ],
+        [
+          "T1018",
+          "T1021",
+          "T1046",
+          "T1078",
+          "T1087",
+          "T1087.002"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1021",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-049",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1489",
+          "T1490"
+        ],
+        [
+          "T1490"
+        ],
+        [
+          "T1490"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1490",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-050",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1490",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1490"
+        ],
+        [
+          "T1490",
+          "T1490.001"
+        ],
+        [
+          "T1490"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1490",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-053",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1204.002",
+          "T1218.011"
+        ],
+        [
+          "T1218",
+          "T1218.011"
+        ],
+        [
+          "T1053",
+          "T1059",
+          "T1218",
+          "T1218.011",
+          "T1566.001"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1204.002",
+      "agreement_rate": 0.333,
+      "flagged_unstable": true,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-054",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1218.011",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1059.003",
+          "T1137",
+          "T1194",
+          "T1218.011",
+          "T1546.012"
+        ],
+        [
+          "T1218",
+          "T1218.010"
+        ],
+        [
+          "T1218",
+          "T1218.010"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1218",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-057",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1082"
+        ],
+        [
+          "T1082"
+        ],
+        [
+          "T1082"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1082",
+      "agreement_rate": 1.0,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    },
+    {
+      "alert_id": "SELFCHECK-ATTACK-PROMPTED-058",
+      "class": "prompted",
+      "expected_ungrounded": true,
+      "ground_truth_technique": "T1082",
+      "is_revoked_id": false,
+      "samples": [
+        [
+          "T1082"
+        ],
+        [
+          "T1057",
+          "T1082",
+          "T1120"
+        ],
+        [
+          "T1082"
+        ]
+      ],
+      "any_citation_rate": 1.0,
+      "majority_id": "T1082",
+      "agreement_rate": 0.667,
+      "flagged_unstable": false,
+      "citation_occurred": true
+    }
+  ]
+}
