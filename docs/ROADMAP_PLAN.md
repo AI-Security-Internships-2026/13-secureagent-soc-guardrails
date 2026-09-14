@@ -825,7 +825,7 @@ an issue's instructions at face value.
 | # | Issue | Status |
 |---|---|---|
 | 40 | R1 · ATT&CK SelfCheckGPT + McNemar replication (both model families) | ✅ **Done**, 2026-09-07. All 7 AC met: 60-item ATT&CK pool built (leakage guard passed, 3 REVOKED IDs represented), both model families run on both legs, McNemar/Cohen's g/odds-ratio reported for all 4 combinations (all significant, all survive joint Holm-Bonferroni correction), Table 3/Fig. 1 expanded, CVE-only limitation bullet updated to reflect the now-closed gap. `docs/all_results.md` #66-#67. |
-| 42 | R3 · Ablation study, 6 configs × **479-alert pool** → Table T6 + UpSet/Venn diagram | ❌ Not started, **and scope conflict flagged, unresolved.** This is *not* the same thing as the Phase 3 component-ablation study already run this session (#59-#61): that one covers 3 datasets / 360 alerts (CVE-bait, ATT&CK-bait, PII-bait) with no visualization deliverable; #42 wants a 479-alert pool (likely the existing cross-source `grounding_benchmark_summary` pool, unconfirmed) plus a Table T6 and an UpSet/Venn overlap diagram, neither of which the current study produces. Decide whether to adapt the existing run's output or scope a fresh one before starting. |
+| 42 | R3 · Ablation study, 6 configs × **479-alert pool** → Table T6 + UpSet/Venn diagram | 🔶 **In progress, scope conflict resolved 2026-09-14 (with the user, not assumed).** Issue's 479 was never real; the actual pooled cross-source set is 575, but 139 of those (live Wazuh) can't be reproduced — only `wazuh_alert_id`/`rule_id`/`rule_level` were persisted, none of the per-event fields the alert content was built from, and the live stack isn't running. Decided to run the honestly-achievable **436** (CVE-bait 150 + ATT&CK-bait 150 + Secure_SOC_AI CVE pool 60 + Secure_SOC_AI rule-engine 76), all reconstructable from static code/data, Wazuh's exclusion disclosed rather than papered over. Built `ablation_pool.py` (frozen 436-alert snapshot — required, not optional: `secure_soc_ai`'s `Incident.id` is a random uuid, so rebuilding per-run would reassign alert_ids) and `ablation_driver.py` (resumable JSONL, retry/backoff, `--validate`). Seeded 507 (config, alert) pairs from the old-scope run (identical toggle values/alert_ids for `C0`-`C3` over `cve_bait`) rather than re-spending quota. Currently **768/2,616 (29.4%)** after hitting Groq's real daily TPD cap; resumes automatically on re-run. Table T6/F3/F4 (Tasks 3-4) still pending completion. `docs/all_results.md` #75. |
 
 ### M3 — Methodological Credibility (P1)
 
@@ -860,12 +860,13 @@ an issue's instructions at face value.
 pending supervisor input (R2). Only two real items remain, both
 genuinely blocked rather than just unstarted:
 
-- **R3** (#42, ablation study) — scope conflict still unresolved (the
-  issue's claimed 479-alert pool doesn't match this project's real
-  575-alert pooled data), and on Groq alone the full run is realistically
-  2-3 weeks of calendar time given this project's own quota history. User
-  is holding this pending a possible switch to self-hosted CNIT lab
-  compute, not yet set up.
+- **R3** (#42, ablation study) — scope conflict resolved 2026-09-14 (436-alert
+  pool, Wazuh's 139 disclosed as unreproducible rather than substituted).
+  In progress: 768/2,616 (config, alert) pairs done. On Groq's free tier the
+  remainder is realistically several more days of calendar time given this
+  project's daily-quota history — just re-run `ablation_driver.py` (no flags)
+  each day to resume. CNIT self-hosted compute would remove that ceiling but
+  still isn't set up.
 - **R4** (#43, two-annotator Cohen's κ) — blocked on a second human
   labeler's real time, the one item in this backlog that can't be
   completed solo.
