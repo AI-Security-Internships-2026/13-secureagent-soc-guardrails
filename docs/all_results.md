@@ -1192,6 +1192,32 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 76. Issue #42 (R3) resumed — found and fixed a real hard-crash bug (spontaneous CVE citation with no local NVD snapshot), 806 → 1,084/2,616 pairs done
+
+**When:** Sep 17
+**What we tried:** Resumed `ablation_driver.py` from its 806/2,616 checkpoint (last session's runs had advanced it 768→805→806). Ran unbounded again in the background to bank more of today's Groq quota window.
+
+**What went wrong:** Driver crashed with an uncaught `RuntimeError` at row 957 (`C1 / cve_pool`, `CVEPOOL-013`): `NVD snapshot missing for CVE-2021-31207`. Root cause: this CVE never appears in the alert text itself — the model spontaneously volunteered it (a real ProxyShell/Exchange CVE) while reasoning about an unrelated alert, and `check_hallucinated_cves_verified` tried to verify it against issue #48/E3's local NVD snapshot, which only pre-captures the ~152 CVE IDs that actually appear in the 436-alert pool. Any CVE the model cites unprompted has no snapshot and hard-crashes the whole run instead of failing gracefully — a real gap in E3's snapshot-mode design, not a transient error. Fixed the immediate case (added `CVE-2021-31207` to `data/nvd_snapshot/NEEDED_IDS.txt`, fetched it via the existing `scripts/capture_nvd_snapshot.py`, regenerated the manifest — 153 entries now) and wrote a small resume loop (`resume_r3.sh`, not committed — scratchpad-only) that auto-detects this exact failure signature in future runs, captures whatever CVE is missing, and re-invokes the driver, so a repeat of this same failure mode doesn't need manual intervention again.
+
+**Result:** With the auto-heal loop running, the driver processed 278 more live calls with zero code errors before stopping cleanly on Groq's real daily quota wall (`tokens per day (TPD): Limit 200000, Used 199418, Requested 1086` — 5-retry backoff exhausted, correctly treated as a hard stop, not a bug). Final tally this session: **806 → 1,084/2,616 (41.4%)**. C1 (−Input) is now fully complete; remaining gaps are C2 (281 missing), C3 (379), C4 (436), C5 (436).
+
+**What it means:** The missing-snapshot failure mode is a latent bug in any config/alert combination where the model volunteers a citation outside the pool's known CVE set — it will very likely recur on C2-C5 (different toggle states can change what the model chooses to say). It's cheap to fix reactively each time it happens (one `capture_nvd_snapshot.py` call), but if it recurs often it may be worth reporting as a proper fix to issue #48/E3 (catch the missing-snapshot case and mark the citation "unverifiable" instead of crashing) rather than continuing to patch it live during ablation runs. Progress otherwise unblocked; next step is simply re-running the driver once tomorrow's Groq quota window opens.
+
+---
+
+## 77. Issue #42 (R3) resumed again same day — quota window partially refreshed, 1,084 → 1,101/2,616
+
+**When:** Sep 17 (later the same day as #76)
+**What we tried:** Re-ran the auto-heal resume loop from #76 again, on the theory that Groq's daily cap might have partially rolled over intraday rather than only at a fixed calendar boundary.
+
+**Result:** It had — the window had freed up a little (used dropped below the prior 199418 ceiling, giving room for 17 more live calls) before immediately re-hitting the wall: `tokens per day (TPD): Limit 200000, Used 199717, Requested 2458, retry in ~15m39s`. Final tally: **1,101/2,616 (42.1%)**. No missing-CVE or other errors this time — pure quota exhaustion, loop stopped cleanly as designed.
+
+**What went wrong:** Nothing broke; confirms Groq's TPD counter isn't a hard once-a-day reset but drains/refills in smaller increments throughout the day for this account — worth knowing, since it means short re-checks later today can pick up small amounts of additional progress rather than needing to wait for a full day boundary.
+
+**What it means:** No new findings; straightforward continuation of #76. C2 remains the closest config to completion (264 missing, down from 281).
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
