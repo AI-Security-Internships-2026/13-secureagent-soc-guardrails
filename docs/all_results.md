@@ -1218,6 +1218,19 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 78. Issue #42 (R3) — multi-day continuation, C1 and C2 now fully complete, C3 nearly done, 1,136 → 1,620/2,616
+
+**When:** Sep 17-20 (several separate resume-loop runs, roughly one per day/quota-window as Groq's daily cap refreshed)
+**What we tried:** Kept re-invoking the same auto-heal resume loop from #76 across several sessions, spaced out (same-day re-checks gave only a handful of rows each — confirmed again on Sep 19 with a 1,365→1,397 same-day bump of just 32 — while a fresh day's window reliably gave 220-280 rows per run: 1,103→1,365 on Sep 19, 1,397→1,620 on Sep 20).
+
+**Result:** No further missing-CVE crashes — the #76 fix (and the auto-heal loop's ability to catch any repeat of that same failure signature) held across every subsequent run. Every stop was a clean Groq daily-quota `RateLimitError`, correctly detected and exited by the loop rather than retried uselessly. Final tally: **1,620/2,616 (61.9%)**. **C0, C1, and C2 are now fully complete.** C3 has only 124 pairs left; C4 and C5 (436 each) haven't been started.
+
+**What went wrong:** Nothing broke. The only friction was throughput variance depending on how much time elapsed between sessions — quick same-day re-polls waste effort for only a few rows, while spacing sessions out by a full day (or more) consistently banks a full ~250-row batch. Noting this so future sessions space themselves out rather than rapid-polling.
+
+**What it means:** At the observed ~250 rows/well-spaced-session rate, the remaining 996 pairs (C3: 124, C4: 436, C5: 436) should take roughly 4 more sessions, provided they're spaced to let Groq's quota meaningfully refresh between runs rather than fragmented into multiple same-day attempts.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
