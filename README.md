@@ -2,6 +2,8 @@
 
 > **CNIT/PNTLab Pisa · TECIP · Scuola Superiore Sant'Anna — AI Security Internship 2026**
 
+📘 **Submission release:** See [`REPRODUCIBILITY.md`](./REPRODUCIBILITY.md) for exact `paper-v1.0` metadata, hashes, commands, and integrity checklist.
+
 ---
 
 ## Research Problem
@@ -127,6 +129,24 @@ python src/main.py
 git checkout dev && git pull origin dev
 git checkout -b emaan-week-01
 ```
+
+---
+
+## Reproducibility via Docker
+
+We ship a minimal reproducibility image that runs the offline mocked schema-parity test at the end of `docker build` — no API key required.
+
+```bash
+docker build -t llmcite .
+docker run --rm llmcite
+```
+
+To run the full test suite you will need a valid `GROQ_API_KEY` environment variable (see [Getting Started](#getting-started) above for setup):
+```bash
+docker run --rm -e GROQ_API_KEY=$GROQ_API_KEY llmcite /bin/bash -c "cd /app && pytest tests/ -v"
+```
+
+This is a **reproducibility image only** — not a web service, REST server, frontend, or deployment target. See the comment block at the top of the `Dockerfile` for the full anti-scope-creep note.
 
 ---
 

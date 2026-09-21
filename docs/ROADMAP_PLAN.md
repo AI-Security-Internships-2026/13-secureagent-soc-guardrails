@@ -837,15 +837,15 @@ an issue's instructions at face value.
 
 | # | Issue | Status |
 |---|---|---|
-| 48 | E3 · NVD snapshot mode + SHA-256 manifest (~290 CVE lookups frozen locally) | ❌ Not started. |
-| 49 | E4 · Top-level Dockerfile (reproducible runtime, mocked-LLM smoke test) | ❌ Not started. Depends on E1 (done) for the lock file it installs from. |
-| 50 | E5 · `REPRODUCIBILITY.md` canonical file + `paper-v1.0` git tag | ❌ Not started. Depends on E1 (done), E3, E4, E2 (done) all landing first — 2 of its 4 dependencies are now clear. |
+| 48 | E3 · NVD snapshot mode + SHA-256 manifest (~290 CVE lookups frozen locally) | ✅ **Done**, 2026-09-09. All 5 AC met. Real count is 152 CVEs (not the issue's guessed ~290 — that assumed no source overlap); real NVD rate limit is 5/30s (not the issue's wrong "5/10s"), verified against NVD's own docs before writing the downloader. `docs/all_results.md` #71. |
+| 49 | E4 · Top-level Dockerfile (reproducible runtime, mocked-LLM smoke test) | ✅ **Done**, 2026-09-09. All 4 AC met. Fixed two real bugs the issue's own template didn't anticipate: `requirements-lock.txt` needs Python 3.12 (not the template's 3.11), and torch's default wheel pulls ~2-3GB of unused CUDA libs (fixed via the CPU-only index) plus pytector's DeBERTa model needing a build-time pre-warm to be genuinely offline. `docs/all_results.md` #68-#70. |
+| 50 | E5 · `REPRODUCIBILITY.md` canonical file + `paper-v1.0` git tag | ✅ **Done**, 2026-09-09. All 8 AC met. Issue's template had multiple wrong specifics (WSL2, Python 3.11, non-existent prompt files, non-existent 479-alert pool) — corrected throughout with real, verified values. `paper-v1.0` tag created locally, not pushed (per issue's own instruction, pending supervisor review). `docs/all_results.md` #72. |
 
 ### M5 — Manuscript Polish (P2)
 
 | # | Issue | Status |
 |---|---|---|
-| 45 | R6 · Explicit RQ1-RQ4 section + evaluation reordering + de-fluff | ❌ Not started. No "Research Questions" subsection exists in the paper yet — confirmed via grep. |
+| 45 | R6 · Explicit RQ1-RQ4 section + evaluation reordering + de-fluff | ✅ **Done**, 2026-09-09. All 6 AC met. Full §4 reorder done in one pass (not deferred) — 58 cross-references individually traced and fixed, not blindly renumbered. New §4.8 Ablation section written with honest in-progress status (R3 not done yet); only its body text needs a later edit when R3 lands, no renumbering needed again. `docs/all_results.md` #73. |
 
 ### M6 — Enhancers (only if everything else finishes early)
 
@@ -856,9 +856,21 @@ an issue's instructions at face value.
 
 ### Suggested next-up, per the milestone ordering
 
-With M1's two engineering issues (E1, E2) done and R2 paused pending
-supervisor input, the milestone-ordering logic says M1 is otherwise clear
-to move past. Reasonable next targets: **R1** (#40, closes the paper's
-disclosed CVE-only limitation on its central finding) or resolving **R3's
-scope conflict** (#42, needed before that ablation work can even start
-cleanly) — both M2, both P0, both currently blocking M2 from closing.
+7 of 12 issues now done (E1, E2, E3, E4, E5, R1, R6) or effectively done
+pending supervisor input (R2). Only two real items remain, both
+genuinely blocked rather than just unstarted:
+
+- **R3** (#42, ablation study) — scope conflict still unresolved (the
+  issue's claimed 479-alert pool doesn't match this project's real
+  575-alert pooled data), and on Groq alone the full run is realistically
+  2-3 weeks of calendar time given this project's own quota history. User
+  is holding this pending a possible switch to self-hosted CNIT lab
+  compute, not yet set up.
+- **R4** (#43, two-annotator Cohen's κ) — blocked on a second human
+  labeler's real time, the one item in this backlog that can't be
+  completed solo.
+
+The two lowest-priority items (**R5** #44, **E6** #51) are both
+explicitly scoped by their own issue text as "only if everything else
+finishes early" / "last in the stack" — reasonable to leave until R3/R4
+resolve.

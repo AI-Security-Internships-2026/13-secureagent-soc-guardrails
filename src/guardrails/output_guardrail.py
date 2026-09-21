@@ -47,6 +47,7 @@ external database lookup, not a second LLM call — it adds ground truth,
 not another unreliable judgment.
 """
 
+import os
 import re
 import time
 import urllib.request
@@ -63,6 +64,7 @@ from src.guardrails.grounding_utils import (
 CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+DEFAULT_NVD_SNAPSHOT_DIR = "data/nvd_snapshot"
 
 # Simple in-process cache so repeated runs / repeated CVEs across a batch
 # don't re-hit the API unnecessarily. NVD's public (no-API-key) rate limit
@@ -76,6 +78,43 @@ def extract_cves(text: str) -> set:
     if not text:
         return set()
     return {match.upper() for match in CVE_PATTERN.findall(text)}
+
+
+def _query_nvd_snapshot(cve_id: str, snapshot_dir: str) -> dict:
+    """
+    Reads a frozen NVD response from data/nvd_snapshot/<CVE-ID>.json
+    (issue #48/E3) instead of hitting the live API — same parsing logic
+    _query_nvd() applies to a live response, applied to the committed
+    snapshot file instead, so results are identical either way for any
+    ID actually captured. Raises RuntimeError (not a silent UNVERIFIED)
+    if the snapshot is missing — a reproducibility run should fail loudly
+    on a gap in the snapshot, not silently degrade.
+    """
+    path = os.path.join(snapshot_dir, f"{cve_id}.json")
+    if not os.path.exists(path):
+        raise RuntimeError(
+            f"NVD snapshot missing for {cve_id} at {path} — see scripts/capture_nvd_snapshot.py"
+        )
+    with open(path, encoding="utf-8") as f:
+        data = _json.load(f)
+    return _parse_nvd_response(data)
+
+
+def _parse_nvd_response(data: dict) -> dict:
+    """Shared parsing logic between the live NVD query and the frozen-snapshot read."""
+    vulnerabilities = data.get("vulnerabilities", [])
+    if not vulnerabilities:
+        return {"exists": False, "description": None, "rejected": False}
+
+    cve_data = vulnerabilities[0].get("cve", {})
+    descriptions = cve_data.get("descriptions", [])
+    en_desc = next((d["value"] for d in descriptions if d.get("lang") == "en"), None)
+    vuln_status = cve_data.get("vulnStatus", "")
+    is_rejected = (
+        vuln_status.lower() == "rejected"
+        or (en_desc is not None and en_desc.strip().upper().startswith("** REJECTED **"))
+    )
+    return {"exists": True, "description": en_desc, "rejected": is_rejected}
 
 
 def _query_nvd(cve_id: str, timeout: float = 8.0, max_retries: int = 3) -> dict:
@@ -104,27 +143,7 @@ def _query_nvd(cve_id: str, timeout: float = 8.0, max_retries: int = 3) -> dict:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
 
-            vulnerabilities = data.get("vulnerabilities", [])
-            if not vulnerabilities:
-                result = {"exists": False, "description": None, "rejected": False}
-            else:
-                cve_data = vulnerabilities[0].get("cve", {})
-                descriptions = cve_data.get("descriptions", [])
-                en_desc = next((d["value"] for d in descriptions if d.get("lang") == "en"), None)
-                # NVD marks withdrawn/invalid/duplicate CVE IDs with a
-                # vulnStatus of "Rejected" and a description that starts
-                # with "** REJECTED **" rather than removing the ID
-                # entirely. Citing one of these is a distinct, more
-                # concerning case than citing a real-but-mismatched CVE —
-                # the ID technically exists but was never a valid
-                # vulnerability record.
-                vuln_status = cve_data.get("vulnStatus", "")
-                is_rejected = (
-                    vuln_status.lower() == "rejected"
-                    or (en_desc is not None and en_desc.strip().upper().startswith("** REJECTED **"))
-                )
-                result = {"exists": True, "description": en_desc, "rejected": is_rejected}
-
+            result = _parse_nvd_response(data)
             _nvd_cache[cve_id] = result
             # Stay comfortably under NVD's public rate limit (~5 req/30s)
             # across multiple ungrounded CVEs checked in one run.
@@ -149,7 +168,8 @@ def _query_nvd(cve_id: str, timeout: float = 8.0, max_retries: int = 3) -> dict:
     return {"exists": None, "description": None, "error": "NVD rate limit persisted after retries"}
 
 
-def verify_cve(cve_id: str, alert_text: str, overlap_threshold: float = 0.15) -> dict:
+def verify_cve(cve_id: str, alert_text: str, overlap_threshold: float = 0.15,
+                use_snapshot: bool = False, snapshot_dir: str = DEFAULT_NVD_SNAPSHOT_DIR) -> dict:
     """
     Classify a single ungrounded CVE mention against real NVD data.
 
@@ -175,7 +195,7 @@ def verify_cve(cve_id: str, alert_text: str, overlap_threshold: float = 0.15) ->
         check") rather than silently scoring 0 overlap and landing in
         REAL_BUT_IRRELEVANT for the wrong reason.
     """
-    nvd_result = _query_nvd(cve_id)
+    nvd_result = _query_nvd_snapshot(cve_id, snapshot_dir) if use_snapshot else _query_nvd(cve_id)
 
     if nvd_result.get("exists") is None:
         return {
@@ -237,7 +257,9 @@ def check_hallucinated_cves(report: dict, alert_text: str, verify_with_nvd: bool
     return sorted(mentioned_cves - grounded_cves)
 
 
-def check_hallucinated_cves_verified(report: dict, alert_text: str, verify_with_nvd: bool = True) -> dict:
+def check_hallucinated_cves_verified(report: dict, alert_text: str, verify_with_nvd: bool = True,
+                                       use_snapshot: bool = False,
+                                       snapshot_dir: str = DEFAULT_NVD_SNAPSHOT_DIR) -> dict:
     """
     Full two-stage check. Returns:
         {
@@ -272,7 +294,7 @@ def check_hallucinated_cves_verified(report: dict, alert_text: str, verify_with_
     verifications = []
     for cve_id in ungrounded:
         if verify_with_nvd:
-            verifications.append(verify_cve(cve_id, alert_text))
+            verifications.append(verify_cve(cve_id, alert_text, use_snapshot=use_snapshot, snapshot_dir=snapshot_dir))
         else:
             verifications.append({
                 "cve_id": cve_id,
