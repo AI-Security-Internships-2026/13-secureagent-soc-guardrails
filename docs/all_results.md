@@ -1231,6 +1231,19 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 79. Issue #42 (R3) — C3 now fully complete, C4 underway, 1,620 → 1,842/2,616
+
+**When:** Sep 21
+**What we tried:** Two more resume-loop runs on a fresh day's quota window. First run (1,620→1,841) banked a strong 176-row batch; an immediate same-day re-check right after (1,841→1,842) confirmed the now-familiar pattern of only a token or two trickling back right after a wall (`Used 199,133/200,000`, next call needed 1,348).
+
+**Result:** **C0, C1, C2, and C3 are all now fully complete.** Final tally: **1,842/2,616 (70.4%)**. Remaining: C4 (338 missing) and C5 (436 missing), 774 pairs total. No missing-CVE crashes, no other errors — every stop was a clean daily-quota wall.
+
+**What went wrong:** Nothing broke. Same throughput lesson as #78, reconfirmed: a well-spaced session still yields ~200+ rows, an immediate re-poll yields almost nothing.
+
+**What it means:** At the same ~250 rows/well-spaced-session rate, the remaining 774 pairs should take roughly 3 more sessions before the run is fully complete and Table T6/F3/F4 can be built.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
