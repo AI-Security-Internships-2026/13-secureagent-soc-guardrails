@@ -18,6 +18,7 @@ numpy
 scikit-learn
 scipy
 matplotlib
+openpyxl
 
 # Utilities
 python-dotenv

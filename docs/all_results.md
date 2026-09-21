@@ -1173,6 +1173,77 @@ Traced and fixed every one of the 58 total `Sect. 4.X` cross-references in `pape
 
 ---
 
+## 75. Issue #42 (R3) re-scoped and started — 436-alert frozen pool, resumable driver, 768/2,616 pairs done
+
+**When:** Sep 14
+**What we tried:** Resolved the scope conflict flagged in #74/ROADMAP #42 — issue #42 asks for 6 configs × "the 479-alert pool, identical to the one that produced §4.9 numbers," but the real pooled cross-source set is 575 alerts, and 139 of those (live Wazuh SIEM) can't be reproduced: `wazuh_integration_results.json` only persisted `wazuh_alert_id`/`rule_id`/`rule_level` per alert, none of the per-event fields (`source_ip`, `payload_snippet`, `file_hash`, `hostname`, `timestamp`) the alert's actual content was built from, and the live Docker stack that produced it isn't running. Re-collecting fresh Wazuh alerts wouldn't be "identical to §4.9" as the issue requires, so — decided with the user rather than assumed — this scope excludes Wazuh and runs the honestly-achievable 436: CVE-bait (150) + ATT&CK-bait (150) + Secure_SOC_AI CVE pool (60) + Secure_SOC_AI rule-engine (76), all fully reconstructable from static code/data with no live dependency.
+
+Built `experiments/evaluation/ablation_pool.py`: assembles all 436 alerts from their existing source modules and freezes them once to `experiments/results/ablation_pool_436.json`. Freezing (not rebuilding per run) turned out to be a real correctness requirement, not just tidiness: `secure_soc_ai`'s `Incident.id` is a random `uuid4` (its `models.py`), so re-deriving the rule-engine leg from source on every driver invocation would silently reassign different alert_ids run over run — the SOC rule-engine alerts get our own deterministic `SOCRULE-001..076` (assigned by sorted incident creation time) instead of secure_soc_ai's own id. Also confirmed by diffing two builds: `Incident.created_at` is wall-clock, not event-derived, so content/ids were identical across rebuilds but timestamps weren't — another reason a frozen snapshot, not live regeneration, is the only sound design here.
+
+Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: loads the frozen pool, loops configs (named `C0`-`C5` per the issue's own table) × alerts in deterministic order, append-only JSONL (`experiments/results/ablation_full.jsonl`) with fsync per row so a crash mid-run loses at most the row in flight, resume-mode keyed on `(config_id, alert_id)`, retry-with-backoff on `RateLimitError`/`InternalServerError`/`APIConnectionError`/`APITimeoutError`. Runs with `use_nvd_snapshot=True` (issue #48/E3's local snapshot) after confirming all 150 needed CVEs are covered — avoids a second live-rate-limited dependency on a run this size. Added `--validate` (completeness check, no calls) and `--seed-legacy`.
+
+**Quota-saving reuse, not re-spent:** 507 of the 2,616 (config, alert) pairs are alerts already run for real against Groq under the earlier (differently-scoped) `ablation_study.py` — its `all-on`/`input-off`/`cve-off`/`attack-off` configs are byte-for-byte the same toggle values as this issue's `C0`/`C1`/`C2`/`C3`, over the identical `cve_bait` alert_ids. `--seed-legacy` imported those 507 rows (real Groq output; `cve_verifications`/`attack_technique_verifications` already carry the taxonomy classification F3 needs) rather than re-spending scarce daily quota to regenerate identical results. Seeded rows are marked `"reused_from"` and only carry the reduced field set that run saved (no `evidence_pack`/`reasoning`/`model` — sufficient for Table T6/F3/F4, not for verbatim case-study quotes).
+
+**Result:** Smoke-tested the driver on 5 live calls first (correct schema, full report captured, resume verified clean on a second invocation) before committing to a longer run. Then ran unbounded in the background: processed 261 new live calls with zero code errors — C0 (full pipeline) reached 411/436, finishing the `attack_bait` and `cve_pool` legs entirely and reaching item 17/76 of `soc_rule_engine` — before hitting Groq's real **daily token quota** (`tokens per day (TPD): Limit 200000, Used 199051`, not a transient 429 — the error's own "try again in 8m48s" is longer than the 5-retry/~4-minute backoff window, so the driver correctly exited rather than hanging). Final tally this session: **768/2,616 (29.4%)**, `experiments/results/ablation_full.jsonl` (768 lines, one fsynced JSON row each).
+
+**What went wrong:** Nothing broke. The quota wall is real infrastructure, not a bug — same daily-cap pattern #74 and the original ablation_study.py runs already hit, now hitting the new pool too. Table T6/F3/F4 (issue #42 Tasks 3-4) can't be built yet; they need the run to reach completion first.
+
+**What it means:** Issue #42's scope conflict is now resolved and documented (436, not 575 or 479, with the Wazuh exclusion disclosed), and the driver/pool infrastructure is proven correct end-to-end against live Groq. Remaining: 1,848 (config, alert) pairs, which at Groq's free-tier ~200k-token daily cap will take several more days of `python -m experiments.evaluation.ablation_driver` runs (no flags needed beyond that — it resumes automatically) before Table T6/F3/F4 can be built.
+
+---
+
+## 76. Issue #42 (R3) resumed — found and fixed a real hard-crash bug (spontaneous CVE citation with no local NVD snapshot), 806 → 1,084/2,616 pairs done
+
+**When:** Sep 17
+**What we tried:** Resumed `ablation_driver.py` from its 806/2,616 checkpoint (last session's runs had advanced it 768→805→806). Ran unbounded again in the background to bank more of today's Groq quota window.
+
+**What went wrong:** Driver crashed with an uncaught `RuntimeError` at row 957 (`C1 / cve_pool`, `CVEPOOL-013`): `NVD snapshot missing for CVE-2021-31207`. Root cause: this CVE never appears in the alert text itself — the model spontaneously volunteered it (a real ProxyShell/Exchange CVE) while reasoning about an unrelated alert, and `check_hallucinated_cves_verified` tried to verify it against issue #48/E3's local NVD snapshot, which only pre-captures the ~152 CVE IDs that actually appear in the 436-alert pool. Any CVE the model cites unprompted has no snapshot and hard-crashes the whole run instead of failing gracefully — a real gap in E3's snapshot-mode design, not a transient error. Fixed the immediate case (added `CVE-2021-31207` to `data/nvd_snapshot/NEEDED_IDS.txt`, fetched it via the existing `scripts/capture_nvd_snapshot.py`, regenerated the manifest — 153 entries now) and wrote a small resume loop (`resume_r3.sh`, not committed — scratchpad-only) that auto-detects this exact failure signature in future runs, captures whatever CVE is missing, and re-invokes the driver, so a repeat of this same failure mode doesn't need manual intervention again.
+
+**Result:** With the auto-heal loop running, the driver processed 278 more live calls with zero code errors before stopping cleanly on Groq's real daily quota wall (`tokens per day (TPD): Limit 200000, Used 199418, Requested 1086` — 5-retry backoff exhausted, correctly treated as a hard stop, not a bug). Final tally this session: **806 → 1,084/2,616 (41.4%)**. C1 (−Input) is now fully complete; remaining gaps are C2 (281 missing), C3 (379), C4 (436), C5 (436).
+
+**What it means:** The missing-snapshot failure mode is a latent bug in any config/alert combination where the model volunteers a citation outside the pool's known CVE set — it will very likely recur on C2-C5 (different toggle states can change what the model chooses to say). It's cheap to fix reactively each time it happens (one `capture_nvd_snapshot.py` call), but if it recurs often it may be worth reporting as a proper fix to issue #48/E3 (catch the missing-snapshot case and mark the citation "unverifiable" instead of crashing) rather than continuing to patch it live during ablation runs. Progress otherwise unblocked; next step is simply re-running the driver once tomorrow's Groq quota window opens.
+
+---
+
+## 77. Issue #42 (R3) resumed again same day — quota window partially refreshed, 1,084 → 1,101/2,616
+
+**When:** Sep 17 (later the same day as #76)
+**What we tried:** Re-ran the auto-heal resume loop from #76 again, on the theory that Groq's daily cap might have partially rolled over intraday rather than only at a fixed calendar boundary.
+
+**Result:** It had — the window had freed up a little (used dropped below the prior 199418 ceiling, giving room for 17 more live calls) before immediately re-hitting the wall: `tokens per day (TPD): Limit 200000, Used 199717, Requested 2458, retry in ~15m39s`. Final tally: **1,101/2,616 (42.1%)**. No missing-CVE or other errors this time — pure quota exhaustion, loop stopped cleanly as designed.
+
+**What went wrong:** Nothing broke; confirms Groq's TPD counter isn't a hard once-a-day reset but drains/refills in smaller increments throughout the day for this account — worth knowing, since it means short re-checks later today can pick up small amounts of additional progress rather than needing to wait for a full day boundary.
+
+**What it means:** No new findings; straightforward continuation of #76. C2 remains the closest config to completion (264 missing, down from 281).
+
+---
+
+## 78. Issue #42 (R3) — multi-day continuation, C1 and C2 now fully complete, C3 nearly done, 1,136 → 1,620/2,616
+
+**When:** Sep 17-20 (several separate resume-loop runs, roughly one per day/quota-window as Groq's daily cap refreshed)
+**What we tried:** Kept re-invoking the same auto-heal resume loop from #76 across several sessions, spaced out (same-day re-checks gave only a handful of rows each — confirmed again on Sep 19 with a 1,365→1,397 same-day bump of just 32 — while a fresh day's window reliably gave 220-280 rows per run: 1,103→1,365 on Sep 19, 1,397→1,620 on Sep 20).
+
+**Result:** No further missing-CVE crashes — the #76 fix (and the auto-heal loop's ability to catch any repeat of that same failure signature) held across every subsequent run. Every stop was a clean Groq daily-quota `RateLimitError`, correctly detected and exited by the loop rather than retried uselessly. Final tally: **1,620/2,616 (61.9%)**. **C0, C1, and C2 are now fully complete.** C3 has only 124 pairs left; C4 and C5 (436 each) haven't been started.
+
+**What went wrong:** Nothing broke. The only friction was throughput variance depending on how much time elapsed between sessions — quick same-day re-polls waste effort for only a few rows, while spacing sessions out by a full day (or more) consistently banks a full ~250-row batch. Noting this so future sessions space themselves out rather than rapid-polling.
+
+**What it means:** At the observed ~250 rows/well-spaced-session rate, the remaining 996 pairs (C3: 124, C4: 436, C5: 436) should take roughly 4 more sessions, provided they're spaced to let Groq's quota meaningfully refresh between runs rather than fragmented into multiple same-day attempts.
+
+---
+
+## 79. Issue #42 (R3) — C3 now fully complete, C4 underway, 1,620 → 1,842/2,616
+
+**When:** Sep 21
+**What we tried:** Two more resume-loop runs on a fresh day's quota window. First run (1,620→1,841) banked a strong 176-row batch; an immediate same-day re-check right after (1,841→1,842) confirmed the now-familiar pattern of only a token or two trickling back right after a wall (`Used 199,133/200,000`, next call needed 1,348).
+
+**Result:** **C0, C1, C2, and C3 are all now fully complete.** Final tally: **1,842/2,616 (70.4%)**. Remaining: C4 (338 missing) and C5 (436 missing), 774 pairs total. No missing-CVE crashes, no other errors — every stop was a clean daily-quota wall.
+
+**What went wrong:** Nothing broke. Same throughput lesson as #78, reconfirmed: a well-spaced session still yields ~200+ rows, an immediate re-poll yields almost nothing.
+
+**What it means:** At the same ~250 rows/well-spaced-session rate, the remaining 774 pairs should take roughly 3 more sessions before the run is fully complete and Table T6/F3/F4 can be built.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
