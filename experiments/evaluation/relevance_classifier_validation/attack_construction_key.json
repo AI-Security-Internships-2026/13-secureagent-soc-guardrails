@@ -1,0 +1,437 @@
+{
+  "ATTACK-BAIT-001__T1055__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1055"
+  },
+  "ATTACK-BAIT-001__T1675__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1055"
+  },
+  "ATTACK-BAIT-003__T1566__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1566"
+  },
+  "ATTACK-BAIT-003__T1573__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1566"
+  },
+  "ATTACK-BAIT-005__T1021__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1021"
+  },
+  "ATTACK-BAIT-005__T1111__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1021"
+  },
+  "ATTACK-BAIT-007__T1190__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1190"
+  },
+  "ATTACK-BAIT-007__T1020__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1190"
+  },
+  "ATTACK-BAIT-009__T1195__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1195"
+  },
+  "ATTACK-BAIT-009__T1069__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1195"
+  },
+  "ATTACK-BAIT-011__T1204__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1204"
+  },
+  "ATTACK-BAIT-011__T1120__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1204"
+  },
+  "ATTACK-BAIT-013__T1547__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1547"
+  },
+  "ATTACK-BAIT-013__T1007__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1547"
+  },
+  "ATTACK-BAIT-015__T1136__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1136"
+  },
+  "ATTACK-BAIT-015__T1652__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1136"
+  },
+  "ATTACK-BAIT-017__T1068__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1068"
+  },
+  "ATTACK-BAIT-017__T1606__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1068"
+  },
+  "ATTACK-BAIT-019__T1134__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1134"
+  },
+  "ATTACK-BAIT-019__T1010__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1134"
+  },
+  "ATTACK-BAIT-021__T1027__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1027"
+  },
+  "ATTACK-BAIT-021__T1491__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1027"
+  },
+  "ATTACK-BAIT-023__T1140__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1140"
+  },
+  "ATTACK-BAIT-023__T1622__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1140"
+  },
+  "ATTACK-BAIT-025__T1110__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1110"
+  },
+  "ATTACK-BAIT-025__T1056__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1110"
+  },
+  "ATTACK-BAIT-027__T1558__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1558"
+  },
+  "ATTACK-BAIT-027__T1012__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1558"
+  },
+  "ATTACK-BAIT-029__T1087__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1087"
+  },
+  "ATTACK-BAIT-029__T1570__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1087"
+  },
+  "ATTACK-BAIT-031__T1057__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1057"
+  },
+  "ATTACK-BAIT-031__T1518__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1057"
+  },
+  "ATTACK-BAIT-033__T1080__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1080"
+  },
+  "ATTACK-BAIT-033__T1052__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1080"
+  },
+  "ATTACK-BAIT-035__T1005__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1005"
+  },
+  "ATTACK-BAIT-035__T1025__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1005"
+  },
+  "ATTACK-BAIT-037__T1560__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1560"
+  },
+  "ATTACK-BAIT-037__T1689__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1560"
+  },
+  "ATTACK-BAIT-039__T1071__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1071"
+  },
+  "ATTACK-BAIT-039__T1588__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1071"
+  },
+  "ATTACK-BAIT-041__T1572__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1572"
+  },
+  "ATTACK-BAIT-041__T1580__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1572"
+  },
+  "ATTACK-BAIT-043__T1132__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1132"
+  },
+  "ATTACK-BAIT-043__T1665__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1132"
+  },
+  "ATTACK-BAIT-045__T1567__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1567"
+  },
+  "ATTACK-BAIT-045__T1610__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1567"
+  },
+  "ATTACK-BAIT-047__T1486__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1486"
+  },
+  "ATTACK-BAIT-047__T1602__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1486"
+  },
+  "ATTACK-BAIT-049__T1489__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1489"
+  },
+  "ATTACK-BAIT-049__T1613__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1489"
+  },
+  "ATTACK-BAIT-051__T1221__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1221"
+  },
+  "ATTACK-BAIT-051__T1083__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1221"
+  },
+  "ATTACK-BAIT-053__T1649__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1649"
+  },
+  "ATTACK-BAIT-053__T1539__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1649"
+  },
+  "ATTACK-BAIT-055__T1571__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1571"
+  },
+  "ATTACK-BAIT-055__T1591__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1571"
+  },
+  "ATTACK-BAIT-057__T1531__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1531"
+  },
+  "ATTACK-BAIT-057__T1650__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1531"
+  },
+  "ATTACK-BAIT-059__T1565__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1565"
+  },
+  "ATTACK-BAIT-059__T1671__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1565"
+  },
+  "ATTACK-BAIT-061__T1125__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1125"
+  },
+  "ATTACK-BAIT-061__T1137__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1125"
+  },
+  "ATTACK-BAIT-063__T1678__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1678"
+  },
+  "ATTACK-BAIT-063__T1537__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1678"
+  },
+  "ATTACK-BAIT-065__T1653__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1653"
+  },
+  "ATTACK-BAIT-065__T1092__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1653"
+  },
+  "ATTACK-BAIT-067__T1216__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1216"
+  },
+  "ATTACK-BAIT-067__T1681__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1216"
+  },
+  "ATTACK-BAIT-069__T1112__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1112"
+  },
+  "ATTACK-BAIT-069__T1525__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1112"
+  },
+  "ATTACK-BAIT-071__T1674__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1674"
+  },
+  "ATTACK-BAIT-071__T1535__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1674"
+  },
+  "ATTACK-BAIT-073__T1668__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1668"
+  },
+  "ATTACK-BAIT-073__T1659__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1668"
+  },
+  "ATTACK-BAIT-075__T1220__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1220"
+  },
+  "ATTACK-BAIT-075__T1115__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1220"
+  },
+  "ATTACK-BAIT-077__T1611__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1611"
+  },
+  "ATTACK-BAIT-077__T1687__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1611"
+  },
+  "ATTACK-BAIT-079__T1568__pos": {
+    "intended": "positive",
+    "expected_technique_for_this_alert": "T1568"
+  },
+  "ATTACK-BAIT-079__T1592__neg_far": {
+    "intended": "negative",
+    "expected_technique_for_this_alert": "T1568"
+  },
+  "ATTACK-BAIT-001__T1566__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1055",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-003__T1021__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1566",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-005__T1190__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1021",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-007__T1195__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1190",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-009__T1204__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1195",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-011__T1547__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1204",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-013__T1136__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1547",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-015__T1068__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1136",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-017__T1134__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1068",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-019__T1027__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1134",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-021__T1140__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1027",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-023__T1110__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1140",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-025__T1558__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1110",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-027__T1087__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1558",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-029__T1057__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1087",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-031__T1080__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1057",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-033__T1005__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1080",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-035__T1560__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1005",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-037__T1071__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1560",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "ATTACK-BAIT-039__T1572__neg_near": {
+    "intended": "negative_near_miss",
+    "expected_technique_for_this_alert": "T1071",
+    "note": "Small index-shift distractor -- deliberately harder than the far-shift base negatives."
+  },
+  "EDGE-KERBEROS__T1558.001": {
+    "intended": "edge_case",
+    "expected_technique_for_this_alert": "T1558",
+    "note": "Real alert is a large/legacy-encryption Kerberos SERVICE ticket request (Kerberoasting-shaped); T1558.001 Golden Ticket is about forging a ticket-GRANTING ticket (TGT). Heavy lexical overlap on 'Kerberos'/'ticket', different sub-technique -- deliberately ambiguous, left unlabeled."
+  },
+  "EDGE-MALDOC__T1204.002": {
+    "intended": "edge_case",
+    "expected_technique_for_this_alert": "T1566",
+    "note": "Real alert's own EXPECTED_TECHNIQUE is T1566 (Phishing, the delivery stage), but the evidence text (macro-enabled Office doc opened, spawns a child process) also textually and conceptually overlaps T1204.002 (Malicious File, the execution stage of the same real-world chain) -- deliberately ambiguous, left unlabeled."
+  },
+  "EDGE-REVOKED__T1156": {
+    "intended": "edge_case",
+    "expected_technique_for_this_alert": "T1552",
+    "note": "T1156 (Malicious Shell Modification) is REVOKED in the snapshot. Alert is an unrelated plaintext-credential-exposure finding -- topically irrelevant on its own terms. Tests that the relevance classifier's BoW overlap score (which runs BEFORE the REVOKED check in verify_attack_technique()) isn't accidentally influenced by revocation status either way."
+  }
+}

@@ -1244,6 +1244,32 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 80. Issue #42 (R3) — C4 nearly done, 1,915 → 2,102/2,616
+
+**When:** Sep 22
+**What we tried:** One resume-loop run on a fresh day's quota window.
+
+**Result:** Banked another 187 rows before the quota wall. Final tally: **2,102/2,616 (80.4%)**. C0-C3 remain fully complete; C4 has only 78 pairs left, C5 (436) hasn't been started. No missing-CVE crashes, no other errors — clean daily-quota stop as usual.
+
+**What went wrong:** Nothing broke.
+
+**What it means:** At the same ~250 rows/well-spaced-session rate, roughly 2 more sessions should finish C4 and make a real dent in C5.
+
+---
+
+## 81. Issue #43 (R4) Part B — ATT&CK relevance-classifier pair set built (103 pairs)
+
+**When:** Sep 22
+**What we tried:** Task B.1 had zero pairs built for the ATT&CK side of the relevance-classifier validation (only the CVE side, Part A, has existing data). Built `build_attack_pairs.py`, the ATT&CK counterpart of the existing `build_pairs.py`: reuses the 150-alert `ATTACK_BAIT_ALERTS` pool and the same local MITRE snapshot the real guardrail verifies against (`attack_grounding.py`'s `_load_attack_techniques()`), so nothing here needed a live network or LLM call.
+
+**Result:** `experiments/evaluation/relevance_classifier_validation/attack_pairs_to_label.csv` — **103 pairs** (within the issue's 80-120 target): 40 anchors × (positive + far-shift negative) = 80 base pairs (exactly meets the "40 relevant / 40 irrelevant minimum" requirement), +20 near-miss negatives (same anchors, a small index-shift distractor instead of a far one — deliberately harder), +3 named edge cases straight from the issue's own Task B.1 text, each built from real already-committed alert evidence rather than invented prose: Kerberos service-ticket alert vs. T1558.001 Golden Ticket (heavy "Kerberos"/"ticket" lexical overlap, different sub-technique), a phishing macro-document alert vs. T1204.002 Malicious File (genuinely debatable — the alert's real technique is T1566 Phishing, but T1204.002 is a real component of the same attack chain), and a revoked technique (T1156) paired with an unrelated alert, to test that the relevance classifier's BoW score — which runs before the REVOKED check — isn't accidentally influenced by revocation status. Construction intent recorded separately in `attack_construction_key.json`, not in the labeling CSV, same blind-construction rationale as the CVE side. Verified zero leakage: no candidate technique ID or technique name appears literally in its own alert's evidence text, across all 103 rows.
+
+**What went wrong:** Nothing — fully deterministic, no external calls, ran clean first try.
+
+**What it means:** The ATT&CK side now has a pair set ready for annotation (Task B.2), matching Part A's CVE set in structure. Annotation itself — and the fallback approach for limited annotator time (single annotator + partial blind cross-check by the supervisor, per the issue's own Risks & Mitigations) — is a separate next step, not done in this pass.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
