@@ -1257,6 +1257,19 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 82. Issue #42 (R3) — C4 now fully complete, only C5 left, 2,102 → 2,343/2,616
+
+**When:** Sep 23
+**What we tried:** One resume-loop run on a fresh day's quota window.
+
+**Result:** Banked 241 more rows before the quota wall. Final tally: **2,343/2,616 (89.6%)**. **C0-C4 are all now fully complete.** Only C5 (None — all four guardrail toggles off) remains, with 273 pairs left. No missing-CVE crashes, no other errors.
+
+**What went wrong:** Nothing broke.
+
+**What it means:** This is the last config. One more well-spaced session at the observed ~250 rows/session rate should finish the entire 2,616-pair ablation study, unblocking Table T6/F3/F4 (issue #42 Tasks 3-4).
+
+---
+
 ## 81. Issue #43 (R4) Part B — ATT&CK relevance-classifier pair set built (103 pairs)
 
 **When:** Sep 22
