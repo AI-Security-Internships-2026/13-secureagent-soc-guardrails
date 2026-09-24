@@ -1322,6 +1322,23 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 86. Issue #45 (R6) — final RQ consistency check: found and fixed two real gaps
+
+**When:** Sep 24
+**What we tried:** Supervisor's condition for closing R6 was a final pass confirming RQ4 is fully answered now that #42's ablation landed, and that all RQ references/results/tables/figures stay consistent across the manuscript. Checked directly against the current compiled document rather than assuming the earlier restructure (#73) still held after #42's changes.
+
+**Result:** Found two real, previously-unnoticed inconsistencies, both fixed:
+1. **RQ4's own definition paragraph (Sect. 1.2) was stale** — it still read "a full ablation... was in progress at the time of writing and is not yet reported in this draft," even though Sect. 4.8 now reports the complete result. Rewritten to state the ablation is complete and summarize the actual finding (PII checker dominant, CVE/ATT&CK smaller distinct effects, input guardrail not causally isolable on this pool) — consistent with Sect. 4.8's own wording, not a new claim.
+2. **The RQ section's own promise wasn't being kept**: Sect. 1.2 states "each subsection [of the Evaluation section] opening by naming the research question it addresses," but 5 of the 9 evaluation subsections (CVE-bait, ATT&CK-bait, SelfCheckGPT, McNemar, Relevance classifier) had no such opening sentence — only Ablation and Cross-source did. Added one-sentence RQ-naming openers to all 5: CVE-bait and ATT&CK-bait -> RQ1 (the second explicitly noted as "on the second citation family"), SelfCheckGPT -> RQ2, McNemar -> RQ3, Relevance classifier -> explicitly non-RQ, framed as validating RQ1's taxonomy assumption (matching the existing "doesn't answer RQ1-RQ4 directly" pattern already used for the real-world and supporting-evaluation subsections).
+
+Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (page count unchanged despite the added sentences — absorbed into existing whitespace).
+
+**What went wrong:** Nothing broke — both gaps were real but low-risk (stale prose, not wrong numbers), caught by actually re-reading Sect. 1.2 against the current Sect. 4 rather than assuming a restructure from two weeks ago was still accurate after #42 landed.
+
+**What it means:** Issue #45/R6 has now satisfied the supervisor's stated closing condition. All 9 evaluation subsections are now internally consistent with the RQ section's own stated organizing promise, and RQ4 has a real answer instead of a leftover placeholder.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

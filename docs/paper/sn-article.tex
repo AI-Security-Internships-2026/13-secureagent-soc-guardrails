@@ -206,9 +206,13 @@ was an open question earlier in this project) both hold.
 \textbf{RQ4.} How do individual pipeline stages (input guardrail, CVE
 checker, ATT\&CK checker, PII redaction) individually affect detection
 outcomes and operational latency? Per-stage toggles are implemented and
-schema-parity-validated (Sect.~\ref{subsec:setup}); a full ablation
-across the paper's pooled evaluation set was in progress at the time of
-writing and is not yet reported in this draft.
+schema-parity-validated (Sect.~\ref{subsec:setup}); the full ablation
+across the paper's pooled evaluation set (Sect.~\ref{subsec:ablation},
+Table~\ref{tab:ablation}) is complete. The PII checker is the largest
+single contributor to the pipeline's review-flag rate; the CVE and
+ATT\&CK checkers each catch distinct, smaller sets of alerts; the input
+guardrail's contribution could not be causally isolated on this
+particular pool (Sect.~\ref{subsec:ablation} explains why).
 
 The rest of the paper is organized as follows: Sect.~\ref{sec:related-work}
 reviews related work; Sect.~\ref{sec:method} describes the pipeline and
@@ -569,7 +573,7 @@ per result file is provided in the repository's
 
 \subsection{Output guardrail: CVE-bait adversarial test}\label{subsec:cve-bait}
 
-The CVE-bait set grew from an initial $n=6$ to $n=150$ real CVEs across
+This subsection addresses RQ1. The CVE-bait set grew from an initial $n=6$ to $n=150$ real CVEs across
 three passes (2026-08-12, 2026-08-12, 2026-08-25), the later additions
 sourced in bulk from CISA's Known Exploited Vulnerabilities (KEV)
 catalog, with each alert's behavior description paraphrased from that
@@ -650,7 +654,7 @@ SelfCheckGPT/McNemar data source.
 
 \subsection{Output guardrail: ATT\&CK-bait adversarial test}\label{subsec:attack-bait}
 
-A parallel bait set covers MITRE ATT\&CK technique citations, expanded
+This subsection also addresses RQ1, on the second citation family. A parallel bait set covers MITRE ATT\&CK technique citations, expanded
 from $n=6$ to $n=150$ across two passes (2026-08-21, 2026-08-25). Every
 technique paraphrases its real, official MITRE description into
 symptom-only EDR/log-style telemetry, never stating the technique name
@@ -691,7 +695,7 @@ outright fabrication.
 
 \subsection{The central empirical result: SelfCheckGPT versus deterministic grounding}\label{subsec:selfcheckgpt}
 
-\textbf{Method.} SelfCheckGPT-style multi-sample consistency checking (3
+This subsection addresses RQ2. \textbf{Method.} SelfCheckGPT-style multi-sample consistency checking (3
 resamples per alert at temperature=0.7 --- production runs at
 temperature=0.1, Sect.~\ref{subsec:setup}, and would give resampling no
 diversity to measure) against the same 60-alert CVE pool used in
@@ -772,7 +776,7 @@ right cluster, but the wrong specific one.
 
 \subsection{Significance testing: deterministic grounding versus SelfCheckGPT}\label{subsec:mcnemar}
 
-A paired McNemar test between the deterministic pipeline and
+This subsection addresses RQ3. A paired McNemar test between the deterministic pipeline and
 SelfCheckGPT needed a separate run rather than reusing
 Sect.~\ref{subsec:selfcheckgpt}'s data: \texttt{sample\_citations()}
 bypasses the guardrail pipeline, so the deterministic checker's actual
@@ -885,6 +889,8 @@ result the paper leads with.
 
 \subsection{Relevance classifier validation}\label{subsec:relevance}
 
+This subsection doesn't answer RQ1-RQ4 directly; it validates the
+human-judgment assumption RQ1's taxonomy split relies on.
 \textbf{Method.} The \texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT}
 split (Sect.~\ref{subsec:taxonomy}) rests on
 Sect.~\ref{subsec:output-guardrail}'s Stage 2 relevance score --- a
