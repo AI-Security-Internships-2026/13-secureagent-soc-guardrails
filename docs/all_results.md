@@ -1339,6 +1339,19 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (
 
 ---
 
+## 87. Issue #51 (E6) Task 1 — system architecture figure (SYS1) built and integrated
+
+**When:** Sep 24
+**What we tried:** Built `make_architecture_figure.py`, drawing the pipeline's real execution order straight from `src/agent/soc_agent.py`'s `analyse_alert()` rather than an idealized version -- read the actual function body first (input guardrail with an early `BLOCKED` return, then LLM generation, then CVE/ATT&CK/PII guardrails running sequentially in that order, then an OR-aggregation into `requires_review`) so the diagram wouldn't misrepresent the real control flow. First draft had real layout bugs (headers clipped out of boxes, text overflowing box width, an in-diagram caption overlapping the converging arrows) -- fixed by switching to manual per-line text stacking instead of relying on matplotlib's unreliable `wrap=True`, and by moving the "independently toggleable, not concurrent" caveat out of the diagram itself and into the actual LaTeX figure caption instead, which reads more cleanly than cramming it between shapes.
+
+**Result:** `docs/paper/figures/fig_architecture.{pdf,png}`, inserted as Figure 1 at the top of Sect. 3 (`sec:method`), with a short lead-in paragraph and caption both stating explicitly that the three output-side guardrails are drawn side by side because they're independently toggleable (tested by Sect. 4.8's ablation), not because the implementation runs them concurrently -- it runs them sequentially, in the order shown. Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 33 pages (up 1 from the new figure).
+
+**What went wrong:** The first draft's layout bugs, described above -- caught by actually rendering and looking at the PNG rather than trusting the script ran without a Python exception. No content/accuracy issues; the pipeline order itself was correct from the first draft since it was read directly from the real function.
+
+**What it means:** Task 1 of issue #51/E6 is done. Task 2 (the citation-taxonomy decision figure) is still open.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

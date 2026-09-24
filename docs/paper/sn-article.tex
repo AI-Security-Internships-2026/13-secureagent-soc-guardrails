@@ -381,6 +381,31 @@ currently asks an analyst to trust its output as a black box.
 
 \section{Proposed Method}\label{sec:method}
 
+Fig.~\ref{fig:architecture} gives the pipeline's real execution order, as
+implemented in \texttt{analyse\_alert()}: an incoming alert first passes
+through the input guardrail; on a detected injection, a
+\texttt{BLOCKED} report is returned immediately and nothing below that
+point runs. Otherwise the LLM generates a threat report, which then
+passes through three independent guardrail stages --- CVE checking,
+ATT\&CK checking, and PII redaction --- before a final aggregation step
+sets \texttt{requires\_review}. Each of the three output-side stages is
+independently toggleable (this is exactly what the component ablation
+study, Sect.~\ref{subsec:ablation}, tests) and every field in the final
+report is always present regardless of which stages ran, but the figure
+draws them side by side purely for layout clarity: the implementation
+runs them sequentially, in the order shown, not concurrently. The rest
+of this section describes each stage in turn.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\linewidth]{figures/fig_architecture.pdf}
+\caption{System architecture: the pipeline's actual execution order.
+CVE, ATT\&CK, and PII guardrails are drawn side by side because each is
+independently toggleable (Sect.~\ref{subsec:ablation}'s ablation study),
+not because they run concurrently --- the implementation executes them
+sequentially, in this order.}\label{fig:architecture}
+\end{figure}
+
 \subsection{Threat model}\label{subsec:threat-model}
 
 \begin{table}[h]
