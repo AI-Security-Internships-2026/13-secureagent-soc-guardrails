@@ -1283,6 +1283,19 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 83. Issue #42 (R3) — ablation study fully complete, 2,616/2,616 (100%)
+
+**When:** Sep 24
+**What we tried:** Three more resume-loop runs across the day as Groq's quota trickled back — 2,373→2,613 (240 rows, one strong session), then a same-day retry landed exactly the last 3 rows of C5 (`soc_rule_engine` SOCRULE-074/075/076).
+
+**Result:** `python -m experiments.evaluation.ablation_driver --validate` confirms: **2,616 rows, all 6 configs present for each of 436 alerts.** All of C0 (full pipeline), C1 (−Input), C2 (−CVE), C3 (−ATT&CK), C4 (−PII), and C5 (None) are done. No missing-CVE crashes since the #76 fix, no other errors — every stop along the way was a clean, correctly-detected Groq daily-quota wall.
+
+**What went wrong:** Nothing broke, start to finish across the whole multi-day run (#75-#83). The only real friction was throughput variance with session spacing, documented in #78-#79.
+
+**What it means:** Issue #42's Task 2 (the full driver run) is done. Tasks 3-4 — Table T6 (6-config summary table), Figure F3 (taxonomy-class stacked bar per config), and Figure F4 (UpSet plot of unique-detection overlap) — can now be built from `experiments/results/ablation_full.jsonl`, which was blocked on this completing.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
