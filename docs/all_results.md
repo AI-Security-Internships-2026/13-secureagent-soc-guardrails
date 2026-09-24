@@ -1309,6 +1309,19 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 85. Issue #41 (R2) — final pre-close verification: citations, bibliography, and novelty statement all check out clean
+
+**When:** Sep 24
+**What we tried:** Supervisor's condition for closing R2 (per the issue's own comment thread) was a final check that every newly-added reference is correctly cited in both text and bibliography, and that the novelty statement clearly distinguishes LLMCite from prior general hallucination/citation-verification work. Did both checks directly against the current manuscript rather than trusting #64/#65's older conclusions to still hold.
+
+**Result:** (1) In-text content for both R2-added references (`ieee_2026_cross_self_verif_cyber`, `acl_findings_2026_entity_verif_rag`) re-checked word-for-word against #65's verified source facts (736 responses, Fleiss' $\kappa$=0.79, cross 56%/self 36.4%/$p$=0.034; EAEV's 87.89% AUROC) — exact match, no drift. (2) Full bibliography audit: wrote a script cross-referencing every `\cite{}` key in `sn-article.tex` against every entry in `sn-bibliography.bib` — 0 cited keys missing a bib entry (also confirmed by the compile itself: 0 undefined references), 0 broken entries. Found 13 orphaned entries (`bib1`-`bib13`) that are unmodified leftovers from the original Springer Nature template, never cited anywhere and not forced into the output (no `\nocite{*}`), so they don't appear in the compiled PDF at all — harmless, but flagged as an optional tidiness cleanup, not a correctness issue. (3) Re-read the actual novelty statement (Sect.~1, "To be clear about what's novel here..." through the `REAL_AND_PLAUSIBLE` paragraph) against the supervisor's own checklist: explicitly names the SOC-specific application, the four-class citation taxonomy, and the `REAL_AND_PLAUSIBLE` failure mode by name, each contrasted directly against general hallucination-detection literature (SelfCheckGPT, FActScore) and general-purpose guardrail frameworks (NeMo Guardrails, Guardrails AI) — all three of the supervisor's named elements present and correctly distinguishing. Recompiled clean: 0 undefined references, 32 pages, both new references render correctly formatted with DOI/URL and verification-date provenance notes in the References list (page 31, entries [7]/[8]).
+
+**What went wrong:** Nothing — every check passed on the first pass. No manuscript edits were needed; this was purely a verification pass.
+
+**What it means:** Issue #41/R2 has now satisfied every condition the supervisor set for closing it. Nothing else is pending on this issue from our side.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
