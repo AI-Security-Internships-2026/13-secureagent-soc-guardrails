@@ -1352,6 +1352,19 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (
 
 ---
 
+## 88. Issue #51 (E6) Task 2 — citation-taxonomy decision figure (TAX1) built and integrated
+
+**When:** Sep 24
+**What we tried:** Read `verify_cve()` (output_guardrail.py) and `verify_attack_technique()` (attack_grounding.py) side by side first to confirm they check conditions in the exact same order before drawing anything -- they do (both mirror the same five-step sequence: grounded? -> source reachable/has a description? -> exists at all? -> formally withdrawn? -> topical overlap >= 0.15?), so one diagram legitimately covers both citation families rather than needing two.
+
+**Result:** `docs/paper/figures/fig_taxonomy.{pdf,png}`, inserted in Sect. 3.5 (`subsec:taxonomy`) right after the existing taxonomy table, as a decision-sequence complement to it. `REAL_AND_PLAUSIBLE` is colored a distinct crimson (not grouped with the other "real" outcomes) with an explicit "highest-risk, precisely because it looks correct" label, matching the paper's own point in that subsection almost verbatim.
+
+**What went wrong, and fixed before committing:** First draft used true rhombus/diamond shapes for the 5 decision nodes -- real bug, not cosmetic: text lines near a diamond's tapered top/bottom apex sit where the shape has already narrowed well below its nominal width, so multi-line text overflowed and visually looked like truncated/missing characters (a diamond text-placement bug, not a string-content bug). Switched to rounded rectangles with a "?" marker and thick white border instead -- reads clearly as a decision node without the taper problem. Second draft then hit a real page-layout bug once inserted into the manuscript: the figure was tall enough that with `[h]` placement its caption's last line collided with the page-footer page number (verified by rendering the actual PDF page, not just trusting a clean compile log -- the compile itself showed no error, only "Underfull" notices, since LaTeX doesn't treat this kind of footer collision as a hard error). Fixed by compressing the diagram's internal vertical spacing (~20% tighter row spacing) and scaling the `\includegraphics` width down to 0.8\linewidth rather than the full column width, both of which reduce the rendered block's total height enough to clear the footer with margin.
+
+**What it means:** Issue #51/E6 is now fully done -- both Task 1 (architecture) and Task 2 (taxonomy) figures are built and integrated. Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 35 pages (up 2 from #87's architecture figure and this one). The overfull-hbox warnings present in the log are all pre-existing table-cell-width warnings unrelated to either new figure, confirmed by line number.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

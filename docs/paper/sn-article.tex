@@ -492,6 +492,22 @@ Class & Meaning \\
 \end{tabular}
 \end{table}
 
+Fig.~\ref{fig:taxonomy} shows the same taxonomy as the decision sequence
+that actually produces it --- both \texttt{verify\_cve()} and
+\texttt{verify\_attack\_technique()} check these conditions in this
+exact order, so one diagram covers both citation families.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{figures/fig_taxonomy.pdf}
+\caption{Citation classification decision sequence, identical in
+structure for CVE and MITRE ATT\&CK identifiers.
+\texttt{REAL\_AND\_PLAUSIBLE} is colored distinctly from the other
+terminal classes: it is the highest-risk outcome, not a safe one, since
+it looks correct on a manual read-through
+(Sect.~\ref{subsec:selfcheckgpt} shows this empirically).}\label{fig:taxonomy}
+\end{figure}
+
 Every ungrounded citation sets \texttt{requires\_review = True}
 unconditionally, regardless of class. That's a deliberate choice, not an
 oversight: an earlier version of the pipeline treated
