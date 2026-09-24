@@ -1296,6 +1296,19 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 84. Issue #42 (R3) Tasks 3-4 — Table T6, Figures F3/F4 built and integrated into the manuscript
+
+**When:** Sep 24
+**What we tried:** With the driver run complete (#83), built the actual deliverables Tasks 3-4 ask for from `experiments/results/ablation_full.jsonl`: `make_ablation_table_t6.py` (Table T6) and `make_ablation_figures.py` (F3 taxonomy-tier stacked bar, F4 UpSet plot of `requires_review` overlap across all 6 configs). F4 needed a new dependency (`upsetplot`, added to requirements.txt/requirements-lock.txt) — hit a genuine `upsetplot==0.9.0`/`matplotlib==3.11` incompatibility in its built-in count-label rendering (`show_counts=True` crashes with `TypeError: only 0-dimensional arrays...`, reproduced on a minimal 3-set example, not specific to this data); worked around it by drawing the bar-count annotations manually from the returned axes instead of relying on the library's broken path.
+
+**Result:** All three land in `sn-article.tex` §4.8 (`subsec:ablation`), replacing the old "in progress" placeholder paragraph — compiles clean, 0 undefined references, 32 pages. Headline numbers: Full pipeline flags 10.3% of alerts (45/436) for review; **removing the PII checker alone drops that to 3.2% (14/436, a 69% relative drop)** — the single largest contributor, and the opposite of the issue's own prior assumption that PII would have "negligible effect on citations" as an orthogonal feature. CVE/ATT&CK checkers each catch real, mostly-distinct alerts (F4's intersections aren't simple nested subsets) but at much smaller magnitude (under 1 percentage point each). `FABRICATED` and `UNVERIFIED` never occurred in this pool at any configuration.
+
+**What went wrong:** Two things worth flagging, both written into the manuscript text directly rather than only noted here: (1) the `upsetplot` library bug above, worked around; (2) the input guardrail (`C1`) never blocked a single alert in this pool in any configuration (0/2,616 `guardrail_blocked`), so the small `C0`-vs-`C1` differences in the table can't be read as a causal effect of removing it — each (config, alert) row is an independent live LLM call, not a shared generation replayed under different toggles, so that specific delta is most plausibly ordinary sampling noise. Said so plainly in the manuscript rather than implying a precision the data doesn't support.
+
+**What it means:** Issue #42/R3 is now fully done — Tasks 1-4 complete, Contributions list left untouched (still 3 items, per Task 5's explicit "do not add a 4th"). RQ4 (the ablation research question) now has a real, honestly-caveated answer in the manuscript instead of a placeholder.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

@@ -1010,20 +1010,102 @@ flags existed) --- gated purely at the orchestrator call site, so a
 disabled stage's check function is never called at all rather than
 called-then-discarded, keeping the ablation's latency numbers honest.
 
-\textbf{Status at the time of writing.} A 2-alert $\times$
-6-configuration schema-parity smoke test is complete and passing: every
-configuration, including every guardrail disabled, produces a
-structurally identical report schema (this is also exercised directly by
+A 2-alert $\times$ 6-configuration schema-parity smoke test passed
+first: every configuration, including every guardrail disabled, produces
+a structurally identical report schema (also exercised directly by
 \texttt{tests/test\_soc\_agent\_schema\_parity.py}, part of the 158-test
-suite reported in Sect.~\ref{subsec:setup}). The full evaluation --- 6
-configurations across the paper's pooled alert set, reporting per-config
-ungrounded/review/PII/latency numbers and each guardrail's
-uniquely-caught-alert contribution --- was in progress at the time of
-writing and is not yet reported in this draft; see the project roadmap
-and committed, timestamped result files in the repository for current
-status. We report this honestly as ongoing rather than either
-fabricating numbers or silently omitting the subsection RQ4 is meant to
-answer.
+suite reported in Sect.~\ref{subsec:setup}).
+
+\textbf{Pool and configurations.} The full run covers a 436-alert pool
+--- the 150 CVE-bait and 150 ATT\&CK-bait alerts and the 60-alert CVE
+pool (all Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}), and 76
+\texttt{Secure\_SOC\_AI}
+rule-engine incidents (Sect.~\ref{subsec:realworld}) --- a scope
+correction from an originally planned 479/575-alert figure: the 139 live
+Wazuh alerts (also Sect.~\ref{subsec:realworld}) could not be included,
+since only \texttt{wazuh\_alert\_id}/\texttt{rule\_id}/\texttt{rule\_level}
+were persisted from that run, not the per-event fields (source IP,
+payload, hostname) the alert text itself depends on, and re-collecting a
+fresh batch would no longer be identical to the alerts producing this
+paper's other reported numbers. Six configurations --- \texttt{C0} full
+pipeline, \texttt{C1}--\texttt{C4} each disabling exactly one of the four
+guardrail stages, and \texttt{C5} all four disabled --- were run against
+every alert: 2{,}616 total live \texttt{gpt-oss-20b} calls, executed
+across several sessions under Groq's free-tier daily token quota and
+resumed from a crash-safe, per-row-fsynced checkpoint between sessions.
+
+\textbf{Result} (Table~\ref{tab:ablation}):
+
+\begin{table}[h]
+\caption{Component ablation summary (T6): 6 configurations $\times$ 436 alerts, 2{,}616 total runs}\label{tab:ablation}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Config & Ungrounded & Review & PII det. & Input FP & Latency ms (IQR) & Lost/gained vs.\ Full \\
+\midrule
+Full pipeline & 5 & 45 (10.3\%) & 66 & 0 & 4766 [1956, 7064] & --- \\
+$-$Input & 13 & 45 (10.3\%) & 56 & 0 & 4604 [2226, 6303] & 12 / 12 \\
+$-$CVE & 8 & 46 (10.6\%) & 59 & 0 & 5005 [2226, 7148] & 13 / 14 \\
+$-$ATT\&CK & 4 & 41 (9.4\%) & 63 & 0 & 4313 [2237, 6312] & 11 / 7 \\
+$-$PII & 15 & 14 (3.2\%) & 0 & 0 & 5408 [2061, 7454] & 39 / 8 \\
+None & 0 & 0 (0.0\%) & 0 & 0 & 5085 [1827, 7638] & 45 / 0 \\
+\botrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig_ablation_taxonomy_stacked.pdf}
+\caption{Component ablation: citation-taxonomy tier of every CVE/ATT\&CK
+verification performed, by configuration. \texttt{FABRICATED} and
+\texttt{UNVERIFIED} never occurred in this pool at any configuration.
+\texttt{REAL\_AND\_PLAUSIBLE} (the taxonomy tier this paper's central
+finding is built on) dominates every configuration's bar, consistent
+with Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}'s bait-test
+results on the same two citation families.}\label{fig:ablation-taxonomy}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig_ablation_upset_unique_alerts.pdf}
+\caption{Component ablation: overlap, across all six configurations, of
+which alerts were flagged \texttt{requires\_review}. The largest bar (24
+alerts) is the set flagged by every configuration except \texttt{C4}
+(\texttt{-PII}) and \texttt{C5} --- i.e.\ alerts whose review flag
+depends on the PII checker regardless of any other guardrail's state.
+No bar groups \texttt{C5} with any other configuration, since \texttt{C5}
+flags nothing.}\label{fig:ablation-upset}
+\end{figure}
+
+\textbf{The PII checker, not citation verification, is this pool's
+dominant contributor to the review-flag rate.} Disabling it alone drops
+the flag rate from 10.3\% to 3.2\% (45 $\to$ 14 of 436 alerts, a 69\%
+relative drop) --- a materially larger effect than either citation
+checker in isolation, and the opposite of what might be assumed for a
+guardrail whose stated purpose (Sect.~\ref{subsec:pii-guardrail}) is orthogonal to
+citation grounding. The CVE and ATT\&CK checkers each catch a real,
+mostly distinct set of alerts --- Fig.~\ref{fig:ablation-upset}'s
+intersections are not simply nested subsets of one another --- but at
+smaller magnitude on this pool (review-flag rate moves by under 1
+percentage point when either is disabled alone). \textbf{We do not claim
+every component is equally essential}: that claim would only be
+supported if every single-stage removal produced a comparable drop, and
+it does not.
+
+\textbf{The input guardrail's contribution cannot be read causally from
+this table.} It never blocked a single alert in this pool, in any
+configuration (0 \texttt{guardrail\_blocked} occurrences across all
+2{,}616 rows) --- unsurprising, since this pool was built to stress
+citation grounding and PII leakage, not prompt injection
+(Sect.~\ref{subsec:input-guardrail} covers that comparison on its own
+purpose-built dataset). Because each (configuration, alert) pair is an
+independent live LLM call rather than a shared generation replayed under
+different guardrail settings, the small differences visible between
+\texttt{C0} and \texttt{C1} in Table~\ref{tab:ablation} (e.g.\ ungrounded
+detections 5 vs.\ 13) are, on a pool where the input guardrail
+demonstrably never intervened, most plausibly ordinary sampling variance
+between two independent generations rather than a demonstrated causal
+effect of removing that stage --- reported plainly rather than implying
+a precision this pool's design cannot support.
 
 \subsection{Cross-source grounding summary}\label{subsec:crosssource}
 

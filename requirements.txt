@@ -19,6 +19,7 @@ scikit-learn
 scipy
 matplotlib
 openpyxl
+upsetplot
 
 # Utilities
 python-dotenv
