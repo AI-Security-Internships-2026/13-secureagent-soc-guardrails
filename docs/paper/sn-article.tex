@@ -974,6 +974,68 @@ failure mode --- short or generic authoritative descriptions starving a
 bag-of-words scorer --- produces false negatives on genuinely correct
 citations, a disclosed limitation restated in Sect.~\ref{sec:discussion}.
 
+\textbf{Blind self-consistency cross-check.} No second independent
+annotator was recruited for this validation --- an explicit scope
+decision under annotator-time constraints, not an oversight. Instead,
+the same rater blind-relabeled a stratified 20\% sample (16 of the 80
+pairs: 8 positive-by-construction, 8 negative-by-construction, matching
+the full set's exact split), with the CVE ID hidden and no access to
+the original labels while relabeling. Result: 16/16 exact agreement
+(Cohen's $\kappa=1.0$, 95\% CI $[1.0,1.0]$, 1000 bootstrap resamples).
+This is evidence of this rater's self-consistency, not of independent
+inter-rater reliability --- a genuinely different second annotator
+could still disagree with this rater's criteria in ways a self-recheck
+cannot surface, a limitation restated in Sect.~\ref{sec:discussion}.
+
+\textbf{ATT\&CK side.} The same classifier and the same 0.15 threshold
+--- calibrated on CVE pairs only, left unchanged here rather than
+retuned, since retuning on this dataset would be a form of leakage ---
+were separately validated against 103 (alert, candidate technique)
+pairs: 40 anchor alerts from the ATT\&CK-bait set
+(Sect.~\ref{subsec:attack-bait}), each paired with its own correct
+technique and a distractor (80 base pairs, meeting the required 40/40
+relevant/irrelevant minimum), 20 additional harder near-miss distractor
+pairs, and 3 named edge cases built to probe specific known failure
+shapes: a Kerberos-ticket alert against \texttt{T1558.001} Golden
+Ticket (heavy lexical overlap, a different sub-technique), a
+phishing-document alert against \texttt{T1204.002} Malicious File (a
+genuinely debatable pairing), and a revoked technique
+(\texttt{T1156}) against an unrelated alert. Labeled by a single rater,
+blind to the technique ID --- though not to its plain-English name,
+left visible after an early attempt to redact that too made the text
+unreadable without adding real blinding, since MITRE's own descriptions
+use a technique's name as an ordinary descriptive noun throughout their
+prose (e.g.\ \texttt{T1566} Phishing's description uses ``phishing'' 10
+times), unlike NVD's number-based CVE text. No independent cross-check
+was performed on this side.
+
+\textbf{Result} (\texttt{attack\_relevance\_classifier\_validation\_results.json},
+$n=103$): \textbf{accuracy 83.5\% (95\% CI [75.2\%, 89.4\%]), precision
+74.0\% (95\% CI [60.5\%, 84.1\%]), recall 90.2\% (95\% CI [77.5\%,
+96.1\%]), F1 81.3\%} (TP=37, FP=13, TN=49, FN=4) --- a real,
+meaningfully lower number than the CVE side's 92.5\%, though still
+above the 0.80 floor below which this validation was explicitly
+designed not to retune the threshold; it stays at 0.15. 12 of the 13
+false positives land on negative or near-miss pairs, confirming the
+terser-description hypothesis directly: the classifier calls
+genuinely-irrelevant technique pairs relevant more often on this family
+than on CVE's longer NVD prose. The named Golden Ticket edge case lands
+exactly as designed --- overlap 0.382 (driven by shared
+``Kerberos''/``ticket'' vocabulary), predicted relevant, but correctly
+judged \texttt{not\_relevant} by the human rater: a concrete, legible
+instance of the classifier's lexical-overlap-versus-true-relevance gap,
+not an abstract concern. The 4 false negatives sit on genuinely correct
+pairs where overlap fell just under threshold, one as low as 0.035 ---
+the same short-authoritative-description failure mode already disclosed
+for the CVE side, evidently present here too.
+
+\textbf{What this means.} The relevance classifier generalizes to a
+second citation family, but at a real, disclosed accuracy cost
+(92.5\%$\to$83.5\%) rather than an assumed-free one --- consistent
+with, not contradicting, this paper's broader finding that ATT\&CK is
+measurably harder for both models (Sect.~\ref{subsec:selfcheckgpt}) and
+this classifier alike.
+
 \subsection{Real-world deployment validation: third-party incident generator and live Wazuh SIEM data}\label{subsec:realworld}
 
 This subsection doesn't answer RQ1-RQ4 directly; it provides supporting
@@ -1571,16 +1633,21 @@ what was tested.
   \texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT}
   (Sect.~\ref{subsec:output-guardrail}, validated
   Sect.~\ref{subsec:relevance}) is 92.5\% accurate against human
-  judgment ($n=80$), not perfect --- its 6 disagreements cluster at the
-  0.15 decision threshold, with a known failure mode on short/generic
-  authoritative descriptions. Its labels are AI-suggested and
-  human-confirmed, not independently annotated from scratch. All 80
-  validation pairs are drawn from the CVE-bait set, so this
-  92.5\%-accuracy figure validates the scorer's CVE-side behavior only;
-  the same scorer's ATT\&CK-side accuracy, against STIX technique
-  descriptions rather than NVD prose, has not been independently
-  checked, despite the two authoritative sources differing
-  structurally in description length and style.
+  judgment on CVE pairs ($n=80$) and 83.5\% accurate on ATT\&CK pairs
+  ($n=103$), not perfect on either family --- the CVE side's 6
+  disagreements cluster at the 0.15 decision threshold, with a known
+  failure mode on short/generic authoritative descriptions; the
+  ATT\&CK side's 17 disagreements concentrate on false positives for
+  negative/near-miss pairs, consistent with its terser STIX prose
+  making the same CVE-calibrated threshold too permissive there. Per
+  this validation's own design, the threshold was \textit{not} retuned
+  on the ATT\&CK-side data to fix this --- doing so would itself be a
+  form of dataset leakage; the classifier is reported as-is, warts
+  included. Both sets of labels come from a single rater, not two
+  independent annotators: the CVE side was additionally cross-checked
+  via a blind 20\% self-relabel (16/80 pairs, Cohen's $\kappa=1.0$),
+  which demonstrates rater self-consistency but not independent
+  inter-rater reliability; the ATT\&CK side has no cross-check at all.
 \end{itemize}
 
 \textbf{Threats to validity.} The input-guardrail comparison
@@ -1600,15 +1667,21 @@ from the local MITRE snapshot rather than any real-world prevalence
 signal, so its rate reflects how often the model reaches for a specific
 technique ID given a resembling symptom description, not attacker
 behavior frequency. Every human-labeled ground truth in this
-paper --- the relevance classifier's 80 pairs
-(Sect.~\ref{subsec:relevance}) most directly, since it's the only one
-reported as a citable accuracy figure --- comes from a single rater,
-with no second annotator and no inter-rater agreement statistic; the
-one check against rater drift is a blind re-check of the 3 pairs
-flagged as most ambiguous, not independent double-labeling of the full
-set. This is a real threat to validity, not fully addressed by the
-``AI-suggested, human-confirmed'' disclosure already given for that
-figure.
+paper --- the relevance classifier's CVE and ATT\&CK pairs
+(Sect.~\ref{subsec:relevance}), now the only ones reported as citable
+accuracy figures on both citation families --- comes from a single
+rater rather than two independent annotators working blind to each
+other. No second annotator was recruited for either family; this is an
+explicit scope decision under annotator-time constraints, disclosed
+here rather than left implicit. The CVE side's labels were cross-checked
+via a blind 20\% self-relabel (perfect agreement, Cohen's $\kappa=1.0$),
+which is evidence of this rater's self-consistency, not of independent
+inter-rater reliability --- a genuinely different second annotator
+could still disagree with this rater's criteria in ways a self-recheck
+cannot surface. The ATT\&CK side has no cross-check of any kind. We
+cannot rule out residual single-rater bias on either citation family's
+ground truth; a fully independent second annotator, or a cross-site
+replication, would strengthen this and remains future work.
 
 \section{Conclusion}\label{sec:conclusion}
 

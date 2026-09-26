@@ -1407,6 +1407,24 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (
 
 ---
 
+## 92. Issue #43 (R4) Tasks C — §4.6 and §5 rewritten with real numbers, both citation families
+
+**When:** Sep 26
+**What we tried:** With real numbers in hand for both families (#90 ATT&CK, #91 CVE), wrote the actual manuscript update rather than force-fitting the issue's own suggested template text, which assumes two independent annotators plus a third-rater tie-breaker -- that never happened, and copying that wording would have been a factual misrepresentation of what was actually done (single rater, blind self-check on a 20% CVE sample, no cross-check at all on ATT&CK).
+
+**Result:** Three spots in `sn-article.tex` updated:
+1. Sect. 4.6 (`subsec:relevance`) -- added a "Blind self-consistency cross-check" paragraph (16/16 agreement, Cohen's kappa=1.0, 95% CI [1.0,1.0], explicitly framed as self-consistency not inter-rater reliability) and a full new "ATT&CK side" Method/Result/What-this-means block (n=103, accuracy 83.5%, F1 81.3%, the Golden Ticket edge case and the false-positive concentration on near-miss pairs both called out by name).
+2. The Sect. 5 Limitations bullet -- rewritten from CVE-only (92.5%, single rater, no ATT&CK check) to cover both families with their real numbers, the explicit "threshold not retuned" disclosure the issue required, and the honest self-check-vs-cross-check distinction.
+3. The Sect. 5 Threats-to-Validity paragraph -- rewritten the same way, ending on the issue's own spirit ("we cannot rule out residual bias... a fully independent second annotator... remains future work") but accurate to a single-rater-plus-self-check reality rather than the two-annotator scenario the issue's suggested wording assumed.
+
+Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 36 pages (up 1). Visually verified all three edited spots render correctly and read naturally into their surrounding sections, not just that the compile succeeded.
+
+**What went wrong:** Nothing -- straightforward writing task once both real number sets were in hand.
+
+**What it means:** Issue #43/R4 is now fully done -- annotation tooling (#89), both families' real classifier-validation numbers (#90, #91), and the manuscript rewrite (this entry). Nothing further pending on this issue from our side.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
