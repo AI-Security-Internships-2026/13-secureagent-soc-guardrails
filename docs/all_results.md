@@ -1365,6 +1365,22 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (
 
 ---
 
+## 89. Issue #43 (R4) — annotation tooling built for the degraded-scope fallback (no second annotator)
+
+**When:** Sep 26
+**What we tried:** User confirmed no independent second annotator will be recruited -- they'll personally do the labeling, per the issue's own "Risks & Mitigations" fallback ("single annotator + 20% blind cross-check... report kappa with n=0.2xN bootstrap"). Built the three pieces needed to actually run that fallback for both citation families:
+1. `build_cve_crosscheck_sheet.py` -- CVE side already has annotator 1's full 80-pair pass. Samples a 20% (16-pair) subset, stratified 8/8 across the pool's own positive/negative-by-construction split (not a plain random 16, so the reduced sample isn't accidentally skewed), reusing the existing blind-sheet's exact ID-redaction logic rather than re-deriving it. Produces `cve_crosscheck_BLIND.xlsx` (to fill in) + `cve_crosscheck_key_HIDDEN.csv` (annotator 1's original labels on just those 16, not to be consulted while labeling).
+2. `build_attack_annotation_sheet.py` -- ATT&CK side has zero labels at all yet (no annotator-1 pass exists to cross-check against), so this builds the full 103-pair blind sheet as the first real pass. Found and fixed a real over-redaction bug in the first draft: naively porting the CVE side's "redact the ID and the name" logic redacted the technique's plain-English name too (e.g. "Phishing"), and MITRE's official descriptions routinely use that name as an ordinary descriptive noun throughout their own prose (10 occurrences of "phishing" in one description) -- redacting all of them left sentences like "Adversaries may send [NAME REDACTED] messages... known as spear[NAME REDACTED]," destroying readability while blinding nothing real (the remaining sentence still obviously means phishing). Fixed by only redacting the technique ID (the actual look-up-able identifier, the direct equivalent of a CVE number), leaving the descriptive prose untouched -- verified by re-reading the actual redacted output before deciding it was right, not just trusting the diff count dropped.
+3. `compute_cohen_kappa.py` -- observed agreement, Cohen's kappa, and a 1000-resample bootstrap 95% CI (appropriate specifically because n=16 is small, where an asymptotic-normal CI formula would be a poor approximation), plus a `disagreements_cve.csv` export with a blank `reason` column for the qualitative note Task A.2 asks for. Refuses to run with a clear message if any row is still unfilled, rather than silently computing on a partial n. End-to-end tested against a synthetic filled-in copy (2 simulated disagreements out of 16) before considering it done -- correctly produced n=16, 87.5% agreement, kappa=0.750, 95% CI [0.355, 1.000] -- then discarded the test artifacts.
+
+**Result:** All three scripts committed. `cve_crosscheck_BLIND.xlsx` (16 pairs) and `attack_annotation_BLIND.xlsx` (103 pairs) are ready to fill in now; `compute_cohen_kappa.py` is ready to run the moment the CVE cross-check sheet comes back.
+
+**What went wrong:** The ATT&CK name-redaction bug above -- caught by actually reading the redacted text output rather than trusting the script ran without error.
+
+**What it means:** The blocking factor on R4 is now purely annotator time (filling in two spreadsheets), not missing tooling. Once both come back: run `compute_cohen_kappa.py` for the CVE kappa/CI, compute pipeline accuracy against the resolved CVE labels and the ATT&CK labels directly (single-annotator, honestly disclosed as such per the issue's own fallback), and write up §4.6/§5 with the real numbers.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
