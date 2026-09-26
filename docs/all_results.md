@@ -1453,6 +1453,19 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 95. Issue #44 (R5) — first session banks 88/150 (58.7%)
+
+**When:** Sep 27
+**What we tried:** Let the driver from #94 run unbounded in the background.
+
+**Result:** 88/150 rows before the quota wall (`Used 198,501/200,000, requested 1,808`) -- faster than the ~250-rows/session estimate from R3 carried over, likely because these rows are cheaper (3 calls each, no NVD-snapshot overhead, short single-CVE-pool prompts). T=0.1 and T=0.3 fully complete; T=0.5 has only 2 alerts left; T=0.7 and T=1.0 (30 each) not started.
+
+**What went wrong:** Nothing -- clean quota-wall stop, no code errors.
+
+**What it means:** At this rate, one more well-spaced session should very plausibly finish the entire 150-row grid.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
