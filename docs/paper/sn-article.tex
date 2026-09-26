@@ -974,18 +974,19 @@ failure mode --- short or generic authoritative descriptions starving a
 bag-of-words scorer --- produces false negatives on genuinely correct
 citations, a disclosed limitation restated in Sect.~\ref{sec:discussion}.
 
-\textbf{Blind self-consistency cross-check.} No second independent
-annotator was recruited for this validation --- an explicit scope
-decision under annotator-time constraints, not an oversight. Instead,
-the same rater blind-relabeled a stratified 20\% sample (16 of the 80
-pairs: 8 positive-by-construction, 8 negative-by-construction, matching
-the full set's exact split), with the CVE ID hidden and no access to
-the original labels while relabeling. Result: 16/16 exact agreement
-(Cohen's $\kappa=1.0$, 95\% CI $[1.0,1.0]$, 1000 bootstrap resamples).
-This is evidence of this rater's self-consistency, not of independent
-inter-rater reliability --- a genuinely different second annotator
-could still disagree with this rater's criteria in ways a self-recheck
-cannot surface, a limitation restated in Sect.~\ref{sec:discussion}.
+\textbf{Independent second-annotator validation.} A second, genuinely
+independent annotator blind-labeled all 80 pairs --- the CVE ID, the
+pipeline's own suggested label, and annotator 1's label all withheld,
+labeling done with no access to annotator 1's pass and no communication
+between raters until both were complete. (An earlier, interim check
+before this second annotator was available had the same original rater
+blind-relabel a stratified 20\% sample as a self-consistency check
+only, not a substitute for this; that interim result is superseded by
+the one below.) Result: \textbf{80/80 exact agreement, Cohen's
+$\kappa=1.0$ (95\% CI $[1.0,1.0]$, 1000 bootstrap resamples), zero
+disagreements to resolve.} This is genuine independent inter-rater
+agreement, not a self-consistency proxy: two different people, working
+blind to each other, classified every one of the 80 pairs identically.
 
 \textbf{ATT\&CK side.} The same classifier and the same 0.15 threshold
 --- calibrated on CVE pairs only, left unchanged here rather than
@@ -1643,11 +1644,13 @@ what was tested.
   this validation's own design, the threshold was \textit{not} retuned
   on the ATT\&CK-side data to fix this --- doing so would itself be a
   form of dataset leakage; the classifier is reported as-is, warts
-  included. Both sets of labels come from a single rater, not two
-  independent annotators: the CVE side was additionally cross-checked
-  via a blind 20\% self-relabel (16/80 pairs, Cohen's $\kappa=1.0$),
-  which demonstrates rater self-consistency but not independent
-  inter-rater reliability; the ATT\&CK side has no cross-check at all.
+  included. The CVE side's ground truth was independently
+  double-annotated: a second, genuinely independent rater blind-labeled
+  all 80 pairs with no access to the first rater's labels, agreeing on
+  every single one (Cohen's $\kappa=1.0$, $n=80$, zero disagreements to
+  resolve). The ATT\&CK side's labels come from a single rater with no
+  independent cross-check at all --- a real asymmetry between the two
+  citation families' ground truth that remains disclosed as such.
 \end{itemize}
 
 \textbf{Threats to validity.} The input-guardrail comparison
@@ -1666,22 +1669,19 @@ analogous bias in the other direction --- technique selection is drawn
 from the local MITRE snapshot rather than any real-world prevalence
 signal, so its rate reflects how often the model reaches for a specific
 technique ID given a resembling symptom description, not attacker
-behavior frequency. Every human-labeled ground truth in this
-paper --- the relevance classifier's CVE and ATT\&CK pairs
-(Sect.~\ref{subsec:relevance}), now the only ones reported as citable
-accuracy figures on both citation families --- comes from a single
-rater rather than two independent annotators working blind to each
-other. No second annotator was recruited for either family; this is an
-explicit scope decision under annotator-time constraints, disclosed
-here rather than left implicit. The CVE side's labels were cross-checked
-via a blind 20\% self-relabel (perfect agreement, Cohen's $\kappa=1.0$),
-which is evidence of this rater's self-consistency, not of independent
-inter-rater reliability --- a genuinely different second annotator
-could still disagree with this rater's criteria in ways a self-recheck
-cannot surface. The ATT\&CK side has no cross-check of any kind. We
-cannot rule out residual single-rater bias on either citation family's
-ground truth; a fully independent second annotator, or a cross-site
-replication, would strengthen this and remains future work.
+behavior frequency. Human-labeled ground truth in this paper is not
+uniformly independently double-annotated across both citation families.
+The relevance classifier's CVE pairs (Sect.~\ref{subsec:relevance},
+$n=80$) were: a second, genuinely independent annotator blind-labeled
+the full set with no access to the first rater's labels, agreeing on
+every single pair (Cohen's $\kappa=1.0$, zero disagreements to resolve)
+--- real independent inter-rater agreement, not a self-consistency
+proxy. The ATT\&CK pairs ($n=103$) were not: no second annotator was
+recruited for that family, an explicit scope decision under
+annotator-time constraints rather than an oversight left undisclosed.
+We cannot rule out residual single-rater bias on the ATT\&CK side's
+ground truth specifically; a second independent annotator for that
+family, or a cross-site replication of both, remains future work.
 
 \section{Conclusion}\label{sec:conclusion}
 

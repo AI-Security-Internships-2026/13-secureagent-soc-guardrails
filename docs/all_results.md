@@ -1425,6 +1425,21 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 36 pages (
 
 ---
 
+## 93. Issue #43 (R4) — real independent second-annotator pass done, satisfying the supervisor's explicit ask: perfect agreement, kappa = 1.0, n=80
+
+**When:** Sep 26-27
+**What we tried:** Re-reading the supervisor's Sep 22 comment on #43 turned up a real gap in #89-#92's work: the comment explicitly asks for "the actual independent second annotation" with disagreements "resolved transparently" -- not the degraded single-rater-plus-self-check fallback #89-#92 used (which the user had explicitly chosen given no annotator time was available at that point). Flagged this conflict directly rather than letting it surface later. User then got a genuinely independent second person to label the existing full-80-pair blind sheet (`annotator2_cve_pairs_BLIND.xlsx`, already built back in Sep 14, regenerated fresh to confirm it was current) and sent back the completed file.
+
+Verified before computing anything (same discipline as #91, where two wrong files were caught this same way first): confirmed all 80 `pair_id`s matched the true set exactly, all labels valid, 40/40 split -- no ID mismatches this time. Built `compute_inter_rater_agreement.py` (the actual Task A.3 script, superseding `compute_cohen_kappa.py`'s reduced-scope version) comparing `annotator1_and_key_HIDDEN.csv` against the new independent second annotator's labels.
+
+**Result:** `inter_rater_agreement_results.json`: **n=80, 100% observed agreement, Cohen's kappa=1.0 (95% CI [1.0,1.0], 1000 bootstrap resamples), 0 disagreements** -- genuine independent inter-rater agreement between two different people, not a self-consistency proxy. Rewrote the Sect. 4.6/5 CVE-side text again (superseding #92's 20%-self-check framing, which is now explicitly marked as an interim step before the real second annotator was available, not left silently replaced): the "Blind self-consistency cross-check" paragraph became "Independent second-annotator validation"; the Limitations bullet and Threats-to-Validity paragraph both updated to say the CVE side now has real independent double-annotation while the ATT&CK side (still single-rater, #90) does not -- an honest asymmetry, not glossed over. Recompiled clean: 0 undefined references, 36 pages (unchanged), no new overfull warnings.
+
+**What went wrong:** Nothing on this pass -- the right file arrived clean and matched exactly on the first try this time.
+
+**What it means:** Issue #43/R4 now genuinely satisfies the supervisor's own explicit request for independent double-annotation on the CVE side, not just the issue's own degraded-scope fallback text. The ATT&CK side remains single-rater only (disclosed as such) -- getting a second independent annotator for that family too would close the one remaining asymmetry, but isn't required by anything the supervisor has said so far.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
