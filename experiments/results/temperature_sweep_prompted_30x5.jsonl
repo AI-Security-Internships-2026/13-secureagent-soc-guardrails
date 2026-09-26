@@ -1,0 +1,1 @@
+{"temperature": 0.1, "alert_id": "SELFCHECK-PROMPTED-001", "ground_truth_cve": "CVE-2021-44228", "samples": [["CVE-2021-44228"], ["CVE-2021-44228"], ["CVE-2021-44228"]], "any_citation_rate": 1.0, "majority_id": "CVE-2021-44228", "agreement_rate": 1.0, "flagged_unstable": false, "citation_occurred": true, "classification": "REAL_AND_PLAUSIBLE", "topical_overlap": 0.333}

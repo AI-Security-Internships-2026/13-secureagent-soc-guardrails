@@ -1440,6 +1440,19 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 94. Issue #44 (R5) Task 1 — temperature-sweep driver built, smoke-tested, and launched
+
+**When:** Sep 27
+**What we tried:** All of R1-R4 now being done unblocks R5 per the issue's own explicit "do not open until..." gate. Built `temperature_sweep_driver.py`, mirroring `ablation_driver.py`'s proven resumable-JSONL pattern (append-only, fsynced per row, retry-with-backoff on the same 4 Groq exception types). Scope decision, documented in the module docstring rather than silently made: restricted the sweep to the 30 PROMPTED (withheld-CVE) alerts from `selfcheckgpt_alerts.py` rather than the issue's literal "60 CVE pool items" -- all four required metrics (volunteer rate, unsupported-citation rate, SelfCheckGPT recall, LLMCite detection rate) are only meaningful on the withheld class, since the stated class is handed its CVE directly and "volunteering" isn't a coherent concept there. Halves the call count (450 vs. 900) without dropping anything either the four metrics or the F6 figure need. Chose live NVD verification over the frozen snapshot (issue #48/E3) for classification, since this sweep's lookup volume is small/bounded and NVD's rate limit is independent of Groq's token quota -- also sidesteps the missing-snapshot crash #42/R3 hit entirely.
+
+**Result:** Smoke-tested with `--limit 3` (one alert, one temperature, 3 real resamples) before committing to a longer run: `SELFCHECK-PROMPTED-001` at T=0.1 volunteered `CVE-2021-44228` (Log4Shell) all 3 times, live-verified as `REAL_AND_PLAUSIBLE` (topical_overlap=0.333), `flagged_unstable=False` -- a real, sane, correctly-classified row end to end. Launched the full run afterward (`python -m experiments.evaluation.temperature_sweep_driver`, unbounded, in the background).
+
+**What went wrong:** Nothing yet -- first smoke-test row worked cleanly on the first try.
+
+**What it means:** R5's Task 1 driver is real and running. 450 total calls needed (30 alerts x 5 temperatures x 3 resamples); at the ~250-260-calls/well-spaced-session throughput observed during R3, expect roughly 2 well-spaced sessions to finish the full grid.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
