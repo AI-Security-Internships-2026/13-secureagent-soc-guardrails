@@ -1381,6 +1381,19 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (
 
 ---
 
+## 90. Issue #43 (R4) Part B — ATT&CK relevance classifier scored against real human labels: 83.5% accuracy, F1 81.3%
+
+**When:** Sep 26
+**What we tried:** User personally labeled all 103 ATT&CK pairs on the blind sheet from #89 (single annotator, no cross-check, per the confirmed degraded-scope decision). Built `score_attack_labels.py`, the ATT&CK counterpart of `score_labels.py`, scoring the same deterministic `_topical_overlap()` classifier (threshold 0.15) against these real labels -- re-derived the bare technique description directly from the local MITRE snapshot for scoring (not the CSV's name-prefixed field, and not the further ID-redacted text the human actually saw), matching exactly what `verify_attack_technique()` itself compares against. Validated the labeled file first: all 103 rows filled, only `relevant`/`not_relevant` values used, no stray pair_ids.
+
+**Result:** `attack_relevance_classifier_validation_results.json`, n=103: **accuracy 83.5% (95% CI [75.2%, 89.4%]), precision 74.0%, recall 90.2%, F1 81.3%** (confusion: TP=37, FP=13, TN=49, FN=4) -- a real, meaningfully lower number than the CVE side's 92.5%, but still above the issue's own 0.80 "don't retune the threshold" floor, so the calibrated 0.15 threshold was left as-is per the issue's explicit instruction. Broke disagreements down by construction intent (17 total): 12 of 13 false positives land on negative/near-miss pairs -- the classifier is calling genuinely-irrelevant technique pairs "relevant" too often, confirming the issue's own hypothesis that ATT&CK's terser prose makes the CVE-calibrated threshold too permissive. The named `EDGE-KERBEROS` case (T1558.001 Golden Ticket) landed exactly as designed: overlap 0.382 (driven by "Kerberos"/"ticket" lexical overlap) but the human correctly judged it not_relevant -- a real, legible example of the threshold's lexical-overlap-vs-true-relevance gap, not a labeling error. 4 false negatives sit on genuinely-correct pairs where overlap fell just under threshold (one as low as 0.035), a real miss in the other direction.
+
+**What went wrong:** Nothing -- the scoring script and the labeled data were both clean on the first pass.
+
+**What it means:** Task B.2 is done for the ATT&CK side (single-annotator, honestly disclosed as such). Still pending on R4: the CVE side's 20% blind cross-check (sheet built in #89, not yet filled in) for the Cohen's kappa/CI number, and the §4.6/§5 manuscript rewrite -- holding off on that until the CVE cross-check result is in hand too, so both citation families' numbers land in one pass rather than two.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

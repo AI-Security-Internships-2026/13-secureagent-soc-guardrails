@@ -51,3 +51,6 @@ docs/paper/**/*.bbl
 docs/paper/**/*.blg
 docs/paper/**/*.pdf
 !docs/paper/figures/*.pdf
+
+# Excel lock files (created while a .xlsx is open in Office)
+**/~$*.xlsx

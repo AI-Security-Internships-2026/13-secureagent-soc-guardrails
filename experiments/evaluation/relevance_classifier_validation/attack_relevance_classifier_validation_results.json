@@ -1,0 +1,958 @@
+{
+  "task": "ATT&CK relevance classifier (_topical_overlap, threshold=0.15) vs. human judgment (single annotator, no cross-check -- issue #43 degraded-scope fallback)",
+  "n_labeled": 103,
+  "n_unlabeled": 0,
+  "n_relevant_by_human": 41,
+  "n_not_relevant_by_human": 62,
+  "confusion_matrix": {
+    "tp": 37,
+    "fp": 13,
+    "tn": 49,
+    "fn": 4
+  },
+  "accuracy": 0.835,
+  "accuracy_wilson_ci_95": [
+    0.7515,
+    0.8943
+  ],
+  "precision": 0.74,
+  "precision_wilson_ci_95": [
+    0.6045,
+    0.8413
+  ],
+  "recall": 0.9024,
+  "recall_wilson_ci_95": [
+    0.7745,
+    0.9614
+  ],
+  "f1": 0.8132,
+  "results": [
+    {
+      "pair_id": "ATTACK-BAIT-035__T1560__neg_near",
+      "alert_id": "ATTACK-BAIT-035",
+      "candidate_technique_id": "T1560",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "EDGE-KERBEROS__T1558.001",
+      "alert_id": "ATTACK-BAIT-027",
+      "candidate_technique_id": "T1558.001",
+      "topical_overlap": 0.3824,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-017__T1134__neg_near",
+      "alert_id": "ATTACK-BAIT-017",
+      "candidate_technique_id": "T1134",
+      "topical_overlap": 0.2917,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-075__T1115__neg_far",
+      "alert_id": "ATTACK-BAIT-075",
+      "candidate_technique_id": "T1115",
+      "topical_overlap": 0.0857,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-071__T1535__neg_far",
+      "alert_id": "ATTACK-BAIT-071",
+      "candidate_technique_id": "T1535",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-007__T1195__neg_near",
+      "alert_id": "ATTACK-BAIT-007",
+      "candidate_technique_id": "T1195",
+      "topical_overlap": 0.0909,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-063__T1678__pos",
+      "alert_id": "ATTACK-BAIT-063",
+      "candidate_technique_id": "T1678",
+      "topical_overlap": 0.6667,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-055__T1571__pos",
+      "alert_id": "ATTACK-BAIT-055",
+      "candidate_technique_id": "T1571",
+      "topical_overlap": 0.5556,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "EDGE-MALDOC__T1204.002",
+      "alert_id": "ATTACK-BAIT-003",
+      "candidate_technique_id": "T1204.002",
+      "topical_overlap": 0.1935,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-061__T1125__pos",
+      "alert_id": "ATTACK-BAIT-061",
+      "candidate_technique_id": "T1125",
+      "topical_overlap": 0.5333,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-025__T1056__neg_far",
+      "alert_id": "ATTACK-BAIT-025",
+      "candidate_technique_id": "T1056",
+      "topical_overlap": 0.1,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-023__T1622__neg_far",
+      "alert_id": "ATTACK-BAIT-023",
+      "candidate_technique_id": "T1622",
+      "topical_overlap": 0.16,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-029__T1570__neg_far",
+      "alert_id": "ATTACK-BAIT-029",
+      "candidate_technique_id": "T1570",
+      "topical_overlap": 0.04,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-005__T1111__neg_far",
+      "alert_id": "ATTACK-BAIT-005",
+      "candidate_technique_id": "T1111",
+      "topical_overlap": 0.125,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-029__T1087__pos",
+      "alert_id": "ATTACK-BAIT-029",
+      "candidate_technique_id": "T1087",
+      "topical_overlap": 0.16,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-073__T1668__pos",
+      "alert_id": "ATTACK-BAIT-073",
+      "candidate_technique_id": "T1668",
+      "topical_overlap": 0.6667,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-057__T1650__neg_far",
+      "alert_id": "ATTACK-BAIT-057",
+      "candidate_technique_id": "T1650",
+      "topical_overlap": 0.1739,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-033__T1005__neg_near",
+      "alert_id": "ATTACK-BAIT-033",
+      "candidate_technique_id": "T1005",
+      "topical_overlap": 0.12,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-025__T1110__pos",
+      "alert_id": "ATTACK-BAIT-025",
+      "candidate_technique_id": "T1110",
+      "topical_overlap": 0.25,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-019__T1134__pos",
+      "alert_id": "ATTACK-BAIT-019",
+      "candidate_technique_id": "T1134",
+      "topical_overlap": 0.48,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-061__T1137__neg_far",
+      "alert_id": "ATTACK-BAIT-061",
+      "candidate_technique_id": "T1137",
+      "topical_overlap": 0.1333,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-033__T1052__neg_far",
+      "alert_id": "ATTACK-BAIT-033",
+      "candidate_technique_id": "T1052",
+      "topical_overlap": 0.12,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-043__T1132__pos",
+      "alert_id": "ATTACK-BAIT-043",
+      "candidate_technique_id": "T1132",
+      "topical_overlap": 0.2593,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-043__T1665__neg_far",
+      "alert_id": "ATTACK-BAIT-043",
+      "candidate_technique_id": "T1665",
+      "topical_overlap": 0.0741,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-001__T1566__neg_near",
+      "alert_id": "ATTACK-BAIT-001",
+      "candidate_technique_id": "T1566",
+      "topical_overlap": 0.2333,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-039__T1572__neg_near",
+      "alert_id": "ATTACK-BAIT-039",
+      "candidate_technique_id": "T1572",
+      "topical_overlap": 0.1935,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-055__T1591__neg_far",
+      "alert_id": "ATTACK-BAIT-055",
+      "candidate_technique_id": "T1591",
+      "topical_overlap": 0.037,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-011__T1204__pos",
+      "alert_id": "ATTACK-BAIT-011",
+      "candidate_technique_id": "T1204",
+      "topical_overlap": 0.2083,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-035__T1025__neg_far",
+      "alert_id": "ATTACK-BAIT-035",
+      "candidate_technique_id": "T1025",
+      "topical_overlap": 0.125,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-003__T1566__pos",
+      "alert_id": "ATTACK-BAIT-003",
+      "candidate_technique_id": "T1566",
+      "topical_overlap": 0.129,
+      "classifier_predicted": "not_relevant",
+      "human_label": "relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-045__T1567__pos",
+      "alert_id": "ATTACK-BAIT-045",
+      "candidate_technique_id": "T1567",
+      "topical_overlap": 0.2857,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-023__T1140__pos",
+      "alert_id": "ATTACK-BAIT-023",
+      "candidate_technique_id": "T1140",
+      "topical_overlap": 0.28,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-031__T1057__pos",
+      "alert_id": "ATTACK-BAIT-031",
+      "candidate_technique_id": "T1057",
+      "topical_overlap": 0.3333,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-007__T1190__pos",
+      "alert_id": "ATTACK-BAIT-007",
+      "candidate_technique_id": "T1190",
+      "topical_overlap": 0.3333,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-017__T1068__pos",
+      "alert_id": "ATTACK-BAIT-017",
+      "candidate_technique_id": "T1068",
+      "topical_overlap": 0.375,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-057__T1531__pos",
+      "alert_id": "ATTACK-BAIT-057",
+      "candidate_technique_id": "T1531",
+      "topical_overlap": 0.4348,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-059__T1671__neg_far",
+      "alert_id": "ATTACK-BAIT-059",
+      "candidate_technique_id": "T1671",
+      "topical_overlap": 0.069,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-037__T1560__pos",
+      "alert_id": "ATTACK-BAIT-037",
+      "candidate_technique_id": "T1560",
+      "topical_overlap": 0.0345,
+      "classifier_predicted": "not_relevant",
+      "human_label": "relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-079__T1568__pos",
+      "alert_id": "ATTACK-BAIT-079",
+      "candidate_technique_id": "T1568",
+      "topical_overlap": 0.3846,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-041__T1580__neg_far",
+      "alert_id": "ATTACK-BAIT-041",
+      "candidate_technique_id": "T1580",
+      "topical_overlap": 0.1034,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-053__T1649__pos",
+      "alert_id": "ATTACK-BAIT-053",
+      "candidate_technique_id": "T1649",
+      "topical_overlap": 0.5185,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-009__T1204__neg_near",
+      "alert_id": "ATTACK-BAIT-009",
+      "candidate_technique_id": "T1204",
+      "topical_overlap": 0.037,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-003__T1573__neg_far",
+      "alert_id": "ATTACK-BAIT-003",
+      "candidate_technique_id": "T1573",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "EDGE-REVOKED__T1156",
+      "alert_id": "ATTACK-BAIT-026",
+      "candidate_technique_id": "T1156",
+      "topical_overlap": 0.12,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-067__T1681__neg_far",
+      "alert_id": "ATTACK-BAIT-067",
+      "candidate_technique_id": "T1681",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-051__T1083__neg_far",
+      "alert_id": "ATTACK-BAIT-051",
+      "candidate_technique_id": "T1083",
+      "topical_overlap": 0.2,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-035__T1005__pos",
+      "alert_id": "ATTACK-BAIT-035",
+      "candidate_technique_id": "T1005",
+      "topical_overlap": 0.25,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-039__T1071__pos",
+      "alert_id": "ATTACK-BAIT-039",
+      "candidate_technique_id": "T1071",
+      "topical_overlap": 0.1935,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-045__T1610__neg_far",
+      "alert_id": "ATTACK-BAIT-045",
+      "candidate_technique_id": "T1610",
+      "topical_overlap": 0.0476,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-029__T1057__neg_near",
+      "alert_id": "ATTACK-BAIT-029",
+      "candidate_technique_id": "T1057",
+      "topical_overlap": 0.12,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-011__T1120__neg_far",
+      "alert_id": "ATTACK-BAIT-011",
+      "candidate_technique_id": "T1120",
+      "topical_overlap": 0.0417,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-001__T1675__neg_far",
+      "alert_id": "ATTACK-BAIT-001",
+      "candidate_technique_id": "T1675",
+      "topical_overlap": 0.1333,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-073__T1659__neg_far",
+      "alert_id": "ATTACK-BAIT-073",
+      "candidate_technique_id": "T1659",
+      "topical_overlap": 0.2121,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-041__T1572__pos",
+      "alert_id": "ATTACK-BAIT-041",
+      "candidate_technique_id": "T1572",
+      "topical_overlap": 0.2414,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-017__T1606__neg_far",
+      "alert_id": "ATTACK-BAIT-017",
+      "candidate_technique_id": "T1606",
+      "topical_overlap": 0.1667,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-021__T1027__pos",
+      "alert_id": "ATTACK-BAIT-021",
+      "candidate_technique_id": "T1027",
+      "topical_overlap": 0.2381,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-049__T1489__pos",
+      "alert_id": "ATTACK-BAIT-049",
+      "candidate_technique_id": "T1489",
+      "topical_overlap": 0.24,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-021__T1140__neg_near",
+      "alert_id": "ATTACK-BAIT-021",
+      "candidate_technique_id": "T1140",
+      "topical_overlap": 0.1905,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-063__T1537__neg_far",
+      "alert_id": "ATTACK-BAIT-063",
+      "candidate_technique_id": "T1537",
+      "topical_overlap": 0.1389,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-003__T1021__neg_near",
+      "alert_id": "ATTACK-BAIT-003",
+      "candidate_technique_id": "T1021",
+      "topical_overlap": 0.129,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-031__T1518__neg_far",
+      "alert_id": "ATTACK-BAIT-031",
+      "candidate_technique_id": "T1518",
+      "topical_overlap": 0.0952,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-079__T1592__neg_far",
+      "alert_id": "ATTACK-BAIT-079",
+      "candidate_technique_id": "T1592",
+      "topical_overlap": 0.0769,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-075__T1220__pos",
+      "alert_id": "ATTACK-BAIT-075",
+      "candidate_technique_id": "T1220",
+      "topical_overlap": 0.6,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-015__T1652__neg_far",
+      "alert_id": "ATTACK-BAIT-015",
+      "candidate_technique_id": "T1652",
+      "topical_overlap": 0.087,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-015__T1136__pos",
+      "alert_id": "ATTACK-BAIT-015",
+      "candidate_technique_id": "T1136",
+      "topical_overlap": 0.1739,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-019__T1027__neg_near",
+      "alert_id": "ATTACK-BAIT-019",
+      "candidate_technique_id": "T1027",
+      "topical_overlap": 0.12,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-047__T1602__neg_far",
+      "alert_id": "ATTACK-BAIT-047",
+      "candidate_technique_id": "T1602",
+      "topical_overlap": 0.0385,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-051__T1221__pos",
+      "alert_id": "ATTACK-BAIT-051",
+      "candidate_technique_id": "T1221",
+      "topical_overlap": 0.52,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-013__T1547__pos",
+      "alert_id": "ATTACK-BAIT-013",
+      "candidate_technique_id": "T1547",
+      "topical_overlap": 0.2333,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-039__T1588__neg_far",
+      "alert_id": "ATTACK-BAIT-039",
+      "candidate_technique_id": "T1588",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-033__T1080__pos",
+      "alert_id": "ATTACK-BAIT-033",
+      "candidate_technique_id": "T1080",
+      "topical_overlap": 0.4,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-037__T1689__neg_far",
+      "alert_id": "ATTACK-BAIT-037",
+      "candidate_technique_id": "T1689",
+      "topical_overlap": 0.1034,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-021__T1491__neg_far",
+      "alert_id": "ATTACK-BAIT-021",
+      "candidate_technique_id": "T1491",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-049__T1613__neg_far",
+      "alert_id": "ATTACK-BAIT-049",
+      "candidate_technique_id": "T1613",
+      "topical_overlap": 0.08,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-027__T1558__pos",
+      "alert_id": "ATTACK-BAIT-027",
+      "candidate_technique_id": "T1558",
+      "topical_overlap": 0.1471,
+      "classifier_predicted": "not_relevant",
+      "human_label": "relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-069__T1525__neg_far",
+      "alert_id": "ATTACK-BAIT-069",
+      "candidate_technique_id": "T1525",
+      "topical_overlap": 0.1071,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-037__T1071__neg_near",
+      "alert_id": "ATTACK-BAIT-037",
+      "candidate_technique_id": "T1071",
+      "topical_overlap": 0.069,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-023__T1110__neg_near",
+      "alert_id": "ATTACK-BAIT-023",
+      "candidate_technique_id": "T1110",
+      "topical_overlap": 0.04,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-069__T1112__pos",
+      "alert_id": "ATTACK-BAIT-069",
+      "candidate_technique_id": "T1112",
+      "topical_overlap": 0.4286,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-019__T1010__neg_far",
+      "alert_id": "ATTACK-BAIT-019",
+      "candidate_technique_id": "T1010",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-027__T1012__neg_far",
+      "alert_id": "ATTACK-BAIT-027",
+      "candidate_technique_id": "T1012",
+      "topical_overlap": 0.0588,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-077__T1611__pos",
+      "alert_id": "ATTACK-BAIT-077",
+      "candidate_technique_id": "T1611",
+      "topical_overlap": 0.5517,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-031__T1080__neg_near",
+      "alert_id": "ATTACK-BAIT-031",
+      "candidate_technique_id": "T1080",
+      "topical_overlap": 0.1905,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-007__T1020__neg_far",
+      "alert_id": "ATTACK-BAIT-007",
+      "candidate_technique_id": "T1020",
+      "topical_overlap": 0.0303,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-053__T1539__neg_far",
+      "alert_id": "ATTACK-BAIT-053",
+      "candidate_technique_id": "T1539",
+      "topical_overlap": 0.2593,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-011__T1547__neg_near",
+      "alert_id": "ATTACK-BAIT-011",
+      "candidate_technique_id": "T1547",
+      "topical_overlap": 0.0417,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-059__T1565__pos",
+      "alert_id": "ATTACK-BAIT-059",
+      "candidate_technique_id": "T1565",
+      "topical_overlap": 0.4828,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-077__T1687__neg_far",
+      "alert_id": "ATTACK-BAIT-077",
+      "candidate_technique_id": "T1687",
+      "topical_overlap": 0.1379,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-015__T1068__neg_near",
+      "alert_id": "ATTACK-BAIT-015",
+      "candidate_technique_id": "T1068",
+      "topical_overlap": 0.087,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-009__T1195__pos",
+      "alert_id": "ATTACK-BAIT-009",
+      "candidate_technique_id": "T1195",
+      "topical_overlap": 0.1481,
+      "classifier_predicted": "not_relevant",
+      "human_label": "relevant",
+      "agree": false
+    },
+    {
+      "pair_id": "ATTACK-BAIT-005__T1021__pos",
+      "alert_id": "ATTACK-BAIT-005",
+      "candidate_technique_id": "T1021",
+      "topical_overlap": 0.35,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-067__T1216__pos",
+      "alert_id": "ATTACK-BAIT-067",
+      "candidate_technique_id": "T1216",
+      "topical_overlap": 0.4167,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-005__T1190__neg_near",
+      "alert_id": "ATTACK-BAIT-005",
+      "candidate_technique_id": "T1190",
+      "topical_overlap": 0.125,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-071__T1674__pos",
+      "alert_id": "ATTACK-BAIT-071",
+      "candidate_technique_id": "T1674",
+      "topical_overlap": 0.6667,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-009__T1069__neg_far",
+      "alert_id": "ATTACK-BAIT-009",
+      "candidate_technique_id": "T1069",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-065__T1092__neg_far",
+      "alert_id": "ATTACK-BAIT-065",
+      "candidate_technique_id": "T1092",
+      "topical_overlap": 0.119,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-001__T1055__pos",
+      "alert_id": "ATTACK-BAIT-001",
+      "candidate_technique_id": "T1055",
+      "topical_overlap": 0.2667,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-065__T1653__pos",
+      "alert_id": "ATTACK-BAIT-065",
+      "candidate_technique_id": "T1653",
+      "topical_overlap": 0.6905,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-013__T1007__neg_far",
+      "alert_id": "ATTACK-BAIT-013",
+      "candidate_technique_id": "T1007",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-047__T1486__pos",
+      "alert_id": "ATTACK-BAIT-047",
+      "candidate_technique_id": "T1486",
+      "topical_overlap": 0.4231,
+      "classifier_predicted": "relevant",
+      "human_label": "relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-027__T1087__neg_near",
+      "alert_id": "ATTACK-BAIT-027",
+      "candidate_technique_id": "T1087",
+      "topical_overlap": 0.0294,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-013__T1136__neg_near",
+      "alert_id": "ATTACK-BAIT-013",
+      "candidate_technique_id": "T1136",
+      "topical_overlap": 0.0,
+      "classifier_predicted": "not_relevant",
+      "human_label": "not_relevant",
+      "agree": true
+    },
+    {
+      "pair_id": "ATTACK-BAIT-025__T1558__neg_near",
+      "alert_id": "ATTACK-BAIT-025",
+      "candidate_technique_id": "T1558",
+      "topical_overlap": 0.15,
+      "classifier_predicted": "relevant",
+      "human_label": "not_relevant",
+      "agree": false
+    }
+  ]
+}
