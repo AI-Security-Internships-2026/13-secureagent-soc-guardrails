@@ -1394,6 +1394,19 @@ Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (
 
 ---
 
+## 91. Issue #43 (R4) Part A — CVE cross-check filled in: perfect agreement, kappa = 1.0
+
+**When:** Sep 26
+**What we tried:** User sent the filled-in CVE cross-check sheet -- but not on the first attempt. Two earlier files sent under similar names turned out to be wrong: one (`CVE_Annotation_Labeled.xlsx`) had a completely different structure (3 columns, no evidence/description text) and, on cross-checking every row's CVE ID against the real `cve_crosscheck_key_HIDDEN.csv`, 8 of 16 CVE numbers didn't match what was actually in the real sample (e.g. `CVE-2023-25280` vs `CVE-2023-2528`, `CVE-2023-20273` vs `CVE-2023-2827`) plus 2 rows had a different alert ID -- flagged directly rather than silently computing a kappa number against IDs that might not correspond to the same real pairs. The second file sent was actually the already-processed ATT&CK sheet resent under a similar name. The third file matched the real structure exactly (`Instructions` + `CVE Cross-check (20%)` tabs, 16 rows) and all 16 `pair_id`s matched the true sample exactly -- verified before trusting it, not after.
+
+**Result:** `cve_crosscheck_kappa_results.json`: **n=16, 100% observed agreement, Cohen's kappa = 1.0 (95% CI [1.0, 1.0], 1000 bootstrap resamples), 0 disagreements.** Renamed the labeled-file path in `compute_cohen_kappa.py` from `cve_crosscheck_BLIND.xlsx` to a separate `cve_crosscheck_labeled.xlsx` so a completed pass can never be silently clobbered by re-running the blank-template builder under the same filename.
+
+**What went wrong:** Two wrong files sent before the right one arrived -- caught both by verifying pair-level identifiers against the real sample rather than trusting a superficially plausible-looking spreadsheet.
+
+**What it means:** Perfect agreement here should be read as this single rater being highly self-consistent on a second blind pass, not as independent-rater validation -- the issue's own fallback (no second independent annotator) makes that distinction important to state honestly in §4.6, not imply a stronger claim than the data supports. Both citation families now have real numbers in hand (CVE: kappa=1.0, n=16 cross-check + 80 single-annotator; ATT&CK: 83.5% accuracy/F1 81.3%, n=103 single-annotator, #90). The §4.6/§5 manuscript rewrite is now unblocked.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

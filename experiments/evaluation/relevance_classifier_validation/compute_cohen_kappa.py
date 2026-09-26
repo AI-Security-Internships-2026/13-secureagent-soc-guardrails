@@ -7,7 +7,7 @@ annotator + 20% blind cross-check", no second independent annotator
 recruited). Compares annotator 1's original label (frozen in
 pairs_to_label_with_suggestions.csv, via cve_crosscheck_key_HIDDEN.csv)
 against the same person's blind relabel of a 20% sample
-(cve_crosscheck_BLIND.xlsx's `your_label` column) on the identical 16
+(cve_crosscheck_labeled.xlsx's `your_label` column) on the identical 16
 pairs.
 
 Reports:
@@ -42,7 +42,10 @@ from sklearn.metrics import cohen_kappa_score
 
 HERE = os.path.dirname(__file__)
 KEY_CSV_PATH = os.path.join(HERE, "cve_crosscheck_key_HIDDEN.csv")
-BLIND_XLSX_PATH = os.path.join(HERE, "cve_crosscheck_BLIND.xlsx")
+# Filled-in copy, kept separate from the blank template
+# (build_cve_crosscheck_sheet.py's cve_crosscheck_BLIND.xlsx) so
+# re-running the builder can never clobber a completed pass.
+BLIND_XLSX_PATH = os.path.join(HERE, "cve_crosscheck_labeled.xlsx")
 DISAGREEMENTS_PATH = os.path.join(HERE, "disagreements_cve.csv")
 RESULTS_JSON_PATH = os.path.join(HERE, "cve_crosscheck_kappa_results.json")
 
