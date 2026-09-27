@@ -1494,6 +1494,19 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 98. Issue #47 (E2) complete — regression suite re-run after #42-44, recorded in REPRODUCIBILITY.md
+
+**When:** Sep 27
+**What we tried:** Now that R3/R4/R5 (#42-44) are all done, re-ran the full suite (`pytest tests/ -v`) per the supervisor's explicit ask on this issue, to confirm none of that week's extensive code/manuscript changes introduced a regression.
+
+**Result:** **158 passed, 0 failed, 0 skipped, 19 warnings, 42.41s** -- actually better than the previously-committed baseline (158 passed, **1 skipped**, 2026-09-09). Checked why: no `skip`/`skipif` marker exists anywhere in the current test suite, so whatever caused that one skip no longer applies -- noted honestly in the updated doc rather than silently changing the count without comment. Replaced `tests/last_run.log` with this fresh run and updated `REPRODUCIBILITY.md` Sect. 9 accordingly.
+
+**What went wrong:** Nothing -- clean run, no regressions from this week's work.
+
+**What it means:** Issue #47/E2 is done. Its own condition for closing ("if the final rerun remains green and no schema inconsistencies are observed") is met.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

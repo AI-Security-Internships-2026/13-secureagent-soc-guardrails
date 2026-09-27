@@ -125,7 +125,7 @@ Verified directly: Issue E4's Docker image builds clean and the default `docker 
 
 ## 9. Test Suite Logs
 
-- [`tests/last_run.log`](./tests/last_run.log): 2026-09-09, `158 passed, 1 skipped, 19 warnings in 144.71s` — regenerated fresh for this document rather than reusing the Sept 5 log already on disk, so it matches the exact commit this file documents.
+- [`tests/last_run.log`](./tests/last_run.log): 2026-09-27, `158 passed, 19 warnings in 42.41s` — re-run per issue #47/E2's explicit request, after issues #42-44 (R3/R4/R5) all landed, to confirm none of that week's changes introduced a regression. **0 failures, 0 skipped** (the earlier 2026-09-09 log recorded 1 skipped; no `skip`/`skipif` marker exists anywhere in the current test suite, so whatever caused that skip no longer applies — noted honestly rather than silently updating the count without comment).
 - [`tests/docker_build.log`](./tests/docker_build.log): Docker build output (Issue E4) proving the reproducibility image builds clean from scratch.
 
 ## 10. Verified Reproduction (Task 3)
