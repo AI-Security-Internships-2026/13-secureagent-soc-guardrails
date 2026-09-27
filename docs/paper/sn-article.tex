@@ -24,6 +24,10 @@
 \usepackage{textcomp}%
 \usepackage{booktabs}%
 \usepackage{rotating}% sidewaystable
+\usepackage{float}% Fig. F6 (temperature sweep) needs [H] -- this section is
+                   % dense enough with pre-existing floats that plain [h]
+                   % drifted the figure ~20 pages away (LaTeX auto-converts
+                   % an unsatisfiable [h] to [ht] and keeps deferring)
 
 \raggedbottom
 
@@ -828,6 +832,60 @@ The two misattribution cases echo Sect.~\ref{subsec:cve-bait}'s
 Follina/DogWalk finding at smaller scale: a real identifier from the
 right cluster, but the wrong specific one.
 
+\textbf{Is this a temperature=0.7 artifact?} The comparison above needs
+SelfCheckGPT's own required resampling diversity, which production
+settings don't use (temperature 0.1 vs.\ 0.7, Sect.~\ref{subsec:setup})
+--- a real, disclosed confound until tested directly. We swept the
+identical 30 withheld-CVE alerts across $t \in \{0.1, 0.3, 0.5, 0.7,
+1.0\}$, 3 resamples each (150 live calls), measuring: the rate the
+model volunteers any CVE at all, the rate that volunteered citation is
+confirmed \texttt{REAL\_AND\_PLAUSIBLE}, SelfCheckGPT's recall on that
+confirmed-unsupported subset, and the deterministic checker's detection
+rate on the same subset.
+
+\textbf{Result} (\texttt{experiments/results/temperature\_sweep\_summary.json},
+$n=30$ per temperature, Fig.~\ref{fig:f6}): the volunteer rate is
+already 93--100\% at every temperature tested, including $t=0.1$ ---
+this 30-alert pool, unlike Sect.~\ref{subsec:cve-bait}'s symptom-only
+CVE-bait set, is built with an explicit citation request on its
+prompted items, so its low-temperature volunteer rate was never
+expected to match that separate pool's 0\%; the two measure different
+things by design, not a contradiction. What the sweep actually settles
+is the question that matters: \textbf{SelfCheckGPT's recall on the
+confirmed-unsupported subset stays low at every temperature} --- 5\% at
+$t=0.1$ (95\% CI [0.9\%, 23.6\%]), 18\% at $t=0.3$, 5\% at $t=0.5$, 10\%
+at $t=0.7$ (matching this section's own 18/20 finding at that
+temperature), and 19\% at $t=1.0$ --- with all five 95\% Wilson
+intervals overlapping each other, ruling out a clean monotonic trend in
+either direction. The deterministic checker's detection rate on the
+identical subset is 100\% at every temperature, by pipeline
+construction (Sect.~\ref{subsec:ablation}: an ungrounded citation
+unconditionally sets \texttt{requires\_review=True}, independent of
+temperature or class).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/fig_f6_temperature_boundary.pdf}
+\caption{Temperature sensitivity of citation volunteering and detection
+(30 withheld-CVE alerts, 3 resamples per temperature; shaded bands are
+95\% Wilson CIs). Volunteering and the confirmed-unsupported
+(\texttt{REAL\_AND\_PLAUSIBLE}) rate stay high and roughly flat across
+the full range; SelfCheckGPT's recall on that same confirmed-unsupported
+subset stays low and flat, never rising above 19\%; the deterministic
+checker's detection rate is flat at 100\% throughout.}\label{fig:f6}
+\end{figure}
+
+\textbf{What this means.} The blindness is not a $t=0.7$ artifact.
+Whenever a \texttt{REAL\_AND\_PLAUSIBLE} citation exists, self-consistency
+checking is structurally blind to it at every temperature tested, from
+production-cold ($t=0.1$) to maximally diverse ($t=1.0$). How
+\textit{often} the triggering condition occurs is temperature- and
+prompt-dependent ---
+Sect.~\ref{subsec:cve-bait}'s symptom-only pool shows that directly; the
+failure mode itself, once triggered, is not. This closes the confound
+Sect.~\ref{sec:discussion} raises below empirically, rather than only
+arguing it down from principle.
+
 \subsection{Significance testing: deterministic grounding versus SelfCheckGPT}\label{subsec:mcnemar}
 
 This subsection addresses RQ3. A paired McNemar test between the deterministic pipeline and
@@ -1534,29 +1592,36 @@ literature doesn't supply it for the CVE/ATT\&CK domain ---
 SelfCheckGPT's own evaluation never quantifies this failure mode on a
 citation-grounding task at all.
 
-Second, and more consequential: the comparison runs at
+Second: the comparison runs at
 temperature=0.7, because SelfCheckGPT's resampling needs diversity to
 measure anything, while production runs at 0.1
 (Sect.~\ref{subsec:setup}) --- and Sect.~\ref{subsec:cve-bait}'s CVE pool, run at
 the production temperature on the same style of alert, shows the model
-volunteering a withheld-but-correct CVE 0\% of the time. That's a real
-confound, not a footnote: it's entirely plausible that most of what
-makes SelfCheckGPT look bad here is temperature-induced volunteering
-behavior, not something inherent to consistency-checking as a method,
-and this dataset can't fully separate the two effects. What the
-confound does \textit{not} touch is the narrower claim underneath it,
-which is temperature-independent: once a model does volunteer a real,
-uncited identifier --- at whatever temperature, in whatever deployment
-actually produces one --- self-consistency checking cannot flag it,
-because the citation is stable across resamples by construction, while
-the deterministic checker flags it every time, because groundedness
-depends on evidence presence, not on how many times the model repeats
-the same answer. That mechanism-level claim holds regardless of how
-often the triggering condition occurs; it is only the specific
-prevalence (18 of 20, not some other split) that depends on
-temperature=0.7, and that dependency should be read as attached to
-Sect.~\ref{subsec:selfcheckgpt}'s headline number, not to the mechanism
-itself.
+volunteering a withheld-but-correct CVE 0\% of the time. That looked
+like a real, only-partially-closable confound when first disclosed:
+plausibly most of what makes SelfCheckGPT look bad here is
+temperature-induced volunteering behavior, not something inherent to
+consistency-checking as a method. Sect.~\ref{subsec:selfcheckgpt}'s
+five-point temperature sweep now closes this empirically rather than
+leaving it argued from principle alone: SelfCheckGPT's recall on the
+confirmed-unsupported subset stays low (5--19\%) at every temperature
+from 0.1 to 1.0, with overlapping 95\% confidence intervals throughout
+--- so the mechanism-level blindness demonstrated at $t=0.7$ is not an
+artifact of that specific temperature choice. What genuinely does vary
+with temperature and prompt design is how often a real, uncited
+identifier gets volunteered in the first place: 0\% on this section's
+symptom-only CVE-bait pool at production temperature, 93--100\% on the
+sweep's explicitly-prompted pool at every temperature tested. That is a
+question about triggering frequency, not about whether self-consistency
+can catch the citation once triggered --- and the sweep shows the
+latter holds regardless of temperature. The mechanism-level claim was
+already temperature-independent by construction (once a model does
+volunteer a real, uncited identifier, self-consistency checking cannot
+flag it, because the citation is stable across resamples by
+definition, while the deterministic checker flags it every time,
+since groundedness depends on evidence presence, not on how many times
+the model repeats the same answer); the sweep is what turns that from
+an architectural argument into a measured one.
 
 \textbf{What the CVE-pool finding (Sect.~\ref{subsec:cve-bait}) means.}
 The 0\%-fabrication / 0\%-spontaneous-citation result is really two
@@ -1581,7 +1646,19 @@ what was tested.
   withheld-but-correct identifier once sampled at the temperature
   SelfCheckGPT requires, so Sect.~\ref{subsec:cve-bait}'s finding
   should be read as holding at production temperature specifically, not
-  as a general model property. Sect.~\ref{subsubsec:llmjudge}'s
+  as a general model property. A five-point temperature sweep
+  ($t\in\{0.1,0.3,0.5,0.7,1.0\}$, Sect.~\ref{subsec:selfcheckgpt})
+  since closed this as an open question rather than an assumption:
+  SelfCheckGPT's recall on the confirmed-unsupported subset stays low
+  (5--19\%) at every temperature tested, with overlapping 95\% CIs, so
+  the blindness itself is not a $t=0.7$ artifact --- only the rate at
+  which a citation gets volunteered in the first place is
+  temperature/prompt-dependent. This sweep was run on the CVE pool
+  only; an equivalent ATT\&CK-side temperature sweep was not performed,
+  so if ATT\&CK memorization is weaker than CVE memorization, the
+  analogous curve for MITRE technique IDs could sit lower at every
+  temperature point --- disclosed, not tested here.
+  Sect.~\ref{subsubsec:llmjudge}'s
   LLM-judge baseline now spans same- and cross-model-family
   judges --- 442/450 (98\%) complete, quota-gated on Groq's free tier
   rather than a design limitation.

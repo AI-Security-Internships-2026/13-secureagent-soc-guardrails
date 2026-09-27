@@ -1481,6 +1481,19 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 97. Issue #44 (R5) complete — temperature sweep finished, Figure F6 built, manuscript updated: the blindness is not a t=0.7 artifact
+
+**When:** Sep 27
+**What we tried:** Resumed the driver from #94/#95's 88/150 checkpoint; finished the remaining 62 rows in one session (150/150 complete). Built `make_fig_f6.py` (the required temperature-boundary curves, 4 series with shaded 95% Wilson CI bands, matching the issue's own plot spec) and wrote up the result across three places: a new "Is this a temperature=0.7 artifact?" passage in Sect. 4.4 (with Fig. F6), a rewrite of the Discussion's existing temperature-confound paragraph (Sect. 5, "Why this comparison despite how it was measured") to report the sweep as closing that confound empirically rather than only arguing it down, and an extension of the existing Limitations bullet with the sweep result plus the issue's own suggested ATT&CK-not-tested disclosure.
+
+**Result:** Per-temperature summary (`experiments/results/temperature_sweep_summary.json`, n=30 per temperature): volunteer rate 93-100% at every temperature including t=0.1 (this 30-alert pool has an explicit citation-request nudge on its prompted items, unlike Sect. 4.2's symptom-only CVE-bait pool, so this doesn't contradict that pool's separate 0% finding -- the two measure different things by design, stated explicitly in the writeup to head off the appearance of an internal contradiction). REAL_AND_PLAUSIBLE rate 67-73% across all temperatures. **SelfCheckGPT recall on the confirmed-unsupported subset stays low at every single temperature** -- 5% (t=0.1), 18% (t=0.3), 5% (t=0.5), 10% (t=0.7, matching Sect. 4.4's own 18/20 finding at that exact temperature), 19% (t=1.0) -- with all five 95% Wilson CIs overlapping each other, ruling out any clean monotonic trend. LLMCite's deterministic detection rate is flat at 100% throughout, by pipeline construction. Recompiled clean: 0 undefined references, 38 pages (up 2).
+
+**What went wrong:** The new Figure F6, inserted with a plain `[h]` placement, drifted 20 pages away from its own discussion -- this results section already has enough competing floats that LaTeX's automatic `[h]`-to-`[ht]` conversion kept deferring it. Caught by actually checking which page the figure landed on (not just that the compile succeeded), fixed by adding the `float` package and forcing this one figure to `[H]` -- it now renders on the very next page after the paragraph that discusses it, as intended.
+
+**What it means:** Issue #44/R5 is done. This directly answers the supervisor's own explicit question on the issue: the REAL_AND_PLAUSIBLE SelfCheckGPT blind spot is temperature-independent, not an artifact of the specific t=0.7 resampling choice -- only the rate at which a citation gets volunteered in the first place depends on temperature and prompt design. Only #47 (E2, regression rerun) and #50 (E5, reproducibility freeze) remain gated on "#42-44," and both are now unblocked now that R3/R4/R5 are all genuinely done.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
