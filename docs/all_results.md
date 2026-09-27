@@ -1507,6 +1507,31 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 99. Issue #50 (E5) complete — full reproducibility freeze, found and fixed two genuine drifts
+
+**When:** Sep 27
+**What we tried:** Now that R3/R4/R5 (#42-44) are all done, did the actual freeze the issue asks for -- not a re-read of the existing `REPRODUCIBILITY.md` (last substantively updated 2026-09-09, before any of this week's work), but an independent re-verification of every claim in it against the current repo state, the same discipline applied throughout this week's other verification passes.
+
+**Found two real drifts, both fixed rather than silently carried forward:**
+1. `requirements-lock.txt`'s committed SHA-256 no longer matched the actual file -- `upsetplot==0.9.0` was added for #42/R3's Figure F4 after this doc was last written. Recomputed and updated.
+2. The manuscript itself (Sect. 4.1) hardcoded the NVD snapshot manifest's SHA-256 and CVE count (152) -- both stale since `CVE-2021-31207` was added to the snapshot mid-ablation (#76), growing it to 153. Updated both the count and the hash in `sn-article.tex`, with a one-sentence explanation of why it grew rather than a silent number change.
+
+**Verified, not merely inspected, for this freeze:**
+- NVD snapshot: all 153 files' SHA-256 recomputed and matched against the manifest (not just "manifest exists").
+- MITRE snapshot SHA: matches the manuscript's cited value exactly.
+- Prompt fingerprints (`SYSTEM_PROMPT`, `JUDGE_SYSTEM_PROMPT`): unchanged, recomputed and matched.
+- Every fully-deterministic §7 command re-run for real and diffed byte-for-byte against its committed output: CVE and ATT&CK relevance-classifier scoring, both annotation-agreement scripts (independent double-annotation kappa=1.0 and the superseded 20% self-check), `ablation_driver --validate` (2,616/2,616), `temperature_sweep_driver --validate` (150/150) -- all identical, zero new API calls spent.
+- Table T6's numbers in the manuscript cross-checked against `ablation_table_t6.json` directly -- exact match, row for row.
+- Full manuscript recompile: 0 undefined references, 0 duplicate-label warnings, 38 pages.
+
+**Result:** Rewrote `REPRODUCIBILITY.md` Sects. 1-2, 6-7, 10-11 to reflect the real, current state -- added commands and hashes for every R3/R4/R5 artifact, replaced the stale "R3/R4/R6 not started" checklist with an honestly-reverified all-complete one, and added the two genuinely-new deterministic reproduction checks (ATT&CK scoring, both kappa scripts) to Sect. 10 alongside the original CVE-scoring check. Re-created the local `paper-v1.0` git tag pointing at the exact final commit (still not pushed to origin, per the issue's own instruction to hold for supervisor review) -- the previous tag pointed at a 2026-09-09 commit that predates literally all of this week's work.
+
+**What went wrong:** Nothing broke -- the two drifts found were genuine but low-severity (a hash and a count, not a wrong headline result), caught specifically because this freeze re-verified everything from scratch rather than trusting the existing document.
+
+**What it means:** Issue #50/E5 is done. Every number in `REPRODUCIBILITY.md` and every hardcoded hash/count in the manuscript itself now matches the actual frozen artifacts, re-confirmed rather than assumed.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
