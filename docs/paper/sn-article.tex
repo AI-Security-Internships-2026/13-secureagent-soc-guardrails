@@ -119,6 +119,19 @@ reports, with a four-class taxonomy in place of the binary
 grounded/ungrounded label most such checkers use, generalized across two
 distinct claim types: CVE identifiers and MITRE ATT\&CK techniques.
 
+A distinction this taxonomy insists on, worth stating plainly before the
+class names do the explaining: an identifier's existing in an
+authoritative source (NVD, MITRE ATT\&CK) is necessary but never
+sufficient to call a citation grounded. Existence is a fact about the
+identifier alone, checkable independent of any alert; evidential
+grounding and topical relevance are facts about whether \textit{this}
+alert's own evidence actually supports citing it. A real, current
+identifier with no topical relationship to the alert in front of the
+model is still not grounded --- that is exactly what separates
+\texttt{REAL\_BUT\_IRRELEVANT} from \texttt{REAL\_AND\_PLAUSIBLE}
+(Sect.~\ref{subsec:taxonomy}), two classes that only get reached once
+existence has already been confirmed.
+
 The sharper claim, and the one the evaluation is actually built around,
 is narrower than ``we built a taxonomy.'' \texttt{REAL\_AND\_PLAUSIBLE}
 names a failure mode that a leading alternative --- self-consistency

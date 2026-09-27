@@ -1466,6 +1466,21 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 96. Issue #41 (R2) — new supervisor comments checked: most reflect a stale (pre-merge) view, one genuine gap fixed
+
+**When:** Sep 27
+**What we tried:** Fresh comments landed on 8 issues (#41-45, #47, #50, #51), all within an 11-minute window. Read each one against the actual current repo state (not just the issue thread) before assuming any of them meant new work was needed. Most (#42, #43, #45, #51) ask for things already fully completed in #83-#93 -- Table T6, real independent double-annotation, RQ4, both figures. Since that work only exists on the still-unmerged `emaan-week-16` branch (PR #56), the most likely explanation is whatever generates these comments is evaluating against `dev`/`main`, which doesn't have any of it yet -- flagged to the user directly rather than silently re-doing already-finished work. #44/#47/#50 are accurate and current (R5 genuinely isn't done).
+
+#41's comment did contain one specific, real gap independent of the merge-visibility question: "review the novelty wording to clearly distinguish authoritative identifier existence/status from evidential grounding and topical relevance; the latter is not established merely by an identifier existing in NVD/MITRE." Checked the actual novelty paragraph (Sect. 1) against this -- the taxonomy *table* already makes exactly this distinction (REAL_BUT_IRRELEVANT vs. REAL_AND_PLAUSIBLE splits precisely on existence vs. topical match), but the Introduction's novelty framing jumped straight to `REAL_AND_PLAUSIBLE` without first stating that existence and relevance are two separate axes -- a reader skimming just the intro could miss it.
+
+**Result:** Added one paragraph to Sect. 1 stating the distinction explicitly and pointing to Sect. 3.5's taxonomy table as where it's operationalized. Recompiled clean: 0 undefined references, 36 pages (unchanged -- absorbed into existing whitespace). Confirmed via the actual pdflatex+bibtex+pdflatex+pdflatex sequence, not the IDE's own separate single-pass auto-compile (which understandably shows transient "citation undefined" warnings before its own bibtex step runs -- not a real problem, just a different, incomplete build than the one that matters).
+
+**What went wrong:** Nothing -- the fix was a clean single-paragraph insertion.
+
+**What it means:** The one plausibly-new, real ask in this comment batch is addressed. Everything else in the batch should resolve itself once PR #56 merges and the reviewing process (whoever/whatever it is) re-evaluates against current `dev`.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
