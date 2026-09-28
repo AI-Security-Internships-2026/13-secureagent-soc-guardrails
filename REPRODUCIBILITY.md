@@ -169,7 +169,7 @@ The remaining §7 commands (CVE-bait, ATT&CK-bait, SelfCheckGPT, McNemar, and th
 
 ## 11. Integrity Checklist
 
-- [x] Git tag `paper-v1.0` re-created locally, pointing at the exact commit this frozen document describes (see §12) — still not pushed to origin, per the issue's own instruction to hold for supervisor review.
+- [x] Git tag `paper-v1.0` pushed to origin, pointing at the merge commit of PR #56 into `dev` (see §12).
 - [x] `requirements-lock.txt` committed; clean venv install works; `import langchain_groq` succeeds (verified in Docker build, Issue E4). Hash re-verified for this freeze (§2) — it had drifted since this file's original writing (`upsetplot` added for Issue R3's Figure F4) and is now current.
 - [x] Dockerfile builds; default `CMD` runs the schema-parity test all-green, fully offline (Issue E4, `docs/all_results.md` #70).
 - [x] 0 `[?]` BibTeX refs, 0 undefined LaTeX references/citations in the compiled PDF (Issue R2; reconfirmed via a full `pdflatex`+`bibtex`+`pdflatex`+`pdflatex` sequence at every manuscript edit this week, not just once).
@@ -194,4 +194,4 @@ This checklist is honest, not pre-ticked. Every item above was individually re-v
 ```
 paper-v1.0 -> (run `git rev-parse paper-v1.0` for the exact commit hash)
 ```
-Created locally via `git tag -a paper-v1.0`, working tree clean at the time of tagging. **Not pushed to `origin`** — per the source issue's own instruction, this is held for supervisor review before becoming a public release marker.
+Created via `git tag -a paper-v1.0`, pointing at the merge commit of PR #56 into `dev` (2026-09-28), and **pushed to `origin`** per the source issue's follow-up instruction, once PR #56 had merged.
