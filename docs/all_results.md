@@ -1532,6 +1532,32 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 100. Issue #50 (E5) follow-up — paper-v1.0 tag pushed to origin after PR #56 merged
+
+**When:** Sep 28
+**What we tried:** PR #56 merged into `dev` on Sep 28 (04:24 UTC), which unblocked the one remaining condition on the supervisor's own tag instruction: push `paper-v1.0` to origin only once the PR was in. Repointed the local tag from the E5 freeze commit to the actual merge commit (`d3cf482`, `dev`'s new HEAD) -- confirmed it's a descendant of the freeze commit first -- then pushed it to origin on explicit confirmation.
+
+**Result:** `paper-v1.0` now resolves to `d3cf482` on origin (`git ls-remote --tags origin` confirms). Opened a small follow-up PR (#57, targeting `dev`) fixing the two sentences in `REPRODUCIBILITY.md` §11/§12 that still described the tag as local-only/held for review -- those went stale the moment the tag was actually pushed.
+
+**What went wrong:** Nothing -- this was purely the sequencing step the supervisor's comment asked for, done once its precondition (merge) was satisfied.
+
+**What it means:** Issue #50/E5's very last open item is done. The only thing left on #50 is for the supervisor to close it.
+
+---
+
+## 101. Issue #43 (R4) follow-up — ATT&CK second-annotator blind sheet built, caught a real ID-leak variant
+
+**When:** Sep 28
+**What we tried:** Supervisor's Sep 28 comment on #43 pointed out a real gap: the CVE side got genuine independent double-annotation (n=80, kappa=1.0), but the ATT&CK side (103 pairs) only ever had a single annotator's pass, scored directly against the relevance classifier. Built `build_attack_annotator2_sheet.py`, mirroring the CVE side's `build_annotator2_sheet.py`, to produce a second, independent annotator's blind copy of the same 103 pairs from the already-labeled sheet -- reusing its already-redacted evidence/description text and annotator 1's label, but exposing neither to annotator 2.
+
+**Result:** Produced `attack_annotator2_pairs_BLIND.xlsx` (103 pairs, blank `your_label` column, dropdown-restricted) and the private `attack_annotator1_and_key_HIDDEN.csv` (technique ID + annotator1's label per pair, for later reconciliation). Verified programmatically before treating it as ready: all 103 `your_label` cells blank, no technique ID present anywhere in the visible text in any form.
+
+**What went wrong:** That verification pass caught a real leak the original annotator-1 build missed: 1/103 pairs (`EDGE-MALDOC__T1204.002`) self-referenced its own sub-technique ID inside a citation URL, but in MITRE's slash form (`T1204/002`) rather than the dot form (`T1204.002`) the original redaction regex checked for -- so it slipped through both the first draft of this script and the original single-annotator build. Confirmed this leak was already present in annotator 1's sheet too (worth a one-line disclosure alongside the CVE side's analogous 2/80-pair leak found during R4's original annotator-2 build). Scanned all 103 pairs for the same slash-slug pattern -- confirmed this is the only pair affected. Fixed by redacting both ID forms for any sub-technique.
+
+**What it means:** The blind sheet is ready to send to a genuine second annotator. Issue #43/R4 is not done until that pass comes back, Cohen's kappa + 95% CI is computed between the two ATT&CK annotators (script not yet built -- will mirror `compute_inter_rater_agreement.py`), disagreements are resolved, and the manuscript is updated with the ATT&CK inter-rater result alongside the existing CVE one.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
