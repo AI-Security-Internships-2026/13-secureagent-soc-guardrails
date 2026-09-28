@@ -233,3 +233,101 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 - Close out the qwen LLM-judge cross-family run if worth finishing (currently 442/450, quota-gated, diminishing returns per retry — same-family and cross-family already agree 100% on every shared sample).
 - Resolve the paper's page-count gap: either trim further or confirm the venue's real length policy and accept the current length.
 - Final full read-through / submission-readiness pass.
+
+---
+
+## Week 13
+
+**Branch:** `emaan-week-13`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/52 (merged jointly with Week 12 as "Weeks 12-13")
+
+### Completed this week
+- [x] Ran a full accuracy review pass across the paper draft, cross-checking every headline number against its actual source result file; rewrote for clarity/length, fixed a Table 5 baseline drift, then commissioned a second rigorous peer-review pass and closed out its remaining findings (a RAG-attribution citation, a McNemar-method footnote, two new threats-to-validity disclosures) (`docs/all_results.md` #53–56)
+- [x] Verified and added a scholarly-citation-hallucination reference substantiating the Abstract's novelty-contrast claim (#57), then re-ported `sn-article.tex` from the updated draft and confirmed a clean compile (#58)
+- [x] Added the four per-stage ablation toggles to `analyse_alert()` (input/CVE/ATT&CK/PII, all default `True`) and recorded the component-ablation execution plan; ran Phase 2 (2-alert × 6-config schema-parity smoke validation, clean) and launched Phase 3 (#59–60)
+- [x] Phase 3 crashed on a per-minute rate limit within ~15 minutes and sat dead, unnoticed, for 3 days — caught during a routine progress check, not by any alert firing. Root-caused to a bug in the "notify me when done" monitoring wrapper itself (the real experiment process had died; the watcher hadn't), fixed, and resumed correctly from checkpoint (#61)
+- [x] Reviewed the new 12-issue GitHub backlog (#40–51, auto-generated milestones) and cross-checked each issue's factual claims against the actual repo rather than trusting them at face value — found real discrepancies (wrong file paths, a stray WSL2/Python-3.11 assumption, an alert-pool size that doesn't exist in this repo) (#62)
+- [x] Closed out issue #46 (E1, dependency freeze) and issue #47 (E2, Week-13 regression suite + schema-parity integration test) (#62–63)
+- [x] Investigated issue #41 (R2)'s three requested literature references: the issue's own pre-written citation text described papers that didn't check out on a first pass (fabricated/misdated); a second pass using better verification (DOI → Crossref, bypassing IEEE's anti-scraping block) confirmed 2 of the 3 were real after all and added them with full verification provenance — the third stayed excluded since it was never real as specified (#64–65)
+- [x] Completed issue #40 (R1): built the ATT&CK-side SelfCheckGPT/McNemar replication pool (mirroring the CVE-side design, including ≥3 REVOKED technique IDs to exercise that taxonomy branch), ran it on both model families, closing the paper's disclosed CVE-only generalization gap on the central finding (#66–67)
+
+### Problems / Blockers
+- Ablation Phase 3's silent 3-day outage was the week's real lesson: a monitoring wrapper that appears to be running tells you nothing if you never verify it against a live check. Fixed the immediate case and stopped trusting a monitor on faith going forward.
+- The new 12-issue GitHub backlog contains real factual errors (wrong repo paths, wrong pool sizes, at least one apparently-fabricated citation requirement) — treating every issue's claims with default skepticism from here on rather than assuming they were fact-checked before filing.
+
+### Next week plan
+- Build Docker-based reproducibility (issues #48–50 / E3–E5)
+- Restructure the manuscript around explicit research questions (issue #45 / R6)
+- Continue the component ablation study toward full completion
+
+---
+
+## Week 14
+
+**Branch:** `emaan-week-14`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/54 (merged)
+
+### Completed this week
+- [x] Issue #49 (E4): wrote a top-level reproducible Dockerfile. Found and fixed 2 real bugs along the way — a Python-version mismatch against the actual lock file's provenance (the issue template suggested 3.11; the real lock file needs 3.12), and CUDA bloat from torch's default GPU wheel pulling several GB never used by this CPU-only image. A third bug surfaced after the build succeeded: the "offline" default smoke test silently triggered a 600MB+ live HuggingFace download of pytector's model on first use, contradicting the whole point of an offline reproducibility image — fixed by baking the model in at build time and verified via `docker stats` that network I/O dropped to a few KB (`docs/all_results.md` #68–70)
+- [x] Issue #48 (E3): built NVD snapshot mode — captures and freezes every real CVE ID's NVD response used across the paper's experiments (152 IDs) into `data/nvd_snapshot/`, with a SHA-256 manifest, so CVE-side experiments reproduce byte-identical years later regardless of NVD's live API (#71)
+- [x] Issue #50 (E5): wrote `REPRODUCIBILITY.md`, the canonical reproducibility index — verified every claim in the issue's own template against the actual repo first (several didn't match: wrong OS assumption, wrong Python version, a nonexistent 479-alert pool) rather than copying it as-is. Included a real, verified reproduction run matching a committed result byte-for-byte, and created the `paper-v1.0` git tag locally, held for supervisor review per the issue's own instruction (#72)
+- [x] Issue #45 (R6): added an explicit Research Questions section (RQ1–4) and restructured all of Sect. 4 so each subsection opens by naming which RQ it addresses (#73)
+- [x] Ran a small ablation smoke test on Groq (24 more real alerts, checkpoint resumed cleanly) and committed an inert backend-switch draft module from a CNIT compute discussion (#74)
+
+### Problems / Blockers
+- The reproducibility issue's own template (E5) assumed a different OS, a different Python version, and an alert-pool size that doesn't exist in this repo — verified against the real repo before writing anything, same pattern as the Week 13 backlog review.
+- Attempted moving the ablation study to self-hosted CNIT compute; VPN connects and genuinely routes, but no reachable server hostname or credentials yet — left pending real access details rather than guessing at network topology.
+
+### Next week plan
+- Continue and complete the full component ablation study (issue #42 / R3)
+- Start the human-annotation validation work (issue #43 / R4)
+
+---
+
+## Week 15
+
+**Branch:** `emaan-week-15`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/55 (merged)
+
+### Completed this week
+- [x] Issue #42 (R3): resolved a real scope conflict in the issue itself — it asked for a 479-alert pool that doesn't match the actual pooled cross-source set, and separately, 139 live Wazuh alerts can't be reconstructed byte-identical (only rule IDs were ever persisted, not the per-event content). Decided with the user to run the honestly-achievable 436-alert pool instead, disclosed rather than silently substituted.
+- [x] Built the frozen 436-alert pool and a resumable, crash-safe driver (`ablation_driver.py`: append-only JSONL, fsync per row, retry-with-backoff on rate limits) and started the real 6-config × 436-alert run against live Groq, seeding 507 already-run pairs from an earlier, differently-scoped run rather than re-spending quota on identical results.
+- [x] Issue #43 (R4): built the blind Excel sheet and reconciliation key for a second, independent CVE relevance annotator. Found and fixed a real anonymization gap along the way — 2 of 80 pairs leaked their own CVE ID inside the raw NVD description text itself, a gap the original single-annotator pass never caught.
+- [x] Ended the week at 806/2,616 ablation pairs done — C0 (full pipeline) reached completion first — gated entirely by Groq's daily token quota, not by anything in the code.
+
+### Problems / Blockers
+- Groq's daily token quota is the sole bottleneck on R3: confirmed it drains/refills gradually through the day rather than resetting cleanly once at midnight, so a same-day re-check only trickles back a handful of rows while a fully-rested day banks roughly 250–280.
+- Hit and fixed a genuine pipeline bug mid-run: the model spontaneously volunteered a CVE (`CVE-2021-31207`) that was never in any alert's evidence text and had no pre-captured NVD snapshot entry, crashing the driver instead of failing gracefully. Fixed by capturing the missing snapshot and building a small auto-heal wrapper that does the same automatically if it recurs.
+
+### Next week plan
+- Keep resuming the ablation driver across quota windows until the full 2,616-pair matrix is done
+- Build Table T6 and Figures F3/F4 once the run completes
+- Get the second annotator's blind sheet filled in
+
+---
+
+## Week 16 (in progress)
+
+**Branch:** `emaan-week-16`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/56 (open)
+
+### Completed so far
+- [x] Issue #42 (R3) — **complete.** Finished the remaining ablation runs (2,616/2,616), built Table T6 and Figures F3 (taxonomy-tier stacked bar) and F4 (UpSet plot), integrated into the manuscript. Headline finding: the PII checker, not citation checking, is the dominant contributor to the pipeline's review-flag rate (69% relative drop when removed) — the opposite of the issue's own prior assumption. The input guardrail's effect couldn't be read causally from this pool at all, since it never blocked a single alert here — disclosed honestly rather than implied.
+- [x] Issue #43 (R4) — **complete.** Built blind-annotation tooling for both citation families. The first attempt used a degraded single-rater self-check (the only option with no second annotator available), but on re-reading the supervisor's explicit follow-up comment, arranged for a genuinely independent second person to do the real double-annotation instead: 80/80 agreement, Cohen's κ = 1.0. Built the ATT&CK-side relevance-classifier validation from scratch (103 pairs — no baseline existed before this week) and scored it against real human labels for the first time: 83.5% accuracy, F1 81.3%, confirming the paper's own hypothesis that the CVE-calibrated threshold is somewhat too permissive for ATT&CK's terser text — left uncalibrated per the issue's own instruction not to retune on this data. Rewrote Sect. 4.6/5 with the real numbers and methodology, not the issue's own two-annotator template text (which never matched what was actually done).
+- [x] Issue #41 (R2) — **complete.** Final pre-close verification: every newly-added reference checked against the manuscript and bibliography, novelty statement re-checked against the supervisor's own explicit checklist (SOC-specific grounding, citation taxonomy, `REAL_AND_PLAUSIBLE` failure mode). No changes needed.
+- [x] Issue #45 (R6) — **complete.** Final consistency check found and fixed two real gaps: RQ4's own definition text was stale (still said the ablation was in progress after R3 had already landed it), and 5 of 9 evaluation subsections were silently missing the RQ-naming opener the RQ section itself promises every subsection has.
+- [x] Issue #51 (E6) — **complete.** Built and integrated both required figures (system architecture, citation-taxonomy decision sequence), both drawn directly from the real pipeline code (`analyse_alert()`, `verify_cve()`/`verify_attack_technique()`) rather than idealized versions.
+- [x] Issue #44 (R5) — **started.** Built and launched the temperature-sensitivity sweep driver (30 withheld alerts × 5 temperatures × 3 resamples, 450 calls total); 88/150 done so far.
+- [x] Built a full demo-companion slide deck and a shot-by-shot script and narration for the required project demo video (issue #53).
+- [x] Opened PR #56 (Week 16 → `dev`).
+
+### Problems / Blockers
+- Caught two genuine data-integrity issues before they became silent errors during R4: two different "labeled" files sent for the CVE cross-check didn't actually match the real 16/80-pair sample (wrong CVE IDs, wrong file structure) — verified every `pair_id` against the true sample before computing any statistic, rather than trusting a plausible-looking spreadsheet.
+- An early attempt at the ATT&CK blind-annotation sheet over-redacted technique names, destroying readability without adding real blinding — MITRE's own prose uses a technique's plain-English name as an ordinary descriptive noun (unlike NVD's number-based CVE text), so hiding it repeatedly mid-sentence didn't blind anything real. Caught by reading the actual redacted output, not just trusting the script ran without error.
+- Issue #53's demo video is still not confirmed recorded, now well past its original due date.
+
+### Next week plan
+- Finish the remaining 62/150 temperature-sweep rows, build Figure F6, write up issue #44/R5 in the manuscript
+- Re-run the full regression suite (issue #47/E2) once R5 finishes
+- Reproducibility freeze + `paper-v1.0` tag (issue #50/E5)
+- Record and share the demo video (issue #53)

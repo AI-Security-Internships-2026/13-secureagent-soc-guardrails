@@ -24,6 +24,10 @@
 \usepackage{textcomp}%
 \usepackage{booktabs}%
 \usepackage{rotating}% sidewaystable
+\usepackage{float}% Fig. F6 (temperature sweep) needs [H] -- this section is
+                   % dense enough with pre-existing floats that plain [h]
+                   % drifted the figure ~20 pages away (LaTeX auto-converts
+                   % an unsatisfiable [h] to [ht] and keeps deferring)
 
 \raggedbottom
 
@@ -119,6 +123,19 @@ reports, with a four-class taxonomy in place of the binary
 grounded/ungrounded label most such checkers use, generalized across two
 distinct claim types: CVE identifiers and MITRE ATT\&CK techniques.
 
+A distinction this taxonomy insists on, worth stating plainly before the
+class names do the explaining: an identifier's existing in an
+authoritative source (NVD, MITRE ATT\&CK) is necessary but never
+sufficient to call a citation grounded. Existence is a fact about the
+identifier alone, checkable independent of any alert; evidential
+grounding and topical relevance are facts about whether \textit{this}
+alert's own evidence actually supports citing it. A real, current
+identifier with no topical relationship to the alert in front of the
+model is still not grounded --- that is exactly what separates
+\texttt{REAL\_BUT\_IRRELEVANT} from \texttt{REAL\_AND\_PLAUSIBLE}
+(Sect.~\ref{subsec:taxonomy}), two classes that only get reached once
+existence has already been confirmed.
+
 The sharper claim, and the one the evaluation is actually built around,
 is narrower than ``we built a taxonomy.'' \texttt{REAL\_AND\_PLAUSIBLE}
 names a failure mode that a leading alternative --- self-consistency
@@ -206,9 +223,13 @@ was an open question earlier in this project) both hold.
 \textbf{RQ4.} How do individual pipeline stages (input guardrail, CVE
 checker, ATT\&CK checker, PII redaction) individually affect detection
 outcomes and operational latency? Per-stage toggles are implemented and
-schema-parity-validated (Sect.~\ref{subsec:setup}); a full ablation
-across the paper's pooled evaluation set was in progress at the time of
-writing and is not yet reported in this draft.
+schema-parity-validated (Sect.~\ref{subsec:setup}); the full ablation
+across the paper's pooled evaluation set (Sect.~\ref{subsec:ablation},
+Table~\ref{tab:ablation}) is complete. The PII checker is the largest
+single contributor to the pipeline's review-flag rate; the CVE and
+ATT\&CK checkers each catch distinct, smaller sets of alerts; the input
+guardrail's contribution could not be causally isolated on this
+particular pool (Sect.~\ref{subsec:ablation} explains why).
 
 The rest of the paper is organized as follows: Sect.~\ref{sec:related-work}
 reviews related work; Sect.~\ref{sec:method} describes the pipeline and
@@ -377,6 +398,31 @@ currently asks an analyst to trust its output as a black box.
 
 \section{Proposed Method}\label{sec:method}
 
+Fig.~\ref{fig:architecture} gives the pipeline's real execution order, as
+implemented in \texttt{analyse\_alert()}: an incoming alert first passes
+through the input guardrail; on a detected injection, a
+\texttt{BLOCKED} report is returned immediately and nothing below that
+point runs. Otherwise the LLM generates a threat report, which then
+passes through three independent guardrail stages --- CVE checking,
+ATT\&CK checking, and PII redaction --- before a final aggregation step
+sets \texttt{requires\_review}. Each of the three output-side stages is
+independently toggleable (this is exactly what the component ablation
+study, Sect.~\ref{subsec:ablation}, tests) and every field in the final
+report is always present regardless of which stages ran, but the figure
+draws them side by side purely for layout clarity: the implementation
+runs them sequentially, in the order shown, not concurrently. The rest
+of this section describes each stage in turn.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\linewidth]{figures/fig_architecture.pdf}
+\caption{System architecture: the pipeline's actual execution order.
+CVE, ATT\&CK, and PII guardrails are drawn side by side because each is
+independently toggleable (Sect.~\ref{subsec:ablation}'s ablation study),
+not because they run concurrently --- the implementation executes them
+sequentially, in this order.}\label{fig:architecture}
+\end{figure}
+
 \subsection{Threat model}\label{subsec:threat-model}
 
 \begin{table}[h]
@@ -462,6 +508,22 @@ Class & Meaning \\
 \botrule
 \end{tabular}
 \end{table}
+
+Fig.~\ref{fig:taxonomy} shows the same taxonomy as the decision sequence
+that actually produces it --- both \texttt{verify\_cve()} and
+\texttt{verify\_attack\_technique()} check these conditions in this
+exact order, so one diagram covers both citation families.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{figures/fig_taxonomy.pdf}
+\caption{Citation classification decision sequence, identical in
+structure for CVE and MITRE ATT\&CK identifiers.
+\texttt{REAL\_AND\_PLAUSIBLE} is colored distinctly from the other
+terminal classes: it is the highest-risk outcome, not a safe one, since
+it looks correct on a manual read-through
+(Sect.~\ref{subsec:selfcheckgpt} shows this empirically).}\label{fig:taxonomy}
+\end{figure}
 
 Every ungrounded citation sets \texttt{requires\_review = True}
 unconditionally, regardless of class. That's a deliberate choice, not an
@@ -553,10 +615,14 @@ across every result in this paper. This asymmetry --- one path versioned
 and reproducible, the other live and time-varying --- is a disclosed
 property of the two authoritative sources' own APIs, restated in
 Sect.~\ref{sec:discussion}'s limitations. National Vulnerability
-Database (NVD) lookups for all 152 CVE IDs referenced in the committed
+Database (NVD) lookups for all 153 CVE IDs referenced in the committed
 evaluation result files are frozen as a committed snapshot under
 \texttt{data/nvd\_snapshot/} with SHA-256 manifest
-\texttt{e150c71a5de62ac68930b30e72d1529267172147ec4ec45b2e488d9345278aca}.
+\texttt{f49cb345ca9a26ea35f728458224c015082940a04f5f95a65e6d7ad7cb867f7c}
+(one CVE added --- \texttt{CVE-2021-31207} --- after the component
+ablation study, Sect.~\ref{subsec:ablation}, hit a citation the model
+spontaneously volunteered that the original 152-ID snapshot didn't yet
+cover; \texttt{docs/all\_results.md} \#76 has the full account).
 Reviewers can re-run all published CVE-side experiments with the
 \texttt{--use-snapshot} CLI flag across evaluation scripts to reproduce
 Sects.~\ref{subsec:cve-bait}, \ref{subsec:selfcheckgpt},
@@ -569,7 +635,7 @@ per result file is provided in the repository's
 
 \subsection{Output guardrail: CVE-bait adversarial test}\label{subsec:cve-bait}
 
-The CVE-bait set grew from an initial $n=6$ to $n=150$ real CVEs across
+This subsection addresses RQ1. The CVE-bait set grew from an initial $n=6$ to $n=150$ real CVEs across
 three passes (2026-08-12, 2026-08-12, 2026-08-25), the later additions
 sourced in bulk from CISA's Known Exploited Vulnerabilities (KEV)
 catalog, with each alert's behavior description paraphrased from that
@@ -650,7 +716,7 @@ SelfCheckGPT/McNemar data source.
 
 \subsection{Output guardrail: ATT\&CK-bait adversarial test}\label{subsec:attack-bait}
 
-A parallel bait set covers MITRE ATT\&CK technique citations, expanded
+This subsection also addresses RQ1, on the second citation family. A parallel bait set covers MITRE ATT\&CK technique citations, expanded
 from $n=6$ to $n=150$ across two passes (2026-08-21, 2026-08-25). Every
 technique paraphrases its real, official MITRE description into
 symptom-only EDR/log-style telemetry, never stating the technique name
@@ -691,7 +757,7 @@ outright fabrication.
 
 \subsection{The central empirical result: SelfCheckGPT versus deterministic grounding}\label{subsec:selfcheckgpt}
 
-\textbf{Method.} SelfCheckGPT-style multi-sample consistency checking (3
+This subsection addresses RQ2. \textbf{Method.} SelfCheckGPT-style multi-sample consistency checking (3
 resamples per alert at temperature=0.7 --- production runs at
 temperature=0.1, Sect.~\ref{subsec:setup}, and would give resampling no
 diversity to measure) against the same 60-alert CVE pool used in
@@ -770,9 +836,63 @@ The two misattribution cases echo Sect.~\ref{subsec:cve-bait}'s
 Follina/DogWalk finding at smaller scale: a real identifier from the
 right cluster, but the wrong specific one.
 
+\textbf{Is this a temperature=0.7 artifact?} The comparison above needs
+SelfCheckGPT's own required resampling diversity, which production
+settings don't use (temperature 0.1 vs.\ 0.7, Sect.~\ref{subsec:setup})
+--- a real, disclosed confound until tested directly. We swept the
+identical 30 withheld-CVE alerts across $t \in \{0.1, 0.3, 0.5, 0.7,
+1.0\}$, 3 resamples each (150 live calls), measuring: the rate the
+model volunteers any CVE at all, the rate that volunteered citation is
+confirmed \texttt{REAL\_AND\_PLAUSIBLE}, SelfCheckGPT's recall on that
+confirmed-unsupported subset, and the deterministic checker's detection
+rate on the same subset.
+
+\textbf{Result} (\texttt{experiments/results/temperature\_sweep\_summary.json},
+$n=30$ per temperature, Fig.~\ref{fig:f6}): the volunteer rate is
+already 93--100\% at every temperature tested, including $t=0.1$ ---
+this 30-alert pool, unlike Sect.~\ref{subsec:cve-bait}'s symptom-only
+CVE-bait set, is built with an explicit citation request on its
+prompted items, so its low-temperature volunteer rate was never
+expected to match that separate pool's 0\%; the two measure different
+things by design, not a contradiction. What the sweep actually settles
+is the question that matters: \textbf{SelfCheckGPT's recall on the
+confirmed-unsupported subset stays low at every temperature} --- 5\% at
+$t=0.1$ (95\% CI [0.9\%, 23.6\%]), 18\% at $t=0.3$, 5\% at $t=0.5$, 10\%
+at $t=0.7$ (matching this section's own 18/20 finding at that
+temperature), and 19\% at $t=1.0$ --- with all five 95\% Wilson
+intervals overlapping each other, ruling out a clean monotonic trend in
+either direction. The deterministic checker's detection rate on the
+identical subset is 100\% at every temperature, by pipeline
+construction (Sect.~\ref{subsec:ablation}: an ungrounded citation
+unconditionally sets \texttt{requires\_review=True}, independent of
+temperature or class).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/fig_f6_temperature_boundary.pdf}
+\caption{Temperature sensitivity of citation volunteering and detection
+(30 withheld-CVE alerts, 3 resamples per temperature; shaded bands are
+95\% Wilson CIs). Volunteering and the confirmed-unsupported
+(\texttt{REAL\_AND\_PLAUSIBLE}) rate stay high and roughly flat across
+the full range; SelfCheckGPT's recall on that same confirmed-unsupported
+subset stays low and flat, never rising above 19\%; the deterministic
+checker's detection rate is flat at 100\% throughout.}\label{fig:f6}
+\end{figure}
+
+\textbf{What this means.} The blindness is not a $t=0.7$ artifact.
+Whenever a \texttt{REAL\_AND\_PLAUSIBLE} citation exists, self-consistency
+checking is structurally blind to it at every temperature tested, from
+production-cold ($t=0.1$) to maximally diverse ($t=1.0$). How
+\textit{often} the triggering condition occurs is temperature- and
+prompt-dependent ---
+Sect.~\ref{subsec:cve-bait}'s symptom-only pool shows that directly; the
+failure mode itself, once triggered, is not. This closes the confound
+Sect.~\ref{sec:discussion} raises below empirically, rather than only
+arguing it down from principle.
+
 \subsection{Significance testing: deterministic grounding versus SelfCheckGPT}\label{subsec:mcnemar}
 
-A paired McNemar test between the deterministic pipeline and
+This subsection addresses RQ3. A paired McNemar test between the deterministic pipeline and
 SelfCheckGPT needed a separate run rather than reusing
 Sect.~\ref{subsec:selfcheckgpt}'s data: \texttt{sample\_citations()}
 bypasses the guardrail pipeline, so the deterministic checker's actual
@@ -885,6 +1005,8 @@ result the paper leads with.
 
 \subsection{Relevance classifier validation}\label{subsec:relevance}
 
+This subsection doesn't answer RQ1-RQ4 directly; it validates the
+human-judgment assumption RQ1's taxonomy split relies on.
 \textbf{Method.} The \texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT}
 split (Sect.~\ref{subsec:taxonomy}) rests on
 Sect.~\ref{subsec:output-guardrail}'s Stage 2 relevance score --- a
@@ -926,6 +1048,69 @@ defensible rather than resting on an unchecked heuristic. Its concrete
 failure mode --- short or generic authoritative descriptions starving a
 bag-of-words scorer --- produces false negatives on genuinely correct
 citations, a disclosed limitation restated in Sect.~\ref{sec:discussion}.
+
+\textbf{Independent second-annotator validation.} A second, genuinely
+independent annotator blind-labeled all 80 pairs --- the CVE ID, the
+pipeline's own suggested label, and annotator 1's label all withheld,
+labeling done with no access to annotator 1's pass and no communication
+between raters until both were complete. (An earlier, interim check
+before this second annotator was available had the same original rater
+blind-relabel a stratified 20\% sample as a self-consistency check
+only, not a substitute for this; that interim result is superseded by
+the one below.) Result: \textbf{80/80 exact agreement, Cohen's
+$\kappa=1.0$ (95\% CI $[1.0,1.0]$, 1000 bootstrap resamples), zero
+disagreements to resolve.} This is genuine independent inter-rater
+agreement, not a self-consistency proxy: two different people, working
+blind to each other, classified every one of the 80 pairs identically.
+
+\textbf{ATT\&CK side.} The same classifier and the same 0.15 threshold
+--- calibrated on CVE pairs only, left unchanged here rather than
+retuned, since retuning on this dataset would be a form of leakage ---
+were separately validated against 103 (alert, candidate technique)
+pairs: 40 anchor alerts from the ATT\&CK-bait set
+(Sect.~\ref{subsec:attack-bait}), each paired with its own correct
+technique and a distractor (80 base pairs, meeting the required 40/40
+relevant/irrelevant minimum), 20 additional harder near-miss distractor
+pairs, and 3 named edge cases built to probe specific known failure
+shapes: a Kerberos-ticket alert against \texttt{T1558.001} Golden
+Ticket (heavy lexical overlap, a different sub-technique), a
+phishing-document alert against \texttt{T1204.002} Malicious File (a
+genuinely debatable pairing), and a revoked technique
+(\texttt{T1156}) against an unrelated alert. Labeled by a single rater,
+blind to the technique ID --- though not to its plain-English name,
+left visible after an early attempt to redact that too made the text
+unreadable without adding real blinding, since MITRE's own descriptions
+use a technique's name as an ordinary descriptive noun throughout their
+prose (e.g.\ \texttt{T1566} Phishing's description uses ``phishing'' 10
+times), unlike NVD's number-based CVE text. No independent cross-check
+was performed on this side.
+
+\textbf{Result} (\texttt{attack\_relevance\_classifier\_validation\_results.json},
+$n=103$): \textbf{accuracy 83.5\% (95\% CI [75.2\%, 89.4\%]), precision
+74.0\% (95\% CI [60.5\%, 84.1\%]), recall 90.2\% (95\% CI [77.5\%,
+96.1\%]), F1 81.3\%} (TP=37, FP=13, TN=49, FN=4) --- a real,
+meaningfully lower number than the CVE side's 92.5\%, though still
+above the 0.80 floor below which this validation was explicitly
+designed not to retune the threshold; it stays at 0.15. 12 of the 13
+false positives land on negative or near-miss pairs, confirming the
+terser-description hypothesis directly: the classifier calls
+genuinely-irrelevant technique pairs relevant more often on this family
+than on CVE's longer NVD prose. The named Golden Ticket edge case lands
+exactly as designed --- overlap 0.382 (driven by shared
+``Kerberos''/``ticket'' vocabulary), predicted relevant, but correctly
+judged \texttt{not\_relevant} by the human rater: a concrete, legible
+instance of the classifier's lexical-overlap-versus-true-relevance gap,
+not an abstract concern. The 4 false negatives sit on genuinely correct
+pairs where overlap fell just under threshold, one as low as 0.035 ---
+the same short-authoritative-description failure mode already disclosed
+for the CVE side, evidently present here too.
+
+\textbf{What this means.} The relevance classifier generalizes to a
+second citation family, but at a real, disclosed accuracy cost
+(92.5\%$\to$83.5\%) rather than an assumed-free one --- consistent
+with, not contradicting, this paper's broader finding that ATT\&CK is
+measurably harder for both models (Sect.~\ref{subsec:selfcheckgpt}) and
+this classifier alike.
 
 \subsection{Real-world deployment validation: third-party incident generator and live Wazuh SIEM data}\label{subsec:realworld}
 
@@ -1010,20 +1195,102 @@ flags existed) --- gated purely at the orchestrator call site, so a
 disabled stage's check function is never called at all rather than
 called-then-discarded, keeping the ablation's latency numbers honest.
 
-\textbf{Status at the time of writing.} A 2-alert $\times$
-6-configuration schema-parity smoke test is complete and passing: every
-configuration, including every guardrail disabled, produces a
-structurally identical report schema (this is also exercised directly by
+A 2-alert $\times$ 6-configuration schema-parity smoke test passed
+first: every configuration, including every guardrail disabled, produces
+a structurally identical report schema (also exercised directly by
 \texttt{tests/test\_soc\_agent\_schema\_parity.py}, part of the 158-test
-suite reported in Sect.~\ref{subsec:setup}). The full evaluation --- 6
-configurations across the paper's pooled alert set, reporting per-config
-ungrounded/review/PII/latency numbers and each guardrail's
-uniquely-caught-alert contribution --- was in progress at the time of
-writing and is not yet reported in this draft; see the project roadmap
-and committed, timestamped result files in the repository for current
-status. We report this honestly as ongoing rather than either
-fabricating numbers or silently omitting the subsection RQ4 is meant to
-answer.
+suite reported in Sect.~\ref{subsec:setup}).
+
+\textbf{Pool and configurations.} The full run covers a 436-alert pool
+--- the 150 CVE-bait and 150 ATT\&CK-bait alerts and the 60-alert CVE
+pool (all Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}), and 76
+\texttt{Secure\_SOC\_AI}
+rule-engine incidents (Sect.~\ref{subsec:realworld}) --- a scope
+correction from an originally planned 479/575-alert figure: the 139 live
+Wazuh alerts (also Sect.~\ref{subsec:realworld}) could not be included,
+since only \texttt{wazuh\_alert\_id}/\texttt{rule\_id}/\texttt{rule\_level}
+were persisted from that run, not the per-event fields (source IP,
+payload, hostname) the alert text itself depends on, and re-collecting a
+fresh batch would no longer be identical to the alerts producing this
+paper's other reported numbers. Six configurations --- \texttt{C0} full
+pipeline, \texttt{C1}--\texttt{C4} each disabling exactly one of the four
+guardrail stages, and \texttt{C5} all four disabled --- were run against
+every alert: 2{,}616 total live \texttt{gpt-oss-20b} calls, executed
+across several sessions under Groq's free-tier daily token quota and
+resumed from a crash-safe, per-row-fsynced checkpoint between sessions.
+
+\textbf{Result} (Table~\ref{tab:ablation}):
+
+\begin{table}[h]
+\caption{Component ablation summary (T6): 6 configurations $\times$ 436 alerts, 2{,}616 total runs}\label{tab:ablation}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Config & Ungrounded & Review & PII det. & Input FP & Latency ms (IQR) & Lost/gained vs.\ Full \\
+\midrule
+Full pipeline & 5 & 45 (10.3\%) & 66 & 0 & 4766 [1956, 7064] & --- \\
+$-$Input & 13 & 45 (10.3\%) & 56 & 0 & 4604 [2226, 6303] & 12 / 12 \\
+$-$CVE & 8 & 46 (10.6\%) & 59 & 0 & 5005 [2226, 7148] & 13 / 14 \\
+$-$ATT\&CK & 4 & 41 (9.4\%) & 63 & 0 & 4313 [2237, 6312] & 11 / 7 \\
+$-$PII & 15 & 14 (3.2\%) & 0 & 0 & 5408 [2061, 7454] & 39 / 8 \\
+None & 0 & 0 (0.0\%) & 0 & 0 & 5085 [1827, 7638] & 45 / 0 \\
+\botrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig_ablation_taxonomy_stacked.pdf}
+\caption{Component ablation: citation-taxonomy tier of every CVE/ATT\&CK
+verification performed, by configuration. \texttt{FABRICATED} and
+\texttt{UNVERIFIED} never occurred in this pool at any configuration.
+\texttt{REAL\_AND\_PLAUSIBLE} (the taxonomy tier this paper's central
+finding is built on) dominates every configuration's bar, consistent
+with Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}'s bait-test
+results on the same two citation families.}\label{fig:ablation-taxonomy}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig_ablation_upset_unique_alerts.pdf}
+\caption{Component ablation: overlap, across all six configurations, of
+which alerts were flagged \texttt{requires\_review}. The largest bar (24
+alerts) is the set flagged by every configuration except \texttt{C4}
+(\texttt{-PII}) and \texttt{C5} --- i.e.\ alerts whose review flag
+depends on the PII checker regardless of any other guardrail's state.
+No bar groups \texttt{C5} with any other configuration, since \texttt{C5}
+flags nothing.}\label{fig:ablation-upset}
+\end{figure}
+
+\textbf{The PII checker, not citation verification, is this pool's
+dominant contributor to the review-flag rate.} Disabling it alone drops
+the flag rate from 10.3\% to 3.2\% (45 $\to$ 14 of 436 alerts, a 69\%
+relative drop) --- a materially larger effect than either citation
+checker in isolation, and the opposite of what might be assumed for a
+guardrail whose stated purpose (Sect.~\ref{subsec:pii-guardrail}) is orthogonal to
+citation grounding. The CVE and ATT\&CK checkers each catch a real,
+mostly distinct set of alerts --- Fig.~\ref{fig:ablation-upset}'s
+intersections are not simply nested subsets of one another --- but at
+smaller magnitude on this pool (review-flag rate moves by under 1
+percentage point when either is disabled alone). \textbf{We do not claim
+every component is equally essential}: that claim would only be
+supported if every single-stage removal produced a comparable drop, and
+it does not.
+
+\textbf{The input guardrail's contribution cannot be read causally from
+this table.} It never blocked a single alert in this pool, in any
+configuration (0 \texttt{guardrail\_blocked} occurrences across all
+2{,}616 rows) --- unsurprising, since this pool was built to stress
+citation grounding and PII leakage, not prompt injection
+(Sect.~\ref{subsec:input-guardrail} covers that comparison on its own
+purpose-built dataset). Because each (configuration, alert) pair is an
+independent live LLM call rather than a shared generation replayed under
+different guardrail settings, the small differences visible between
+\texttt{C0} and \texttt{C1} in Table~\ref{tab:ablation} (e.g.\ ungrounded
+detections 5 vs.\ 13) are, on a pool where the input guardrail
+demonstrably never intervened, most plausibly ordinary sampling variance
+between two independent generations rather than a demonstrated causal
+effect of removing that stage --- reported plainly rather than implying
+a precision this pool's design cannot support.
 
 \subsection{Cross-source grounding summary}\label{subsec:crosssource}
 
@@ -1329,29 +1596,36 @@ literature doesn't supply it for the CVE/ATT\&CK domain ---
 SelfCheckGPT's own evaluation never quantifies this failure mode on a
 citation-grounding task at all.
 
-Second, and more consequential: the comparison runs at
+Second: the comparison runs at
 temperature=0.7, because SelfCheckGPT's resampling needs diversity to
 measure anything, while production runs at 0.1
 (Sect.~\ref{subsec:setup}) --- and Sect.~\ref{subsec:cve-bait}'s CVE pool, run at
 the production temperature on the same style of alert, shows the model
-volunteering a withheld-but-correct CVE 0\% of the time. That's a real
-confound, not a footnote: it's entirely plausible that most of what
-makes SelfCheckGPT look bad here is temperature-induced volunteering
-behavior, not something inherent to consistency-checking as a method,
-and this dataset can't fully separate the two effects. What the
-confound does \textit{not} touch is the narrower claim underneath it,
-which is temperature-independent: once a model does volunteer a real,
-uncited identifier --- at whatever temperature, in whatever deployment
-actually produces one --- self-consistency checking cannot flag it,
-because the citation is stable across resamples by construction, while
-the deterministic checker flags it every time, because groundedness
-depends on evidence presence, not on how many times the model repeats
-the same answer. That mechanism-level claim holds regardless of how
-often the triggering condition occurs; it is only the specific
-prevalence (18 of 20, not some other split) that depends on
-temperature=0.7, and that dependency should be read as attached to
-Sect.~\ref{subsec:selfcheckgpt}'s headline number, not to the mechanism
-itself.
+volunteering a withheld-but-correct CVE 0\% of the time. That looked
+like a real, only-partially-closable confound when first disclosed:
+plausibly most of what makes SelfCheckGPT look bad here is
+temperature-induced volunteering behavior, not something inherent to
+consistency-checking as a method. Sect.~\ref{subsec:selfcheckgpt}'s
+five-point temperature sweep now closes this empirically rather than
+leaving it argued from principle alone: SelfCheckGPT's recall on the
+confirmed-unsupported subset stays low (5--19\%) at every temperature
+from 0.1 to 1.0, with overlapping 95\% confidence intervals throughout
+--- so the mechanism-level blindness demonstrated at $t=0.7$ is not an
+artifact of that specific temperature choice. What genuinely does vary
+with temperature and prompt design is how often a real, uncited
+identifier gets volunteered in the first place: 0\% on this section's
+symptom-only CVE-bait pool at production temperature, 93--100\% on the
+sweep's explicitly-prompted pool at every temperature tested. That is a
+question about triggering frequency, not about whether self-consistency
+can catch the citation once triggered --- and the sweep shows the
+latter holds regardless of temperature. The mechanism-level claim was
+already temperature-independent by construction (once a model does
+volunteer a real, uncited identifier, self-consistency checking cannot
+flag it, because the citation is stable across resamples by
+definition, while the deterministic checker flags it every time,
+since groundedness depends on evidence presence, not on how many times
+the model repeats the same answer); the sweep is what turns that from
+an architectural argument into a measured one.
 
 \textbf{What the CVE-pool finding (Sect.~\ref{subsec:cve-bait}) means.}
 The 0\%-fabrication / 0\%-spontaneous-citation result is really two
@@ -1376,7 +1650,19 @@ what was tested.
   withheld-but-correct identifier once sampled at the temperature
   SelfCheckGPT requires, so Sect.~\ref{subsec:cve-bait}'s finding
   should be read as holding at production temperature specifically, not
-  as a general model property. Sect.~\ref{subsubsec:llmjudge}'s
+  as a general model property. A five-point temperature sweep
+  ($t\in\{0.1,0.3,0.5,0.7,1.0\}$, Sect.~\ref{subsec:selfcheckgpt})
+  since closed this as an open question rather than an assumption:
+  SelfCheckGPT's recall on the confirmed-unsupported subset stays low
+  (5--19\%) at every temperature tested, with overlapping 95\% CIs, so
+  the blindness itself is not a $t=0.7$ artifact --- only the rate at
+  which a citation gets volunteered in the first place is
+  temperature/prompt-dependent. This sweep was run on the CVE pool
+  only; an equivalent ATT\&CK-side temperature sweep was not performed,
+  so if ATT\&CK memorization is weaker than CVE memorization, the
+  analogous curve for MITRE technique IDs could sit lower at every
+  temperature point --- disclosed, not tested here.
+  Sect.~\ref{subsubsec:llmjudge}'s
   LLM-judge baseline now spans same- and cross-model-family
   judges --- 442/450 (98\%) complete, quota-gated on Groq's free tier
   rather than a design limitation.
@@ -1442,16 +1728,23 @@ what was tested.
   \texttt{REAL\_AND\_PLAUSIBLE}/\texttt{REAL\_BUT\_IRRELEVANT}
   (Sect.~\ref{subsec:output-guardrail}, validated
   Sect.~\ref{subsec:relevance}) is 92.5\% accurate against human
-  judgment ($n=80$), not perfect --- its 6 disagreements cluster at the
-  0.15 decision threshold, with a known failure mode on short/generic
-  authoritative descriptions. Its labels are AI-suggested and
-  human-confirmed, not independently annotated from scratch. All 80
-  validation pairs are drawn from the CVE-bait set, so this
-  92.5\%-accuracy figure validates the scorer's CVE-side behavior only;
-  the same scorer's ATT\&CK-side accuracy, against STIX technique
-  descriptions rather than NVD prose, has not been independently
-  checked, despite the two authoritative sources differing
-  structurally in description length and style.
+  judgment on CVE pairs ($n=80$) and 83.5\% accurate on ATT\&CK pairs
+  ($n=103$), not perfect on either family --- the CVE side's 6
+  disagreements cluster at the 0.15 decision threshold, with a known
+  failure mode on short/generic authoritative descriptions; the
+  ATT\&CK side's 17 disagreements concentrate on false positives for
+  negative/near-miss pairs, consistent with its terser STIX prose
+  making the same CVE-calibrated threshold too permissive there. Per
+  this validation's own design, the threshold was \textit{not} retuned
+  on the ATT\&CK-side data to fix this --- doing so would itself be a
+  form of dataset leakage; the classifier is reported as-is, warts
+  included. The CVE side's ground truth was independently
+  double-annotated: a second, genuinely independent rater blind-labeled
+  all 80 pairs with no access to the first rater's labels, agreeing on
+  every single one (Cohen's $\kappa=1.0$, $n=80$, zero disagreements to
+  resolve). The ATT\&CK side's labels come from a single rater with no
+  independent cross-check at all --- a real asymmetry between the two
+  citation families' ground truth that remains disclosed as such.
 \end{itemize}
 
 \textbf{Threats to validity.} The input-guardrail comparison
@@ -1470,16 +1763,19 @@ analogous bias in the other direction --- technique selection is drawn
 from the local MITRE snapshot rather than any real-world prevalence
 signal, so its rate reflects how often the model reaches for a specific
 technique ID given a resembling symptom description, not attacker
-behavior frequency. Every human-labeled ground truth in this
-paper --- the relevance classifier's 80 pairs
-(Sect.~\ref{subsec:relevance}) most directly, since it's the only one
-reported as a citable accuracy figure --- comes from a single rater,
-with no second annotator and no inter-rater agreement statistic; the
-one check against rater drift is a blind re-check of the 3 pairs
-flagged as most ambiguous, not independent double-labeling of the full
-set. This is a real threat to validity, not fully addressed by the
-``AI-suggested, human-confirmed'' disclosure already given for that
-figure.
+behavior frequency. Human-labeled ground truth in this paper is not
+uniformly independently double-annotated across both citation families.
+The relevance classifier's CVE pairs (Sect.~\ref{subsec:relevance},
+$n=80$) were: a second, genuinely independent annotator blind-labeled
+the full set with no access to the first rater's labels, agreeing on
+every single pair (Cohen's $\kappa=1.0$, zero disagreements to resolve)
+--- real independent inter-rater agreement, not a self-consistency
+proxy. The ATT\&CK pairs ($n=103$) were not: no second annotator was
+recruited for that family, an explicit scope decision under
+annotator-time constraints rather than an oversight left undisclosed.
+We cannot rule out residual single-rater bias on the ATT\&CK side's
+ground truth specifically; a second independent annotator for that
+family, or a cross-site replication of both, remains future work.
 
 \section{Conclusion}\label{sec:conclusion}
 

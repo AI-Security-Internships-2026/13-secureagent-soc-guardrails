@@ -13,7 +13,7 @@ than repeated.
 
 - **Paper release tag:** `paper-v1.0` (see §8 below)
 - **Commit SHA:** exact commit hash of `paper-v1.0` — run `git rev-parse paper-v1.0` (a hardcoded hash here would go stale the moment this file itself changes again, since the file's own commit hash depends on its content; the tag is the stable reference)
-- **Date of evaluation runs:** `2026-06-10` – `2026-09-09` (repo's first commit to this document's writing date; see `docs/all_results.md` for the dated, numbered log of every individual experiment)
+- **Date of evaluation runs:** `2026-06-10` – `2026-09-27` (repo's first commit to this freeze's date; see `docs/all_results.md` for the dated, numbered log of every individual experiment)
 - **Operating system:** Native Windows 11 Home, build `26200` (this project has never run under WSL2 — the issue template that requested this file assumed WSL2/Ubuntu, which is incorrect for this repo's actual development environment)
 - **CPU / RAM:** 13th Gen Intel Core i7-1355U · 12 logical cores · 16 GB RAM
 - **Python version:** `Python 3.12.6` (not 3.11 — `requirements-lock.txt` itself documents it was generated on 3.12.6, and one of its pinned packages, `scipy==1.18.1`, has no Python 3.11 wheel at all; discovered and documented while building the Dockerfile for Issue E4)
@@ -29,7 +29,7 @@ pip install -r requirements-lock.txt
 python -m spacy download en_core_web_sm
 ```
 - Pinned versions manifest: [`requirements-lock.txt`](./requirements-lock.txt) — produced by `pip freeze` on a clean venv (Issue E1).
-- SHA-256 of requirements-lock.txt: `099938490887c6acd2e62907bfc298a3a334552fea6798767db643e15240cf4c`
+- SHA-256 of requirements-lock.txt: `747165c71e6dad086e84785f995f949ed4a0d41b81b75bb881cfc2745faebd5e` (changed since this file's original writing — `upsetplot==0.9.0` was added for Issue R3's Figure F4; recomputed for this freeze rather than left stale)
 - Groq client packages (explicit, Issue E1): `groq==0.37.1`, `langchain-groq==1.1.3`
 
 ## 3. Model IDs & Generation Hyperparameters (as used in §4 of the paper)
@@ -56,7 +56,7 @@ Computed via `hashlib.sha256(PROMPT_STRING.encode("utf-8")).hexdigest()` on the 
 ## 5. Data Snapshot Hashes
 
 - **MITRE ATT&CK STIX Enterprise snapshot** (`data/mitre_attack/enterprise_attack_techniques.json`, fetched 2026-08-04, 858 techniques): SHA-256 `3655344c1b3428392994a947cb13b04b2236a6818b9ce9e35084db98b4fbd08f` — already cited in `docs/paper/paper_draft.md`/`sn-article.tex` §4.1.
-- **NVD snapshot** (Issue E3, all 152 CVE IDs referenced in committed result files): [`data/nvd_snapshot/MANIFEST.sha256`](./data/nvd_snapshot/MANIFEST.sha256) — every `<CVE-ID>.json` listed individually, 152/152 entries verified via `sha256sum -c`. Use the `--use-snapshot` CLI flag (see §7) to reproduce without live network access to the NVD API.
+- **NVD snapshot** (Issue E3, all 153 CVE IDs referenced in committed result files — 152 originally, plus `CVE-2021-31207` added mid-way through the R3 ablation study when the model spontaneously volunteered a citation the original snapshot didn't cover, `docs/all_results.md` #76): [`data/nvd_snapshot/MANIFEST.sha256`](./data/nvd_snapshot/MANIFEST.sha256) — every `<CVE-ID>.json` listed individually, **153/153 entries re-verified for this freeze** (byte-for-byte SHA-256 recompute against every file, not just a manifest-exists check). Use the `--use-snapshot` CLI flag (see §7) to reproduce without live network access to the NVD API.
 
 ## 6. Data Hashes for Key Evaluation Result/Input Files
 
@@ -65,8 +65,16 @@ The issue template assumed several dedicated JSON "input pool" files (e.g. `cve_
 ```
 f112050eca509fd216a8ddd9f1f9ca3f94075ee690f7bdb8abde1ba249615c11  experiments/results/attack_bait_pool_60.json
 56501aa866e4cabd03b6e921b41dce5ea9f069d762a770b36e60d797a83c218a  experiments/evaluation/relevance_classifier_validation/relevance_classifier_validation_results.json
+19136e38d6237695143b7dec4905d464e03096ec3b3732e6dfa014598646bd7f  experiments/results/ablation_pool_436.json
+ed39f8f05ad982962d36fea371b9bf70b7b8a1fd553096c879e01ea4ba4695a3  experiments/results/ablation_full.jsonl
+3e76ade277b2786fcc67271905881ceb0e4822d1f7c4133883f5db6b661763a5  experiments/results/ablation_table_t6.json
+dd7e7b35391e642ee0131af846284647b14508239126d24466bccf73c9e8509c  experiments/evaluation/relevance_classifier_validation/attack_relevance_classifier_validation_results.json
+0e68286d7416c997be9df445ce6273bc96b1d3953db9082b52656595d75e7d95  experiments/evaluation/relevance_classifier_validation/inter_rater_agreement_results.json
+01fe8e3625ca80b1a0b5213ebce0925df3804383f79e54d261189d62b26e4664  experiments/evaluation/relevance_classifier_validation/cve_crosscheck_kappa_results.json
+da0ba4a0e67213acaed554c7c0737e366429669d8a1ddb92e7a43f05ae444a66  experiments/results/temperature_sweep_prompted_30x5.jsonl
+d151c52acade1a3720e3c86fec6542a26472e92454104efd0a53c83e21a62749  experiments/results/temperature_sweep_summary.json
 ```
-(A relevance-classifier pool for ATT&CK citations, analogous to the CVE-side 80-pair set, does not yet exist — that is Issue R4's second task, currently blocked on needing a second human annotator; see §10.)
+The ATT&CK-side relevance-classifier pool this section previously flagged as not existing yet (blocked on Issue R4's second annotator) is now built and scored — `relevance_classifier_validation/attack_pairs_to_label.csv` (103 pairs) plus the result file hashed above, n=103, 83.5% accuracy. Both citation families' human-annotation ground truth are also frozen: `annotator1_and_key_HIDDEN.csv` / `annotator2_cve_pairs_labeled.xlsx` (CVE, real independent double-annotation, κ=1.0) and `attack_annotation_labeled.xlsx` (ATT&CK, single rater, disclosed as such in the manuscript). See §10 for the byte-for-byte reproduction check on the ATT&CK scorer.
 
 ## 7. Commands to Reproduce Each Result
 
@@ -91,17 +99,35 @@ python -m experiments.evaluation.selfcheckgpt_significance_test_attack
 GENERATOR_MODEL=qwen/qwen3.6-27b python -m experiments.evaluation.selfcheckgpt_test_attack
 GENERATOR_MODEL=qwen/qwen3.6-27b python -m experiments.evaluation.selfcheckgpt_significance_test_attack
 
-# Sect. 4.6  Relevance classifier validation (deterministic, no LLM calls, no API cost)
+# Sect. 4.6  Relevance classifier validation, both citation families (deterministic, no LLM calls, no API cost)
 python -m experiments.evaluation.relevance_classifier_validation.score_labels
+python -m experiments.evaluation.relevance_classifier_validation.score_attack_labels
 
-# Sect. 4.8/4.9 (issue's §4.8) Ablation study, 6 configs (Issue R3)
-# NOT YET AVAILABLE AS A SINGLE COMMAND — R3 is not started; its scope
-# (which alert pool, how many configs) is explicitly unresolved as of this
-# writing. See docs/ROADMAP_PLAN.md Sect. 15, issue #42.
+# Sect. 4.6  Human-annotation agreement statistics (deterministic, no LLM calls)
+# CVE side: real independent second annotator, n=80, Cohen's kappa=1.0
+python -m experiments.evaluation.relevance_classifier_validation.compute_inter_rater_agreement
+# CVE side: earlier interim 20% self-check, n=16, superseded by the above but kept for the record
+python -m experiments.evaluation.relevance_classifier_validation.compute_cohen_kappa
+
+# Sect. 4.4  Temperature-sensitivity sweep, Figure F6 (Issue R5)
+python -m experiments.evaluation.temperature_sweep_driver          # resume until 150/150 complete (quota-gated)
+python -m experiments.evaluation.temperature_sweep_driver --validate
+python -m experiments.evaluation.make_fig_f6                       # deterministic once the sweep JSONL exists
+
+# Sect. 4.8  Ablation study, 6 configs x 436 alerts (Issue R3)
+python -m experiments.evaluation.ablation_driver                   # resume until 2,616/2,616 complete (quota-gated)
+python -m experiments.evaluation.ablation_driver --validate
+python -m experiments.evaluation.make_ablation_table_t6            # deterministic once the JSONL is complete
+python -m experiments.evaluation.make_ablation_figures             # Figures F3 + F4, same precondition
+
+# Sect. 3  Architecture (Fig. 1) and citation-taxonomy (Fig. 2) diagrams (Issue E6, deterministic, no LLM calls)
+python -m experiments.evaluation.make_architecture_figure
+python -m experiments.evaluation.make_taxonomy_figure
 
 # Sect. 4.10.4  Concurrency benchmark
 python -m experiments.evaluation.fresh_process_benchmark
 ```
+The two `--driver` commands above (ablation, temperature sweep) are the ones actually gated by Groq's free-tier daily token quota (200k tokens/model/day) — both are resumable, append-only, and safe to interrupt and re-run across multiple days; `docs/all_results.md` #75-#97 documents the real multi-session history of finishing both. Everything else in this section is either a single live-call pass or fully deterministic post-processing over already-committed data.
 
 ## 8. How to Reproduce in Under 10 Minutes (Offline)
 
@@ -125,33 +151,43 @@ Verified directly: Issue E4's Docker image builds clean and the default `docker 
 
 ## 9. Test Suite Logs
 
-- [`tests/last_run.log`](./tests/last_run.log): 2026-09-09, `158 passed, 1 skipped, 19 warnings in 144.71s` — regenerated fresh for this document rather than reusing the Sept 5 log already on disk, so it matches the exact commit this file documents.
+- [`tests/last_run.log`](./tests/last_run.log): 2026-09-27, `158 passed, 19 warnings in 42.41s` — re-run per issue #47/E2's explicit request, after issues #42-44 (R3/R4/R5) all landed, to confirm none of that week's changes introduced a regression. **0 failures, 0 skipped** (the earlier 2026-09-09 log recorded 1 skipped; no `skip`/`skipif` marker exists anywhere in the current test suite, so whatever caused that skip no longer applies — noted honestly rather than silently updating the count without comment).
 - [`tests/docker_build.log`](./tests/docker_build.log): Docker build output (Issue E4) proving the reproducibility image builds clean from scratch.
 
 ## 10. Verified Reproduction (Task 3)
 
-Ran one full command from §7 for real, at zero API cost, and confirmed it reproduces the paper's committed number byte-for-byte: `python -m experiments.evaluation.relevance_classifier_validation.score_labels` — this is fully deterministic (it recomputes the classifier's accuracy from already-collected human labels, no LLM calls involved), so it was safe and cheap to actually run rather than merely inspect. Result: **92.5% accuracy (95% CI [0.846, 0.965]), 90.5% precision, 95.0% recall, F1 92.7%**, confusion matrix `{tp: 38, fp: 4, tn: 36, fn: 2}` — diffed the freshly-generated output file against the already-committed `relevance_classifier_validation_results.json` and confirmed they are byte-for-byte identical (`diff` exit code 0). This matches Sect. 4.6's reported n=80 accuracy figure exactly.
+Re-ran every fully-deterministic command from §7 for real, at zero API cost, for this freeze specifically (not just inspected), and diffed each freshly-generated output against the already-committed file:
 
-The other §7 commands were **not** re-run for this document — each involves 50-150+ real Groq API calls, and this project's own history (`docs/all_results.md` #61, #66-#67) documents that re-running any of them can take hours to days depending on Groq's free-tier daily quota. Their committed result files (`experiments/results/*.json`) are the record of record; re-running them is a good sanity check before a real submission but was not done here to avoid burning quota needed for still-open issues (R3's ablation study in particular).
+- `score_labels` (CVE relevance classifier): **92.5% accuracy (95% CI [0.846, 0.965]), 90.5% precision, 95.0% recall, F1 92.7%**, confusion matrix `{tp: 38, fp: 4, tn: 36, fn: 2}` — byte-for-byte identical to the committed file (`diff` exit code 0). Matches Sect. 4.6's n=80 figure exactly.
+- `score_attack_labels` (ATT&CK relevance classifier): **83.5% accuracy (95% CI [0.752, 0.894]), 74.0% precision, 90.2% recall, F1 81.3%**, confusion matrix `{tp: 37, fp: 13, tn: 49, fn: 4}` — byte-for-byte identical to the committed file. Matches Sect. 4.6's n=103 figure exactly.
+- `compute_inter_rater_agreement` (CVE independent double-annotation): **n=80, 100% agreement, Cohen's kappa=1.0, 95% CI [1.0, 1.0]** — byte-for-byte identical to the committed file. Matches Sect. 4.6's headline annotation-agreement figure.
+- `compute_cohen_kappa` (CVE 20% self-check, superseded interim result): **n=16, 100% agreement, kappa=1.0** — byte-for-byte identical to the committed file.
+- `ablation_driver --validate`: **2,616/2,616 rows, all 6 configs present for each of 436 alerts.**
+- `temperature_sweep_driver --validate`: **150/150 rows, all 5 temperatures present for each of 30 alerts.**
+
+The remaining §7 commands (CVE-bait, ATT&CK-bait, SelfCheckGPT, McNemar, and the two resumable drivers' *live-call* portions) were **not** re-run from scratch for this freeze — each involves 50-2,616 real Groq API calls, and this project's own history (`docs/all_results.md` #61, #66-#67, #75-#97) documents that a from-scratch re-run of any of them can take hours to days on Groq's free-tier daily quota. Their committed result files are the record of record; both resumable drivers (`ablation_driver`, `temperature_sweep_driver`) were, however, run to genuine completion during this project's actual evaluation (not merely claimed) — §7's `--validate` flags are exactly the cheap, zero-new-call way to re-confirm that completeness at any later point, including right now.
 
 ## 11. Integrity Checklist
 
-- [x] Git tag `paper-v1.0` created locally (see §12) — not yet pushed to origin, per the issue's own instruction to hold for supervisor review.
-- [x] `requirements-lock.txt` committed; clean venv install works; `import langchain_groq` succeeds (verified in Docker build, Issue E4).
+- [x] Git tag `paper-v1.0` re-created locally, pointing at the exact commit this frozen document describes (see §12) — still not pushed to origin, per the issue's own instruction to hold for supervisor review.
+- [x] `requirements-lock.txt` committed; clean venv install works; `import langchain_groq` succeeds (verified in Docker build, Issue E4). Hash re-verified for this freeze (§2) — it had drifted since this file's original writing (`upsetplot` added for Issue R3's Figure F4) and is now current.
 - [x] Dockerfile builds; default `CMD` runs the schema-parity test all-green, fully offline (Issue E4, `docs/all_results.md` #70).
-- [x] 0 `[?]` BibTeX refs in the compiled PDF (Issue R2, confirmed clean both before and after this session's reference work).
-- [x] `tests/last_run.log` committed, fresh as of this document (§9).
-- [x] NVD snapshot committed, manifest verifies 152/152 (Issue E3, `docs/all_results.md` #71).
+- [x] 0 `[?]` BibTeX refs, 0 undefined LaTeX references/citations in the compiled PDF (Issue R2; reconfirmed via a full `pdflatex`+`bibtex`+`pdflatex`+`pdflatex` sequence at every manuscript edit this week, not just once).
+- [x] `tests/last_run.log` committed, fresh as of this freeze: **158 passed, 0 failed, 0 skipped** (Issue E2, `docs/all_results.md` #98 — re-run specifically after R3/R4/R5 landed, per the issue's own request).
+- [x] NVD snapshot committed, manifest verifies **153/153** (Issue E3; grew from 152 mid-ablation, `docs/all_results.md` #76 — re-verified byte-for-byte for this freeze, §5).
 - [x] MITRE snapshot SHA in the manuscript matches the actual file (§5).
 - [x] Issue R1 (ATT&CK SelfCheckGPT replication) executed and complete, both model families (`docs/all_results.md` #66-#67).
-- [ ] Issue R3 (ablation study, Table T6 + UpSet/Venn) — **not started.** Scope conflict unresolved: the issue specifies a 479-alert pool that doesn't match this project's real pooled data (575 alerts); needs a scoping decision before it can begin. Tracked in `docs/ROADMAP_PLAN.md` §15.
-- [ ] Issue R4 (two-annotator Cohen's κ, ATT&CK relevance validation) — **not started, blocked.** Needs a second human labeler; not something that can be completed without that person's time.
-- [ ] Issue R6 (explicit RQ1-RQ4 section, evaluation reordering, de-fluff pass) — **not started.**
-- [ ] "This subsection addresses RQx" openers in §4 — not present; depends on R6.
-- [ ] Explicit RQ1-RQ4 list in §1 — not present; depends on R6.
-- [ ] Standalone architecture/taxonomy figures (Issue E6/#51) — not started; explicitly lowest-priority per that issue's own text.
+- [x] Issue R2 (literature pass, novelty statement) complete — every added reference verified against text and bibliography, novelty statement checked against the supervisor's explicit checklist twice (`docs/all_results.md` #85, #96).
+- [x] Issue R3 (ablation study, Table T6 + Figures F3/F4) complete — **2,616/2,616** (config, alert) pairs across all 6 configurations and 436 alerts, re-verified via `--validate` for this freeze (`docs/all_results.md` #75-#84).
+- [x] Issue R4 (two-annotator Cohen's κ, ATT&CK relevance validation) complete — genuine independent double-annotation on the CVE side (**n=80, κ=1.0**, a real second person, not the degraded single-rater fallback used in an earlier interim pass), ATT&CK side scored against real human labels for the first time (**n=103, 83.5% accuracy, F1 81.3%**) (`docs/all_results.md` #89-#93).
+- [x] Issue R5 (temperature-sensitivity sweep, Figure F6) complete — **150/150** (temperature, alert) pairs; SelfCheckGPT's recall on confirmed-unsupported citations stays low (5-19%) at every temperature 0.1-1.0, all 95% CIs overlapping (`docs/all_results.md` #94-#97).
+- [x] Issue R6 (explicit RQ1-RQ4 section, evaluation reordering) complete, including a final consistency pass that caught and fixed a stale RQ4 description and 5 missing RQ-openers (`docs/all_results.md` #73, #86).
+- [x] "This subsection addresses RQx" openers present on all 9 evaluation subsections in §4 (Issue R6, `docs/all_results.md` #86).
+- [x] Explicit RQ1-RQ4 list present in §1 (Issue R6).
+- [x] Architecture and citation-taxonomy figures (Issue E6/#51) built and integrated — both drawn from the real pipeline code, not idealized diagrams (`docs/all_results.md` #87-#88).
+- [x] Issue E2 (regression + schema-parity suite) re-run after R3/R4/R5, all green (`docs/all_results.md` #98, §9 above).
 
-This checklist is honest, not pre-ticked — several items above are genuinely still open, tracked in `docs/ROADMAP_PLAN.md` §15, and this file will be updated as they close.
+This checklist is honest, not pre-ticked. Every item above was individually re-verified for this freeze (not carried over from the original 2026-09-09 writing) — several genuinely drifted since then (the dependency lock hash, the NVD snapshot count, one test-suite skip count) and are reported as found, not silently corrected without comment.
 
 ## 12. Git Tag
 

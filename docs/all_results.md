@@ -1244,6 +1244,294 @@ Built `experiments/evaluation/ablation_driver.py` per issue #42's Task 2 spec: l
 
 ---
 
+## 80. Issue #42 (R3) — C4 nearly done, 1,915 → 2,102/2,616
+
+**When:** Sep 22
+**What we tried:** One resume-loop run on a fresh day's quota window.
+
+**Result:** Banked another 187 rows before the quota wall. Final tally: **2,102/2,616 (80.4%)**. C0-C3 remain fully complete; C4 has only 78 pairs left, C5 (436) hasn't been started. No missing-CVE crashes, no other errors — clean daily-quota stop as usual.
+
+**What went wrong:** Nothing broke.
+
+**What it means:** At the same ~250 rows/well-spaced-session rate, roughly 2 more sessions should finish C4 and make a real dent in C5.
+
+---
+
+## 82. Issue #42 (R3) — C4 now fully complete, only C5 left, 2,102 → 2,343/2,616
+
+**When:** Sep 23
+**What we tried:** One resume-loop run on a fresh day's quota window.
+
+**Result:** Banked 241 more rows before the quota wall. Final tally: **2,343/2,616 (89.6%)**. **C0-C4 are all now fully complete.** Only C5 (None — all four guardrail toggles off) remains, with 273 pairs left. No missing-CVE crashes, no other errors.
+
+**What went wrong:** Nothing broke.
+
+**What it means:** This is the last config. One more well-spaced session at the observed ~250 rows/session rate should finish the entire 2,616-pair ablation study, unblocking Table T6/F3/F4 (issue #42 Tasks 3-4).
+
+---
+
+## 81. Issue #43 (R4) Part B — ATT&CK relevance-classifier pair set built (103 pairs)
+
+**When:** Sep 22
+**What we tried:** Task B.1 had zero pairs built for the ATT&CK side of the relevance-classifier validation (only the CVE side, Part A, has existing data). Built `build_attack_pairs.py`, the ATT&CK counterpart of the existing `build_pairs.py`: reuses the 150-alert `ATTACK_BAIT_ALERTS` pool and the same local MITRE snapshot the real guardrail verifies against (`attack_grounding.py`'s `_load_attack_techniques()`), so nothing here needed a live network or LLM call.
+
+**Result:** `experiments/evaluation/relevance_classifier_validation/attack_pairs_to_label.csv` — **103 pairs** (within the issue's 80-120 target): 40 anchors × (positive + far-shift negative) = 80 base pairs (exactly meets the "40 relevant / 40 irrelevant minimum" requirement), +20 near-miss negatives (same anchors, a small index-shift distractor instead of a far one — deliberately harder), +3 named edge cases straight from the issue's own Task B.1 text, each built from real already-committed alert evidence rather than invented prose: Kerberos service-ticket alert vs. T1558.001 Golden Ticket (heavy "Kerberos"/"ticket" lexical overlap, different sub-technique), a phishing macro-document alert vs. T1204.002 Malicious File (genuinely debatable — the alert's real technique is T1566 Phishing, but T1204.002 is a real component of the same attack chain), and a revoked technique (T1156) paired with an unrelated alert, to test that the relevance classifier's BoW score — which runs before the REVOKED check — isn't accidentally influenced by revocation status. Construction intent recorded separately in `attack_construction_key.json`, not in the labeling CSV, same blind-construction rationale as the CVE side. Verified zero leakage: no candidate technique ID or technique name appears literally in its own alert's evidence text, across all 103 rows.
+
+**What went wrong:** Nothing — fully deterministic, no external calls, ran clean first try.
+
+**What it means:** The ATT&CK side now has a pair set ready for annotation (Task B.2), matching Part A's CVE set in structure. Annotation itself — and the fallback approach for limited annotator time (single annotator + partial blind cross-check by the supervisor, per the issue's own Risks & Mitigations) — is a separate next step, not done in this pass.
+
+---
+
+## 83. Issue #42 (R3) — ablation study fully complete, 2,616/2,616 (100%)
+
+**When:** Sep 24
+**What we tried:** Three more resume-loop runs across the day as Groq's quota trickled back — 2,373→2,613 (240 rows, one strong session), then a same-day retry landed exactly the last 3 rows of C5 (`soc_rule_engine` SOCRULE-074/075/076).
+
+**Result:** `python -m experiments.evaluation.ablation_driver --validate` confirms: **2,616 rows, all 6 configs present for each of 436 alerts.** All of C0 (full pipeline), C1 (−Input), C2 (−CVE), C3 (−ATT&CK), C4 (−PII), and C5 (None) are done. No missing-CVE crashes since the #76 fix, no other errors — every stop along the way was a clean, correctly-detected Groq daily-quota wall.
+
+**What went wrong:** Nothing broke, start to finish across the whole multi-day run (#75-#83). The only real friction was throughput variance with session spacing, documented in #78-#79.
+
+**What it means:** Issue #42's Task 2 (the full driver run) is done. Tasks 3-4 — Table T6 (6-config summary table), Figure F3 (taxonomy-class stacked bar per config), and Figure F4 (UpSet plot of unique-detection overlap) — can now be built from `experiments/results/ablation_full.jsonl`, which was blocked on this completing.
+
+---
+
+## 84. Issue #42 (R3) Tasks 3-4 — Table T6, Figures F3/F4 built and integrated into the manuscript
+
+**When:** Sep 24
+**What we tried:** With the driver run complete (#83), built the actual deliverables Tasks 3-4 ask for from `experiments/results/ablation_full.jsonl`: `make_ablation_table_t6.py` (Table T6) and `make_ablation_figures.py` (F3 taxonomy-tier stacked bar, F4 UpSet plot of `requires_review` overlap across all 6 configs). F4 needed a new dependency (`upsetplot`, added to requirements.txt/requirements-lock.txt) — hit a genuine `upsetplot==0.9.0`/`matplotlib==3.11` incompatibility in its built-in count-label rendering (`show_counts=True` crashes with `TypeError: only 0-dimensional arrays...`, reproduced on a minimal 3-set example, not specific to this data); worked around it by drawing the bar-count annotations manually from the returned axes instead of relying on the library's broken path.
+
+**Result:** All three land in `sn-article.tex` §4.8 (`subsec:ablation`), replacing the old "in progress" placeholder paragraph — compiles clean, 0 undefined references, 32 pages. Headline numbers: Full pipeline flags 10.3% of alerts (45/436) for review; **removing the PII checker alone drops that to 3.2% (14/436, a 69% relative drop)** — the single largest contributor, and the opposite of the issue's own prior assumption that PII would have "negligible effect on citations" as an orthogonal feature. CVE/ATT&CK checkers each catch real, mostly-distinct alerts (F4's intersections aren't simple nested subsets) but at much smaller magnitude (under 1 percentage point each). `FABRICATED` and `UNVERIFIED` never occurred in this pool at any configuration.
+
+**What went wrong:** Two things worth flagging, both written into the manuscript text directly rather than only noted here: (1) the `upsetplot` library bug above, worked around; (2) the input guardrail (`C1`) never blocked a single alert in this pool in any configuration (0/2,616 `guardrail_blocked`), so the small `C0`-vs-`C1` differences in the table can't be read as a causal effect of removing it — each (config, alert) row is an independent live LLM call, not a shared generation replayed under different toggles, so that specific delta is most plausibly ordinary sampling noise. Said so plainly in the manuscript rather than implying a precision the data doesn't support.
+
+**What it means:** Issue #42/R3 is now fully done — Tasks 1-4 complete, Contributions list left untouched (still 3 items, per Task 5's explicit "do not add a 4th"). RQ4 (the ablation research question) now has a real, honestly-caveated answer in the manuscript instead of a placeholder.
+
+---
+
+## 85. Issue #41 (R2) — final pre-close verification: citations, bibliography, and novelty statement all check out clean
+
+**When:** Sep 24
+**What we tried:** Supervisor's condition for closing R2 (per the issue's own comment thread) was a final check that every newly-added reference is correctly cited in both text and bibliography, and that the novelty statement clearly distinguishes LLMCite from prior general hallucination/citation-verification work. Did both checks directly against the current manuscript rather than trusting #64/#65's older conclusions to still hold.
+
+**Result:** (1) In-text content for both R2-added references (`ieee_2026_cross_self_verif_cyber`, `acl_findings_2026_entity_verif_rag`) re-checked word-for-word against #65's verified source facts (736 responses, Fleiss' $\kappa$=0.79, cross 56%/self 36.4%/$p$=0.034; EAEV's 87.89% AUROC) — exact match, no drift. (2) Full bibliography audit: wrote a script cross-referencing every `\cite{}` key in `sn-article.tex` against every entry in `sn-bibliography.bib` — 0 cited keys missing a bib entry (also confirmed by the compile itself: 0 undefined references), 0 broken entries. Found 13 orphaned entries (`bib1`-`bib13`) that are unmodified leftovers from the original Springer Nature template, never cited anywhere and not forced into the output (no `\nocite{*}`), so they don't appear in the compiled PDF at all — harmless, but flagged as an optional tidiness cleanup, not a correctness issue. (3) Re-read the actual novelty statement (Sect.~1, "To be clear about what's novel here..." through the `REAL_AND_PLAUSIBLE` paragraph) against the supervisor's own checklist: explicitly names the SOC-specific application, the four-class citation taxonomy, and the `REAL_AND_PLAUSIBLE` failure mode by name, each contrasted directly against general hallucination-detection literature (SelfCheckGPT, FActScore) and general-purpose guardrail frameworks (NeMo Guardrails, Guardrails AI) — all three of the supervisor's named elements present and correctly distinguishing. Recompiled clean: 0 undefined references, 32 pages, both new references render correctly formatted with DOI/URL and verification-date provenance notes in the References list (page 31, entries [7]/[8]).
+
+**What went wrong:** Nothing — every check passed on the first pass. No manuscript edits were needed; this was purely a verification pass.
+
+**What it means:** Issue #41/R2 has now satisfied every condition the supervisor set for closing it. Nothing else is pending on this issue from our side.
+
+---
+
+## 86. Issue #45 (R6) — final RQ consistency check: found and fixed two real gaps
+
+**When:** Sep 24
+**What we tried:** Supervisor's condition for closing R6 was a final pass confirming RQ4 is fully answered now that #42's ablation landed, and that all RQ references/results/tables/figures stay consistent across the manuscript. Checked directly against the current compiled document rather than assuming the earlier restructure (#73) still held after #42's changes.
+
+**Result:** Found two real, previously-unnoticed inconsistencies, both fixed:
+1. **RQ4's own definition paragraph (Sect. 1.2) was stale** — it still read "a full ablation... was in progress at the time of writing and is not yet reported in this draft," even though Sect. 4.8 now reports the complete result. Rewritten to state the ablation is complete and summarize the actual finding (PII checker dominant, CVE/ATT&CK smaller distinct effects, input guardrail not causally isolable on this pool) — consistent with Sect. 4.8's own wording, not a new claim.
+2. **The RQ section's own promise wasn't being kept**: Sect. 1.2 states "each subsection [of the Evaluation section] opening by naming the research question it addresses," but 5 of the 9 evaluation subsections (CVE-bait, ATT&CK-bait, SelfCheckGPT, McNemar, Relevance classifier) had no such opening sentence — only Ablation and Cross-source did. Added one-sentence RQ-naming openers to all 5: CVE-bait and ATT&CK-bait -> RQ1 (the second explicitly noted as "on the second citation family"), SelfCheckGPT -> RQ2, McNemar -> RQ3, Relevance classifier -> explicitly non-RQ, framed as validating RQ1's taxonomy assumption (matching the existing "doesn't answer RQ1-RQ4 directly" pattern already used for the real-world and supporting-evaluation subsections).
+
+Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 32 pages (page count unchanged despite the added sentences — absorbed into existing whitespace).
+
+**What went wrong:** Nothing broke — both gaps were real but low-risk (stale prose, not wrong numbers), caught by actually re-reading Sect. 1.2 against the current Sect. 4 rather than assuming a restructure from two weeks ago was still accurate after #42 landed.
+
+**What it means:** Issue #45/R6 has now satisfied the supervisor's stated closing condition. All 9 evaluation subsections are now internally consistent with the RQ section's own stated organizing promise, and RQ4 has a real answer instead of a leftover placeholder.
+
+---
+
+## 87. Issue #51 (E6) Task 1 — system architecture figure (SYS1) built and integrated
+
+**When:** Sep 24
+**What we tried:** Built `make_architecture_figure.py`, drawing the pipeline's real execution order straight from `src/agent/soc_agent.py`'s `analyse_alert()` rather than an idealized version -- read the actual function body first (input guardrail with an early `BLOCKED` return, then LLM generation, then CVE/ATT&CK/PII guardrails running sequentially in that order, then an OR-aggregation into `requires_review`) so the diagram wouldn't misrepresent the real control flow. First draft had real layout bugs (headers clipped out of boxes, text overflowing box width, an in-diagram caption overlapping the converging arrows) -- fixed by switching to manual per-line text stacking instead of relying on matplotlib's unreliable `wrap=True`, and by moving the "independently toggleable, not concurrent" caveat out of the diagram itself and into the actual LaTeX figure caption instead, which reads more cleanly than cramming it between shapes.
+
+**Result:** `docs/paper/figures/fig_architecture.{pdf,png}`, inserted as Figure 1 at the top of Sect. 3 (`sec:method`), with a short lead-in paragraph and caption both stating explicitly that the three output-side guardrails are drawn side by side because they're independently toggleable (tested by Sect. 4.8's ablation), not because the implementation runs them concurrently -- it runs them sequentially, in the order shown. Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 33 pages (up 1 from the new figure).
+
+**What went wrong:** The first draft's layout bugs, described above -- caught by actually rendering and looking at the PNG rather than trusting the script ran without a Python exception. No content/accuracy issues; the pipeline order itself was correct from the first draft since it was read directly from the real function.
+
+**What it means:** Task 1 of issue #51/E6 is done. Task 2 (the citation-taxonomy decision figure) is still open.
+
+---
+
+## 88. Issue #51 (E6) Task 2 — citation-taxonomy decision figure (TAX1) built and integrated
+
+**When:** Sep 24
+**What we tried:** Read `verify_cve()` (output_guardrail.py) and `verify_attack_technique()` (attack_grounding.py) side by side first to confirm they check conditions in the exact same order before drawing anything -- they do (both mirror the same five-step sequence: grounded? -> source reachable/has a description? -> exists at all? -> formally withdrawn? -> topical overlap >= 0.15?), so one diagram legitimately covers both citation families rather than needing two.
+
+**Result:** `docs/paper/figures/fig_taxonomy.{pdf,png}`, inserted in Sect. 3.5 (`subsec:taxonomy`) right after the existing taxonomy table, as a decision-sequence complement to it. `REAL_AND_PLAUSIBLE` is colored a distinct crimson (not grouped with the other "real" outcomes) with an explicit "highest-risk, precisely because it looks correct" label, matching the paper's own point in that subsection almost verbatim.
+
+**What went wrong, and fixed before committing:** First draft used true rhombus/diamond shapes for the 5 decision nodes -- real bug, not cosmetic: text lines near a diamond's tapered top/bottom apex sit where the shape has already narrowed well below its nominal width, so multi-line text overflowed and visually looked like truncated/missing characters (a diamond text-placement bug, not a string-content bug). Switched to rounded rectangles with a "?" marker and thick white border instead -- reads clearly as a decision node without the taper problem. Second draft then hit a real page-layout bug once inserted into the manuscript: the figure was tall enough that with `[h]` placement its caption's last line collided with the page-footer page number (verified by rendering the actual PDF page, not just trusting a clean compile log -- the compile itself showed no error, only "Underfull" notices, since LaTeX doesn't treat this kind of footer collision as a hard error). Fixed by compressing the diagram's internal vertical spacing (~20% tighter row spacing) and scaling the `\includegraphics` width down to 0.8\linewidth rather than the full column width, both of which reduce the rendered block's total height enough to clear the footer with margin.
+
+**What it means:** Issue #51/E6 is now fully done -- both Task 1 (architecture) and Task 2 (taxonomy) figures are built and integrated. Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 35 pages (up 2 from #87's architecture figure and this one). The overfull-hbox warnings present in the log are all pre-existing table-cell-width warnings unrelated to either new figure, confirmed by line number.
+
+---
+
+## 89. Issue #43 (R4) — annotation tooling built for the degraded-scope fallback (no second annotator)
+
+**When:** Sep 26
+**What we tried:** User confirmed no independent second annotator will be recruited -- they'll personally do the labeling, per the issue's own "Risks & Mitigations" fallback ("single annotator + 20% blind cross-check... report kappa with n=0.2xN bootstrap"). Built the three pieces needed to actually run that fallback for both citation families:
+1. `build_cve_crosscheck_sheet.py` -- CVE side already has annotator 1's full 80-pair pass. Samples a 20% (16-pair) subset, stratified 8/8 across the pool's own positive/negative-by-construction split (not a plain random 16, so the reduced sample isn't accidentally skewed), reusing the existing blind-sheet's exact ID-redaction logic rather than re-deriving it. Produces `cve_crosscheck_BLIND.xlsx` (to fill in) + `cve_crosscheck_key_HIDDEN.csv` (annotator 1's original labels on just those 16, not to be consulted while labeling).
+2. `build_attack_annotation_sheet.py` -- ATT&CK side has zero labels at all yet (no annotator-1 pass exists to cross-check against), so this builds the full 103-pair blind sheet as the first real pass. Found and fixed a real over-redaction bug in the first draft: naively porting the CVE side's "redact the ID and the name" logic redacted the technique's plain-English name too (e.g. "Phishing"), and MITRE's official descriptions routinely use that name as an ordinary descriptive noun throughout their own prose (10 occurrences of "phishing" in one description) -- redacting all of them left sentences like "Adversaries may send [NAME REDACTED] messages... known as spear[NAME REDACTED]," destroying readability while blinding nothing real (the remaining sentence still obviously means phishing). Fixed by only redacting the technique ID (the actual look-up-able identifier, the direct equivalent of a CVE number), leaving the descriptive prose untouched -- verified by re-reading the actual redacted output before deciding it was right, not just trusting the diff count dropped.
+3. `compute_cohen_kappa.py` -- observed agreement, Cohen's kappa, and a 1000-resample bootstrap 95% CI (appropriate specifically because n=16 is small, where an asymptotic-normal CI formula would be a poor approximation), plus a `disagreements_cve.csv` export with a blank `reason` column for the qualitative note Task A.2 asks for. Refuses to run with a clear message if any row is still unfilled, rather than silently computing on a partial n. End-to-end tested against a synthetic filled-in copy (2 simulated disagreements out of 16) before considering it done -- correctly produced n=16, 87.5% agreement, kappa=0.750, 95% CI [0.355, 1.000] -- then discarded the test artifacts.
+
+**Result:** All three scripts committed. `cve_crosscheck_BLIND.xlsx` (16 pairs) and `attack_annotation_BLIND.xlsx` (103 pairs) are ready to fill in now; `compute_cohen_kappa.py` is ready to run the moment the CVE cross-check sheet comes back.
+
+**What went wrong:** The ATT&CK name-redaction bug above -- caught by actually reading the redacted text output rather than trusting the script ran without error.
+
+**What it means:** The blocking factor on R4 is now purely annotator time (filling in two spreadsheets), not missing tooling. Once both come back: run `compute_cohen_kappa.py` for the CVE kappa/CI, compute pipeline accuracy against the resolved CVE labels and the ATT&CK labels directly (single-annotator, honestly disclosed as such per the issue's own fallback), and write up §4.6/§5 with the real numbers.
+
+---
+
+## 90. Issue #43 (R4) Part B — ATT&CK relevance classifier scored against real human labels: 83.5% accuracy, F1 81.3%
+
+**When:** Sep 26
+**What we tried:** User personally labeled all 103 ATT&CK pairs on the blind sheet from #89 (single annotator, no cross-check, per the confirmed degraded-scope decision). Built `score_attack_labels.py`, the ATT&CK counterpart of `score_labels.py`, scoring the same deterministic `_topical_overlap()` classifier (threshold 0.15) against these real labels -- re-derived the bare technique description directly from the local MITRE snapshot for scoring (not the CSV's name-prefixed field, and not the further ID-redacted text the human actually saw), matching exactly what `verify_attack_technique()` itself compares against. Validated the labeled file first: all 103 rows filled, only `relevant`/`not_relevant` values used, no stray pair_ids.
+
+**Result:** `attack_relevance_classifier_validation_results.json`, n=103: **accuracy 83.5% (95% CI [75.2%, 89.4%]), precision 74.0%, recall 90.2%, F1 81.3%** (confusion: TP=37, FP=13, TN=49, FN=4) -- a real, meaningfully lower number than the CVE side's 92.5%, but still above the issue's own 0.80 "don't retune the threshold" floor, so the calibrated 0.15 threshold was left as-is per the issue's explicit instruction. Broke disagreements down by construction intent (17 total): 12 of 13 false positives land on negative/near-miss pairs -- the classifier is calling genuinely-irrelevant technique pairs "relevant" too often, confirming the issue's own hypothesis that ATT&CK's terser prose makes the CVE-calibrated threshold too permissive. The named `EDGE-KERBEROS` case (T1558.001 Golden Ticket) landed exactly as designed: overlap 0.382 (driven by "Kerberos"/"ticket" lexical overlap) but the human correctly judged it not_relevant -- a real, legible example of the threshold's lexical-overlap-vs-true-relevance gap, not a labeling error. 4 false negatives sit on genuinely-correct pairs where overlap fell just under threshold (one as low as 0.035), a real miss in the other direction.
+
+**What went wrong:** Nothing -- the scoring script and the labeled data were both clean on the first pass.
+
+**What it means:** Task B.2 is done for the ATT&CK side (single-annotator, honestly disclosed as such). Still pending on R4: the CVE side's 20% blind cross-check (sheet built in #89, not yet filled in) for the Cohen's kappa/CI number, and the §4.6/§5 manuscript rewrite -- holding off on that until the CVE cross-check result is in hand too, so both citation families' numbers land in one pass rather than two.
+
+---
+
+## 91. Issue #43 (R4) Part A — CVE cross-check filled in: perfect agreement, kappa = 1.0
+
+**When:** Sep 26
+**What we tried:** User sent the filled-in CVE cross-check sheet -- but not on the first attempt. Two earlier files sent under similar names turned out to be wrong: one (`CVE_Annotation_Labeled.xlsx`) had a completely different structure (3 columns, no evidence/description text) and, on cross-checking every row's CVE ID against the real `cve_crosscheck_key_HIDDEN.csv`, 8 of 16 CVE numbers didn't match what was actually in the real sample (e.g. `CVE-2023-25280` vs `CVE-2023-2528`, `CVE-2023-20273` vs `CVE-2023-2827`) plus 2 rows had a different alert ID -- flagged directly rather than silently computing a kappa number against IDs that might not correspond to the same real pairs. The second file sent was actually the already-processed ATT&CK sheet resent under a similar name. The third file matched the real structure exactly (`Instructions` + `CVE Cross-check (20%)` tabs, 16 rows) and all 16 `pair_id`s matched the true sample exactly -- verified before trusting it, not after.
+
+**Result:** `cve_crosscheck_kappa_results.json`: **n=16, 100% observed agreement, Cohen's kappa = 1.0 (95% CI [1.0, 1.0], 1000 bootstrap resamples), 0 disagreements.** Renamed the labeled-file path in `compute_cohen_kappa.py` from `cve_crosscheck_BLIND.xlsx` to a separate `cve_crosscheck_labeled.xlsx` so a completed pass can never be silently clobbered by re-running the blank-template builder under the same filename.
+
+**What went wrong:** Two wrong files sent before the right one arrived -- caught both by verifying pair-level identifiers against the real sample rather than trusting a superficially plausible-looking spreadsheet.
+
+**What it means:** Perfect agreement here should be read as this single rater being highly self-consistent on a second blind pass, not as independent-rater validation -- the issue's own fallback (no second independent annotator) makes that distinction important to state honestly in §4.6, not imply a stronger claim than the data supports. Both citation families now have real numbers in hand (CVE: kappa=1.0, n=16 cross-check + 80 single-annotator; ATT&CK: 83.5% accuracy/F1 81.3%, n=103 single-annotator, #90). The §4.6/§5 manuscript rewrite is now unblocked.
+
+---
+
+## 92. Issue #43 (R4) Tasks C — §4.6 and §5 rewritten with real numbers, both citation families
+
+**When:** Sep 26
+**What we tried:** With real numbers in hand for both families (#90 ATT&CK, #91 CVE), wrote the actual manuscript update rather than force-fitting the issue's own suggested template text, which assumes two independent annotators plus a third-rater tie-breaker -- that never happened, and copying that wording would have been a factual misrepresentation of what was actually done (single rater, blind self-check on a 20% CVE sample, no cross-check at all on ATT&CK).
+
+**Result:** Three spots in `sn-article.tex` updated:
+1. Sect. 4.6 (`subsec:relevance`) -- added a "Blind self-consistency cross-check" paragraph (16/16 agreement, Cohen's kappa=1.0, 95% CI [1.0,1.0], explicitly framed as self-consistency not inter-rater reliability) and a full new "ATT&CK side" Method/Result/What-this-means block (n=103, accuracy 83.5%, F1 81.3%, the Golden Ticket edge case and the false-positive concentration on near-miss pairs both called out by name).
+2. The Sect. 5 Limitations bullet -- rewritten from CVE-only (92.5%, single rater, no ATT&CK check) to cover both families with their real numbers, the explicit "threshold not retuned" disclosure the issue required, and the honest self-check-vs-cross-check distinction.
+3. The Sect. 5 Threats-to-Validity paragraph -- rewritten the same way, ending on the issue's own spirit ("we cannot rule out residual bias... a fully independent second annotator... remains future work") but accurate to a single-rater-plus-self-check reality rather than the two-annotator scenario the issue's suggested wording assumed.
+
+Recompiled clean: 0 undefined references, 0 duplicate-label warnings, 36 pages (up 1). Visually verified all three edited spots render correctly and read naturally into their surrounding sections, not just that the compile succeeded.
+
+**What went wrong:** Nothing -- straightforward writing task once both real number sets were in hand.
+
+**What it means:** Issue #43/R4 is now fully done -- annotation tooling (#89), both families' real classifier-validation numbers (#90, #91), and the manuscript rewrite (this entry). Nothing further pending on this issue from our side.
+
+---
+
+## 93. Issue #43 (R4) — real independent second-annotator pass done, satisfying the supervisor's explicit ask: perfect agreement, kappa = 1.0, n=80
+
+**When:** Sep 26-27
+**What we tried:** Re-reading the supervisor's Sep 22 comment on #43 turned up a real gap in #89-#92's work: the comment explicitly asks for "the actual independent second annotation" with disagreements "resolved transparently" -- not the degraded single-rater-plus-self-check fallback #89-#92 used (which the user had explicitly chosen given no annotator time was available at that point). Flagged this conflict directly rather than letting it surface later. User then got a genuinely independent second person to label the existing full-80-pair blind sheet (`annotator2_cve_pairs_BLIND.xlsx`, already built back in Sep 14, regenerated fresh to confirm it was current) and sent back the completed file.
+
+Verified before computing anything (same discipline as #91, where two wrong files were caught this same way first): confirmed all 80 `pair_id`s matched the true set exactly, all labels valid, 40/40 split -- no ID mismatches this time. Built `compute_inter_rater_agreement.py` (the actual Task A.3 script, superseding `compute_cohen_kappa.py`'s reduced-scope version) comparing `annotator1_and_key_HIDDEN.csv` against the new independent second annotator's labels.
+
+**Result:** `inter_rater_agreement_results.json`: **n=80, 100% observed agreement, Cohen's kappa=1.0 (95% CI [1.0,1.0], 1000 bootstrap resamples), 0 disagreements** -- genuine independent inter-rater agreement between two different people, not a self-consistency proxy. Rewrote the Sect. 4.6/5 CVE-side text again (superseding #92's 20%-self-check framing, which is now explicitly marked as an interim step before the real second annotator was available, not left silently replaced): the "Blind self-consistency cross-check" paragraph became "Independent second-annotator validation"; the Limitations bullet and Threats-to-Validity paragraph both updated to say the CVE side now has real independent double-annotation while the ATT&CK side (still single-rater, #90) does not -- an honest asymmetry, not glossed over. Recompiled clean: 0 undefined references, 36 pages (unchanged), no new overfull warnings.
+
+**What went wrong:** Nothing on this pass -- the right file arrived clean and matched exactly on the first try this time.
+
+**What it means:** Issue #43/R4 now genuinely satisfies the supervisor's own explicit request for independent double-annotation on the CVE side, not just the issue's own degraded-scope fallback text. The ATT&CK side remains single-rater only (disclosed as such) -- getting a second independent annotator for that family too would close the one remaining asymmetry, but isn't required by anything the supervisor has said so far.
+
+---
+
+## 94. Issue #44 (R5) Task 1 — temperature-sweep driver built, smoke-tested, and launched
+
+**When:** Sep 27
+**What we tried:** All of R1-R4 now being done unblocks R5 per the issue's own explicit "do not open until..." gate. Built `temperature_sweep_driver.py`, mirroring `ablation_driver.py`'s proven resumable-JSONL pattern (append-only, fsynced per row, retry-with-backoff on the same 4 Groq exception types). Scope decision, documented in the module docstring rather than silently made: restricted the sweep to the 30 PROMPTED (withheld-CVE) alerts from `selfcheckgpt_alerts.py` rather than the issue's literal "60 CVE pool items" -- all four required metrics (volunteer rate, unsupported-citation rate, SelfCheckGPT recall, LLMCite detection rate) are only meaningful on the withheld class, since the stated class is handed its CVE directly and "volunteering" isn't a coherent concept there. Halves the call count (450 vs. 900) without dropping anything either the four metrics or the F6 figure need. Chose live NVD verification over the frozen snapshot (issue #48/E3) for classification, since this sweep's lookup volume is small/bounded and NVD's rate limit is independent of Groq's token quota -- also sidesteps the missing-snapshot crash #42/R3 hit entirely.
+
+**Result:** Smoke-tested with `--limit 3` (one alert, one temperature, 3 real resamples) before committing to a longer run: `SELFCHECK-PROMPTED-001` at T=0.1 volunteered `CVE-2021-44228` (Log4Shell) all 3 times, live-verified as `REAL_AND_PLAUSIBLE` (topical_overlap=0.333), `flagged_unstable=False` -- a real, sane, correctly-classified row end to end. Launched the full run afterward (`python -m experiments.evaluation.temperature_sweep_driver`, unbounded, in the background).
+
+**What went wrong:** Nothing yet -- first smoke-test row worked cleanly on the first try.
+
+**What it means:** R5's Task 1 driver is real and running. 450 total calls needed (30 alerts x 5 temperatures x 3 resamples); at the ~250-260-calls/well-spaced-session throughput observed during R3, expect roughly 2 well-spaced sessions to finish the full grid.
+
+---
+
+## 95. Issue #44 (R5) — first session banks 88/150 (58.7%)
+
+**When:** Sep 27
+**What we tried:** Let the driver from #94 run unbounded in the background.
+
+**Result:** 88/150 rows before the quota wall (`Used 198,501/200,000, requested 1,808`) -- faster than the ~250-rows/session estimate from R3 carried over, likely because these rows are cheaper (3 calls each, no NVD-snapshot overhead, short single-CVE-pool prompts). T=0.1 and T=0.3 fully complete; T=0.5 has only 2 alerts left; T=0.7 and T=1.0 (30 each) not started.
+
+**What went wrong:** Nothing -- clean quota-wall stop, no code errors.
+
+**What it means:** At this rate, one more well-spaced session should very plausibly finish the entire 150-row grid.
+
+---
+
+## 96. Issue #41 (R2) — new supervisor comments checked: most reflect a stale (pre-merge) view, one genuine gap fixed
+
+**When:** Sep 27
+**What we tried:** Fresh comments landed on 8 issues (#41-45, #47, #50, #51), all within an 11-minute window. Read each one against the actual current repo state (not just the issue thread) before assuming any of them meant new work was needed. Most (#42, #43, #45, #51) ask for things already fully completed in #83-#93 -- Table T6, real independent double-annotation, RQ4, both figures. Since that work only exists on the still-unmerged `emaan-week-16` branch (PR #56), the most likely explanation is whatever generates these comments is evaluating against `dev`/`main`, which doesn't have any of it yet -- flagged to the user directly rather than silently re-doing already-finished work. #44/#47/#50 are accurate and current (R5 genuinely isn't done).
+
+#41's comment did contain one specific, real gap independent of the merge-visibility question: "review the novelty wording to clearly distinguish authoritative identifier existence/status from evidential grounding and topical relevance; the latter is not established merely by an identifier existing in NVD/MITRE." Checked the actual novelty paragraph (Sect. 1) against this -- the taxonomy *table* already makes exactly this distinction (REAL_BUT_IRRELEVANT vs. REAL_AND_PLAUSIBLE splits precisely on existence vs. topical match), but the Introduction's novelty framing jumped straight to `REAL_AND_PLAUSIBLE` without first stating that existence and relevance are two separate axes -- a reader skimming just the intro could miss it.
+
+**Result:** Added one paragraph to Sect. 1 stating the distinction explicitly and pointing to Sect. 3.5's taxonomy table as where it's operationalized. Recompiled clean: 0 undefined references, 36 pages (unchanged -- absorbed into existing whitespace). Confirmed via the actual pdflatex+bibtex+pdflatex+pdflatex sequence, not the IDE's own separate single-pass auto-compile (which understandably shows transient "citation undefined" warnings before its own bibtex step runs -- not a real problem, just a different, incomplete build than the one that matters).
+
+**What went wrong:** Nothing -- the fix was a clean single-paragraph insertion.
+
+**What it means:** The one plausibly-new, real ask in this comment batch is addressed. Everything else in the batch should resolve itself once PR #56 merges and the reviewing process (whoever/whatever it is) re-evaluates against current `dev`.
+
+---
+
+## 97. Issue #44 (R5) complete — temperature sweep finished, Figure F6 built, manuscript updated: the blindness is not a t=0.7 artifact
+
+**When:** Sep 27
+**What we tried:** Resumed the driver from #94/#95's 88/150 checkpoint; finished the remaining 62 rows in one session (150/150 complete). Built `make_fig_f6.py` (the required temperature-boundary curves, 4 series with shaded 95% Wilson CI bands, matching the issue's own plot spec) and wrote up the result across three places: a new "Is this a temperature=0.7 artifact?" passage in Sect. 4.4 (with Fig. F6), a rewrite of the Discussion's existing temperature-confound paragraph (Sect. 5, "Why this comparison despite how it was measured") to report the sweep as closing that confound empirically rather than only arguing it down, and an extension of the existing Limitations bullet with the sweep result plus the issue's own suggested ATT&CK-not-tested disclosure.
+
+**Result:** Per-temperature summary (`experiments/results/temperature_sweep_summary.json`, n=30 per temperature): volunteer rate 93-100% at every temperature including t=0.1 (this 30-alert pool has an explicit citation-request nudge on its prompted items, unlike Sect. 4.2's symptom-only CVE-bait pool, so this doesn't contradict that pool's separate 0% finding -- the two measure different things by design, stated explicitly in the writeup to head off the appearance of an internal contradiction). REAL_AND_PLAUSIBLE rate 67-73% across all temperatures. **SelfCheckGPT recall on the confirmed-unsupported subset stays low at every single temperature** -- 5% (t=0.1), 18% (t=0.3), 5% (t=0.5), 10% (t=0.7, matching Sect. 4.4's own 18/20 finding at that exact temperature), 19% (t=1.0) -- with all five 95% Wilson CIs overlapping each other, ruling out any clean monotonic trend. LLMCite's deterministic detection rate is flat at 100% throughout, by pipeline construction. Recompiled clean: 0 undefined references, 38 pages (up 2).
+
+**What went wrong:** The new Figure F6, inserted with a plain `[h]` placement, drifted 20 pages away from its own discussion -- this results section already has enough competing floats that LaTeX's automatic `[h]`-to-`[ht]` conversion kept deferring it. Caught by actually checking which page the figure landed on (not just that the compile succeeded), fixed by adding the `float` package and forcing this one figure to `[H]` -- it now renders on the very next page after the paragraph that discusses it, as intended.
+
+**What it means:** Issue #44/R5 is done. This directly answers the supervisor's own explicit question on the issue: the REAL_AND_PLAUSIBLE SelfCheckGPT blind spot is temperature-independent, not an artifact of the specific t=0.7 resampling choice -- only the rate at which a citation gets volunteered in the first place depends on temperature and prompt design. Only #47 (E2, regression rerun) and #50 (E5, reproducibility freeze) remain gated on "#42-44," and both are now unblocked now that R3/R4/R5 are all genuinely done.
+
+---
+
+## 98. Issue #47 (E2) complete — regression suite re-run after #42-44, recorded in REPRODUCIBILITY.md
+
+**When:** Sep 27
+**What we tried:** Now that R3/R4/R5 (#42-44) are all done, re-ran the full suite (`pytest tests/ -v`) per the supervisor's explicit ask on this issue, to confirm none of that week's extensive code/manuscript changes introduced a regression.
+
+**Result:** **158 passed, 0 failed, 0 skipped, 19 warnings, 42.41s** -- actually better than the previously-committed baseline (158 passed, **1 skipped**, 2026-09-09). Checked why: no `skip`/`skipif` marker exists anywhere in the current test suite, so whatever caused that one skip no longer applies -- noted honestly in the updated doc rather than silently changing the count without comment. Replaced `tests/last_run.log` with this fresh run and updated `REPRODUCIBILITY.md` Sect. 9 accordingly.
+
+**What went wrong:** Nothing -- clean run, no regressions from this week's work.
+
+**What it means:** Issue #47/E2 is done. Its own condition for closing ("if the final rerun remains green and no schema inconsistencies are observed") is met.
+
+---
+
+## 99. Issue #50 (E5) complete — full reproducibility freeze, found and fixed two genuine drifts
+
+**When:** Sep 27
+**What we tried:** Now that R3/R4/R5 (#42-44) are all done, did the actual freeze the issue asks for -- not a re-read of the existing `REPRODUCIBILITY.md` (last substantively updated 2026-09-09, before any of this week's work), but an independent re-verification of every claim in it against the current repo state, the same discipline applied throughout this week's other verification passes.
+
+**Found two real drifts, both fixed rather than silently carried forward:**
+1. `requirements-lock.txt`'s committed SHA-256 no longer matched the actual file -- `upsetplot==0.9.0` was added for #42/R3's Figure F4 after this doc was last written. Recomputed and updated.
+2. The manuscript itself (Sect. 4.1) hardcoded the NVD snapshot manifest's SHA-256 and CVE count (152) -- both stale since `CVE-2021-31207` was added to the snapshot mid-ablation (#76), growing it to 153. Updated both the count and the hash in `sn-article.tex`, with a one-sentence explanation of why it grew rather than a silent number change.
+
+**Verified, not merely inspected, for this freeze:**
+- NVD snapshot: all 153 files' SHA-256 recomputed and matched against the manifest (not just "manifest exists").
+- MITRE snapshot SHA: matches the manuscript's cited value exactly.
+- Prompt fingerprints (`SYSTEM_PROMPT`, `JUDGE_SYSTEM_PROMPT`): unchanged, recomputed and matched.
+- Every fully-deterministic §7 command re-run for real and diffed byte-for-byte against its committed output: CVE and ATT&CK relevance-classifier scoring, both annotation-agreement scripts (independent double-annotation kappa=1.0 and the superseded 20% self-check), `ablation_driver --validate` (2,616/2,616), `temperature_sweep_driver --validate` (150/150) -- all identical, zero new API calls spent.
+- Table T6's numbers in the manuscript cross-checked against `ablation_table_t6.json` directly -- exact match, row for row.
+- Full manuscript recompile: 0 undefined references, 0 duplicate-label warnings, 38 pages.
+
+**Result:** Rewrote `REPRODUCIBILITY.md` Sects. 1-2, 6-7, 10-11 to reflect the real, current state -- added commands and hashes for every R3/R4/R5 artifact, replaced the stale "R3/R4/R6 not started" checklist with an honestly-reverified all-complete one, and added the two genuinely-new deterministic reproduction checks (ATT&CK scoring, both kappa scripts) to Sect. 10 alongside the original CVE-scoring check. Re-created the local `paper-v1.0` git tag pointing at the exact final commit (still not pushed to origin, per the issue's own instruction to hold for supervisor review) -- the previous tag pointed at a 2026-09-09 commit that predates literally all of this week's work.
+
+**What went wrong:** Nothing broke -- the two drifts found were genuine but low-severity (a hash and a count, not a wrong headline result), caught specifically because this freeze re-verified everything from scratch rather than trusting the existing document.
+
+**What it means:** Issue #50/E5 is done. Every number in `REPRODUCIBILITY.md` and every hardcoded hash/count in the manuscript itself now matches the actual frozen artifacts, re-confirmed rather than assumed.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

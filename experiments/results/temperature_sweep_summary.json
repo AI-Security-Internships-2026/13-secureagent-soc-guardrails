@@ -1,0 +1,124 @@
+{
+  "temperature_grid": [
+    0.1,
+    0.3,
+    0.5,
+    0.7,
+    1.0
+  ],
+  "n_alerts": 30,
+  "n_resamples": 3,
+  "pool": "PROMPTED_ALERTS only (see module docstring for scope decision)",
+  "per_temperature": [
+    {
+      "temperature": 0.1,
+      "n": 30,
+      "n_complete": true,
+      "p_volunteer": 0.9667,
+      "p_volunteer_wilson_ci_95": [
+        0.8333,
+        0.9941
+      ],
+      "p_correct_but_unsupported": 0.6667,
+      "p_correct_but_unsupported_wilson_ci_95": [
+        0.4878,
+        0.8077
+      ],
+      "n_real_and_plausible": 20,
+      "selfcheckgpt_recall_on_unsupported": 0.05,
+      "selfcheckgpt_recall_wilson_ci_95": [
+        0.0089,
+        0.2361
+      ],
+      "llmcite_detection_rate_on_unsupported": 1.0
+    },
+    {
+      "temperature": 0.3,
+      "n": 30,
+      "n_complete": true,
+      "p_volunteer": 1.0,
+      "p_volunteer_wilson_ci_95": [
+        0.8865,
+        1.0
+      ],
+      "p_correct_but_unsupported": 0.7333,
+      "p_correct_but_unsupported_wilson_ci_95": [
+        0.5555,
+        0.8582
+      ],
+      "n_real_and_plausible": 22,
+      "selfcheckgpt_recall_on_unsupported": 0.1818,
+      "selfcheckgpt_recall_wilson_ci_95": [
+        0.0731,
+        0.3852
+      ],
+      "llmcite_detection_rate_on_unsupported": 1.0
+    },
+    {
+      "temperature": 0.5,
+      "n": 30,
+      "n_complete": true,
+      "p_volunteer": 1.0,
+      "p_volunteer_wilson_ci_95": [
+        0.8865,
+        1.0
+      ],
+      "p_correct_but_unsupported": 0.7,
+      "p_correct_but_unsupported_wilson_ci_95": [
+        0.5212,
+        0.8334
+      ],
+      "n_real_and_plausible": 21,
+      "selfcheckgpt_recall_on_unsupported": 0.0476,
+      "selfcheckgpt_recall_wilson_ci_95": [
+        0.0085,
+        0.2267
+      ],
+      "llmcite_detection_rate_on_unsupported": 1.0
+    },
+    {
+      "temperature": 0.7,
+      "n": 30,
+      "n_complete": true,
+      "p_volunteer": 0.9333,
+      "p_volunteer_wilson_ci_95": [
+        0.7868,
+        0.9815
+      ],
+      "p_correct_but_unsupported": 0.6667,
+      "p_correct_but_unsupported_wilson_ci_95": [
+        0.4878,
+        0.8077
+      ],
+      "n_real_and_plausible": 20,
+      "selfcheckgpt_recall_on_unsupported": 0.1,
+      "selfcheckgpt_recall_wilson_ci_95": [
+        0.0279,
+        0.301
+      ],
+      "llmcite_detection_rate_on_unsupported": 1.0
+    },
+    {
+      "temperature": 1.0,
+      "n": 30,
+      "n_complete": true,
+      "p_volunteer": 1.0,
+      "p_volunteer_wilson_ci_95": [
+        0.8865,
+        1.0
+      ],
+      "p_correct_but_unsupported": 0.7,
+      "p_correct_but_unsupported_wilson_ci_95": [
+        0.5212,
+        0.8334
+      ],
+      "n_real_and_plausible": 21,
+      "selfcheckgpt_recall_on_unsupported": 0.1905,
+      "selfcheckgpt_recall_wilson_ci_95": [
+        0.0767,
+        0.4
+      ],
+      "llmcite_detection_rate_on_unsupported": 1.0
+    }
+  ]
+}

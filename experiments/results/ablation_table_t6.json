@@ -1,0 +1,107 @@
+{
+  "source": "experiments/results/ablation_full.jsonl",
+  "table": [
+    {
+      "config_id": "C0",
+      "name": "Full pipeline",
+      "n_alerts": 436,
+      "ungrounded_detections": 5,
+      "requires_review_flags": 45,
+      "requires_review_pct": 10.3,
+      "pii_detections": 66,
+      "input_rail_fp": 0,
+      "median_latency_ms": 4766,
+      "iqr_latency_ms": [
+        1956,
+        7064
+      ],
+      "alerts_lost_vs_full": null,
+      "alerts_gained_vs_full": null
+    },
+    {
+      "config_id": "C1",
+      "name": "$-$Input",
+      "n_alerts": 436,
+      "ungrounded_detections": 13,
+      "requires_review_flags": 45,
+      "requires_review_pct": 10.3,
+      "pii_detections": 56,
+      "input_rail_fp": 0,
+      "median_latency_ms": 4604,
+      "iqr_latency_ms": [
+        2226,
+        6303
+      ],
+      "alerts_lost_vs_full": 12,
+      "alerts_gained_vs_full": 12
+    },
+    {
+      "config_id": "C2",
+      "name": "$-$CVE",
+      "n_alerts": 436,
+      "ungrounded_detections": 8,
+      "requires_review_flags": 46,
+      "requires_review_pct": 10.6,
+      "pii_detections": 59,
+      "input_rail_fp": 0,
+      "median_latency_ms": 5005,
+      "iqr_latency_ms": [
+        2226,
+        7148
+      ],
+      "alerts_lost_vs_full": 13,
+      "alerts_gained_vs_full": 14
+    },
+    {
+      "config_id": "C3",
+      "name": "$-$ATT\\&CK",
+      "n_alerts": 436,
+      "ungrounded_detections": 4,
+      "requires_review_flags": 41,
+      "requires_review_pct": 9.4,
+      "pii_detections": 63,
+      "input_rail_fp": 0,
+      "median_latency_ms": 4313,
+      "iqr_latency_ms": [
+        2237,
+        6312
+      ],
+      "alerts_lost_vs_full": 11,
+      "alerts_gained_vs_full": 7
+    },
+    {
+      "config_id": "C4",
+      "name": "$-$PII",
+      "n_alerts": 436,
+      "ungrounded_detections": 15,
+      "requires_review_flags": 14,
+      "requires_review_pct": 3.2,
+      "pii_detections": 0,
+      "input_rail_fp": 0,
+      "median_latency_ms": 5408,
+      "iqr_latency_ms": [
+        2061,
+        7454
+      ],
+      "alerts_lost_vs_full": 39,
+      "alerts_gained_vs_full": 8
+    },
+    {
+      "config_id": "C5",
+      "name": "None",
+      "n_alerts": 436,
+      "ungrounded_detections": 0,
+      "requires_review_flags": 0,
+      "requires_review_pct": 0.0,
+      "pii_detections": 0,
+      "input_rail_fp": 0,
+      "median_latency_ms": 5085,
+      "iqr_latency_ms": [
+        1827,
+        7638
+      ],
+      "alerts_lost_vs_full": 45,
+      "alerts_gained_vs_full": 0
+    }
+  ]
+}
