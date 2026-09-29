@@ -1,0 +1,11 @@
+{
+  "n": 103,
+  "observed_agreement": 0.9903,
+  "cohen_kappa": 0.9797,
+  "cohen_kappa_bootstrap_95ci": [
+    0.9372,
+    1.0
+  ],
+  "n_bootstrap": 1000,
+  "n_disagreements": 1
+}

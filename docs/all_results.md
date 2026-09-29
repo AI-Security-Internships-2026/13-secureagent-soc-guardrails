@@ -1558,6 +1558,21 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 102. Issue #43 (R4) — ATT&CK second annotation returned, one wrong file caught before trusting it, real kappa computed
+
+**When:** Sep 29
+**What we tried:** Second ATT&CK annotator's completed sheet came in. Before computing anything, cross-checked it the same way the CVE side's two wrong files were caught earlier in R4 -- never trust a plausible-looking spreadsheet without verifying it against the true sample first.
+
+**What went wrong (caught before it mattered):** The first file received (`attack_alert_pairs.xlsx`, from outside the repo) was not the blind sheet at all -- wrong filename, wrong sheet names, 7 columns instead of 5, and critically it exposed the real `technique_id` and the internal ground-truth `pair_type` construction category (`pos`/`neg_near`/`neg_far`/`edge`) in plain sight, neither of which an annotator should ever see. Worse, every one of its 103 labels matched annotator 1's label exactly (after `pos`/`neg` -> `relevant`/`not_relevant` mapping) and every `technique_id` matched the true key exactly -- not the signature of an independent blind judgment, more consistent with something derived from already-existing data than a fresh second read. Rejected without computing kappa on it.
+
+**Result (real file):** The actual filled `attack_annotator2_pairs_BLIND.xlsx` (the file this repo's own tooling produced) checked out on every integrity test: all 103 `pair_id`s match the true sample exactly, no duplicates, no technique-ID leak in the visible text, valid `relevant`/`not_relevant` vocabulary throughout. Built `compute_attack_inter_rater_agreement.py` (mirrors `compute_inter_rater_agreement.py` on the CVE side) and ran it for real: **n=103, 99.0% observed agreement, Cohen's kappa=0.980 (95% CI [0.937, 1.000], 1000 bootstrap resamples), 1 disagreement.**
+
+The one disagreement (`ATTACK-BAIT-059__T1565__pos`): annotator 1 said `relevant`, annotator 2 said `not_relevant`. The pair's alert evidence is a close paraphrase of T1565 (Data Manipulation)'s own description text and was constructed as a `pos` case -- looks more like an annotator miss than genuine ambiguity, but left for a human tie-break decision rather than resolved by inspection alone; written to `disagreements_attack.csv` with `resolved_label`/`reason` left blank pending that call.
+
+**What it means:** The ATT&CK side now has the same kind of genuine independent double-annotation result the CVE side already had (n=80, kappa=1.0) -- kappa=0.980 here is not as perfect, but is still very strong agreement, and unlike the rejected file, it's a plausible real result rather than a suspiciously exact match. R4 is not fully closed yet: the one disagreement needs a resolved label before the classifier evaluation and manuscript update can be finalized.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
