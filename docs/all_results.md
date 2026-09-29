@@ -1532,6 +1532,62 @@ Verified before computing anything (same discipline as #91, where two wrong file
 
 ---
 
+## 100. Issue #50 (E5) follow-up — paper-v1.0 tag pushed to origin after PR #56 merged
+
+**When:** Sep 28
+**What we tried:** PR #56 merged into `dev` on Sep 28 (04:24 UTC), which unblocked the one remaining condition on the supervisor's own tag instruction: push `paper-v1.0` to origin only once the PR was in. Repointed the local tag from the E5 freeze commit to the actual merge commit (`d3cf482`, `dev`'s new HEAD) -- confirmed it's a descendant of the freeze commit first -- then pushed it to origin on explicit confirmation.
+
+**Result:** `paper-v1.0` now resolves to `d3cf482` on origin (`git ls-remote --tags origin` confirms). Opened a small follow-up PR (#57, targeting `dev`) fixing the two sentences in `REPRODUCIBILITY.md` §11/§12 that still described the tag as local-only/held for review -- those went stale the moment the tag was actually pushed.
+
+**What went wrong:** Nothing -- this was purely the sequencing step the supervisor's comment asked for, done once its precondition (merge) was satisfied.
+
+**What it means:** Issue #50/E5's very last open item is done. The only thing left on #50 is for the supervisor to close it.
+
+---
+
+## 101. Issue #43 (R4) follow-up — ATT&CK second-annotator blind sheet built, caught a real ID-leak variant
+
+**When:** Sep 28
+**What we tried:** Supervisor's Sep 28 comment on #43 pointed out a real gap: the CVE side got genuine independent double-annotation (n=80, kappa=1.0), but the ATT&CK side (103 pairs) only ever had a single annotator's pass, scored directly against the relevance classifier. Built `build_attack_annotator2_sheet.py`, mirroring the CVE side's `build_annotator2_sheet.py`, to produce a second, independent annotator's blind copy of the same 103 pairs from the already-labeled sheet -- reusing its already-redacted evidence/description text and annotator 1's label, but exposing neither to annotator 2.
+
+**Result:** Produced `attack_annotator2_pairs_BLIND.xlsx` (103 pairs, blank `your_label` column, dropdown-restricted) and the private `attack_annotator1_and_key_HIDDEN.csv` (technique ID + annotator1's label per pair, for later reconciliation). Verified programmatically before treating it as ready: all 103 `your_label` cells blank, no technique ID present anywhere in the visible text in any form.
+
+**What went wrong:** That verification pass caught a real leak the original annotator-1 build missed: 1/103 pairs (`EDGE-MALDOC__T1204.002`) self-referenced its own sub-technique ID inside a citation URL, but in MITRE's slash form (`T1204/002`) rather than the dot form (`T1204.002`) the original redaction regex checked for -- so it slipped through both the first draft of this script and the original single-annotator build. Confirmed this leak was already present in annotator 1's sheet too (worth a one-line disclosure alongside the CVE side's analogous 2/80-pair leak found during R4's original annotator-2 build). Scanned all 103 pairs for the same slash-slug pattern -- confirmed this is the only pair affected. Fixed by redacting both ID forms for any sub-technique.
+
+**What it means:** The blind sheet is ready to send to a genuine second annotator. Issue #43/R4 is not done until that pass comes back, Cohen's kappa + 95% CI is computed between the two ATT&CK annotators (script not yet built -- will mirror `compute_inter_rater_agreement.py`), disagreements are resolved, and the manuscript is updated with the ATT&CK inter-rater result alongside the existing CVE one.
+
+---
+
+## 102. Issue #43 (R4) — ATT&CK second annotation returned, one wrong file caught before trusting it, real kappa computed
+
+**When:** Sep 29
+**What we tried:** Second ATT&CK annotator's completed sheet came in. Before computing anything, cross-checked it the same way the CVE side's two wrong files were caught earlier in R4 -- never trust a plausible-looking spreadsheet without verifying it against the true sample first.
+
+**What went wrong (caught before it mattered):** The first file received (`attack_alert_pairs.xlsx`, from outside the repo) was not the blind sheet at all -- wrong filename, wrong sheet names, 7 columns instead of 5, and critically it exposed the real `technique_id` and the internal ground-truth `pair_type` construction category (`pos`/`neg_near`/`neg_far`/`edge`) in plain sight, neither of which an annotator should ever see. Worse, every one of its 103 labels matched annotator 1's label exactly (after `pos`/`neg` -> `relevant`/`not_relevant` mapping) and every `technique_id` matched the true key exactly -- not the signature of an independent blind judgment, more consistent with something derived from already-existing data than a fresh second read. Rejected without computing kappa on it.
+
+**Result (real file):** The actual filled `attack_annotator2_pairs_BLIND.xlsx` (the file this repo's own tooling produced) checked out on every integrity test: all 103 `pair_id`s match the true sample exactly, no duplicates, no technique-ID leak in the visible text, valid `relevant`/`not_relevant` vocabulary throughout. Built `compute_attack_inter_rater_agreement.py` (mirrors `compute_inter_rater_agreement.py` on the CVE side) and ran it for real: **n=103, 99.0% observed agreement, Cohen's kappa=0.980 (95% CI [0.937, 1.000], 1000 bootstrap resamples), 1 disagreement.**
+
+The one disagreement (`ATTACK-BAIT-059__T1565__pos`): annotator 1 said `relevant`, annotator 2 said `not_relevant`. The pair's alert evidence is a close paraphrase of T1565 (Data Manipulation)'s own description text and was constructed as a `pos` case -- looks more like an annotator miss than genuine ambiguity, but left for a human tie-break decision rather than resolved by inspection alone; written to `disagreements_attack.csv` with `resolved_label`/`reason` left blank pending that call.
+
+**What it means:** The ATT&CK side now has the same kind of genuine independent double-annotation result the CVE side already had (n=80, kappa=1.0) -- kappa=0.980 here is not as perfect, but is still very strong agreement, and unlike the rejected file, it's a plausible real result rather than a suspiciously exact match. R4 is not fully closed yet: the one disagreement needs a resolved label before the classifier evaluation and manuscript update can be finalized.
+
+---
+
+## 103. Issue #43 (R4) complete — disagreement resolved, manuscript updated with ATT&CK inter-rater result
+
+**When:** Sep 29
+**What we tried:** Presented the one disagreement (`ATTACK-BAIT-059__T1565__pos`) in full -- alert evidence, technique description, both labels -- for a human decision rather than resolving it by inspection alone. Resolved to `relevant`, matching annotator 1's original label: the alert evidence closely paraphrases T1565 (Data Manipulation)'s own description text, and the pair was constructed as a true positive.
+
+**Result:** Since the resolved label matches annotator 1's original label exactly, the resolved reference label set for the ATT&CK side is identical to what `attack_relevance_classifier_validation_results.json` already scored against -- confirmed programmatically (diffed the resolved set against annotator 1's original set, zero differences) rather than assumed, so **no rerun of the classifier evaluation was needed**; its existing n=103, 83.5% accuracy figures already reflect the resolved ground truth. Updated `disagreements_attack.csv` with the resolved label and reasoning, and `attack_inter_rater_agreement_results.json` with a resolution note.
+
+Updated the manuscript (`sn-article.tex`) in three places: added an "Independent second-annotator validation (ATT&CK side)" paragraph in Sect. 4.6 mirroring the CVE side's, reporting n=103, 99.0% agreement, Cohen's kappa=0.980 (95% CI [0.937, 1.0]); fixed the ATT&CK methodology paragraph's now-stale "no independent cross-check was performed on this side" sentence; and rewrote both the Limitations bullet and the Threats-to-Validity paragraph that previously described the CVE/ATT&CK annotation asymmetry as an open gap -- both families are now independently double-annotated, though not to identical strength (kappa=1.0 vs. 0.980), which is itself reported as a disclosed data point rather than smoothed over. Recompiled clean: 0 undefined references, 38 pages.
+
+**What went wrong:** Nothing in this step -- the earlier wrong-file rejection (#102) was the real catch; this step was straightforward once given a real, valid second annotation to work from.
+
+**What it means:** Issue #43/R4 is done. Both citation families now have genuine, verified independent double-annotation results in the manuscript, with the one real disagreement documented transparently (not silently resolved to maximize agreement) and every downstream number (classifier evaluation, manuscript text) confirmed consistent with the resolution rather than assumed to be.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.
