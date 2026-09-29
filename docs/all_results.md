@@ -1573,6 +1573,21 @@ The one disagreement (`ATTACK-BAIT-059__T1565__pos`): annotator 1 said `relevant
 
 ---
 
+## 103. Issue #43 (R4) complete — disagreement resolved, manuscript updated with ATT&CK inter-rater result
+
+**When:** Sep 29
+**What we tried:** Presented the one disagreement (`ATTACK-BAIT-059__T1565__pos`) in full -- alert evidence, technique description, both labels -- for a human decision rather than resolving it by inspection alone. Resolved to `relevant`, matching annotator 1's original label: the alert evidence closely paraphrases T1565 (Data Manipulation)'s own description text, and the pair was constructed as a true positive.
+
+**Result:** Since the resolved label matches annotator 1's original label exactly, the resolved reference label set for the ATT&CK side is identical to what `attack_relevance_classifier_validation_results.json` already scored against -- confirmed programmatically (diffed the resolved set against annotator 1's original set, zero differences) rather than assumed, so **no rerun of the classifier evaluation was needed**; its existing n=103, 83.5% accuracy figures already reflect the resolved ground truth. Updated `disagreements_attack.csv` with the resolved label and reasoning, and `attack_inter_rater_agreement_results.json` with a resolution note.
+
+Updated the manuscript (`sn-article.tex`) in three places: added an "Independent second-annotator validation (ATT&CK side)" paragraph in Sect. 4.6 mirroring the CVE side's, reporting n=103, 99.0% agreement, Cohen's kappa=0.980 (95% CI [0.937, 1.0]); fixed the ATT&CK methodology paragraph's now-stale "no independent cross-check was performed on this side" sentence; and rewrote both the Limitations bullet and the Threats-to-Validity paragraph that previously described the CVE/ATT&CK annotation asymmetry as an open gap -- both families are now independently double-annotated, though not to identical strength (kappa=1.0 vs. 0.980), which is itself reported as a disclosed data point rather than smoothed over. Recompiled clean: 0 undefined references, 38 pages.
+
+**What went wrong:** Nothing in this step -- the earlier wrong-file rejection (#102) was the real catch; this step was straightforward once given a real, valid second annotation to work from.
+
+**What it means:** Issue #43/R4 is done. Both citation families now have genuine, verified independent double-annotation results in the manuscript, with the one real disagreement documented transparently (not silently resolved to maximize agreement) and every downstream number (classifier evaluation, manuscript text) confirmed consistent with the resolution rather than assumed to be.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

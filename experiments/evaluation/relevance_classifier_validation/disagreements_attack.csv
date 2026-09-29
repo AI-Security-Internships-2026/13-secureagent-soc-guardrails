@@ -1,2 +1,2 @@
 pair_id,annotator1_label,annotator2_label,resolved_label,reason
-ATTACK-BAIT-059__T1565__pos,relevant,not_relevant,,
+ATTACK-BAIT-059__T1565__pos,relevant,not_relevant,relevant,"Resolved by project owner review: the alert evidence is a close paraphrase of T1565 (Data Manipulation)'s own description (""insert, delete, or manipulate data...to influence external outcomes or hide activity, thus threatening the integrity of the data"" appears near-verbatim in both), and the pair was constructed as a true positive. Annotator 2's not_relevant call treated as a miss, not a genuine ambiguity."

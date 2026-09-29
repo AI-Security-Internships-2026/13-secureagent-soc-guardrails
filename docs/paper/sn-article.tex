@@ -1082,8 +1082,8 @@ left visible after an early attempt to redact that too made the text
 unreadable without adding real blinding, since MITRE's own descriptions
 use a technique's name as an ordinary descriptive noun throughout their
 prose (e.g.\ \texttt{T1566} Phishing's description uses ``phishing'' 10
-times), unlike NVD's number-based CVE text. No independent cross-check
-was performed on this side.
+times), unlike NVD's number-based CVE text. This single-annotator pass
+was independently cross-checked afterward (see below).
 
 \textbf{Result} (\texttt{attack\_relevance\_classifier\_validation\_results.json},
 $n=103$): \textbf{accuracy 83.5\% (95\% CI [75.2\%, 89.4\%]), precision
@@ -1111,6 +1111,23 @@ second citation family, but at a real, disclosed accuracy cost
 with, not contradicting, this paper's broader finding that ATT\&CK is
 measurably harder for both models (Sect.~\ref{subsec:selfcheckgpt}) and
 this classifier alike.
+
+\textbf{Independent second-annotator validation (ATT\&CK side).} A
+second, genuinely independent annotator blind-labeled all 103 pairs ---
+the technique ID and annotator 1's label both withheld, labeling done
+with no access to annotator 1's pass. Result: \textbf{102/103 agreement
+(99.0\%), Cohen's $\kappa=0.980$ (95\% CI $[0.937,1.0]$, 1000 bootstrap
+resamples), 1 disagreement.} The single disagreement
+(alert/technique pair built as a true positive for \texttt{T1565} Data
+Manipulation, whose alert evidence closely paraphrases the technique's
+own description) was resolved to \texttt{relevant} on review, matching
+annotator 1's original label and leaving the reference label set used
+above unchanged. This is weaker than the CVE side's perfect
+$\kappa=1.0$ but still strong agreement by conventional
+interpretation, consistent with ATT\&CK relevance judgments being
+somewhat harder to make consistently than CVE ones, the same
+directional pattern already observed in the classifier's own accuracy
+gap above.
 
 \subsection{Real-world deployment validation: third-party incident generator and live Wazuh SIEM data}\label{subsec:realworld}
 
@@ -1738,13 +1755,16 @@ what was tested.
   this validation's own design, the threshold was \textit{not} retuned
   on the ATT\&CK-side data to fix this --- doing so would itself be a
   form of dataset leakage; the classifier is reported as-is, warts
-  included. The CVE side's ground truth was independently
+  included. Both families' ground truth are now independently
   double-annotated: a second, genuinely independent rater blind-labeled
-  all 80 pairs with no access to the first rater's labels, agreeing on
-  every single one (Cohen's $\kappa=1.0$, $n=80$, zero disagreements to
-  resolve). The ATT\&CK side's labels come from a single rater with no
-  independent cross-check at all --- a real asymmetry between the two
-  citation families' ground truth that remains disclosed as such.
+  all 80 CVE pairs with no access to the first rater's labels, agreeing
+  on every single one (Cohen's $\kappa=1.0$, $n=80$, zero disagreements
+  to resolve); a second independent rater separately blind-labeled all
+  103 ATT\&CK pairs, agreeing on 102/103 (Cohen's $\kappa=0.980$, 95\%
+  CI $[0.937,1.0]$), with the one disagreement resolved to match
+  annotator 1's label on review. The ATT\&CK side's slightly lower
+  agreement is consistent with the same terser-STIX-prose pattern
+  already disclosed above for the classifier's own accuracy gap.
 \end{itemize}
 
 \textbf{Threats to validity.} The input-guardrail comparison
@@ -1763,19 +1783,23 @@ analogous bias in the other direction --- technique selection is drawn
 from the local MITRE snapshot rather than any real-world prevalence
 signal, so its rate reflects how often the model reaches for a specific
 technique ID given a resembling symptom description, not attacker
-behavior frequency. Human-labeled ground truth in this paper is not
-uniformly independently double-annotated across both citation families.
-The relevance classifier's CVE pairs (Sect.~\ref{subsec:relevance},
-$n=80$) were: a second, genuinely independent annotator blind-labeled
-the full set with no access to the first rater's labels, agreeing on
-every single pair (Cohen's $\kappa=1.0$, zero disagreements to resolve)
---- real independent inter-rater agreement, not a self-consistency
-proxy. The ATT\&CK pairs ($n=103$) were not: no second annotator was
-recruited for that family, an explicit scope decision under
-annotator-time constraints rather than an oversight left undisclosed.
-We cannot rule out residual single-rater bias on the ATT\&CK side's
-ground truth specifically; a second independent annotator for that
-family, or a cross-site replication of both, remains future work.
+behavior frequency. Human-labeled ground truth in this paper is now
+independently double-annotated for both citation families, though not
+to identical strength. The relevance classifier's CVE pairs
+(Sect.~\ref{subsec:relevance}, $n=80$): a second, genuinely independent
+annotator blind-labeled the full set with no access to the first
+rater's labels, agreeing on every single pair (Cohen's $\kappa=1.0$,
+zero disagreements to resolve) --- real independent inter-rater
+agreement, not a self-consistency proxy. The ATT\&CK pairs ($n=103$): a
+second, genuinely independent annotator likewise blind-labeled the full
+set, agreeing on 102/103 (Cohen's $\kappa=0.980$, 95\% CI
+$[0.937,1.0]$); the one disagreement was resolved on review to match
+annotator 1's original label, so the reference labels used throughout
+this paper's ATT\&CK-side evaluation are unchanged by the resolution.
+The ATT\&CK side's imperfect agreement (vs.\ the CVE side's exact
+$\kappa=1.0$) is itself a disclosed data point consistent with ATT\&CK
+relevance judgments being somewhat harder to make consistently than CVE
+ones -- a cross-site replication of both remains future work.
 
 \section{Conclusion}\label{sec:conclusion}
 

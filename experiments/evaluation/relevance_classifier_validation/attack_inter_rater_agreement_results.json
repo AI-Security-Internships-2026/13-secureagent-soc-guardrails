@@ -7,5 +7,7 @@
     1.0
   ],
   "n_bootstrap": 1000,
-  "n_disagreements": 1
+  "n_disagreements": 1,
+  "disagreements_resolved": true,
+  "resolution_note": "1 disagreement (ATTACK-BAIT-059__T1565__pos) resolved by project owner review to 'relevant', matching annotator 1's original label; see disagreements_attack.csv. Resolved reference label set is therefore identical to annotator 1's original set, so attack_relevance_classifier_validation_results.json (scored against annotator 1) already reflects the resolved labels -- no rerun needed."
 }
