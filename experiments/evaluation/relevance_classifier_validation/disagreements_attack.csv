@@ -1,0 +1,2 @@
+pair_id,annotator1_label,annotator2_label,resolved_label,reason
+ATTACK-BAIT-059__T1565__pos,relevant,not_relevant,,
