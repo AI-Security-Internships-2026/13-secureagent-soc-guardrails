@@ -39,46 +39,37 @@
 
 \affil*[1]{\orgdiv{TECIP}, \orgname{Scuola Superiore Sant'Anna}, \orgaddress{\street{CNIT/PNTLab}, \city{Pisa}, \country{Italy}}}
 
-\abstract{Large language models are increasingly used in Security
-Operations Centers to draft threat reports, and those reports often cite
-CVE identifiers and MITRE ATT\&CK techniques as evidence. Almost nothing
-in a typical deployment checks whether those citations are real,
-relevant, or actually supported by the alert the model was given. A
-model can invent an identifier, cite a real one that has nothing to do
-with the alert, or recall a real, on-topic identifier the alert itself
-never mentioned. Treating all three as one ``flagged'' outcome hides the
-fact that they carry very different risks for an analyst deciding how
-much to trust the report.
+\abstract{Large language models increasingly draft Security Operations
+Center threat reports citing CVE identifiers and MITRE ATT\&CK
+techniques as evidence, yet typical deployments rarely check whether
+these citations are real, relevant, or evidence-supported. A model may
+invent an identifier, cite an unrelated real one, or recall a real,
+on-topic identifier never mentioned in the alert --- risks a single
+``flagged'' outcome hides from an analyst's trust decision.
 
-This paper presents LLMCite, a two-stage pipeline that first checks
-whether a cited identifier is grounded in the alert's own evidence, then
-verifies any ungrounded ones against authoritative sources --- the
-National Vulnerability Database for CVEs, the MITRE ATT\&CK STIX corpus
-for techniques --- and sorts the result into four outcome classes (plus a
-fifth for formally withdrawn identifiers). The central class,
-\texttt{REAL\_AND\_PLAUSIBLE}, names the case a human reviewer is least
-likely to catch: a real, topically appropriate citation the alert never
-actually supplied.
+LLMCite is a two-stage pipeline: it checks whether a cited identifier is
+grounded in the alert's evidence, then verifies ungrounded ones against
+authoritative sources --- NVD for CVEs, the MITRE ATT\&CK STIX corpus for
+techniques --- sorted into four outcome classes plus a fifth for
+withdrawn identifiers. The central class, \texttt{REAL\_AND\_PLAUSIBLE},
+names the case a human reviewer is least likely to catch: a real,
+topically appropriate citation the alert never supplied.
 
-Adversarial testing across both citation types shows the pipeline rarely
-induces spontaneous citation. The paper's main empirical result compares
-this approach against SelfCheckGPT-style self-consistency checking on
-the same alerts: self-consistency correctly identifies grounded
-citations but misses most ungrounded ones, because most of its misses
-are the model consistently recalling a real, correct identifier from
-training data --- indistinguishable from genuine grounding to a
-consistency-only signal, but exactly the pattern
-\texttt{REAL\_AND\_PLAUSIBLE} exists to catch. The deterministic checker
-is significantly more accurate on the same alerts (McNemar $p=0.012$),
-and the gap holds --- and grows sharper --- across two independent
-generator model families ($p\approx2\times10^{-7}$) and two citation
-families, CVE and MITRE ATT\&CK ($p\approx3\times10^{-7}$ and
-$p\approx2\times10^{-5}$ respectively). Supporting evaluation --- an LLM-judge
-baseline, real third-party and live SIEM data, and the pipeline's
-input-guardrail and PII-redaction layers --- further validates the
-system without changing this central finding. LLMCite is a
-domain-specialized citation-grounding verifier for security-critical LLM
-applications, distinct from prior work on scholarly citation checking.}
+Its central result: SelfCheckGPT-style self-consistency checking, run on
+the same alerts, correctly flags grounded citations but misses most
+ungrounded ones, since most misses are the model consistently recalling
+a real, correct identifier from training data --- indistinguishable from
+grounding to a consistency-only signal, yet exactly what
+\texttt{REAL\_AND\_PLAUSIBLE} targets. The deterministic checker is more
+accurate (McNemar $p=0.012$), and the gap holds --- and sharpens ---
+across two model families ($p\approx2\times10^{-7}$) and two citation
+families, CVE and MITRE ATT\&CK ($p\approx3\times10^{-7}$,
+$p\approx2\times10^{-5}$). Supporting evaluation (an LLM-judge baseline,
+real third-party/live SIEM data, input-guardrail and PII-redaction
+layers) further validates the system without altering this finding.
+LLMCite is a domain-specialized citation-grounding verifier for
+security-critical LLM applications, distinct from prior
+scholarly-citation-checking work.}
 
 \keywords{hallucination detection, CVE grounding, MITRE ATT\&CK, LLM guardrails}
 
