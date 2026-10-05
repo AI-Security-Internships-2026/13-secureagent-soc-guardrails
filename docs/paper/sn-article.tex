@@ -1284,6 +1284,36 @@ every component is equally essential}: that claim would only be
 supported if every single-stage removal produced a comparable drop, and
 it does not.
 
+\textbf{Why the PII checker dominates on this specific pool: not genuine
+leakage, but a known false-positive pattern at unusually high volume.}
+Of \texttt{C0}'s 45 flagged alerts, 41 (91\%) carry at least one PII
+detection, and every single one of the pool's 66 total PII detections is
+typed \texttt{PERSON} --- none are \texttt{EMAIL\_ADDRESS},
+\texttt{PHONE\_NUMBER}, \texttt{US\_SSN}, or \texttt{CREDIT\_CARD}.
+Manually checking every flagged string against the alert text confirms
+none is a real human name: all are software/vulnerability proper nouns
+(``Heartbleed,'' ``Flash Player,'' ``Zimbra,'' ``Bash,'' ``Java,''
+``Ray,'' ``Cookie,'' among others) tripping the same Title-Case NER
+false-positive class already disclosed in
+Sects.~\ref{subsec:wazuh}/\ref{subsubsec:pii-bait} --- just at far higher
+volume here than those sections' own bait sets ever produced, because
+this pool's CVE-heavy sources are saturated with exactly the kind of
+named-vulnerability prose that pattern feeds on: 23/150 CVE-bait alerts
+and 15/60 CVE-pool alerts carry a false-positive \texttt{PERSON}
+detection, versus 3/150 ATT\&CK-bait alerts (whose technique
+descriptions rarely name a specific product) and \textbf{zero} of the 76
+Secure\_SOC\_AI rule-engine incidents (realistic, non-bait-authored
+text). The remaining 4 of \texttt{C0}'s 45 flags are flagged purely for
+a citation issue, with no PII detection at all. \textbf{The honest
+restatement of this subsection's headline finding is therefore
+narrower than ``PII leakage outweighs citation-grounding risk'':} on
+this pool, the PII checker's own known false-positive rate on
+vulnerability-naming text happens to fire far more often than either
+citation checker's true-positive rate, which is a fact about this
+pool's composition and this checker's disclosed NER weakness, not
+evidence that real PII leakage is operationally more common or more
+risky than an ungrounded citation.
+
 \textbf{The input guardrail's contribution cannot be read causally from
 this table.} It never blocked a single alert in this pool, in any
 configuration (0 \texttt{guardrail\_blocked} occurrences across all
