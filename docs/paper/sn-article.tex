@@ -1615,6 +1615,34 @@ producing this result actually works across real, third-party, and live
 data --- it supports this finding, it isn't a separate finding of equal
 weight.
 
+\textbf{Does the ablation study undercut this?} Sect.~\ref{subsec:ablation}'s
+own numbers invite a direct question: if the CVE and ATT\&CK checkers
+each move the pool's review-flag rate by under one percentage point
+when disabled, while the PII checker moves it by 69\% relatively, is
+this paper's central mechanism actually the minor one? Two things
+are true at once here, and neither cancels the other. First, most of
+the PII checker's apparent dominance on that specific pool is a known
+false-positive pattern firing at unusually high volume
+(Sect.~\ref{subsec:ablation}'s own breakdown: 41 of 45 flags, all 66
+underlying detections typed \texttt{PERSON}, none a real human name),
+not evidence that genuine PII leakage risk outweighs citation-grounding
+risk in general. Second, and separately, the citation checkers'
+\textit{own} small footprint on this specific ablation pool is expected,
+not contradictory: an ungrounded citation is a rare event everywhere
+else this paper measures it too --- 0\% on 147 of 150 symptom-only
+CVE-bait alerts, 2.7\% on the ATT\&CK-bait equivalent
+(Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}) --- so a
+component built to catch a rare event will show a small aggregate
+footprint on any one pool's flag-rate delta, almost by construction.
+That is a statement about how often the triggering condition occurs,
+not about how much it matters when it does: Sect.~\ref{subsec:selfcheckgpt}'s
+central finding is precisely that this rare event is also the one a
+leading alternative method cannot catch at all. The ablation measures
+volume; the McNemar comparison measures whether the mechanism is
+necessary when the event occurs. Both can be true without
+contradiction, and this paper reports both rather than letting the
+louder of the two numbers speak for the other.
+
 \textbf{Why this comparison, despite how it was measured.} Two questions
 are worth answering directly rather than leaving for a reader to
 reconstruct. First: is it actually surprising that self-consistency
