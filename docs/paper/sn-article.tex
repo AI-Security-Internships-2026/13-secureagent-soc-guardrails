@@ -39,46 +39,37 @@
 
 \affil*[1]{\orgdiv{TECIP}, \orgname{Scuola Superiore Sant'Anna}, \orgaddress{\street{CNIT/PNTLab}, \city{Pisa}, \country{Italy}}}
 
-\abstract{Large language models are increasingly used in Security
-Operations Centers to draft threat reports, and those reports often cite
-CVE identifiers and MITRE ATT\&CK techniques as evidence. Almost nothing
-in a typical deployment checks whether those citations are real,
-relevant, or actually supported by the alert the model was given. A
-model can invent an identifier, cite a real one that has nothing to do
-with the alert, or recall a real, on-topic identifier the alert itself
-never mentioned. Treating all three as one ``flagged'' outcome hides the
-fact that they carry very different risks for an analyst deciding how
-much to trust the report.
+\abstract{Large language models increasingly draft Security Operations
+Center threat reports citing CVE identifiers and MITRE ATT\&CK
+techniques as evidence, yet typical deployments rarely check whether
+these citations are real, relevant, or evidence-supported. A model may
+invent an identifier, cite an unrelated real one, or recall a real,
+on-topic identifier never mentioned in the alert --- risks a single
+``flagged'' outcome hides from an analyst's trust decision.
 
-This paper presents LLMCite, a two-stage pipeline that first checks
-whether a cited identifier is grounded in the alert's own evidence, then
-verifies any ungrounded ones against authoritative sources --- the
-National Vulnerability Database for CVEs, the MITRE ATT\&CK STIX corpus
-for techniques --- and sorts the result into four outcome classes (plus a
-fifth for formally withdrawn identifiers). The central class,
-\texttt{REAL\_AND\_PLAUSIBLE}, names the case a human reviewer is least
-likely to catch: a real, topically appropriate citation the alert never
-actually supplied.
+LLMCite is a two-stage pipeline: it checks whether a cited identifier is
+grounded in the alert's evidence, then verifies ungrounded ones against
+authoritative sources --- NVD for CVEs, the MITRE ATT\&CK STIX corpus for
+techniques --- sorted into four outcome classes plus a fifth for
+withdrawn identifiers. The central class, \texttt{REAL\_AND\_PLAUSIBLE},
+names the case a human reviewer is least likely to catch: a real,
+topically appropriate citation the alert never supplied.
 
-Adversarial testing across both citation types shows the pipeline rarely
-induces spontaneous citation. The paper's main empirical result compares
-this approach against SelfCheckGPT-style self-consistency checking on
-the same alerts: self-consistency correctly identifies grounded
-citations but misses most ungrounded ones, because most of its misses
-are the model consistently recalling a real, correct identifier from
-training data --- indistinguishable from genuine grounding to a
-consistency-only signal, but exactly the pattern
-\texttt{REAL\_AND\_PLAUSIBLE} exists to catch. The deterministic checker
-is significantly more accurate on the same alerts (McNemar $p=0.012$),
-and the gap holds --- and grows sharper --- across two independent
-generator model families ($p\approx2\times10^{-7}$) and two citation
-families, CVE and MITRE ATT\&CK ($p\approx3\times10^{-7}$ and
-$p\approx2\times10^{-5}$ respectively). Supporting evaluation --- an LLM-judge
-baseline, real third-party and live SIEM data, and the pipeline's
-input-guardrail and PII-redaction layers --- further validates the
-system without changing this central finding. LLMCite is a
-domain-specialized citation-grounding verifier for security-critical LLM
-applications, distinct from prior work on scholarly citation checking.}
+Its central result: SelfCheckGPT-style self-consistency checking, run on
+the same alerts, correctly flags grounded citations but misses most
+ungrounded ones, since most misses are the model consistently recalling
+a real, correct identifier from training data --- indistinguishable from
+grounding to a consistency-only signal, yet exactly what
+\texttt{REAL\_AND\_PLAUSIBLE} targets. The deterministic checker is more
+accurate (McNemar $p=0.012$), and the gap holds --- and sharpens ---
+across two model families ($p\approx2\times10^{-7}$) and two citation
+families, CVE and MITRE ATT\&CK ($p\approx3\times10^{-7}$,
+$p\approx2\times10^{-5}$). Supporting evaluation (an LLM-judge baseline,
+real third-party/live SIEM data, input-guardrail and PII-redaction
+layers) further validates the system without altering this finding.
+LLMCite is a domain-specialized citation-grounding verifier for
+security-critical LLM applications, distinct from prior
+scholarly-citation-checking work.}
 
 \keywords{hallucination detection, CVE grounding, MITRE ATT\&CK, LLM guardrails}
 
@@ -165,17 +156,19 @@ as a separate contribution of equal weight.
    pattern from genuine grounding --- it's fooled by exactly the
    citations \texttt{REAL\_AND\_PLAUSIBLE} was designed to catch, in 18
    of 20 failure cases (Sect.~\ref{subsec:selfcheckgpt}). The
-   deterministic checker is significantly more accurate on the same
-   alerts (McNemar $p=0.0118$, Sect.~\ref{subsec:mcnemar}), and the same
-   comparison, repeated on a second, independent model family
+   deterministic checker is more accurate on the same alerts (McNemar
+   $p=0.0118$, Sect.~\ref{subsec:mcnemar}). The comparison is not a
+   fair contest between equals: self-consistency was never designed to
+   check evidence presence. Its contribution here is a measurement --- how
+   often this blind spot actually occurs on real citations in this domain,
+   which the hallucination-detection literature does not supply. The same
+   comparison, repeated on a second model family
    (\texttt{qwen/qwen3.6-27b}) and on a second citation family (MITRE
-   ATT\&CK techniques, both model families), reproduces the gap every
-   time --- more strongly in three of the four replications
-   ($p\approx2\times10^{-7}$, $p\approx3\times10^{-7}$,
-   $p\approx2\times10^{-5}$) than the original CVE/\texttt{gpt-oss-20b}
-   result --- closing both the single-model- and
-   single-citation-family-generalization questions this finding would
-   otherwise leave open.
+   ATT\&CK techniques, both model families), again favors the deterministic
+   checker, with p-values of $p\approx2\times10^{-7}$, $p\approx3\times10^{-7}$,
+   and $p\approx2\times10^{-5}$. All three replication tables have a zero
+   cell at n=60, so their exact magnitudes are less precise than the
+   original $p=0.0118$ result, which has no zero cell.
 \item \textbf{A domain-specialized, two-stage citation-verification
    pipeline} for SOC LLM reports: a fast deterministic grounding check,
    followed by authoritative-source verification (NVD for CVEs, the
@@ -190,8 +183,8 @@ as a separate contribution of equal weight.
    through an independent third-party incident generator, a 60-alert CVE
    pool isolating whether the model can identify a CVE from behavior
    alone versus merely verify one it's given, 139 real alerts across
-   five trigger types from a live Wazuh SIEM deployment including a
-   genuinely detected brute-force attack, a pooled cross-source summary
+   five trigger types from a local, single-node Wazuh SIEM lab including a
+   detected brute-force attack, a pooled cross-source summary
    spanning 575 alerts, and supporting evaluation of the pipeline's
    other guardrail layers --- an input-guardrail comparison against two
    open-source alternatives, a same- and cross-family LLM-judge baseline
@@ -943,13 +936,14 @@ continuity-corrected form instead --- chi-square continuity-corrected
 McNemar $p\approx2.0\times10^{-7}$. The two tests aren't interchangeable
 in general, but both are standard McNemar variants and the choice here
 is forced by the data, not by which one gives a smaller $p$-value. This
-is a stronger result than the same-family test above (16 vs.\ 4,
+differs from the same-family test above (16 vs.\ 4,
 $p=0.0118$): on qwen-generated reports, SelfCheckGPT never once beat the
-deterministic checker on any of the 60 alerts. The
-single-model-generalization limitation Sect.~\ref{sec:discussion}
+deterministic checker on any of the 60 alerts, so the cell that carries
+the test is zero and the exact $p$-value is correspondingly imprecise.
+The single-model-generalization limitation Sect.~\ref{sec:discussion}
 discloses is addressed directly by this result rather than left
-untested: the central finding holds, and holds more strongly, on a
-second model family.
+untested: the central finding holds on a second model family, with the
+same direction of effect.
 
 \textbf{Cross-citation-family replication.} Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar}
 above use CVE identifiers throughout; the same self-consistency-versus-
@@ -1000,7 +994,7 @@ smallest three clear correspondingly stricter thresholds). This closes
 the citation-family generalization question the same way this section's
 cross-model-family result already closed the model-family one: not
 merely disclosed as an open limitation, but directly tested and found to
-hold --- more strongly, in fact, than the original CVE/\texttt{gpt-oss-20b}
+hold in the same direction as the original CVE/\texttt{gpt-oss-20b}
 result the paper leads with.
 
 \subsection{Relevance classifier validation}\label{subsec:relevance}
@@ -1129,7 +1123,7 @@ somewhat harder to make consistently than CVE ones, the same
 directional pattern already observed in the classifier's own accuracy
 gap above.
 
-\subsection{Real-world deployment validation: third-party incident generator and live Wazuh SIEM data}\label{subsec:realworld}
+\subsection{Real-world deployment validation: third-party incident generator and a local Wazuh SIEM lab}\label{subsec:realworld}
 
 This subsection doesn't answer RQ1-RQ4 directly; it provides supporting
 real-world evidence for RQ1's grounding claim, under both non-adversarial
@@ -1292,6 +1286,36 @@ percentage point when either is disabled alone). \textbf{We do not claim
 every component is equally essential}: that claim would only be
 supported if every single-stage removal produced a comparable drop, and
 it does not.
+
+\textbf{Why the PII checker dominates on this specific pool: not genuine
+leakage, but a known false-positive pattern at unusually high volume.}
+Of \texttt{C0}'s 45 flagged alerts, 41 (91\%) carry at least one PII
+detection, and every single one of the pool's 66 total PII detections is
+typed \texttt{PERSON} --- none are \texttt{EMAIL\_ADDRESS},
+\texttt{PHONE\_NUMBER}, \texttt{US\_SSN}, or \texttt{CREDIT\_CARD}.
+Manually checking every flagged string against the alert text confirms
+none is a real human name: all are software/vulnerability proper nouns
+(``Heartbleed,'' ``Flash Player,'' ``Zimbra,'' ``Bash,'' ``Java,''
+``Ray,'' ``Cookie,'' among others) tripping the same Title-Case NER
+false-positive class already disclosed in
+Sects.~\ref{subsec:wazuh}/\ref{subsubsec:pii-bait} --- just at far higher
+volume here than those sections' own bait sets ever produced, because
+this pool's CVE-heavy sources are saturated with exactly the kind of
+named-vulnerability prose that pattern feeds on: 23/150 CVE-bait alerts
+and 15/60 CVE-pool alerts carry a false-positive \texttt{PERSON}
+detection, versus 3/150 ATT\&CK-bait alerts (whose technique
+descriptions rarely name a specific product) and \textbf{zero} of the 76
+Secure\_SOC\_AI rule-engine incidents (realistic, non-bait-authored
+text). The remaining 4 of \texttt{C0}'s 45 flags are flagged purely for
+a citation issue, with no PII detection at all. \textbf{The honest
+restatement of this subsection's headline finding is therefore
+narrower than ``PII leakage outweighs citation-grounding risk'':} on
+this pool, the PII checker's own known false-positive rate on
+vulnerability-naming text happens to fire far more often than either
+citation checker's true-positive rate, which is a fact about this
+pool's composition and this checker's disclosed NER weakness, not
+evidence that real PII leakage is operationally more common or more
+risky than an ungrounded citation.
 
 \textbf{The input guardrail's contribution cannot be read causally from
 this table.} It never blocked a single alert in this pool, in any
@@ -1594,6 +1618,34 @@ producing this result actually works across real, third-party, and live
 data --- it supports this finding, it isn't a separate finding of equal
 weight.
 
+\textbf{Does the ablation study undercut this?} Sect.~\ref{subsec:ablation}'s
+own numbers invite a direct question: if the CVE and ATT\&CK checkers
+each move the pool's review-flag rate by under one percentage point
+when disabled, while the PII checker moves it by 69\% relatively, is
+this paper's central mechanism actually the minor one? Two things
+are true at once here, and neither cancels the other. First, most of
+the PII checker's apparent dominance on that specific pool is a known
+false-positive pattern firing at unusually high volume
+(Sect.~\ref{subsec:ablation}'s own breakdown: 41 of 45 flags, all 66
+underlying detections typed \texttt{PERSON}, none a real human name),
+not evidence that genuine PII leakage risk outweighs citation-grounding
+risk in general. Second, and separately, the citation checkers'
+\textit{own} small footprint on this specific ablation pool is expected,
+not contradictory: an ungrounded citation is a rare event everywhere
+else this paper measures it too --- 0\% on 147 of 150 symptom-only
+CVE-bait alerts, 2.7\% on the ATT\&CK-bait equivalent
+(Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}) --- so a
+component built to catch a rare event will show a small aggregate
+footprint on any one pool's flag-rate delta, almost by construction.
+That is a statement about how often the triggering condition occurs,
+not about how much it matters when it does: Sect.~\ref{subsec:selfcheckgpt}'s
+central finding is precisely that this rare event is also the one a
+leading alternative method cannot catch at all. The ablation measures
+volume; the McNemar comparison measures whether the mechanism is
+necessary when the event occurs. Both can be true without
+contradiction, and this paper reports both rather than letting the
+louder of the two numbers speak for the other.
+
 \textbf{Why this comparison, despite how it was measured.} Two questions
 are worth answering directly rather than leaving for a reader to
 reconstruct. First: is it actually surprising that self-consistency
@@ -1696,11 +1748,21 @@ what was tested.
   CVE-specific. This is no longer an untested limitation:
   Sect.~\ref{subsec:mcnemar}'s cross-citation-family replication repeats
   the full comparison on a mirrored 60-alert ATT\&CK pool, on both model
-  families, and finds the gap again --- more strongly in both cases
-  ($p\approx3.4\times10^{-7}$, $p\approx2.3\times10^{-5}$) than the
-  original CVE/\texttt{gpt-oss-20b} result ($p=0.0118$). All four family
+  families, and finds the gap again, in the same direction
+  ($p\approx3.4\times10^{-7}$, $p\approx2.3\times10^{-5}$, both from
+  zero-cell tables at n=60; compare the original $p=0.0118$). All four family
   combinations remain significant under a Holm-Bonferroni correction
   applied jointly across them.
+\item The real-world prevalence of the failure mode this paper centers
+  on is not established by these experiments. Under default production
+  settings (temperature 0.1, no explicit request for an identifier), the
+  model spontaneously cited an ungrounded identifier in 0 of 147
+  symptom-only CVE-bait alerts. The REAL\_AND\_PLAUSIBLE evidence in
+  Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar} comes from
+  settings that deliberately elicit citations: explicit identifier
+  requests, sampling at temperature 0.7 for resampling, or the 0.3--1.0
+  sweep. The findings characterize what happens when the failure mode
+  occurs, not how often it occurs in deployment.
 \item The CVE-bait result (Sect.~\ref{subsec:cve-bait}, $n=150$) gives a
   citable 95\% CI ([0.4\%, 4.7\%]), but both ungrounded citations
   occurred on the same two famous vulnerabilities (Log4Shell,
@@ -1736,8 +1798,8 @@ what was tested.
   Groq throughout most of this paper. For the central SelfCheckGPT
   finding specifically, this is no longer an untested limitation:
   Sect.~\ref{subsec:mcnemar}'s cross-family replication with
-  \texttt{qwen/qwen3.6-27b} reproduces it, more strongly
-  ($p\approx2.0\times10^{-7}$ vs.\ $p=0.0118$). The rest of the
+  \texttt{qwen/qwen3.6-27b} reproduces it in the same direction
+  ($p\approx2.0\times10^{-7}$, from a zero-cell table; compare $p=0.0118$). The rest of the
   evaluation (CVE-/ATT\&CK-bait, Wazuh, PII, input-guardrail
   comparison) remains single-model-tested; generalization there is
   still untested.
@@ -1858,7 +1920,7 @@ altering the central finding above.
 \begin{itemize}
 \item \textbf{Funding:} Not applicable.
 \item \textbf{Conflict of interest / Competing interests:} The author declares no competing interests.
-\item \textbf{Ethics approval and consent to participate:} Not applicable --- this work involves no human or animal subjects research. (The relevance-classifier validation in Sect.~\ref{subsec:relevance} involved one human rater labeling technical (alert, CVE) pairs, not human-subjects research.)
+\item \textbf{Ethics approval and consent to participate:} This work involves no animal subjects. Human annotators labeled technical (alert, identifier) pairs for the relevance-classifier validation (Sect.~\ref{subsec:relevance}). The task collected no personal data beyond the labels themselves, and no information about annotators was recorded for analysis. No institutional ethics review was sought for this technical annotation task. [Confirm against institutional and target-journal policy on expert annotation before submission.]
 \item \textbf{Consent for publication:} Not applicable.
 \item \textbf{Data availability:} All evaluation result files, evaluation scripts, and the pipeline implementation referenced throughout Sect.~\ref{sec:evaluation} and the Appendix are available in the project repository.
 \item \textbf{Materials availability:} Not applicable.
