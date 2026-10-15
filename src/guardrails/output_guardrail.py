@@ -63,6 +63,20 @@ from src.guardrails.grounding_utils import (
 
 CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 
+# LLM output sometimes renders "CVE-2022-30190" with a non-ASCII dash
+# (en dash, non-breaking hyphen, etc.) that looks identical on screen but
+# won't match CVE_PATTERN's literal "-", silently dropping the citation
+# from extraction entirely -- the opposite of a false positive, and worse,
+# since it means a real ungrounded citation never gets flagged at all.
+_DASH_VARIANTS = str.maketrans({
+    "‐": "-",  # hyphen
+    "‑": "-",  # non-breaking hyphen
+    "‒": "-",  # figure dash
+    "–": "-",  # en dash
+    "—": "-",  # em dash
+    "−": "-",  # minus sign
+})
+
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 DEFAULT_NVD_SNAPSHOT_DIR = "data/nvd_snapshot"
 
@@ -77,7 +91,7 @@ def extract_cves(text: str) -> set:
     """Return the set of normalised (uppercase) CVE IDs found in text."""
     if not text:
         return set()
-    return {match.upper() for match in CVE_PATTERN.findall(text)}
+    return {match.upper() for match in CVE_PATTERN.findall(text.translate(_DASH_VARIANTS))}
 
 
 def _query_nvd_snapshot(cve_id: str, snapshot_dir: str) -> dict:

@@ -1588,6 +1588,32 @@ Updated the manuscript (`sn-article.tex`) in three places: added an "Independent
 
 ---
 
+## 104. Ablation study (R3) follow-up: the "PII dominates" finding is a known false-positive pattern at high volume, not genuine leakage -- manuscript corrected
+
+**When:** Oct 5
+**What we tried:** A review pass on the ablation section (Sect. 4.8) flagged that "the PII checker is the dominant contributor to the review-flag rate" (#84/#89) was being read as if PII leakage risk genuinely outweighs citation-grounding risk, without ever checking *why* the PII checker fires so often on this specific 436-alert pool. Queried `experiments/results/ablation_full.jsonl`'s `C0` (full-pipeline) rows directly rather than assuming -- pulled every `pii_detections` entry and cross-referenced it against `requires_review`.
+
+**Result:** Of `C0`'s 45 flagged alerts, 41 (91%) carry a PII detection, and **all 66 of the pool's PII detections, with zero exceptions, are typed `PERSON`** -- none are `EMAIL_ADDRESS`, `PHONE_NUMBER`, `US_SSN`, or `CREDIT_CARD`. Manually checked every flagged string against the alert text: none is a real human name. All are software/vulnerability proper nouns -- "Heartbleed," "Flash Player," "Zimbra," "Bash," "Java," "Ray," "Cookie," among others -- tripping the exact Title-Case NER false-positive pattern already disclosed elsewhere in the paper (Sects. 4.7/4.9.2's Wazuh and PII-bait findings), just at much higher volume here. Per-source breakdown: 23/150 CVE-bait alerts and 15/60 CVE-pool alerts carry a false-positive hit (both sources saturated with named-vulnerability prose); only 3/150 ATT&CK-bait alerts; **zero** of the 76 Secure_SOC_AI rule-engine incidents (realistic, non-bait-authored text). The remaining 4/45 flags are purely citation-driven, no PII involved at all.
+
+**What went wrong:** Nothing broke -- this was a correctness-of-interpretation check, not a bug hunt, and it found a real gap in how an existing, already-published number was being explained.
+
+**What it means:** The ablation's "PII dominates" finding is real and the underlying numbers don't change, but the *interpretation* needed correcting. On this pool, the PII checker's own known false-positive rate on vulnerability-naming text happens to fire far more often than either citation checker's true-positive rate -- a fact about this pool's composition (CVE-heavy sources are saturated with exactly the kind of text that trips this known NER weakness) and this checker's disclosed weakness, not evidence that real PII leakage is operationally more common or more risky than an ungrounded citation. Added a new paragraph to `sn-article.tex` Sect. 4.8 with the full verified breakdown above so a reader can't walk away with the stronger, unsupported reading. Recompiles clean, 39 pages (up from 38), 0 undefined references.
+
+---
+
+## 105. Dashboard bug: ungrounded CVE citation with a non-ASCII dash was silently missed by the grounding regex — found via live demo, fixed
+
+**When:** Oct 10
+**What we tried:** While live-testing the dashboard's "Live Demo" tab (BAIT-017, the Follina/MS-MSDT alert), the model's report clearly cited `CVE-2022-30190` in its `recommended_action` text, but the dashboard showed "Passed guardrail" and "no ungrounded CVE or ATT&CK technique citations detected" — no flag at all. Reproduced `check_hallucinated_cves_verified()` directly against a report text matching the screenshot verbatim with an ASCII hyphen: it correctly flagged the citation (`flagged=True`, `requires_review=True`), so the checker logic itself wasn't broken. That pointed at `extract_cves()`'s regex (`CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}")`, `src/guardrails/output_guardrail.py`), which only matches a literal ASCII hyphen `-` — an LLM rendering the same citation with a visually identical but different Unicode dash (en dash, non-breaking hyphen, etc.) would make the citation invisible to extraction entirely, not just misclassified.
+
+**Result:** Confirmed the regex fails to match CVE IDs containing `‐`–`—` or `−` dash variants while matching the plain-hyphen form fine. Fixed by normalizing those dash variants to ASCII `-` via `str.translate()` before running `CVE_PATTERN` inside `extract_cves()` — the only call site of `CVE_PATTERN` in the codebase, so the fix is fully localized. Verified the fix catches all four dash variants tested, and the existing `tests/test_output_guardrail.py` suite still passes (30/30, no regressions).
+
+**What went wrong:** This was a real false-negative in the grounding checker — worse than a false positive, since it means a genuinely ungrounded, unverified citation could silently pass as clean depending on exactly which dash character the LLM happened to generate that run (non-deterministic, not reproducible from the frozen bait-alert data alone). Not caught by any existing test because `tests/test_output_guardrail.py`'s fixtures all use plain ASCII hyphens.
+
+**What it means:** The two-stage grounding design itself was never wrong — this was purely an extraction-layer gap between "what a human reading the UI sees as a citation" and "what the regex matches as one." Also removed a stale dashboard caption (`dashboard/app.py`, CVE-bait source picker) describing a specific past run's result (DogWalk vs. Follina) as if it were a fixed, reproducible property of BAIT-017 — it isn't, since the LLM's citation on any given run is non-deterministic and this very investigation is a case in point.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

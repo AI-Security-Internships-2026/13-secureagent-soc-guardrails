@@ -331,3 +331,29 @@ Conclusion: the slowdown is a single connection occasionally stalling 5-10x long
 - Re-run the full regression suite (issue #47/E2) once R5 finishes
 - Reproducibility freeze + `paper-v1.0` tag (issue #50/E5)
 - Record and share the demo video (issue #53)
+
+---
+
+## Week 17
+
+**Branch:** `emaan-week-17`
+**PR link:** https://github.com/AI-Security-Internships-2026/13-secureagent-soc-guardrails/pull/59 (open)
+
+### Completed this week
+- [x] Issue #43 (R4) — **fully complete now, both citation families.** Built the ATT&CK-side blind second-annotator sheet (103 pairs), catching a real ID-leak variant the first redaction pass missed (`T1204/002` slash format, not just the dot format the regex checked for). Second annotator's real sheet returned 99.0% agreement, Cohen's κ = 0.980 (95% CI [0.937, 1.000]), 1 disagreement — but only after rejecting an unrelated wrong file first (it exposed real technique IDs and matched annotator 1 exactly on all 103 pairs, which isn't consistent with an independent blind pass). Resolved the one real disagreement to match annotator 1, confirmed no classifier rerun was needed, and updated Sect. 4.6/Limitations/Threats-to-Validity to drop the now-stale "CVE/ATT&CK annotation is asymmetric" framing — both families are independently double-annotated (CVE κ=1.0, ATT&CK κ=0.980) (`docs/all_results.md` #101–103).
+- [x] Issue #50 (E5) follow-up — pushed the `paper-v1.0` git tag to origin, pointing at PR #56's merged commit, per the supervisor's explicit follow-up request (#100).
+- [x] Ablation (R3) follow-up, two real corrections to how the "PII dominates the review-flag rate" finding reads: checked the actual `ablation_full.jsonl` rows rather than assuming — all 66 PII detections in the pool are typed PERSON, zero are a real human name, all are software/vulnerability proper nouns (Heartbleed, Flash Player, Zimbra, Bash) tripping the same NER false-positive pattern already disclosed elsewhere, just at far higher volume; added the verified per-source breakdown so the finding doesn't overclaim (#104). Then added a reconciliation paragraph addressing the tension head-on — the citation checkers move the flag rate under 1 point each while PII moves it 69% relatively, explained as expected given ungrounded citations are a rare event everywhere else in the paper, not evidence the mechanism doesn't matter when it fires.
+- [x] Trimmed the Abstract from 359 words back to ~250 (the Springer target it had drifted past as results accumulated), preserving every load-bearing claim — the three citation-failure modes, the taxonomy, the central SelfCheckGPT comparison with all four replication p-values, supporting evaluation, and the closing distinction from scholarly-citation-checking work.
+- [x] Tightened manuscript claims and disclosures from a review pass: reframed Contribution 1 as measuring how often the blind spot occurs rather than a contest between equals; replaced "more strongly" wording with same-direction wording and noted the replication p-values come from zero-cell tables at n=60 vs. the original's non-zero-cell p=0.0118; retitled the Wazuh subsection/contribution text to describe a local single-node lab, not a live deployment; added a limitation disclosing real-world prevalence isn't established (the failure mode was elicited by explicit requests or elevated temperature, 0/147 spontaneous at default settings); rewrote the ethics statement to match the annotation work actually performed, flagged for the author to confirm against institutional/journal policy.
+- [x] Built and added the project presentation deck (title, scope, architecture, demo).
+- [x] Found and fixed a real production bug outside the paper, caught via live dashboard use: the CVE-grounding regex only matched a literal ASCII hyphen, so a citation rendered with a Unicode dash variant (en dash, non-breaking hyphen, etc.) was silently dropped from extraction entirely — meaning a genuinely ungrounded citation never got flagged. Root-caused by reproducing the checker logic in isolation first (confirmed sound) before isolating the bug to `extract_cves()`'s regex; fixed with a minimal `str.translate()` normalization; 30/30 tests pass (`docs/all_results.md` #105).
+- [x] Kept PR #59 (Week 17 → `dev`) current with all of the above; merged `dev` into the branch once mid-week to resolve a conflict.
+
+### Problems / Blockers
+- Issue #53's demo video is still not confirmed recorded — carried over from last week. The recording script/checklist (click-by-click steps, word-for-word narration, live-Wazuh-feed segment, results takeaways) is now fully finalized against the real dashboard and current deck, so nothing further is blocking the recording itself except actually doing it.
+- PR #59 has no reviews yet and hasn't been merged into `dev`.
+
+### Next week plan
+- Record and share the demo video (issue #53), using the already-finalized script
+- Get PR #59 reviewed and merged into `dev`
+- Start Week 18 work once #59 merges (branch already exists, no divergent commits yet)
