@@ -52,8 +52,11 @@ grounded in the alert's evidence, then verifies ungrounded ones against
 authoritative sources --- NVD for CVEs, the MITRE ATT\&CK STIX corpus for
 techniques --- sorted into four outcome classes plus a fifth for
 withdrawn identifiers. The central class, \texttt{REAL\_AND\_PLAUSIBLE},
-names the case a human reviewer is least likely to catch: a real,
-topically appropriate citation the alert never supplied.
+names a real, topically appropriate citation the alert never supplied ---
+plausibly the hardest case for a human reviewer to catch on a manual
+read-through, since it looks correct, though this paper tests that
+claim against an automated alternative (self-consistency checking)
+rather than against human readers directly.
 
 Its central result: SelfCheckGPT-style self-consistency checking, run on
 the same alerts, correctly flags grounded citations but misses most
@@ -61,10 +64,13 @@ ungrounded ones, since most misses are the model consistently recalling
 a real, correct identifier from training data --- indistinguishable from
 grounding to a consistency-only signal, yet exactly what
 \texttt{REAL\_AND\_PLAUSIBLE} targets. The deterministic checker is more
-accurate (McNemar $p=0.012$), and the gap holds --- and sharpens ---
+accurate (McNemar $p=0.012$), and the gap holds in the same direction
 across two model families ($p\approx2\times10^{-7}$) and two citation
 families, CVE and MITRE ATT\&CK ($p\approx3\times10^{-7}$,
-$p\approx2\times10^{-5}$). Supporting evaluation (an LLM-judge baseline,
+$p\approx2\times10^{-5}$) --- the three smaller replication $p$-values
+come from zero-discordant-cell contingency tables and are reported as
+directional confirmation, not as a larger effect than the original
+result. Supporting evaluation (an LLM-judge baseline,
 real third-party/live SIEM data, input-guardrail and PII-redaction
 layers) further validates the system without altering this finding.
 LLMCite is a domain-specialized citation-grounding verifier for
@@ -149,17 +155,27 @@ as a separate contribution of equal weight.
 \begin{enumerate}
 \item \textbf{\texttt{REAL\_AND\_PLAUSIBLE}: a taxonomic distinction that
    matters empirically, not just conceptually.} A real, topically
-   appropriate citation never actually stated in the evidence is the
-   case most likely to evade human review, precisely because it looks
-   correct. A SelfCheckGPT-style self-consistency baseline, run on the
+   appropriate citation never actually stated in the evidence is
+   plausibly the case most likely to evade human review, precisely
+   because it looks correct --- a claim this paper motivates but does
+   not test on human readers directly (see Discussion). What is tested
+   directly: a SelfCheckGPT-style self-consistency baseline, run on the
    same alerts as the deterministic pipeline, cannot distinguish this
    pattern from genuine grounding --- it's fooled by exactly the
    citations \texttt{REAL\_AND\_PLAUSIBLE} was designed to catch, in 18
    of 20 failure cases (Sect.~\ref{subsec:selfcheckgpt}). The
    deterministic checker is more accurate on the same alerts (McNemar
    $p=0.0118$, Sect.~\ref{subsec:mcnemar}). The comparison is not a
-   fair contest between equals: self-consistency was never designed to
-   check evidence presence. Its contribution here is a measurement --- how
+   fair contest between equals, in both directions: self-consistency was
+   never designed to check evidence presence, while the deterministic
+   checker's own decision rule --- is this identifier's literal text absent
+   from the evidence --- is close to definitionally what distinguishes this
+   pool's withheld/stated construction (Sect.~\ref{subsec:cve-bait}) in
+   the first place, so part of its measured accuracy on this specific
+   pool reflects that alignment rather than a demonstrated capability on
+   citations whose grounding isn't already built into how the test set was
+   constructed (Sect.~\ref{sec:discussion} returns to this). Its
+   contribution here is a measurement --- how
    often this blind spot actually occurs on real citations in this domain,
    which the hallucination-detection literature does not supply. The same
    comparison, repeated on a second model family
@@ -514,8 +530,10 @@ exact order, so one diagram covers both citation families.
 structure for CVE and MITRE ATT\&CK identifiers.
 \texttt{REAL\_AND\_PLAUSIBLE} is colored distinctly from the other
 terminal classes: it is the highest-risk outcome, not a safe one, since
-it looks correct on a manual read-through
-(Sect.~\ref{subsec:selfcheckgpt} shows this empirically).}\label{fig:taxonomy}
+it looks correct on a manual read-through. (Not tested on human readers;
+Sect.~\ref{subsec:selfcheckgpt} shows the related but distinct result
+that an automated self-consistency signal is fooled by it
+empirically.)}\label{fig:taxonomy}
 \end{figure}
 
 Every ungrounded citation sets \texttt{requires\_review = True}
@@ -523,8 +541,11 @@ unconditionally, regardless of class. That's a deliberate choice, not an
 oversight: an earlier version of the pipeline treated
 \texttt{REAL\_AND\_PLAUSIBLE} as self-evidently safe and didn't flag it.
 We changed this after recognizing that \texttt{REAL\_AND\_PLAUSIBLE} is
-precisely the case a human reviewer is \textit{least} likely to catch on
-a manual read-through, since it looks correct --- making it the
+plausibly the case a human reviewer is \textit{least} likely to catch on
+a manual read-through, since it looks correct --- a design rationale,
+not a tested claim about human reviewers (this paper's own test of
+whether an automated signal is fooled by it is
+Sect.~\ref{subsec:selfcheckgpt}) --- making it the
 highest-risk category for silent trust, not the lowest.
 
 \subsection{PII redaction guardrail}\label{subsec:pii-guardrail}
@@ -1453,29 +1474,25 @@ benchmarking.
 Supporting evaluation; not a direct answer to RQ1-RQ4. As an alternative verification strategy, a judge call is prompted
 directly with an (alert evidence, generated report) pair and asked to
 classify citations as grounded/ungrounded, without the deterministic
-pipeline's verdict --- run over a class-balanced calibration set with
-two judges: \texttt{openai/gpt-oss-20b} (same-family) and
-\texttt{qwen/qwen3.6-27b} (a genuinely different, independently-hosted
-family, addressing Zheng et al.'s \cite{llmjudge2023}
-self-enhancement-bias concern directly). Both reproduced the
-deterministic pipeline's labels exactly: \textbf{100\%
-accuracy/precision/recall} on the same-family run ($n=318$, complete,
-95\% CI [98.8\%, 100\%]) and the cross-family run ($n=450$,
-\textbf{442/450 (98\%) completed}, 95\% CI [99.1\%, 100\%] on 440 scored
-samples). The two sets aren't sample-for-sample identical --- the
-underlying bait-alert pool grew between runs, so the same-family 318 are
-a strict subset of the cross-family 450 --- but on every shared sample
-the judges agree 100\%.
+pipeline's verdict --- run with two judges: \texttt{openai/gpt-oss-20b}
+(same-family) and \texttt{qwen/qwen3.6-27b} (a genuinely different,
+independently-hosted family, addressing self-enhancement bias
+\cite{llmjudge2023}). Both reproduced the deterministic pipeline's
+labels exactly: \textbf{100\% accuracy/precision/recall} on the
+same-family run ($n=318$, 95\% CI [98.8\%, 100\%]) and the cross-family
+run (\textbf{442/450, 98\% completed}, 95\% CI [99.1\%, 100\%] on 440
+scored). The same-family 318 are a subset of the cross-family 450 (the
+pool grew between runs); agreement is 100\% on every shared sample.
 
 \textbf{This result is weaker evidence than the headline number
-suggests.} The harder tier's discriminating signal is close to what the
+suggests:} the harder tier's discriminating signal is close to what the
 deterministic checker already computes --- an identifier-shaped token
 appearing in the evidence --- so a capable judge matching it is an
 expected feasibility floor, not deep semantic reasoning. The defensible
-claim is narrower: an LLM judge can reproduce this binary decision
-regardless of model family, while the deterministic pipeline keeps real
-deployment advantages neither judge shares --- near-zero latency, no
-per-call cost or rate-limit exposure, no dependence on a hosted API.
+claim is narrower: a judge can reproduce this binary decision
+regardless of model family, but the deterministic pipeline keeps real
+deployment advantages neither shares --- near-zero latency, no per-call
+cost, no hosted-API dependence.
 
 \subsubsection{PII redaction guardrail: bait test (Threat T3)}\label{subsubsec:pii-bait}
 
@@ -1505,15 +1522,11 @@ with a real confidence interval. All 5 detections caught only one of the
 alert's two expected entity types, never both; manual inspection of
 ``nothing detected'' cases confirms the model
 (\texttt{openai/gpt-oss-20b}) consistently summarizes PII
-\textit{abstractly} rather than quoting raw values.
-
-Two of the initial 7 raw detections were false positives --- the NER
-model flagged the bare word ``PII'' and the phrase ``enforce bucket'' as
-\texttt{PERSON} --- caught by manually checking every detection against
-its known sourced value rather than trusting the aggregate rate. Fixed
-by extending the plausibility filter (real names are Title Case; reject
-lowercase-starting or acronym-shaped spans), correcting the rate from an
-inflated 17.5\% (7/40) to the verified 12.5\% (5/40) above.
+\textit{abstractly} rather than quoting raw values. (Two of 7 initial
+raw detections were NER false positives, caught by manually checking
+every detection against its known sourced value and corrected by
+tightening the plausibility filter --- the 12.5\% above, not the
+inflated 17.5\% first computed.)
 
 \textbf{What this means.} The model's own summarization behavior is
 itself a meaningful T3 mitigation; on the cases where it did quote
@@ -1525,86 +1538,39 @@ absorb false positives that happen to land on the right label.
 
 \subsubsection{Concurrency and throughput benchmarks}\label{subsubsec:concurrency}
 
-Supporting evaluation; not a direct answer to RQ1-RQ4. An original benchmark (1/2/4 workers, 3 repeats looped inside one
-long-running process) showed threading's full-pipeline throughput
-improving from 1 to 2 workers but collapsing sharply at 4 (0.67
-alerts/sec), consistent with (though not definitively proven to be)
-Groq server-side per-key throttling under load; multiprocessing was
-worse than threading at every worker count.
-
-This was \textbf{redone 2026-08-25} to close two gaps: repeats looping
-inside one long-running process can let OS scheduler/allocator state
-carry over between them, and there was no way to separate guardrail
-overhead from live Groq network variance. Fixes: (1) each repeat runs as
-a genuinely independent subprocess
-(\texttt{fresh\_process\_benchmark.py}); (2) a mocked-LLM variant runs
-the real guardrail/grounding/redaction pipeline but replaces only the
-Groq call with a fixed 0.3s delay, free of API cost and rate limits, so
-it runs at $n=30$ instead of $n=6$.
-
-Fresh-process isolation surfaced a real bug: full-pipeline runs with
-more than one thread crashed on an unlocked lazy-singleton race in the
-pytector loader (two threads racing on the first concurrent call both
-started constructing the DeBERTa model at once) --- a real production
-risk, not just a benchmark artifact, fixed with double-checked locking.
-
-\begin{table*}[h]
-\caption{Concurrency benchmark, fresh-process repeats ($n=3$ repeats per configuration; guardrail-only $n=2000$, mocked-pipeline $n=30$, real-pipeline $n=6$)}\label{tab:concurrency}
-\centering
-\begin{tabular}{@{}llcc@{}}
-\toprule
-Workload & Workers & Threading (alerts/sec) & Multiprocessing (alerts/sec) \\
-\midrule
-Guardrail-only & 1 & $850{,}323 \pm 115{,}672$ & $648{,}379 \pm 41{,}175$ \\
-Guardrail-only & 2 & $108{,}456 \pm 9{,}380$ & $309 \pm 2$ \\
-Guardrail-only & 4 & $97{,}063 \pm 14{,}474$ & $230 \pm 1$ \\
-Full pipeline, mocked LLM & 1 & $1.973 \pm 0.032$ & $2.031 \pm 0.018$ \\
-Full pipeline, mocked LLM & 2 & $2.660 \pm 0.140$ & $1.380 \pm 0.006$ \\
-Full pipeline, mocked LLM & 4 & $3.284 \pm 0.415$ & $1.328 \pm 0.010$ \\
-Full pipeline, real Groq & 1 & $0.839 \pm 0.019$ & $0.896 \pm 0.037$ \\
-Full pipeline, real Groq & 2 & $1.196 \pm 0.174$ & $0.333 \pm 0.006$ \\
-Full pipeline, real Groq & 4 & $1.243 \pm 0.170$ & $0.273 \pm 0.017$ \\
-\botrule
-\end{tabular}
-\end{table*}
-
-\begin{figure*}[h]
-\centering
-\includegraphics[width=0.95\linewidth]{figures/fig_concurrency_throughput.pdf}
-\caption{Throughput vs.\ worker count across all three workload types, threading vs.\ multiprocessing, mean $\pm$ stdev. The same pattern repeats in every panel: threading's line climbs as workers increase, multiprocessing's falls --- visible at a glance in a way Table~\ref{tab:concurrency}'s nine rows require more work to see.}\label{fig:concurrency}
-\end{figure*}
-
-\textbf{What this shows.} The mocked and real-API columns agree in
-direction at every worker count, validating the mocked variant as a
-genuine stand-in. Threading's full-pipeline throughput climbs with more
-workers (real: $+48\%$ from 1 to 4 threads) since the GIL releases
-during network waits, letting threads overlap I/O. Multiprocessing's
-falls (real: $-70\%$) since each additional process pays its own
-model-load cost with no offsetting I/O-overlap benefit --- the original
-``process overhead dominates'' finding, now with a concrete measured
-mechanism (the pytector cold-start) behind it. Guardrail-only numbers
-reproduce the original qualitative pattern (more workers hurts a
-CPU-bound, microsecond-scale task, far more so for multiprocessing),
-though the 2/4-worker figures are noisier than the means suggest ---
-\texttt{psutil.cpu\_percent()}'s 0.1s sampling interval is coarse
-relative to a sub-millisecond runtime.
-
-\textbf{Honest discrepancy, not resolved.} The redone real-API run does
-\textit{not} reproduce the original benchmark's sharp 4-thread
-collapse --- 4-thread throughput here is the \textit{best} of the three
-worker counts, not the worst. Both runs are $n=6$, modest statistical
-power either way; this could be a real but non-reproduced throttling
-instance, or cross-run interference in the original in-process design
-(e.g.\ rate-limit-window state persisting across the sequential
-1$\to$2$\to$4 tests). Neither explanation is confirmed --- both results
-are reported rather than one quietly replacing the other.
+Supporting evaluation; not a direct answer to RQ1-RQ4, and not a
+citation-grounding result at all --- an engineering throughput
+characterization of the pipeline's threading/multiprocessing behavior,
+included for completeness. A fresh-process benchmark
+(\texttt{fresh\_process\_benchmark.py}; guardrail-only $n=2000$,
+mocked-LLM-pipeline $n=30$, real-Groq-pipeline $n=6$, 1/2/4 workers)
+found threading's full-pipeline throughput improves with more workers
+(real: $+48\%$ from 1 to 4 threads, since the GIL releases during
+network waits) while multiprocessing's falls ($-70\%$, since each
+process pays its own model-load cost with no offsetting I/O-overlap
+benefit). This isolation also surfaced and fixed a real concurrency bug
+in production code: an unlocked lazy-singleton race in the pytector
+loader that crashed multi-threaded runs. An earlier, methodologically
+weaker benchmark had suggested a sharp 4-thread throughput collapse;
+the redone, fresh-process version does not reproduce that collapse, and
+the discrepancy is unresolved rather than papered over. Full
+methodology, the complete nine-row throughput table, and the
+unresolved-discrepancy discussion are in
+Appendix~\ref{secA0-concurrency}, since none of this bears on the
+paper's citation-grounding claims.
 
 \section{Discussion}\label{sec:discussion}
 
 \textbf{What \texttt{REAL\_AND\_PLAUSIBLE} means for trust.} The central
 practical argument of this paper is that a citation which is real and
-topically plausible is the \textit{hardest} case for a human reviewer to
-catch, not the easiest --- it looks correct. Sect.~\ref{subsec:taxonomy}'s
+topically plausible is plausibly the \textit{hardest} case for a human
+reviewer to catch, not the easiest --- it looks correct. This is a
+motivating claim about human readers that this paper does not test
+directly; what it tests directly is the related claim that a leading
+\textit{automated} alternative is fooled by exactly this pattern, which
+is weaker evidence for the human-reviewer claim than it may first
+appear, and a genuine gap for future work (a reader study) to close.
+Sect.~\ref{subsec:taxonomy}'s
 taxonomy and its unconditional review-flag policy exist specifically
 because an earlier version of this pipeline got this wrong, treating
 \texttt{REAL\_AND\_PLAUSIBLE} as self-evidently safe; the fix is
@@ -1645,6 +1611,24 @@ volume; the McNemar comparison measures whether the mechanism is
 necessary when the event occurs. Both can be true without
 contradiction, and this paper reports both rather than letting the
 louder of the two numbers speak for the other.
+
+\textbf{A rough, explicitly illustrative impact estimate.} Combining
+Sect.~\ref{subsec:crosssource}'s pooled cross-source ungrounded-citation
+rates (0.47\% CVE, 1.64\% ATT\&CK, across 575 alerts spanning both
+adversarial and non-adversarial sources) with the ablation's per-stage
+flag counts suggests that, on a pool shaped like this paper's own
+evaluation set, citation grounding would independently catch on the
+order of single-digit-to-low-double-digit ungrounded citations per
+1{,}000 alerts that no other guardrail layer would flag --- a real but
+small absolute contribution, set against the PII checker's much larger
+flag volume on this pool, which Sect.~\ref{subsec:ablation} already
+attributes mostly to a disclosed false-positive pattern rather than
+genuine leakage. This estimate should not be read as a validated
+production rate: it is arithmetic over this paper's own non-random,
+partly adversarial sample sources (Sect.~\ref{sec:discussion}'s threats
+to validity), offered only to make the practical scale of the
+contribution legible rather than leaving the reader to infer it from
+percentages reported on different denominators throughout this section.
 
 \textbf{Why this comparison, despite how it was measured.} Two questions
 are worth answering directly rather than leaving for a reader to
@@ -1869,12 +1853,13 @@ We presented LLMCite, a domain-specialized citation-grounding
 verification pipeline for LLM-generated SOC reports, built around a
 four-class outcome taxonomy (plus a fifth label for formally withdrawn
 identifiers) rather than a binary flagged/not-flagged label. The
-taxonomy's central claim --- that a real, topically plausible citation
-never actually stated in the evidence (\texttt{REAL\_AND\_PLAUSIBLE}) is
-the hardest case for a human reviewer to catch, precisely because it
-looks correct --- isn't argued architecturally alone.
-Sects.~\ref{subsec:selfcheckgpt}--\ref{subsec:mcnemar} demonstrate it
-directly: at the sampling temperature self-consistency checking
+taxonomy is motivated by the claim that a real, topically plausible
+citation never actually stated in the evidence
+(\texttt{REAL\_AND\_PLAUSIBLE}) is plausibly the hardest case for a
+human reviewer to catch, precisely because it looks correct --- a claim
+about human readers this paper does not test directly. What it
+demonstrates directly, on the related but narrower automated question,
+is this: at the sampling temperature self-consistency checking
 requires, the model volunteers real, correct-but-uncited identifiers it
 stays silent on at production temperature (Sect.~\ref{subsec:cve-bait}'s CVE pool),
 and does so consistently enough across independent resamples that a
@@ -1883,12 +1868,21 @@ apart from a genuinely grounded citation. External grounding can,
 because it checks the evidence the model was actually given rather than
 the model's confidence in its own answer --- and the resulting accuracy
 gap is large enough to be statistically confirmed on the identical
-alerts (McNemar $p=0.0118$), not merely observed, and reproduces more
-strongly still on both a second, independent model family
+alerts (McNemar $p=0.0118$), not merely observed, and holds in the same
+direction on both a second, independent model family
 (\texttt{qwen/qwen3.6-27b}, $p\approx2\times10^{-7}$) and a second
 citation family (MITRE ATT\&CK, $p\approx3.4\times10^{-7}$ and
 $p\approx2.3\times10^{-5}$ across both model families,
-Sect.~\ref{subsec:mcnemar}). That
+Sect.~\ref{subsec:mcnemar}) --- these three smaller $p$-values come from
+zero-discordant-cell contingency tables and confirm direction, not a
+stronger effect than the original result. We also note, as
+Sect.~\ref{sec:discussion} discusses at length, that the deterministic
+checker's decision rule is close to definitionally aligned with how
+this evaluation's withheld/stated pools are constructed, so this
+comparison should be read as a measurement of how often the blind spot
+occurs on real citations in this domain, not as a demonstration that
+grounding is a generically hard problem the deterministic checker
+happens to solve. That
 distinction --- not raw accuracy against a baseline --- is what this
 paper argues a citation-grounding pipeline contributes that
 self-consistency checking alone doesn't, and it's the one comparison in
@@ -1929,6 +1923,84 @@ altering the central finding above.
 \end{itemize}
 
 \begin{appendices}
+
+\section{Supplementary results}\label{secA0}
+
+\subsection{Concurrency and throughput benchmarks: full methodology and results}\label{secA0-concurrency}
+
+Referenced from Sect.~\ref{subsubsec:concurrency}. An original benchmark
+(1/2/4 workers, 3 repeats looped inside one long-running process) showed
+threading's full-pipeline throughput improving from 1 to 2 workers but
+collapsing sharply at 4 (0.67 alerts/sec), consistent with (though not
+definitively proven to be) Groq server-side per-key throttling under
+load; multiprocessing was worse than threading at every worker count.
+
+This was \textbf{redone 2026-08-25} to close two gaps: repeats looping
+inside one long-running process can let OS scheduler/allocator state
+carry over between them, and there was no way to separate guardrail
+overhead from live Groq network variance. Fixes: (1) each repeat runs as
+a genuinely independent subprocess
+(\texttt{fresh\_process\_benchmark.py}); (2) a mocked-LLM variant runs
+the real guardrail/grounding/redaction pipeline but replaces only the
+Groq call with a fixed 0.3s delay, free of API cost and rate limits, so
+it runs at $n=30$ instead of $n=6$.
+
+Fresh-process isolation surfaced a real bug: full-pipeline runs with
+more than one thread crashed on an unlocked lazy-singleton race in the
+pytector loader (two threads racing on the first concurrent call both
+started constructing the DeBERTa model at once) --- a real production
+risk, not just a benchmark artifact, fixed with double-checked locking.
+
+\begin{table}[h]
+\caption{Concurrency benchmark, fresh-process repeats ($n=3$ repeats per configuration; guardrail-only $n=2000$, mocked-pipeline $n=30$, real-pipeline $n=6$)}\label{tab:concurrency}
+\centering
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Workload & Workers & Threading (alerts/sec) & Multiprocessing (alerts/sec) \\
+\midrule
+Guardrail-only & 1 & $850{,}323 \pm 115{,}672$ & $648{,}379 \pm 41{,}175$ \\
+Guardrail-only & 2 & $108{,}456 \pm 9{,}380$ & $309 \pm 2$ \\
+Guardrail-only & 4 & $97{,}063 \pm 14{,}474$ & $230 \pm 1$ \\
+Full pipeline, mocked LLM & 1 & $1.973 \pm 0.032$ & $2.031 \pm 0.018$ \\
+Full pipeline, mocked LLM & 2 & $2.660 \pm 0.140$ & $1.380 \pm 0.006$ \\
+Full pipeline, mocked LLM & 4 & $3.284 \pm 0.415$ & $1.328 \pm 0.010$ \\
+Full pipeline, real Groq & 1 & $0.839 \pm 0.019$ & $0.896 \pm 0.037$ \\
+Full pipeline, real Groq & 2 & $1.196 \pm 0.174$ & $0.333 \pm 0.006$ \\
+Full pipeline, real Groq & 4 & $1.243 \pm 0.170$ & $0.273 \pm 0.017$ \\
+\botrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig_concurrency_throughput.pdf}
+\caption{Throughput vs.\ worker count across all three workload types, threading vs.\ multiprocessing, mean $\pm$ stdev. The same pattern repeats in every panel: threading's line climbs as workers increase, multiprocessing's falls --- visible at a glance in a way Table~\ref{tab:concurrency}'s nine rows require more work to see.}\label{fig:concurrency}
+\end{figure}
+
+\textbf{What this shows.} The mocked and real-API columns agree in
+direction at every worker count, validating the mocked variant as a
+genuine stand-in. Threading's full-pipeline throughput climbs with more
+workers (real: $+48\%$ from 1 to 4 threads) since the GIL releases
+during network waits, letting threads overlap I/O. Multiprocessing's
+falls (real: $-70\%$) since each additional process pays its own
+model-load cost with no offsetting I/O-overlap benefit --- the original
+``process overhead dominates'' finding, now with a concrete measured
+mechanism (the pytector cold-start) behind it. Guardrail-only numbers
+reproduce the original qualitative pattern (more workers hurts a
+CPU-bound, microsecond-scale task, far more so for multiprocessing),
+though the 2/4-worker figures are noisier than the means suggest ---
+\texttt{psutil.cpu\_percent()}'s 0.1s sampling interval is coarse
+relative to a sub-millisecond runtime.
+
+\textbf{Honest discrepancy, not resolved.} The redone real-API run does
+\textit{not} reproduce the original benchmark's sharp 4-thread
+collapse --- 4-thread throughput here is the \textit{best} of the three
+worker counts, not the worst. Both runs are $n=6$, modest statistical
+power either way; this could be a real but non-reproduced throttling
+instance, or cross-run interference in the original in-process design
+(e.g.\ rate-limit-window state persisting across the sequential
+1$\to$2$\to$4 tests). Neither explanation is confirmed --- both results
+are reported rather than one quietly replacing the other.
 
 \section{Mapping this draft back to the codebase}\label{secA1}
 
