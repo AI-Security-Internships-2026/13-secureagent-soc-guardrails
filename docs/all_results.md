@@ -1601,6 +1601,19 @@ Updated the manuscript (`sn-article.tex`) in three places: added an "Independent
 
 ---
 
+## 105. Dashboard bug: ungrounded CVE citation with a non-ASCII dash was silently missed by the grounding regex — found via live demo, fixed
+
+**When:** Oct 10
+**What we tried:** While live-testing the dashboard's "Live Demo" tab (BAIT-017, the Follina/MS-MSDT alert), the model's report clearly cited `CVE-2022-30190` in its `recommended_action` text, but the dashboard showed "Passed guardrail" and "no ungrounded CVE or ATT&CK technique citations detected" — no flag at all. Reproduced `check_hallucinated_cves_verified()` directly against a report text matching the screenshot verbatim with an ASCII hyphen: it correctly flagged the citation (`flagged=True`, `requires_review=True`), so the checker logic itself wasn't broken. That pointed at `extract_cves()`'s regex (`CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}")`, `src/guardrails/output_guardrail.py`), which only matches a literal ASCII hyphen `-` — an LLM rendering the same citation with a visually identical but different Unicode dash (en dash, non-breaking hyphen, etc.) would make the citation invisible to extraction entirely, not just misclassified.
+
+**Result:** Confirmed the regex fails to match CVE IDs containing `‐`–`—` or `−` dash variants while matching the plain-hyphen form fine. Fixed by normalizing those dash variants to ASCII `-` via `str.translate()` before running `CVE_PATTERN` inside `extract_cves()` — the only call site of `CVE_PATTERN` in the codebase, so the fix is fully localized. Verified the fix catches all four dash variants tested, and the existing `tests/test_output_guardrail.py` suite still passes (30/30, no regressions).
+
+**What went wrong:** This was a real false-negative in the grounding checker — worse than a false positive, since it means a genuinely ungrounded, unverified citation could silently pass as clean depending on exactly which dash character the LLM happened to generate that run (non-deterministic, not reproducible from the frozen bait-alert data alone). Not caught by any existing test because `tests/test_output_guardrail.py`'s fixtures all use plain ASCII hyphens.
+
+**What it means:** The two-stage grounding design itself was never wrong — this was purely an extraction-layer gap between "what a human reading the UI sees as a citation" and "what the regex matches as one." Also removed a stale dashboard caption (`dashboard/app.py`, CVE-bait source picker) describing a specific past run's result (DogWalk vs. Follina) as if it were a fixed, reproducible property of BAIT-017 — it isn't, since the LLM's citation on any given run is non-deterministic and this very investigation is a case in point.
+
+---
+
 ## What's not run yet (see `docs/ROADMAP_PLAN.md` for the live priority order)
 
 - **Significance testing on the CVE-bait comparison** — even at n=150 (#44), only 2 ungrounded citations occurred, which still isn't enough discordant data for McNemar-style testing against a future baseline to be meaningful.

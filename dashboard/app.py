@@ -100,14 +100,6 @@ with tab_live:
             sample = next(a for a in SAMPLE_ALERTS if a.alert_id == preset)
 
         elif source_choice == "CVE-bait (output guardrail demo)":
-            st.caption(
-                "100 alerts describing real vulnerabilities by symptom only, never by "
-                "CVE number — 97 never mention a CVE at all (0/97 ever produced an "
-                "ungrounded citation in testing); BAIT-002, 011, and 017 explicitly ask "
-                "the model to cite one it wasn't given. Defaults to BAIT-017, which "
-                "cited a real but wrong CVE (DogWalk instead of the correct Follina) — "
-                "the most illustrative flagged example."
-            )
             preset_names = [f"{a.alert_id} ({a.event_type})" for a in CVE_BAIT_ALERTS]
             default_idx = next((i for i, a in enumerate(CVE_BAIT_ALERTS) if a.alert_id == "BAIT-017"), 0)
             choice_idx = st.selectbox(
