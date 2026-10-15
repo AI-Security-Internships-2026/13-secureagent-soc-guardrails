@@ -406,7 +406,7 @@ draws them side by side purely for layout clarity: the implementation
 runs them sequentially, in the order shown, not concurrently. The rest
 of this section describes each stage in turn.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.78\linewidth]{figures/fig_architecture.pdf}
 \caption{System architecture: the pipeline's actual execution order.
@@ -507,7 +507,7 @@ that actually produces it --- both \texttt{verify\_cve()} and
 \texttt{verify\_attack\_technique()} check these conditions in this
 exact order, so one diagram covers both citation families.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.8\linewidth]{figures/fig_taxonomy.pdf}
 \caption{Citation classification decision sequence, identical in
@@ -785,7 +785,7 @@ Prompted (bait, withheld) & 30 (0 declined) & 5/30 (recall 0.17) \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/fig_selfcheckgpt_by_class.pdf}
 \caption{SelfCheckGPT self-consistency: correctness by class, generator model, and citation family (CVE/ATT\&CK). All four CVE/model and ATT\&CK/model combinations are near-perfect on the Stated/grounded class; all four collapse on the Prompted/withheld class --- most severely on ATT\&CK, where recall drops to 0.10 (\texttt{gpt-oss-20b}) and 0.17 (\texttt{qwen}), below even the CVE side's already-low 0.31 and 0.033 (Sect.~\ref{subsec:mcnemar}'s cross-family CVE result). The blind spot generalizes across both axes this paper tests it on: it does not shrink on a second model family, and it does not shrink on a second citation family either.}\label{fig:selfcheckgpt}
@@ -1248,7 +1248,7 @@ None & 0 & 0 (0.0\%) & 0 & 0 & 5085 [1827, 7638] & 45 / 0 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/fig_ablation_taxonomy_stacked.pdf}
 \caption{Component ablation: citation-taxonomy tier of every CVE/ATT\&CK
@@ -1260,7 +1260,7 @@ with Sects.~\ref{subsec:cve-bait}--\ref{subsec:attack-bait}'s bait-test
 results on the same two citation families.}\label{fig:ablation-taxonomy}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/fig_ablation_upset_unique_alerts.pdf}
 \caption{Component ablation: overlap, across all six configurations, of
